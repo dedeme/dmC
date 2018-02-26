@@ -300,7 +300,7 @@ void io_duplicates(void) {
     Flea *f1 = fleas_get(fleas, i);
     RANGE(j, i + 1, fleas_size(fleas)) {
       if (flea_gen_eq(f1, fleas_get(fleas, j))) {
-        fleas_set(fleas, i, flea_mutate(f1, fleaId++, cycle));
+        fleas_set(fleas, j, flea_mutate(f1, fleaId++, cycle));
         ++n;
         break;
       }

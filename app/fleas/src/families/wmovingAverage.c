@@ -29,8 +29,8 @@ typedef struct wmovingAverage_WmovingAverage WmovingAverage;
 
 struct wmovingAverage_WmovingAverage {
   Gen *length; // v + 5
-  Gen *buy_strip; // v * 0.005
-  Gen *sell_strip;  // v * 0.005
+  Gen *buy_strip; // v * 0.001
+  Gen *sell_strip;  // v * 0.001
 
   size_t avg_len;
   double mbuy;
@@ -47,8 +47,8 @@ static WmovingAverage *new(
   this->sell_strip = sell_strip;
 
   this->avg_len = gen_actual(length) + 5;
-  this->mbuy = 1 + (double)gen_actual(buy_strip) * 0.005;
-  this->msell = 1 - (double)gen_actual(sell_strip) * 0.005;
+  this->mbuy = 1 + (double)gen_actual(buy_strip) * 0.001;
+  this->msell = 1 - (double)gen_actual(sell_strip) * 0.001;
   this->extra = NULL;
 
   return this;
@@ -159,8 +159,8 @@ static Flea *mk_fextra(Flea *f, WmovingAverage *this) {
 
 Flea *wmovingAverage_new(Flea *f) {
   Gen *length = gen_new(146);
-  Gen *buy_strip = gen_new(61);
-  Gen *sell_strip = gen_new(61);
+  Gen *buy_strip = gen_new(301);
+  Gen *sell_strip = gen_new(301);
 
   return mk_fextra(f, new(length, buy_strip, sell_strip));
 }

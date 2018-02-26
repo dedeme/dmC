@@ -16,7 +16,7 @@
 static void help() {
   puts(
     "Use: ctemplate path\n"
-    "Where 'path' is the comun parent of 'include' and 'src'"
+    "Where 'path' is the common parent of 'include' and 'src'"
   );
 }
 
