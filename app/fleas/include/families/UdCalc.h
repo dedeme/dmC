@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+///
 enum udcalc_Result {
-  UDCALC_NOT_VALID, // value < 0
+  UDCALC_NOT_VALID, // value <= 0
   UDCALC_BUY, // Buy position
   UDCALC_SELL, // Sell position
   UDCALC_NOP // Position between buy and sell
@@ -32,15 +33,9 @@ UdCalc *udcalc_new(
 );
 
 ///
-void udcalc_free(UdCalc *this);
-
-///
 double *udcalc_values(UdCalc *this);
 
-/// Adds quote to this and returns
-///   -2: If data is not prepared to use
-///   0 : If quote is not valid (< 0)
-///   1 : If
+/// Adds quote to this.<br>
 /// Used by MovingAverage
 enum udcalc_Result udcalc_add(UdCalc *this, double quote);
 

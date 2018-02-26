@@ -35,7 +35,7 @@ void buy_test(Db *db) {
 
   uint stocks;
   double cost;
-  buy_do(&stocks, &cost, b1, qs);
+  buy_do(&stocks, &cost, b1, (Quote **)arr_es(qs));
   assert(cost < 20000);
   double vstocks1 = (stocks + 1) * 1.2;
   assert(vstocks1 + fees_app(vstocks1) > 20000);

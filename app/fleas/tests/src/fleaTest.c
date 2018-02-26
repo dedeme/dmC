@@ -8,11 +8,9 @@
 void flea_test(Db *db) {
   printf("Flea test\n");
 
-  Nicks *nicks = db_nicks(db);
-
-  Flea *f = flea_new(2, 34, nicks_size(nicks));
+  Flea *f = flea_new(2, 34);
   Json *js = flea_serialize(f);
-  Flea *f2 = flea_restore(js, nicks_size(nicks));
+  Flea *f2 = flea_restore(js);
   Json *js2 = flea_serialize(f2);
   assert(!strcmp(js, js2));
 

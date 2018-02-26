@@ -1,11 +1,18 @@
 // Copyright 17-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+/*.+.
+@struct: -Sell
+  nick: size_t
+  stocks: size_t
+*/
+
 #include "order/Sell.h"
 #include <dm.h>
 #include "Quote.h"
 #include "order/fees.h"
 
+/*.-.*/
 struct sell_Sell {
   size_t nick;
   size_t stocks;
@@ -27,9 +34,10 @@ inline
 size_t sell_stocks(Sell *this){
   return this->stocks;
 }
+/*.-.*/
 
-double sell_do(Sell *this, Arr/*Quote*/ *qs) {
-	Quote *q = arr_get(qs, this->nick);
+double sell_do(Sell *this, Quote **qs) {
+	Quote *q = qs[this->nick];
 	double price = quote_open(q);
 	if (price > 0) {
     return sell_income(this->stocks, price);

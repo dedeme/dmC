@@ -258,7 +258,7 @@ void flea_process(
   Flea *this,
   Db *db,
   char *date,
-  Arr/*Quote*/ *day,
+  Quote **day,
   int traced,
   Arr/*Trace*/ *traces
 ) {
@@ -293,7 +293,7 @@ void flea_process(
 
         Trace *tr = trace_new(
           date,
-          arr_get(day, nick),
+          day[nick],
           beforeCash,
           beforePortfolio,
           nick_id(nicks_get(nicks, nick)),
@@ -338,7 +338,7 @@ void flea_process(
 
           Trace *tr = trace_new(
             date,
-            arr_get(day, nick),
+            day[nick],
             beforeCash,
             beforePortfolio,
             nick_id(nicks_get(nicks, nick)),
@@ -355,7 +355,7 @@ void flea_process(
   }_EACH
   this->extra->buys = buys_new();
 
-  RANGE0(nick_ix, arr_size(day)) {
+  RANGE0(nick_ix, NICKS_NUMBER) {
     if (
       (gen_actual(this->ibex) == 0 && nick_in_ibex(nicks_get(nicks, nick_ix)))
       ||
@@ -364,7 +364,7 @@ void flea_process(
       continue;
     }
 
-    Quote *quote = arr_get(day, nick_ix);
+    Quote *quote = day[nick_ix];
     this->process(this->family_extra, this, nick_ix, quote);
   }_RANGE
 }

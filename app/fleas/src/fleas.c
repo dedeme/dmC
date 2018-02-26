@@ -36,7 +36,7 @@ static void process(size_t minutes, size_t traced) {
   Arr/*Trace*/ *traces = arr_new();
 
   Arr/*char */ *qdates = db_qdates(db);
-  Arr/*Arr[Quote]*/ *quotes = db_quotes(db);
+  Quote **quotes = db_quotes(db);
   Nicks *nicks = db_nicks(db);
 
   Date t1 = date_now();
@@ -52,19 +52,18 @@ static void process(size_t minutes, size_t traced) {
         ftraced = flea_serialize(f);
       }
       flea_prepare(f, cycle);
-      size_t size = arr_size(quotes);
-      RANGE0(iq, size) {
+      RANGE0(iq, QUOTES_NUMBER) {
         flea_process(
-          f, db, arr_get(qdates, iq), arr_get(quotes, iq), traced, traces
+          f, db, arr_get(qdates, iq), quotes + iq * NICKS_NUMBER, traced, traces
         );
       }_RANGE
 
       double cash = flea_cash(f);
       EACH(flea_portfolio(f), Pentry, e) {
         double q = -1;
-        for (int i = arr_size(quotes) - 1; i >= 0; --i) {
+        for (int i = QUOTES_NUMBER - 1; i >= 0; --i) {
           double q0 = quote_close(
-            arr_get(arr_get(quotes, i), portfolio_nick(e))
+            quotes[i * NICKS_NUMBER + portfolio_nick(e)]
           );
           if (q0 > 0) {
             q = q0;
@@ -188,11 +187,7 @@ static void process(size_t minutes, size_t traced) {
     io_save_traces(json_warray(traces_data));
   }
 
-  EACH(quotes, Arr/*Quote*/, row) {
-    EACH(row, Quote, q) {
-      free(q);
-    }_EACH
-  }_EACH
+  quotes_free();
 }
 
 void gc_messages(char *msg, long unsigned int arg) {

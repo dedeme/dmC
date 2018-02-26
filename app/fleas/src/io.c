@@ -48,8 +48,15 @@ Nicks *io_nicks(void) {
   Map/*Json*/ *data = json_robject(file_read(data_db));
 
   Map/*Json*/ *status = json_robject(map_get(data, "status"));
-  Nicks *nks = nicks_new(arr_size(status));
-  RANGE0(i, arr_size(status)) {
+
+  if (arr_size((Arr *)status) != NICKS_NUMBER)
+    THROW
+      "arr_size(status) is %d, but ought to be %d",
+      arr_size((Arr *)status), NICKS_NUMBER
+    _THROW
+
+  Nicks *nks = nicks_new(NICKS_NUMBER);
+  RANGE0(i, NICKS_NUMBER) {
     Kv *kv = (Kv *)arr_get((Arr *)status, i);
     char *v = json_rstring(kv->value);
     if (*v) {
@@ -63,7 +70,7 @@ Nicks *io_nicks(void) {
   EACH((Arr *)ibex, Kv, kv) {
     bool v = json_rbool(kv->value);
     if (v) {
-      RANGE0(i, nicks_size(nks)){
+      RANGE0(i, NICKS_NUMBER){
         if (!strcmp(nick_id(nicks_get(nks, i)), kv->key)) {
           nick_set_in_ibex(nicks_get(nks, i));
           break;
@@ -75,13 +82,9 @@ Nicks *io_nicks(void) {
   return nks;
 }
 
-void io_quotes(
-  Arr/*char*/ **qdates,
-  Arr/*Arr[Quote]*/ **quotes,
-  Nicks *nicks
-) {
-  *qdates = arr_new();
-  *quotes = arr_new();
+Arr/*char*/ *io_quotes(Nicks *nicks) {
+  Arr/*char*/ *qdates = arr_new();
+  Quote **quotes = quotes_get();
 
   char *path = path_cat(
     bolsa_data_dir,
@@ -93,34 +96,38 @@ void io_quotes(
 
   EACH(lines, char, line) {
     int ix = str_cindex(line, ':');
-    arr_add(*qdates, str_sub(line, 0, ix));
-    Arr/*Quote*/ *a = arr_new();
-    arr_add(*quotes, a);
+    arr_add(qdates, str_sub(line, 0, ix));
   }_EACH
 
-  RANGE0(in, nicks_size(nicks)) {
-    char *nick = nick_id(nicks_get(nicks, in));
+  if (arr_size(qdates) != QUOTES_NUMBER)
+    THROW
+      "arr_size(qdates) is %d, but ought to be %d",
+      arr_size(qdates), QUOTES_NUMBER
+    _THROW
+
+  RANGE0(nix, NICKS_NUMBER) {
+    char *nick = nick_id(nicks_get(nicks, nix));
     char *path = path_cat(bolsa_data_dir, str_printf("%s.db", nick), NULL);
     Arr/*char*/ *lines = str_csplit(file_read(path), '\n');
     arr_reverse(lines);
 
-    RANGE0(i, arr_size(*qdates)) {
+    RANGE0(i, QUOTES_NUMBER) {
       char *line = arr_get(lines, i);
       int ix = str_cindex(line, ':');
       char *date = str_sub(line, 0, ix);
-      if (strcmp(date, arr_get(*qdates, i))) {
+      if (strcmp(date, arr_get(qdates, i))) {
         THROW
           "io_quotes: Date does not match at index %d between %s and %s "
           "(%s : %s)",
           i, nick, nick_id(nicks_get(nicks, 0)),
-          date, (char *)arr_get(*qdates, i)
+          date, (char *)arr_get(qdates, i)
         _THROW
       }
 
-      Quote *q = quote_from_str(line);
-      arr_add(arr_get(*quotes, i), q);
+      quotes[i * NICKS_NUMBER + nix] = quote_from_str(line);
     }_RANGE
   }_RANGE
+  return qdates;
 }
 
 static Fleas *read_fleas() {

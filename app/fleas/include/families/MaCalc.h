@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+///
 enum macalc_Result {
-  MACALC_NOT_VALID, // Few quotes or value < 0
+  MACALC_NOT_VALID, // Few quotes or value <= 0
   MACALC_BUY, // Buy position
   MACALC_SELL, // Sell position
   MACALC_NOP // Position between buy and sell
@@ -37,11 +38,8 @@ double macalc_sum(MaCalc *this);
 ///
 double *macalc_values(MaCalc *this);
 
-/// Adds quote to this and returns
-///   -2: If data is not prepared to use
-///   0 : If quote is not valid (< 0)
-///   1 : If
-/// Used by MovingAverage
+/// Adds quote to this.<br>
+/// Used by MovingAverage.
 enum macalc_Result macalc_add(MaCalc *this, double quote);
 
 #endif

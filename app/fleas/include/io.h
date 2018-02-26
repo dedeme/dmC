@@ -15,14 +15,9 @@ void io_init(void);
 ///
 Nicks *io_nicks(void);
 
-/// io_quotes reads a ordered list of quotes dates in 'qdates' and
-/// companies quotes in 'quotes' which entries match with 'qdates'<br>
-/// Each entry of quotes is an array which match nicks elements.
-void io_quotes(
-  Arr/*char*/ **qdates,
-  Arr/*Arr[Quote]*/ **quotes,
-  Nicks *nicks
-);
+/// io_quotes intializes the object returned by quotes_get() and returns
+/// an array with the list of dates of such quotes.
+Arr/*char*/ *io_quotes(Nicks *nicks);
 
 ///
 void io_get_fleas(size_t *fleaId, size_t *cycle, Fleas **fleas);

@@ -32,7 +32,7 @@ void sell_test(Db *db) {
   Quote *q3 = quote_restore("[8.20,8.40,8.50,8.10,33]");
   arr_add(qs, q3);
 
-  double r = sell_do(s1, qs);
+  double r = sell_do(s1, (Quote **)arr_es(qs));
   double vstocks = 21556 * 1.2;
   assert(eq(r, vstocks - fees_app(vstocks)));
 

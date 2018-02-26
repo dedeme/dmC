@@ -15,8 +15,8 @@ LIB_INCLUDE = lib/lib$(LIB)/include
 
 CFLAGS = -Wall -rdynamic
 FILES = $(C_FILES) $(H_FILES)
-bin/$(PRG): $(C_FILES) $(LIB_PATH)/lib$(LIB).a
-	gcc $(CFLAGS) $(FILES) -o bin/$(PRG) \
+bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
+	gcc $(CFLAGS) $(C_FILES) -o bin/$(PRG) \
 	  -Iinclude -I$(LIB_INCLUDE) \
 		-L$(LIB_PATH) -l$(LIB) \
 		-lgc -lm

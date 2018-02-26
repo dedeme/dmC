@@ -18,9 +18,6 @@ typedef struct udcalc2_UdCalc2 UdCalc2;
 UdCalc2 *udcalc2_new(size_t ud_len, size_t quotes_len);
 
 ///
-void udcalc2_free(UdCalc2 *this);
-
-///
 double *udcalc2_values(UdCalc2 *this);
 
 /// Adds quote to averages and returns

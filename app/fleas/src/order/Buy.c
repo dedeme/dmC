@@ -32,9 +32,9 @@ void buy_do(
   size_t *stocks_r,
   double *cost_r,
   Buy *this,
-  Arr/*Quote*/ *qs
+  Quote **qs
 ) {
-	Quote *q = arr_get(qs, this->nick);
+	Quote *q = qs[this->nick];
 	double price = quote_open(q);
 	if (price > 0) {
     double order_money = this->money;

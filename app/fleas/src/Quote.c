@@ -2,6 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Quote.h"
+#include "DEFS.h"
 #include <dm.h>
 
 struct quote_Quote {
@@ -70,4 +71,26 @@ Quote *quote_restore(Json *s) {
   this->min = jarr_gdouble(serial, i++);
   this->vol = jarr_guint(serial, i++);
   return this;
+}
+
+// -------------------------------------------------------------------
+
+static Quote **quotes = NULL;
+
+Quote **quotes_get() {
+  if (quotes) {
+    return quotes;
+  }
+  quotes = malloc(sizeof(Quote *) * QUOTES_NUMBER * NICKS_NUMBER);
+  return quotes;
+}
+
+///
+void quotes_free() {
+  Quote **p = quotes;
+  REPEAT(QUOTES_NUMBER * NICKS_NUMBER) {
+    free(*p++);
+  }_REPEAT
+  free(quotes);
+  quotes = NULL;
 }

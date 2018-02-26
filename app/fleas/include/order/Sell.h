@@ -9,7 +9,9 @@
 #include <Json.h>
 #include <stdlib.h>
 #include "Nick.h"
+#include "Quote.h"
 
+/*.-.*/
 ///
 typedef struct sell_Sell Sell;
 
@@ -18,10 +20,11 @@ size_t sell_nick(Sell *this);
 
 ///
 size_t sell_stocks(Sell *this);
+/*.-.*/
 
 /// sell_do executes a Sell. 'qs' are the quotes of day.
 /// If operation can not be done, sell_do returns 0
-double sell_do(Sell *this, Arr/*Quote*/ *qs);
+double sell_do(Sell *this, Quote **qs);
 
 ///
 Json *sell_serialize(Sell *this, Nicks *nicks);

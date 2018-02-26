@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+///
 enum wmacalc_Result {
-  WMACALC_NOT_VALID, // Few quotes or value < 0
+  WMACALC_NOT_VALID, // Few quotes or value <= 0
   WMACALC_BUY, // Buy position
   WMACALC_SELL, // Sell position
   WMACALC_NOP // Position between buy and sell
@@ -32,10 +33,7 @@ WmaCalc *wmacalc_new(
 ///
 double wmacalc_sum(WmaCalc *this);
 
-/// Adds quote to this and returns
-///   -2: If data is not prepared to use
-///   0 : If quote is not valid (< 0)
-///   1 : If
+/// Adds quote to this.<br>
 /// Used by MovingAverage
 enum wmacalc_Result wmacalc_add(WmaCalc *this, double quote);
 

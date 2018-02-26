@@ -22,7 +22,6 @@ int main() {
   sys_init("fleas");
   io_init();
   Db *db = db_new();
-  Arr/*Arr[Quote]*/ *quotes = db_quotes(db);
 
   gen_test();
   quote_test();
@@ -38,11 +37,7 @@ int main() {
   udcalc2_test();
   wmacalc2_test();
 
-  EACH(quotes, Arr/*Quote*/, row) {
-    EACH(row, Quote, q) {
-      free(q);
-    }_EACH
-  }_EACH
+  quotes_free();
 
   return 0;
 }

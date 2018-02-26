@@ -36,6 +36,16 @@ Json *quote_serialize(Quote *q);
 ///
 Quote *quote_restore(Json *serial);
 
+/// Returns an unique array[QUOTES_NUMBER][NICKS_NUMBER].<br>
+/// This array is initialized in io_quotes at the begining of program.<br>
+/// It is populated with Quotes created with quote_from_str.<br>
+/// The quote's and the array are allocated without garbage collector and
+/// should be freed with (quotes and array) with quotes_free.
+Quote **quotes_get();
+
+///
+void quotes_free();
+
 #endif
 
 

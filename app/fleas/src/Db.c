@@ -14,7 +14,7 @@ struct db_Db {
 
   Nicks *nicks;
   Arr/*char*/ *qdates;
-  Arr/*Arr[Quote]*/ *quotes;
+  Quote **quotes;
 };
 
 Db *db_new(void) {
@@ -28,17 +28,8 @@ Db *db_new(void) {
     _THROW
   }
 
-  io_quotes(
-    &this->qdates,
-    &this->quotes,
-    this->nicks
-  );
-  if (arr_size(this->quotes) != QUOTES_NUMBER) {
-    THROW
-      "this->quotes has %d elements, but ought to have %d",
-      arr_size(this->quotes), QUOTES_NUMBER
-    _THROW
-  }
+  this->qdates = io_quotes(this->nicks);
+  this->quotes = quotes_get();
 
   io_get_fleas(&this->fleaId, &this->cycle, &this->fleas);
 
@@ -71,7 +62,7 @@ Arr/*char*/ *db_qdates(Db *this) {
 }
 
 inline
-Arr/*Map[Quote]*/ *db_quotes(Db *this) {
+Quote **db_quotes(Db *this) {
   return this->quotes;
 }
 

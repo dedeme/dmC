@@ -31,7 +31,7 @@ Fleas *db_fleas(Db *this);
 Arr/*char*/ *db_qdates(Db *this);
 
 ///
-Arr/*Map[Quote]*/ *db_quotes(Db *this);
+Quote **db_quotes(Db *this);
 
 ///
 Nicks *db_nicks(Db *this);

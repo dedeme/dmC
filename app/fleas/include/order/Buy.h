@@ -9,6 +9,7 @@
 #include <Json.h>
 #include <stdlib.h>
 #include "Nick.h"
+#include "Quote.h"
 
 ///
 typedef struct buy_Buy Buy;
@@ -25,7 +26,7 @@ void buy_do(
   size_t *stocks_r,
   double *cost_r,
   Buy *this,
-  Arr/*Quote*/ *qs
+  Quote **qs
 );
 
 ///

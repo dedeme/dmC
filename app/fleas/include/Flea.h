@@ -88,7 +88,7 @@ void flea_process(
   Flea *this,
   Db *db,
   char *date,
-  Arr/*Quote*/ *day,
+  Quote **day,
   int traced,
   Arr/*Trace*/ *traces
 );
