@@ -1,7 +1,7 @@
 // Copyright 13-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dm.h>
+#include <dm/dm.h>
 
 typedef struct pos_Pos Pos;
 
@@ -239,10 +239,10 @@ static char *make_dic(Map/*Arr[Pos]*/ *keys, char *lang, char *target) {
 	Buf *trans = buf_new();
 	Buf *dic = buf_new();
 
-  int sort(void *e1, void *e2) {
+  bool sort(void *e1, void *e2) {
     Kv *kv1 = e1;
     Kv *kv2 = e2;
-    return strcmp(kv1->key, kv2->key);
+    return strcmp(kv1->key, kv2->key) > 0;
   }
   arr_sort((Arr *)keys, sort);
   arr_sort((Arr *)old_dic, sort);

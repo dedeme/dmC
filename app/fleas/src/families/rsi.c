@@ -2,7 +2,7 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/rsi.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "Gen.h"
 #include "order/Buy.h"
 

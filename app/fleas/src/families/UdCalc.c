@@ -2,7 +2,7 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/UdCalc.h"
-#include <dm.h>
+#include <dm/dm.h>
 
 struct udcalc_UdCalc {
   size_t ud_len;

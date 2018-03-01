@@ -3,7 +3,7 @@
  * GNU General Public License - V3 <http://www.gnu.org/licenses/>
  */
 
-#include <dm.h>
+#include <dm/dm.h>
 #include "../include/compile.h"
 
 typedef struct {
@@ -282,8 +282,8 @@ void _dic_mix(char *root, Arr/*Dic_entry*/ *dic) {
     Buf *bf = buf_new();
     buf_add(bf, "# File generated file by haxe_maker\n\n");
 
-    FNC(sort_orphan, Old_dic_entry, e1, e2) {
-      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter));
+    FNE(sort_orphan, Old_dic_entry, e1, e2) {
+      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter)) > 0;
     }_FN
     arr_sort(orphan, sort_orphan);
     FNX(w_orphan, Old_dic_entry, e) {
@@ -292,8 +292,8 @@ void _dic_mix(char *root, Arr/*Dic_entry*/ *dic) {
     }_FN
     it_each(it_from(orphan), w_orphan);
 
-    FNC(sort_todo, Dic_entry, e1, e2) {
-      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter));
+    FNE(sort_todo, Dic_entry, e1, e2) {
+      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter)) > 0;
     }_FN
     arr_sort(todo, sort_todo);
     FNX(w_todo, Dic_entry, e) {
@@ -306,8 +306,8 @@ void _dic_mix(char *root, Arr/*Dic_entry*/ *dic) {
     }_FN
     it_each(it_from(todo), w_todo);
 
-    FNC(sort_ok, New_dic_entry, e1, e2) {
-      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter));
+    FNE(sort_ok, New_dic_entry, e1, e2) {
+      return strcmp(str_to_lower(e1->ter), str_to_lower(e2->ter)) > 0;
     }_FN
     arr_sort(ok, sort_ok);
     FNX(w_ok, New_dic_entry, e) {

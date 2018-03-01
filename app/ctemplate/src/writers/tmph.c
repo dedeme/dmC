@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/tmph.h"
-#include "dm.h"
+#include "dm/dm.h"
 
 static char *MARK = "/*.-.*/";
 

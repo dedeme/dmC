@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "readers/head.h"
-#include "dm.h"
+#include "dm/dm.h"
 #include "ctype.h"
 
 Head *head_read(RW *rw) {

@@ -3,7 +3,7 @@
  * GNU General Public License - V3 <http://www.gnu.org/licenses/>
  */
 
-#include <dm.h>
+#include <dm/dm.h>
 #include <unistd.h>
 #include "../include/help.h"
 #include "../include/initialize.h"

@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/tmpc.h"
-#include "dm.h"
+#include "dm/dm.h"
 #include "writers/structure.h"
 
 static char *MARK = "/*.-.*/";

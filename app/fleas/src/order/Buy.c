@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "order/Buy.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "Quote.h"
 #include "order/fees.h"
 

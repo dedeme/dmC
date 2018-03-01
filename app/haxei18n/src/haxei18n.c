@@ -1,7 +1,7 @@
 // Copyright 15-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dm.h>
+#include <dm/dm.h>
 #include <sys/stat.h>
 #include <time.h>
 
@@ -139,7 +139,7 @@ void read_sources (int len, char *dir, Map/*Arr[char]*/ *data) {
   }_EACH
 }
 
-int write_sort(void *p1, void *p2) {
+bool write_sort(void *p1, void *p2) {
   Kv *kv1 = p1;
   char *k1 = kv1->key;
   Arr/*char*/ *vs1 = kv1->value;
@@ -168,7 +168,7 @@ int write_sort(void *p1, void *p2) {
   if (*v2) {
     return -1;
   }
-  return strcasecmp(k1, k2);
+  return strcasecmp(k1, k2) > 0;
 }
 
 void write(char *file, Map/*Arr[char]*/ *map, Buf *hx_code) {

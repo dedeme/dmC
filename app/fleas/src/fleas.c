@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "fleas.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "io.h"
 #include "Db.h"
 #include "Quote.h"

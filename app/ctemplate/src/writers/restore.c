@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/restore.h"
-#include "dm.h"
+#include "dm/dm.h"
 
 void restore_write(RW *rw, Structure *st) {
   if (st->head->mod != HEAD_RESTORE) {

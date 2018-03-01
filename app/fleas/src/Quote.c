@@ -3,7 +3,7 @@
 
 #include "Quote.h"
 #include "DEFS.h"
-#include <dm.h>
+#include <dm/dm.h>
 
 struct quote_Quote {
   double open;

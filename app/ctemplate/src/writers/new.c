@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/new.h"
-#include "dm.h"
+#include "dm/dm.h"
 
 void new_write(RW *rw, Structure *st) {
   rw_writeln(rw, "");

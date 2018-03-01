@@ -4,7 +4,7 @@
  */
 
 #include <unistd.h>
-#include <dm.h>
+#include <dm/dm.h>
 #include "../include/initialize.h"
 #include "../include/files.h"
 

@@ -1,7 +1,7 @@
 // Copyright 27-Jan-2018 ºDeme
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dm.h>
+#include <dm/dm.h>
 #include "families/WmaCalc2.h"
 
 struct wmacalc2_WmaCalc2 {

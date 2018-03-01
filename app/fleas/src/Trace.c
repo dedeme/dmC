@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Trace.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "Portfolio.h"
 
 struct trace_Trace {

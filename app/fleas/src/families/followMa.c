@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/followMa.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "DEFS.h"
 #include "Gen.h"
 #include "order/Buy.h"

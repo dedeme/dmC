@@ -2,7 +2,7 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/WmaCalc.h"
-#include <dm.h>
+#include <dm/dm.h>
 
 struct wmacalc_WmaCalc {
   size_t avg_len;

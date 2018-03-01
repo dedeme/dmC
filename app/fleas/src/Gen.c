@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Gen.h"
-#include <dm.h>
+#include <dm/dm.h>
 #include "math.h"
 
 struct gen_Gen {
