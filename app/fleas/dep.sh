@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 LIBS="https://github.com/dedeme/libdmc.git libdmc "
 
