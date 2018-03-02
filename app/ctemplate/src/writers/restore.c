@@ -5,7 +5,7 @@
 #include "dm/dm.h"
 
 void restore_write(RW *rw, Structure *st) {
-  if (st->head->mod != HEAD_RESTORE) {
+  if (st->head->mod != HEAD_SERIAL) {
     return;
   }
 

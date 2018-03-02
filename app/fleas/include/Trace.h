@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <dm/Json.h>
-#include "Quote.h"
+#include "market/Quote.h"
 #include "Portfolio.h"
 
 ///

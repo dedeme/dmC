@@ -3,9 +3,10 @@
 
 #include "fleas.h"
 #include <dm/dm.h>
+#include "market/Quote.h"
 #include "io.h"
 #include "Db.h"
-#include "Quote.h"
+#include "Quotes.h"
 #include "DEFS.h"
 #include "Flea.h"
 #include "Trace.h"
@@ -186,8 +187,6 @@ static void process(size_t minutes, size_t traced) {
 
     io_save_traces(json_warray(traces_data));
   }
-
-  quotes_free();
 }
 
 void gc_messages(char *msg, long unsigned int arg) {

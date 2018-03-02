@@ -7,7 +7,7 @@
 static char *MARK = "/*.-.*/";
 
 static void wrestore(RW *rw, Structure *st) {
-  if (st->head->mod != HEAD_RESTORE) {
+  if (st->head->mod != HEAD_SERIAL) {
     return;
   }
 

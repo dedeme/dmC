@@ -33,7 +33,7 @@ Param *param_read(RW *rw, Head *head) {
     pr->func = true;
   }
 
-  if (head->mod == HEAD_SERIAL || head->mod == HEAD_RESTORE) {
+  if (head->mod == HEAD_SERIAL) {
     if (pr->func)
       THROW
         rw_msg(rw, "There can not be functions in a serializable structure")

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIBS="https://github.com/dedeme/libdmc.git libdmc"
+LIBS="https://github.com/dedeme/libmarket.git libmarket"
 
 # Do not change --------------------------------------------
 
@@ -17,6 +17,7 @@ clone() {
   cd $LIB
   mkdir lib
   mkdir obj
+  make clean
   make
   cd ../..
   if [ -e $LIB ]

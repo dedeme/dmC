@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include "DEFS.h"
-#include "Quote.h"
+#include "market/Quote.h"
 #include "Stat.h"
 #include "order/Buy.h"
 #include "order/Sell.h"

@@ -6,6 +6,7 @@
 #ifndef DB_H
   # define DB_H
 
+#include "market/Quote.h"
 #include "Nick.h"
 #include "Flea.h"
 

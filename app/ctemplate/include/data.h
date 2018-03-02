@@ -74,7 +74,7 @@ typedef struct Body Body;
 ///   - : HEAD_NO_SERIAL
 ///   + : RESTORE (Includes serialization
 ///   default: SERIAL
-enum head_Mod { HEAD_NO_SERIAL, HEAD_SERIAL, HEAD_RESTORE };
+enum head_Mod { HEAD_NO_SERIAL, HEAD_SERIAL };
 
 ///
 enum head_Id_mod { HEAD_ID_PUBLIC, HEAD_ID_PRIVATE };

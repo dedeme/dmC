@@ -28,7 +28,7 @@
 #define INITIAL_CASH 125000
 
 ///
-#define FLEAS_NUMBER 10000
+#define FLEAS_NUMBER 5000
 
 ///
 enum Families_type {

@@ -2,9 +2,10 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include <dm/dm.h>
+#include "market/Quote.h"
 #include "io.h"
+#include "Quotes.h"
 #include "DEFS.h"
-#include "Quote.h"
 #include "Flea.h"
 
 static char *home = NULL;
@@ -80,6 +81,18 @@ Nicks *io_nicks(void) {
   }_EACH
 
   return nks;
+}
+
+static Quote *quote_from_str(char *quote) {
+  Arr/*char*/ *qparts = str_csplit(quote, ':');
+
+  return quote_new(
+    atof(arr_get(qparts, 1)),
+    atof(arr_get(qparts, 2)),
+    atof(arr_get(qparts, 3)),
+    atof(arr_get(qparts, 4)),
+    atoi(arr_get(qparts, 5))
+  );
 }
 
 Arr/*char*/ *io_quotes(Nicks *nicks) {

@@ -10,9 +10,6 @@
 #include "writers/tmpc.h"
 #include "writers/tmph.h"
 
-// static char *START_MARK = "/*.+.";
-// static char *MARK = "/*.-.*/";
-
 static void help() {
   puts(
     "Use: ctemplate path\n"

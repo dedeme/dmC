@@ -1,5 +1,5 @@
 PRG = fleas
-LIB = dmc
+LIB = market
 
 C_FILES = $(wildcard src/*.c) \
           $(wildcard src/order/*.c) \

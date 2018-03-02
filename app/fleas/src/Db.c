@@ -5,6 +5,7 @@
 #include <dm/dm.h>
 #include "io.h"
 #include "DEFS.h"
+#include "Quotes.h"
 
 struct db_Db {
   size_t fleaId;

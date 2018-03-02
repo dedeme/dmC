@@ -10,17 +10,11 @@ Head *head_read(RW *rw) {
   if (rc->indent)
     THROW rw_msg(rw, "Indented structure head") _THROW
 
-  char *l = rc->l1;
+  char *l = rc->l;
   enum head_Mod mod = HEAD_SERIAL;
-  switch (rc->first) {
-  case '-':
+  if (rc->first == '-') {
     mod = HEAD_NO_SERIAL;
-    break;
-  case '+':
-    mod = HEAD_RESTORE;
-    break;
-  default:
-    l = rc->l;
+    l = rc->l1;
   }
 
   Tp/*char, char*/ *tp = rw_split(rw, l, ':');
