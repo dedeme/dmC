@@ -8,11 +8,12 @@
 
 #include <stdlib.h>
 #include "DEFS.h"
+#include "dmc/Arr.h"
 #include "market/Quote.h"
 #include "Stat.h"
-#include "order/Buy.h"
-#include "order/Sell.h"
-#include "Portfolio.h"
+#include "market/Buy.h"
+#include "market/Sell.h"
+#include "market/Pf.h"
 
 typedef struct db_Db Db;
 
@@ -66,16 +67,16 @@ size_t flea_ibex(Flea *this);
 Stat *flea_stats(Flea *this);
 
 ///
-Buys *flea_buys(Flea *this);
+Arr/*Buy*/ *flea_buys(Flea *this);
 
 ///
-Sells *flea_sells(Flea *this);
+Arr/*Sell*/ *flea_sells(Flea *this);
 
 ///
 double flea_cash(Flea *this);
 
 ///
-Portfolio *flea_portfolio(Flea *this);
+Pf *flea_portfolio(Flea *this);
 
 ///
 size_t flea_nbuys(Flea *this);

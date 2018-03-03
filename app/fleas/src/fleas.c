@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "fleas.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "market/Quote.h"
 #include "io.h"
 #include "Db.h"
@@ -60,11 +60,11 @@ static void process(size_t minutes, size_t traced) {
       }_RANGE
 
       double cash = flea_cash(f);
-      EACH(flea_portfolio(f), Pentry, e) {
+      EACH(flea_portfolio(f), Pf_entry, e) {
         double q = -1;
         for (int i = QUOTES_NUMBER - 1; i >= 0; --i) {
           double q0 = quote_close(
-            quotes[i * NICKS_NUMBER + portfolio_nick(e)]
+            quotes[i * NICKS_NUMBER + pf_entry_nick(e)]
           );
           if (q0 > 0) {
             q = q0;
@@ -77,11 +77,11 @@ static void process(size_t minutes, size_t traced) {
         if (q < -0.1) {
           THROW
             "%s: Wrong quotes",
-            nick_id(nicks_get(nicks, portfolio_nick(e)))
+            nick_id(nicks_get(nicks, pf_entry_nick(e)))
           _THROW
         }
 
-        cash += sell_income(portfolio_stocks(e), q);
+        cash += sell_income(pf_entry_stocks(e), q);
       }_EACH
 
       stat_setup(

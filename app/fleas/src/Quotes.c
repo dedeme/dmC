@@ -3,7 +3,7 @@
 
 #include "Quotes.h"
 #include "DEFS.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 
 static Quote *quotes[sizeof(Quote *) * QUOTES_NUMBER * NICKS_NUMBER];
 

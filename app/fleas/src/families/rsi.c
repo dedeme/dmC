@@ -2,9 +2,9 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/rsi.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "Gen.h"
-#include "order/Buy.h"
+#include "market/Buy.h"
 
 struct _Rsi {
   size_t ix;
@@ -117,16 +117,16 @@ static void process(
     ? 100.0
     : 100.0 - 100.0 / (1 + rsi->ups_avg / rsi->downs_avg);
 
-  size_t stocks = portfolio_get(flea_portfolio(f), nick);
+  size_t stocks = pf_get(flea_portfolio(f), nick);
   if (rsiv > this->up) {
     if (rsi->can_buy && !stocks) {
-      buys_add(flea_buys(f), nick, flea_bet(f));
+      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
     }
     rsi->can_buy = false;
     rsi->can_sell = true;
   } else if (rsiv < this->down) {
     if (rsi->can_sell && stocks) {
-      sells_add(flea_sells(f), nick, stocks);
+      arr_add(flea_sells(f), sell_new(nick, stocks));
     }
     rsi->can_sell = false;
     rsi->can_buy = true;

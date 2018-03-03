@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "readers/var.h"
-#include "dm/dm.h"
+#include "dmc/all.h"
 
 Var *var_read(RW *rw) {
   Rcode *rc = rw_rc(rw);

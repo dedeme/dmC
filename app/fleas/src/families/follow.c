@@ -2,10 +2,10 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/follow.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "DEFS.h"
 #include "Gen.h"
-#include "order/Buy.h"
+#include "market/Buy.h"
 #include "families/UdCalc2.h"
 
 struct _Follow {
@@ -100,7 +100,7 @@ static void process(
     }
 
     if (close > 0) {
-      size_t stocks = portfolio_get(flea_portfolio(f), nick);
+      size_t stocks = pf_get(flea_portfolio(f), nick);
       if (stocks) {
         this->cash += stocks * close;
       }
@@ -136,9 +136,9 @@ static void process(
         arr_add(nicks_to_buy, nick_to_buy);
       }_RANGE
 
-      EACH(flea_portfolio(f), Pentry, e) {
+      EACH(flea_portfolio(f), Pf_entry, e) {
         bool contains = false;
-        size_t pnick = portfolio_nick(e);
+        size_t pnick = pf_entry_nick(e);
         EACH(nicks_to_buy, size_t, nick) {
           if (*nick == pnick) {
             contains = true;
@@ -146,20 +146,20 @@ static void process(
           }
         }_EACH
         if (!contains) {
-          sells_add(flea_sells(f), pnick, portfolio_stocks(e));
+          arr_add(flea_sells(f), sell_new(pnick, pf_entry_stocks(e)));
         }
       }_EACH
 
       EACH(nicks_to_buy, size_t, nick) {
         bool contains = false;
-        EACH(flea_portfolio(f), Pentry, e) {
-          if (*nick == portfolio_nick(e)) {
+        EACH(flea_portfolio(f), Pf_entry, e) {
+          if (*nick == pf_entry_nick(e)) {
             contains = true;
             break;
           }
         }_EACH
         if (!contains) {
-          buys_add(flea_buys(f), *nick, flea_bet(f));
+          arr_add(flea_buys(f), buy_new(*nick, flea_bet(f)));
         }
       }_EACH
     }

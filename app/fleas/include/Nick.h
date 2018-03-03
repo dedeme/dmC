@@ -6,7 +6,7 @@
 #ifndef NICK_H
   # define NICK_H
 
-#include <dm/dm.h>
+#include <dmc/all.h>
 
 ///
 typedef struct nick_Nick Nick;

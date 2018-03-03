@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "jstemplate.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include <ctype.h>
 
 struct Par {

@@ -2,10 +2,10 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/movingAverage.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "DEFS.h"
 #include "Gen.h"
-#include "order/Buy.h"
+#include "market/Buy.h"
 #include "families/MaCalc.h"
 
 struct _MovingAverage {
@@ -96,7 +96,7 @@ static void process(
 
   if (r == MACALC_BUY) {
     if (ma->can_buy) {
-      buys_add(flea_buys(f), nick, flea_bet(f));
+      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
     }
     ma->can_buy = false;
     ma->can_sell = true;
@@ -104,9 +104,9 @@ static void process(
     ma->can_buy = true;
     if (r == MACALC_SELL) {
       if (ma->can_sell) {
-        size_t stocks = portfolio_get(flea_portfolio(f), nick);
+        size_t stocks = pf_get(flea_portfolio(f), nick);
         if (stocks) {
-          sells_add(flea_sells(f), nick, stocks);
+          arr_add(flea_sells(f), sell_new(nick, stocks));
         }
       }
       ma->can_sell = false;

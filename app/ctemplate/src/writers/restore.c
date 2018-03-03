@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/restore.h"
-#include "dm/dm.h"
+#include "dmc/all.h"
 
 void restore_write(RW *rw, Structure *st) {
   if (st->head->mod != HEAD_SERIAL) {
@@ -24,7 +24,7 @@ void restore_write(RW *rw, Structure *st) {
     char *j = "";
     if (!strcmp(s, "_array")) j = "jarr_garray";
     else if (!strcmp(s, "_bool")) j = "jarr_gbool";
-    else if (!strcmp(s, "_double")) j = "jarr_gdouble";
+    else if (str_starts(s, "_double")) j = "jarr_gdouble";
     else if (!strcmp(s, "_int")) j = "jarr_gint";
     else if (!strcmp(s, "_object")) j = "jarr_gobject";
     else if (!strcmp(s, "_string")) j = "jarr_gstring";

@@ -7,9 +7,9 @@
 #ifndef READERS_RW_H
   #define READERS_RW_H
 
-#include "dm/Tuples.h"
+#include "dmc/Tuples.h"
 #include "data.h"
-#include "dm/file.h"
+#include "dmc/file.h"
 
 ///
 struct Rcode {

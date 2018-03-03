@@ -3,7 +3,7 @@
  * GNU General Public License - V3 <http://www.gnu.org/licenses/>
  */
 
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "../include/new_directory.h"
 #include "../include/files.h"
 

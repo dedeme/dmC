@@ -1,5 +1,4 @@
 PRG = fleas
-LIB = market
 
 C_FILES = $(wildcard src/*.c) \
           $(wildcard src/order/*.c) \
@@ -10,13 +9,11 @@ H_FILES = $(wildcard include/*.h) \
           $(wildcard include/tests/*.h) \
           $(wildcard include/families/*.h)
 
-LIB_PATH = lib/lib$(LIB)
-LIB_INCLUDE = lib/lib$(LIB)/include
-
 CFLAGS = -Wall -rdynamic
 FILES = $(C_FILES) $(H_FILES)
-bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
+bin/$(PRG): $(FILES) lib/libdmc/libdmc.a lib/libmarket/libmarket.a
 	gcc $(CFLAGS) $(C_FILES) -o bin/$(PRG) \
-	  -Iinclude -I$(LIB_INCLUDE) \
-		-L$(LIB_PATH) -l$(LIB) \
+	  -Iinclude \
+	  -Ilib/libdmc/include -Llib/libdmc -ldmc \
+	  -Ilib/libmarket/include -Llib/libmarket -lmarket \
 		-lgc -lm

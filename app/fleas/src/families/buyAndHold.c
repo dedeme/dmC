@@ -2,8 +2,8 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/buyAndHold.h"
-#include <dm/dm.h>
-#include "order/Buy.h"
+#include <dmc/all.h>
+#include "market/Buy.h"
 
 struct _BuyAndHold {
 };
@@ -35,7 +35,7 @@ static void process(
   Quote *q
 ) {
   if (flea_bet(f) < flea_cash(f)) {
-    buys_add(flea_buys(f), nick, flea_bet(f));
+    arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
   }
 }
 

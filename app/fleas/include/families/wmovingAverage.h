@@ -6,7 +6,7 @@
 #ifndef WMOVING_AVERAGE_H
   # define WMOVING_AVERAGE_H
 
-#include <dm/Json.h>
+#include <dmc/Json.h>
 #include "Flea.h"
 
 ///

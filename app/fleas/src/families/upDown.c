@@ -2,10 +2,10 @@
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "families/upDown.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include "DEFS.h"
 #include "Gen.h"
-#include "order/Buy.h"
+#include "market/Buy.h"
 #include "families/UdCalc.h"
 
 struct _UpDown {
@@ -102,7 +102,7 @@ static void process(
 
   if (r == UDCALC_BUY) {
     if (ud->can_buy) {
-      buys_add(flea_buys(f), nick, flea_bet(f));
+      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
     }
     ud->can_buy = false;
     ud->can_sell = true;
@@ -110,9 +110,9 @@ static void process(
     ud->can_buy = true;
     if (r == UDCALC_SELL) {
       if (ud->can_sell) {
-        size_t stocks = portfolio_get(flea_portfolio(f), nick);
+        size_t stocks = pf_get(flea_portfolio(f), nick);
         if (stocks) {
-          sells_add(flea_sells(f), nick, stocks);
+          arr_add(flea_sells(f), sell_new(nick, stocks));
         }
       }
       ud->can_sell = false;
@@ -128,7 +128,7 @@ static Json *trace_data(UpDown *this, size_t nick) {
   Arr/*Json*/ *jsr = arr_new();
   Arr/*Json*/ *closes = arr_new();
 
-  double *cls = udcalc_values(ud->calc);
+  double *cls = udcalc_values(ud->calc) - 1;
   REPEAT(this->ud_len - 1){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT

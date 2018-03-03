@@ -6,7 +6,7 @@
 #ifndef FEXTRA_H
   # define FEXTRA_H
 
-#include "dm/Arr.h"
+#include "dmc/Arr.h"
 #include "Flea.h"
 
 Flea *fextra_new(Flea *f);

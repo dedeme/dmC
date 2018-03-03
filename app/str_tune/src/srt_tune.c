@@ -1,11 +1,11 @@
 // Copyright 26-Dec-2017 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dm/dm.h>
+#include <dmc/all.h>
 
 void help () {
   puts(
-    "str_tune. Version 201802\n\n"
+    "str_tune. Version 201803\n\n"
     "This program modifies a file called 'source.str' placed in the\n"
     "current directory.\n\n"
     "Use:\n"

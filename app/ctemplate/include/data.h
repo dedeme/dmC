@@ -7,7 +7,7 @@
 #ifndef DATA_H
   #define DATA_H
 
-#include "dm/dm.h"
+#include "dmc/all.h"
 
 /// Definitions
 ///   - : PRIVATE

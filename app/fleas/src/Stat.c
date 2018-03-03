@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Stat.h"
-#include <dm/dm.h>
+#include <dmc/all.h>
 #include <DEFS.h>
 
 struct gen_Stat {

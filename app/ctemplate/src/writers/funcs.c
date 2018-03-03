@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/funcs.h"
-#include "dm/dm.h"
+#include "dmc/all.h"
 
 void funcs_write(RW *rw, Structure *st) {
   EACH(st->body->ps, Param, p) {

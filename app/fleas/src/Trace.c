@@ -2,19 +2,19 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Trace.h"
-#include <dm/dm.h>
-#include "Portfolio.h"
+#include <dmc/all.h>
+#include "market/Pf.h"
 
 struct trace_Trace {
   char *date;
 	Quote *quote;
 	double beforeCash;
-	Portfolio *beforePortfolio;
+	Pf *beforePortfolio;
 	char *nick;
 	double cash;
 	uint stocks;
 	double afterCash;
-	Portfolio *afterPortfolio;
+	Pf *afterPortfolio;
 	Json *family_data;
 };
 
@@ -22,12 +22,12 @@ Trace *trace_new(
   char *date,
 	Quote *quote,
 	double beforeCash,
-	Portfolio *beforePortfolio,
+	Pf *beforePortfolio,
 	char *nick,
 	double cash, // if order is sell its value is 0
 	uint stocks, // if order is buy its value is 0
 	double afterCash,
-	Portfolio *afterPortfolio,
+	Pf *afterPortfolio,
 	Json *family_data
 ) {
   Trace *this = MALLOC(Trace);
@@ -58,6 +58,17 @@ Trace *trace_copy(Trace *this) {
     this->afterPortfolio,
     this->family_data
   );
+}
+
+static Json *portfolio_serialize(Pf *pf, Nicks *nicks) {
+  Arr/*Json*/ *r = arr_new();
+  EACH(pf, Pf_entry, pe) {
+    Arr/*Json*/ *ajs = arr_new();
+    jarr_astring(ajs, nick_id(nicks_get(nicks, pf_entry_nick(pe))));
+    jarr_auint(ajs,pf_entry_stocks(pe));
+    jarr_aarray(r, ajs);
+  }_EACH
+  return json_warray(r);
 }
 
 Json *trace_serialize(Trace *this, Nicks *nicks) {

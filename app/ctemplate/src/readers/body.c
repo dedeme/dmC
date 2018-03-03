@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "readers/body.h"
-#include "dm/dm.h"
+#include "dmc/all.h"
 #include "readers/param.h"
 #include "readers/var.h"
 #include "readers/func.h"

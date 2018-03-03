@@ -7,9 +7,10 @@
   # define TRACE_H
 
 #include <stdlib.h>
-#include <dm/Json.h>
+#include <dmc/Json.h>
 #include "market/Quote.h"
-#include "Portfolio.h"
+#include "market/Pf.h"
+#include "Nick.h"
 
 ///
 typedef struct trace_Trace Trace;
@@ -19,12 +20,12 @@ Trace *trace_new(
   char *date,
 	Quote *quote,
 	double beforeCash,
-	Portfolio *beforePortfolio,
+	Pf *beforePortfolio,
 	char *nick,
 	double cash, // if order is sell its value is 0
 	uint stocks, // if order is buy its value is 0
 	double afterCash,
-	Portfolio *afterPortfolio,
+	Pf *afterPortfolio,
 	Json *family_data
 );
 

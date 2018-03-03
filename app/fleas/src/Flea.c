@@ -1,23 +1,23 @@
 // Copyright 16-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dm/dm.h>
+#include <dmc/all.h>
+#include "market/Buy.h"
+#include "market/Sell.h"
+#include "market/Pf.h"
 #include "Flea.h"
 #include "DEFS.h"
 #include "Db.h"
 #include "Gen.h"
 #include "Trace.h"
-#include "Portfolio.h"
-#include "order/Buy.h"
-#include "order/Sell.h"
 #include "fextra.h"
 
 struct _Flea {
   size_t age;
-  Buys *buys;
-  Sells *sells;
+  Arr/*Buy*/ *buys;
+  Arr/*Sell*/ *sells;
   double cash;
-  Portfolio *portfolio;
+  Pf *portfolio;
   size_t nbuys;
   size_t nsells;
 };
@@ -170,10 +170,10 @@ void flea_prepare(Flea *this, size_t cycle){
   }
   struct _Flea *extra = MALLOC(struct _Flea);
   extra->age = cycle - this->cycle;
-  extra->buys = buys_new();
-  extra->sells = sells_new();
+  extra->buys = arr_new();
+  extra->sells = arr_new();
 	extra->cash = INITIAL_CASH;
-  extra->portfolio = portfolio_new();
+  extra->portfolio = pf_new();
 	extra->nbuys = 0;
 	extra->nsells = 0;
 
@@ -220,12 +220,12 @@ Stat *flea_stats(Flea *this) {
 }
 
 inline
-Buys *flea_buys(Flea *this) {
+Arr/*Buy*/ *flea_buys(Flea *this) {
   return this->extra->buys;
 }
 
 inline
-Sells *flea_sells(Flea *this){
+Arr/*Sell*/ *flea_sells(Flea *this){
   return this->extra->sells;
 }
 
@@ -235,7 +235,7 @@ double flea_cash(Flea *this) {
 }
 
 inline
-Portfolio *flea_portfolio(Flea *this) {
+Pf *flea_portfolio(Flea *this) {
   return this->extra->portfolio;
 }
 
@@ -269,25 +269,29 @@ void flea_process(
   }
 
   EACH(this->extra->sells, Sell, s) {
-    double cash = sell_do(s, day);
+    double cash = 0;
+    double open = quote_open(day[sell_nick(s)]);
+    if (open > 0) {
+      cash = sell_do(s, open);
+    }
     if (cash > 0) {
       size_t nick = sell_nick(s);
-      Portfolio *portfolio = this->extra->portfolio;
+      Pf *portfolio = this->extra->portfolio;
 
       double beforeCash;
-      Portfolio *beforePortfolio;
+      Pf *beforePortfolio;
       if (traced) {
         beforeCash = this->extra->cash;
-        beforePortfolio = portfolio_copy(portfolio);
+        beforePortfolio = pf_copy(portfolio);
       }
 
-      portfolio_remove(this->extra->portfolio, nick, sell_stocks(s));
+      pf_remove(this->extra->portfolio, nick, sell_stocks(s));
       this->extra->cash += cash;
       ++this->extra->nsells;
 
       if (traced) {
-        Portfolio *afterPortfolio;
-        afterPortfolio = portfolio_copy(portfolio);
+        Pf *afterPortfolio;
+        afterPortfolio = pf_copy(portfolio);
 
         Json *fdata = family_trace_data(this, nick);
 
@@ -307,32 +311,35 @@ void flea_process(
       }
     }
   }_EACH
-  this->extra->sells = sells_new();
+  this->extra->sells = arr_new();
 
   arr_shuffle(this->extra->buys);
   EACH(this->extra->buys, Buy, b) {
     if (buy_money(b) <= this->extra->cash) {
-      size_t stocks;
-      double cost;
-      buy_do(&stocks, &cost, b, day);
+      size_t stocks = 0;
+      double cost = 0.0;
+      double open = quote_open(day[buy_nick(b)]);
+      if (open > 0) {
+        buy_do(&stocks, &cost, b, open);
+      }
       if (stocks > 0) {
         size_t nick = buy_nick(b);
-        Portfolio *portfolio = this->extra->portfolio;
+        Pf *portfolio = this->extra->portfolio;
 
         double beforeCash;
-        Portfolio *beforePortfolio;
+        Pf *beforePortfolio;
         if (traced) {
           beforeCash = this->extra->cash;
-          beforePortfolio = portfolio_copy(portfolio);
+          beforePortfolio = pf_copy(portfolio);
         }
 
-        portfolio_add(portfolio, nick, stocks);
+        pf_add(portfolio, nick, stocks);
         this->extra->cash -= cost;
         ++this->extra->nbuys;
 
         if (traced) {
-          Portfolio *afterPortfolio;
-          afterPortfolio = portfolio_copy(portfolio);
+          Pf *afterPortfolio;
+          afterPortfolio = pf_copy(portfolio);
 
           Json *fdata = family_trace_data(this, nick);
 
@@ -353,7 +360,7 @@ void flea_process(
       }
     }
   }_EACH
-  this->extra->buys = buys_new();
+  this->extra->buys = arr_new();
 
   RANGE0(nick_ix, NICKS_NUMBER) {
     if (
