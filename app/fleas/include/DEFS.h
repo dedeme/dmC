@@ -31,7 +31,14 @@
 #define FLEAS_NUMBER 5000
 
 ///
-enum Families_type {
+enum Family_option {
+  FAMILIES_ALL,
+  FAMILY_BEST,
+  FAMILY_IBEX_BEST
+};
+
+///
+enum Family_type {
   BUY_AND_HOLD,
   UP_DOWN,
   MOVING_AVERAGE,

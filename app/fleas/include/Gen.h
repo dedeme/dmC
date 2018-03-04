@@ -22,7 +22,7 @@ Gen *gen_new(uint maxOptions);
 ///
 Gen *gen_copy(Gen *this);
 
-/// gen_mutate returns a new Gen mutated from 'g'.
+/// gen_mutate returns a new Gen mutated from 'this'.
 Gen *gen_mutate(Gen *this);
 
 ///

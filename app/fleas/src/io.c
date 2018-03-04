@@ -4,12 +4,14 @@
 #include <dmc/all.h>
 #include "market/Quote.h"
 #include "io.h"
+#include "Options.h"
 #include "Quotes.h"
 #include "DEFS.h"
 #include "Flea.h"
 
 static char *home = NULL;
-static char *data_dir = NULL;
+static char *data_dir_base = NULL;
+static char *data_dir_opt = NULL;
 static char *tmp_dir = NULL;
 static char *bolsa_data_dir = NULL;
 static char *fversion = NULL;
@@ -17,18 +19,16 @@ static char *fversion = NULL;
 void io_init(void) {
   home = sys_home();
 
-  data_dir = path_cat(home, "data", NULL);
-  if (!file_exists(data_dir)) {
-    file_mkdir(data_dir);
+  data_dir_base = path_cat(home, "data", NULL);
+  if (!file_exists(data_dir_base)) {
+    file_mkdir(data_dir_base);
+    file_mkdir(path_cat(data_dir_base, "all", NULL));
+    file_mkdir(path_cat(data_dir_base, "best", NULL));
+    file_mkdir(path_cat(data_dir_base, "ibex", NULL));
+    file_mkdir(path_cat(data_dir_base, "ibexBest", NULL));
   }
 
-  tmp_dir = path_cat(home, "tmp", NULL);
-  if (file_exists(tmp_dir)) {
-    file_del(tmp_dir);
-  }
-  file_mkdir(tmp_dir);
-
-  fversion = path_cat(data_dir, "version.txt", NULL);
+  fversion = path_cat(data_dir_base, "version.txt", NULL);
   if (!file_exists(fversion)) {
     file_write(fversion, DATA_VERSION);
   } else {
@@ -37,6 +37,22 @@ void io_init(void) {
       THROW exc_illegal_argument("v", DATA_VERSION, v) _THROW
     }
   }
+
+  Options *opts = options_get();
+  data_dir_opt = options_ibex(opts)
+    ? options_best(opts)
+      ? path_cat(data_dir_base, "ibexBest", NULL)
+      : path_cat(data_dir_base, "ibex", NULL)
+    : options_best(opts)
+      ? path_cat(data_dir_base, "best", NULL)
+      : path_cat(data_dir_base, "all", NULL)
+    ;
+
+  tmp_dir = path_cat(home, "tmp", NULL);
+  if (file_exists(tmp_dir)) {
+    file_del(tmp_dir);
+  }
+  file_mkdir(tmp_dir);
 
   bolsa_data_dir = path_cat(home, "bolsa_data", NULL);
   if (!file_exists(bolsa_data_dir)) {
@@ -146,7 +162,7 @@ Arr/*char*/ *io_quotes(Nicks *nicks) {
 static Fleas *read_fleas() {
   Fleas *fleas = fleas_new(FLEAS_NUMBER);
   RANGE0(i, FLEAS_NUMBER / 1000) {
-    char *path = path_cat(data_dir, str_printf("fleas%d.db", i), NULL);
+    char *path = path_cat(data_dir_opt, str_printf("fleas%d.db", i), NULL);
     Arr/*Json*/ *jsa = json_rarray(file_read(path));
     size_t ifl = i * 1000;
     EACH(jsa, Json, a) {
@@ -157,7 +173,7 @@ static Fleas *read_fleas() {
 }
 
 void io_get_fleas(size_t *fleaId, size_t *cycle, Fleas **fleas) {
-  char *path = path_cat(data_dir, "conf.db", NULL);
+  char *path = path_cat(data_dir_opt, "conf.db", NULL);
   if (!file_exists(path)) {
     *fleas = fleas_new(FLEAS_NUMBER);
     RANGE0(i, FLEAS_NUMBER) {
@@ -180,7 +196,7 @@ void io_get_fleas(size_t *fleaId, size_t *cycle, Fleas **fleas) {
 }
 
 void io_set_fleas(size_t fleaId, size_t cycle, Fleas *fleas) {
-  char *path = path_cat(data_dir, "conf.db", NULL);
+  char *path = path_cat(data_dir_opt, "conf.db", NULL);
 
   Map/*Json*/ *jsm = map_new();
   jmap_puint(jsm, "fleaId", fleaId);
@@ -195,7 +211,7 @@ void io_set_fleas(size_t fleaId, size_t cycle, Fleas *fleas) {
       end = size;
     }
 
-    path = path_cat(data_dir, str_printf("fleas%d.db", i / 1000), NULL);
+    path = path_cat(data_dir_opt, str_printf("fleas%d.db", i / 1000), NULL);
 
     Arr/*Json*/ *jsa = arr_new();
     RANGE(ifl, i, end) {
@@ -213,7 +229,7 @@ static void save_bests (
   if (cycle % level10) {
     return;
   }
-  char *path = path_cat(data_dir, str_printf("bests%d.db", level), NULL);
+  char *path = path_cat(data_dir_opt, str_printf("bests%d.db", level), NULL);
 
   Arr/*Json*/ *entry = arr_new();
   jarr_auint(entry, cycle);
@@ -251,7 +267,7 @@ void io_save_bests(size_t cycle, Json *data) {
 }
 
 void io_save_traces(Json *data) {
-  char *path = path_cat(data_dir, "traces.db", NULL);
+  char *path = path_cat(data_dir_opt, "traces.db", NULL);
   file_write(path, data);
 }
 
@@ -269,7 +285,7 @@ void io_backup(char *dir) {
   char *file = path_cat(path, str_printf("Fleas%s.zip", date), NULL);
 
   file_del(file);
-  ext_zip(data_dir, file);
+  ext_zip(data_dir_base, file);
 }
 
 void io_restore(char *file) {
@@ -297,8 +313,8 @@ void io_restore(char *file) {
 
   char *data_tmp = path_cat(home, "data2", NULL);
   char *data_new = path_cat(tmp_dir, "data", NULL);
-  file_rename(data_dir, data_tmp);
-  file_rename(data_new, data_dir);
+  file_rename(data_dir_base, data_tmp);
+  file_rename(data_new, data_dir_base);
   file_del(data_tmp);
 }
 

@@ -5,6 +5,7 @@
 #include <dmc/all.h>
 #include "market/Quote.h"
 #include "io.h"
+#include "Options.h"
 #include "Db.h"
 #include "Quotes.h"
 #include "DEFS.h"
@@ -17,10 +18,10 @@ static void help (void) {
   puts(
     "fleas. v201802\n\n"
     "Use:\n"
-		"  fleas\n"
-		"  fleas <time_minutes> -> (e.g. fleas 5)\n"
-		"  fleas trace <flea> -> (e.g. fleas trace 12543)\n"
-    "  fleas dup (remove duplicate fleas)\n"
+		"  fleas [i | b | ib] \n"
+		"  fleas [i | b | ib] <time_minutes> -> (e.g. fleas 5)\n"
+		"  fleas [i | b | ib] trace <flea> -> (e.g. fleas trace 12543)\n"
+    "  fleas [i | b | ib] dup (remove duplicate fleas)\n"
 		"  fleas stop\n"
 		"  fleas force (remove stop lock)\n"
 		"  fleas backup <dir> -> (e.g. fleas backup ./)\n"
@@ -90,8 +91,7 @@ static void process(size_t minutes, size_t traced) {
       );
       if (
         cash > (INITIAL_CASH + 1) &&
-        stat_buys(flea_stats(f)) > MIN_BUYS &&
-        flea_family(f) != -1 // Use to delete a wrong family
+        stat_buys(flea_stats(f)) > MIN_BUYS
       ) {
         flea_reset(f);
       } else {
@@ -144,8 +144,8 @@ static void process(size_t minutes, size_t traced) {
           Flea *f = flea_new(db_next_flea_id(db), cycle + 1);
           fleas_set(fleas, ifl, f);
         }
-      } else {
-        size_t fm = flea_family(f1);
+      } else if (family_opt(flea_family(f1)) == FAMILIES_ALL) {
+        size_t fm = gen_actual(family_gen(flea_family(f1)));
         Arr/*Flea*/ *afm = fbests[fm];
         if (arr_size(afm) < BESTS_FAMILIES_NUMBER) {
           arr_add(afm, f1);
@@ -197,7 +197,35 @@ void gc_messages(char *msg, long unsigned int arg) {
 
 int main (int argc, char **argv) {
 //  GC_set_warn_proc(gc_messages);
+
+  void argv_rotation() {
+    RANGE(i, 1, argc - 1) {
+      argv[i] = argv[i + 1];
+    }_RANGE
+  }
+
   sys_init("fleas");
+
+  if (argc > 1) {
+    if (!strcmp(argv[1], "i")) {
+      options_init(false, true);
+      argv_rotation();
+      --argc;
+    } else if (!strcmp(argv[1], "b")) {
+      options_init(true, false);
+      argv_rotation();
+      --argc;
+    } else if (!strcmp(argv[1], "ib")) {
+      options_init(true, true);
+      argv_rotation();
+      --argc;
+    } else {
+      options_init(false, false);
+    }
+  } else {
+    options_init(false, false);
+  }
+
   io_init();
 
   if (argc == 1) {

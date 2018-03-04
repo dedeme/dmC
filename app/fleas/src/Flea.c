@@ -9,6 +9,8 @@
 #include "DEFS.h"
 #include "Db.h"
 #include "Gen.h"
+#include "Options.h"
+#include "Family.h"
 #include "Trace.h"
 #include "fextra.h"
 
@@ -25,7 +27,7 @@ struct _Flea {
 struct flea_Flea {
   size_t id;
   size_t cycle;
-  Gen *family;
+  Family *family;
   Gen *bet; // 5000 + v * 1000
   Gen *ibex; // 0 -> No ibex; 1 -> Ibex; 2 -> Mix
   Stat *stats;
@@ -77,7 +79,7 @@ static Json *serialize(void *family_extra) {
 static Flea *new(
   size_t id,
   size_t cycle,
-  Gen *family,
+  Family *family,
   Gen *bet,
   Gen *ibex,
   Stat *stats
@@ -105,12 +107,17 @@ static Flea *new(
 }
 
 Flea *flea_new(size_t id, size_t cycle) {
+  Options *opts = options_get();
   Flea *r = new(
     id,
     cycle,
-    gen_new(FAMILIES_END),  // family
+    options_best(opts)
+      ? options_ibex(opts)
+        ? family_new(FAMILY_IBEX_BEST)
+        : family_new(FAMILY_BEST)
+      : family_new(FAMILIES_ALL),
     gen_new(11),            // bet
-    gen_new(3),             // ibex
+    options_ibex(opts) ? gen_new(1) : gen_new(3),
     stat_new()
   );
 
@@ -118,14 +125,14 @@ Flea *flea_new(size_t id, size_t cycle) {
 }
 
 bool flea_gen_eq(Flea *this, Flea *other) {
-  return gen_actual(this->family) == gen_actual(other->family) &&
+  return family_eq(this->family, other->family) &&
     gen_actual(this->bet) == gen_actual(other->bet) &&
     gen_actual(this->ibex) == gen_actual(other->ibex) &&
     this->gen_eq(this->family_extra, other->family_extra);
 }
 
 Flea *flea_mutate(Flea *this, size_t id, size_t cycle) {
-  Gen *family = gen_copy(this->family);
+  Family *family = family_copy(this->family);
   Gen *bet = gen_mutate(this->bet);
   Gen *ibex = gen_mutate(this->ibex);
   Stat *stats = stat_new();
@@ -200,8 +207,8 @@ size_t flea_cycle(Flea *this) {
 }
 
 inline
-size_t flea_family(Flea *this) {
-  return gen_actual(this->family);
+Family *flea_family(Flea *this) {
+  return this->family;
 }
 
 inline
@@ -364,9 +371,9 @@ void flea_process(
 
   RANGE0(nick_ix, NICKS_NUMBER) {
     if (
-      (gen_actual(this->ibex) == 0 && nick_in_ibex(nicks_get(nicks, nick_ix)))
+      (gen_actual(this->ibex) == 1 && nick_in_ibex(nicks_get(nicks, nick_ix)))
       ||
-      (gen_actual(this->ibex) == 1 && !nick_in_ibex(nicks_get(nicks, nick_ix)))
+      (gen_actual(this->ibex) == 0 && !nick_in_ibex(nicks_get(nicks, nick_ix)))
     ) {
       continue;
     }
@@ -381,7 +388,7 @@ Json *flea_serialize(Flea *this) {
 
   jarr_auint(serial, this->id);
   jarr_auint(serial, this->cycle);
-  arr_add(serial, gen_serialize(this->family));
+  arr_add(serial, family_serialize(this->family));
   arr_add(serial, gen_serialize(this->bet));
   arr_add(serial, gen_serialize(this->ibex));
   arr_add(serial, stat_serialize(this->stats));
@@ -395,7 +402,7 @@ Flea *flea_restore(Json *s) {
   size_t i = 0;
   size_t id = jarr_guint(serial, i++);
   size_t cycle = jarr_guint(serial, i++);
-  Gen *family = gen_restore(arr_get(serial, i++));
+  Family *family = family_restore(arr_get(serial, i++));
   Gen *bet = gen_restore(arr_get(serial, i++));
   Gen *ibex = gen_restore(arr_get(serial, i++));
   Stat *stats = stat_restore(arr_get(serial, i++));

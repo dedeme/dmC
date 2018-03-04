@@ -1,51 +1,51 @@
 // Copyright 22-Jan-2018 ºDeme
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "families/upDown.h"
+#include "families/ibest.h"
 #include <dmc/all.h>
 #include "DEFS.h"
 #include "Gen.h"
 #include "market/Buy.h"
 #include "families/UdCalc.h"
 
-struct _UpDown {
+struct _Ibest {
   UdCalc *calc;
   bool can_buy;
   bool can_sell;
 };
 
-static struct _UpDown *_updown_new(
-  size_t ud_len,
+static struct _Ibest *_updown_new(
+  size_t ibest_len,
   double mbuy,
   double msell
 ) {
-  struct _UpDown *this = MALLOC(struct _UpDown);
-  this->calc = udcalc_new(ud_len, mbuy, msell, QUOTES_NUMBER);
+  struct _Ibest *this = MALLOC(struct _Ibest);
+  this->calc = udcalc_new(ibest_len, mbuy, msell, QUOTES_NUMBER);
   this->can_buy = false;
   this->can_sell = false;
   return this;
 }
 
-struct updown_UpDown {
-  Gen *length; // v + 5
+struct ibest_Ibest {
+  Gen *length; // v + 61
   Gen *buy_strip; // v * 0.001
   Gen *sell_strip; // v * 0.001
 
-  size_t ud_len;
+  size_t ibest_len;
   double mbuy;
   double msell;
   Arr/*_MovingAverage*/ *extra;
 };
 
-typedef struct updown_UpDown UpDown;
+typedef struct ibest_Ibest Ibest;
 
-static UpDown *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
-  UpDown *this = MALLOC(UpDown);
+static Ibest *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
+  Ibest *this = MALLOC(Ibest);
   this->length = length;
   this->buy_strip = buy_strip;
   this->sell_strip = sell_strip;
 
-  this->ud_len = gen_actual(this->length) + 5;
+  this->ibest_len = gen_actual(this->length) + 61;
   this->mbuy = 1 + (double)gen_actual(buy_strip) * 0.001;
   this->msell = 1 - (double)gen_actual(sell_strip) * 0.001;
   this->extra = NULL;
@@ -54,32 +54,32 @@ static UpDown *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
 
 }
 
-static bool gen_eq(UpDown *this, UpDown *other) {
+static bool gen_eq(Ibest *this, Ibest *other) {
   return gen_actual(this->length) == gen_actual(other->length) &&
     gen_actual(this->buy_strip) == gen_actual(other->buy_strip) &&
     gen_actual(other->sell_strip) == gen_actual(other->sell_strip);
 }
 
-static void prepare(UpDown *this) {
+static void prepare(Ibest *this) {
   if (this->extra) {
     THROW exc_not_null_pointer("this") _THROW
   }
 
   Arr/*_UpDown*/ *extra = arr_new();
 
-  size_t ud_len = this->ud_len;
+  size_t best_len = this->ibest_len;
   REPEAT(NICKS_NUMBER) {
-    arr_add(extra, _updown_new(ud_len, this->mbuy, this->msell));
+    arr_add(extra, _updown_new(best_len, this->mbuy, this->msell));
   }_REPEAT
 
   this->extra = extra;
 }
 
-static void reset(UpDown *this) {
+static void reset(Ibest *this) {
   this->extra = NULL;
 }
 
-static UpDown *mutate(UpDown *this) {
+static Ibest *mutate(Ibest *this) {
   return new(
     gen_mutate(this->length),
     gen_mutate(this->buy_strip),
@@ -88,12 +88,12 @@ static UpDown *mutate(UpDown *this) {
 }
 
 static void process(
-  UpDown *this,
+  Ibest *this,
   Flea *f,
   size_t nick,
   Quote *q
 ) {
-  struct _UpDown *ud = arr_get(this->extra, nick);
+  struct _Ibest *ud = arr_get(this->extra, nick);
   enum udcalc_Result r = udcalc_add(ud->calc, quote_close(q));
 
   if (r == UDCALC_NOT_VALID) {
@@ -122,14 +122,14 @@ static void process(
   }
 }
 
-static Json *trace_data(UpDown *this, size_t nick) {
-  struct _UpDown *ud = arr_get(this->extra, nick);
+static Json *trace_data(Ibest *this, size_t nick) {
+  struct _Ibest *ud = arr_get(this->extra, nick);
 
   Arr/*Json*/ *jsr = arr_new();
   Arr/*Json*/ *closes = arr_new();
 
   double *cls = udcalc_values(ud->calc) - 1;
-  REPEAT(this->ud_len){
+  REPEAT(this->ibest_len){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT
   jarr_aarray(jsr, closes);
@@ -140,7 +140,7 @@ static Json *trace_data(UpDown *this, size_t nick) {
   return json_warray(jsr);
 }
 
-static Json *serialize(UpDown *this) {
+static Json *serialize(Ibest *this) {
   Arr/*Json*/ *a = arr_new();
 
   arr_add(a, gen_serialize(this->length));
@@ -150,7 +150,7 @@ static Json *serialize(UpDown *this) {
   return json_warray(a);
 }
 
-static Flea *mk_fextra(Flea *f, UpDown *this) {
+static Flea *mk_fextra(Flea *f, Ibest *this) {
   return flea_fextra(
     f,
     this,
@@ -164,15 +164,15 @@ static Flea *mk_fextra(Flea *f, UpDown *this) {
   );
 }
 
-Flea *updown_new(Flea *f) {
-  Gen *length = gen_new(146);
+Flea *ibest_new(Flea *f) {
+  Gen *length = gen_new(9);
   Gen *buy_strip = gen_new(301);
   Gen *sell_strip = gen_new(301);
 
   return mk_fextra(f, new(length, buy_strip, sell_strip));
 }
 
-Flea *updown_restore(Flea *f, Json *serial) {
+Flea *ibest_restore(Flea *f, Json *serial) {
   Arr/*Json*/ *a = json_rarray(serial);
 
   uint i = 0;

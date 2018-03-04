@@ -11,6 +11,7 @@
 #include "dmc/Arr.h"
 #include "market/Quote.h"
 #include "Stat.h"
+#include "Family.h"
 #include "market/Buy.h"
 #include "market/Sell.h"
 #include "market/Pf.h"
@@ -55,7 +56,7 @@ size_t flea_id(Flea *this);
 size_t flea_cycle(Flea *this);
 
 ///
-size_t flea_family(Flea *this);
+Family *flea_family(Flea *this);
 
 ///
 double flea_bet(Flea *this);
