@@ -106,7 +106,7 @@ static void wfuncs(RW *rw, Structure *st) {
 }
 
 static void wnew(RW *rw, Structure *st) {
-  if (st->head->id_mod == HEAD_ID_PRIVATE) {
+  if (st->head->id_mod != HEAD_NEW_PUBLIC) {
     return;
   }
 

@@ -77,7 +77,7 @@ typedef struct Body Body;
 enum head_Mod { HEAD_NO_SERIAL, HEAD_SERIAL };
 
 ///
-enum head_Id_mod { HEAD_ID_PUBLIC, HEAD_ID_PRIVATE };
+enum head_Id_mod { HEAD_NEW_PUBLIC, HEAD_ID_PUBLIC, HEAD_ID_PRIVATE };
 
 ///
 struct Head {

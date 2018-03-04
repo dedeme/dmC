@@ -23,9 +23,12 @@ Head *head_read(RW *rw) {
     THROW rw_msg(rw, "Expected 'struct'") _THROW
   char *id = tp->e2;
 
-  enum head_Id_mod id_mod = HEAD_ID_PUBLIC;
+  enum head_Id_mod id_mod = HEAD_NEW_PUBLIC;
   if (*id == '-') {
     id_mod = HEAD_ID_PRIVATE;
+    id = str_sub_end(id, 1);
+  } else if (*id == '@') {
+    id_mod = HEAD_ID_PUBLIC;
     id = str_sub_end(id, 1);
   }
   if (!*id)

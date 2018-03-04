@@ -11,7 +11,7 @@
 ///   HEAD
 ///     [BODY]
 ///   -- HEAD
-///   [-]struct: [-]Id
+///   [-]struct: [-|@]Id
 ///   -- BODY
 ///     [PARAM+]
 ///     [-
