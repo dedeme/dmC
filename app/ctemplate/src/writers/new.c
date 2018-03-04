@@ -7,11 +7,13 @@
 void new_write(RW *rw, Structure *st) {
   rw_writeln(rw, "");
 
+  char *private_mark = st->head->id_mod == HEAD_ID_PUBLIC ? "_" : "";
+
   size_t size = arr_size(st->body->ps);
   if (size > 3) {
     rw_write(rw, str_printf(
-      "%s *%snew(",
-      st->head->id, st->head->prefix
+      "%s *%s%snew(",
+      st->head->id, private_mark, st->head->prefix
     ));
 
     bool first = true;
@@ -30,8 +32,8 @@ void new_write(RW *rw, Structure *st) {
     rw_writeln(rw, "\n) {");
   } else {
     rw_write(rw, str_printf(
-      "%s *%snew(",
-      st->head->id, st->head->prefix
+      "%s *%s%snew(",
+      st->head->id, private_mark, st->head->prefix
     ));
 
     bool first = true;
