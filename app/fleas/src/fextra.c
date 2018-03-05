@@ -15,12 +15,12 @@
 #include "families/followMa.h"
 #include "families/followWma.h"
 #include "families/best.h"
-#include "families/ibest.h"
+#include "families/sbest.h"
 
 Flea *fextra_new(Flea *f) {
   Family *fm = flea_family(f);
-  if (family_opt(fm) == FAMILY_IBEX_BEST) {
-    return ibest_new(f);
+  if (family_opt(fm) == FAMILY_SEL_BEST) {
+    return sbest_new(f);
   } else if (family_opt(fm) == FAMILY_BEST) {
     return best_new(f);
   } else {
@@ -50,8 +50,8 @@ Flea *fextra_new(Flea *f) {
 
 Flea *fextra_restore(Flea *f, Json *serial) {
   Family *fm = flea_family(f);
-  if (family_opt(fm) == FAMILY_IBEX_BEST) {
-    return ibest_restore(f, serial);
+  if (family_opt(fm) == FAMILY_SEL_BEST) {
+    return sbest_restore(f, serial);
   } else if (family_opt(fm) == FAMILY_BEST) {
     return best_restore(f, serial);
   } else {

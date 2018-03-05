@@ -29,7 +29,7 @@ struct flea_Flea {
   size_t cycle;
   Family *family;
   Gen *bet; // 5000 + v * 1000
-  Gen *ibex; // 0 -> No ibex; 1 -> Ibex; 2 -> Mix
+  Gen *ibex; // 0 -> Selected; 1 -> Ibex; 2-> No ibex; 3 -> Mix
   Stat *stats;
 
   struct _Flea *extra;
@@ -112,12 +112,12 @@ Flea *flea_new(size_t id, size_t cycle) {
     id,
     cycle,
     options_best(opts)
-      ? options_ibex(opts)
-        ? family_new(FAMILY_IBEX_BEST)
+      ? options_sel(opts)
+        ? family_new(FAMILY_SEL_BEST)
         : family_new(FAMILY_BEST)
       : family_new(FAMILIES_ALL),
     gen_new(11),            // bet
-    options_ibex(opts) ? gen_new(1) : gen_new(3),
+    options_sel(opts) ? gen_new(1) : gen_new(4),
     stat_new()
   );
 
@@ -371,9 +371,11 @@ void flea_process(
 
   RANGE0(nick_ix, NICKS_NUMBER) {
     if (
-      (gen_actual(this->ibex) == 1 && nick_in_ibex(nicks_get(nicks, nick_ix)))
+      (gen_actual(this->ibex) == 0 && !nick_sel(nicks_get(nicks, nick_ix)))
       ||
-      (gen_actual(this->ibex) == 0 && !nick_in_ibex(nicks_get(nicks, nick_ix)))
+      (gen_actual(this->ibex) == 1 && !nick_in_ibex(nicks_get(nicks, nick_ix)))
+      ||
+      (gen_actual(this->ibex) == 2 && nick_in_ibex(nicks_get(nicks, nick_ix)))
     ) {
       continue;
     }

@@ -7,19 +7,19 @@
 /*
 -struct: @Options
   best:bool
-  ibex:bool
+  sel:bool
 */
 
 /*.-.*/
 struct options_Options {
   bool best;
-  bool ibex;
+  bool sel;
 };
 
-Options *_options_new(bool best, bool ibex) {
+Options *_options_new(bool best, bool sel) {
   Options *this = MALLOC(Options);
   this->best = best;
-  this->ibex = ibex;
+  this->sel = sel;
   return this;
 }
 
@@ -29,8 +29,8 @@ bool options_best(Options *this) {
 }
 
 inline
-bool options_ibex(Options *this) {
-  return this->ibex;
+bool options_sel(Options *this) {
+  return this->sel;
 }
 /*.-.*/
 

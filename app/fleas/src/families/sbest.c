@@ -1,51 +1,51 @@
 // Copyright 22-Jan-2018 ºDeme
 // GNU Buyeral Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "families/ibest.h"
+#include "families/sbest.h"
 #include <dmc/all.h>
 #include "DEFS.h"
 #include "Gen.h"
 #include "market/Buy.h"
 #include "families/UdCalc.h"
 
-struct _Ibest {
+struct _Sbest {
   UdCalc *calc;
   bool can_buy;
   bool can_sell;
 };
 
-static struct _Ibest *_updown_new(
-  size_t ibest_len,
+static struct _Sbest *_updown_new(
+  size_t sbest_len,
   double mbuy,
   double msell
 ) {
-  struct _Ibest *this = MALLOC(struct _Ibest);
-  this->calc = udcalc_new(ibest_len, mbuy, msell, QUOTES_NUMBER);
+  struct _Sbest *this = MALLOC(struct _Sbest);
+  this->calc = udcalc_new(sbest_len, mbuy, msell, QUOTES_NUMBER);
   this->can_buy = false;
   this->can_sell = false;
   return this;
 }
 
-struct ibest_Ibest {
+struct sbest_Sbest {
   Gen *length; // v + 61
   Gen *buy_strip; // v * 0.001
   Gen *sell_strip; // v * 0.001
 
-  size_t ibest_len;
+  size_t sbest_len;
   double mbuy;
   double msell;
   Arr/*_MovingAverage*/ *extra;
 };
 
-typedef struct ibest_Ibest Ibest;
+typedef struct sbest_Sbest Sbest;
 
-static Ibest *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
-  Ibest *this = MALLOC(Ibest);
+static Sbest *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
+  Sbest *this = MALLOC(Sbest);
   this->length = length;
   this->buy_strip = buy_strip;
   this->sell_strip = sell_strip;
 
-  this->ibest_len = gen_actual(this->length) + 61;
+  this->sbest_len = gen_actual(this->length) + 61;
   this->mbuy = 1 + (double)gen_actual(buy_strip) * 0.001;
   this->msell = 1 - (double)gen_actual(sell_strip) * 0.001;
   this->extra = NULL;
@@ -54,20 +54,20 @@ static Ibest *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
 
 }
 
-static bool gen_eq(Ibest *this, Ibest *other) {
+static bool gen_eq(Sbest *this, Sbest *other) {
   return gen_actual(this->length) == gen_actual(other->length) &&
     gen_actual(this->buy_strip) == gen_actual(other->buy_strip) &&
     gen_actual(other->sell_strip) == gen_actual(other->sell_strip);
 }
 
-static void prepare(Ibest *this) {
+static void prepare(Sbest *this) {
   if (this->extra) {
     THROW exc_not_null_pointer("this") _THROW
   }
 
   Arr/*_UpDown*/ *extra = arr_new();
 
-  size_t best_len = this->ibest_len;
+  size_t best_len = this->sbest_len;
   REPEAT(NICKS_NUMBER) {
     arr_add(extra, _updown_new(best_len, this->mbuy, this->msell));
   }_REPEAT
@@ -75,11 +75,11 @@ static void prepare(Ibest *this) {
   this->extra = extra;
 }
 
-static void reset(Ibest *this) {
+static void reset(Sbest *this) {
   this->extra = NULL;
 }
 
-static Ibest *mutate(Ibest *this) {
+static Sbest *mutate(Sbest *this) {
   return new(
     gen_mutate(this->length),
     gen_mutate(this->buy_strip),
@@ -88,12 +88,12 @@ static Ibest *mutate(Ibest *this) {
 }
 
 static void process(
-  Ibest *this,
+  Sbest *this,
   Flea *f,
   size_t nick,
   Quote *q
 ) {
-  struct _Ibest *ud = arr_get(this->extra, nick);
+  struct _Sbest *ud = arr_get(this->extra, nick);
   enum udcalc_Result r = udcalc_add(ud->calc, quote_close(q));
 
   if (r == UDCALC_NOT_VALID) {
@@ -122,14 +122,14 @@ static void process(
   }
 }
 
-static Json *trace_data(Ibest *this, size_t nick) {
-  struct _Ibest *ud = arr_get(this->extra, nick);
+static Json *trace_data(Sbest *this, size_t nick) {
+  struct _Sbest *ud = arr_get(this->extra, nick);
 
   Arr/*Json*/ *jsr = arr_new();
   Arr/*Json*/ *closes = arr_new();
 
   double *cls = udcalc_values(ud->calc) - 1;
-  REPEAT(this->ibest_len){
+  REPEAT(this->sbest_len){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT
   jarr_aarray(jsr, closes);
@@ -140,7 +140,7 @@ static Json *trace_data(Ibest *this, size_t nick) {
   return json_warray(jsr);
 }
 
-static Json *serialize(Ibest *this) {
+static Json *serialize(Sbest *this) {
   Arr/*Json*/ *a = arr_new();
 
   arr_add(a, gen_serialize(this->length));
@@ -150,7 +150,7 @@ static Json *serialize(Ibest *this) {
   return json_warray(a);
 }
 
-static Flea *mk_fextra(Flea *f, Ibest *this) {
+static Flea *mk_fextra(Flea *f, Sbest *this) {
   return flea_fextra(
     f,
     this,
@@ -164,7 +164,7 @@ static Flea *mk_fextra(Flea *f, Ibest *this) {
   );
 }
 
-Flea *ibest_new(Flea *f) {
+Flea *sbest_new(Flea *f) {
   Gen *length = gen_new(9);
   Gen *buy_strip = gen_new(301);
   Gen *sell_strip = gen_new(301);
@@ -172,7 +172,7 @@ Flea *ibest_new(Flea *f) {
   return mk_fextra(f, new(length, buy_strip, sell_strip));
 }
 
-Flea *ibest_restore(Flea *f, Json *serial) {
+Flea *sbest_restore(Flea *f, Json *serial) {
   Arr/*Json*/ *a = json_rarray(serial);
 
   uint i = 0;

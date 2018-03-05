@@ -24,6 +24,12 @@ bool nick_in_ibex(Nick *this);
 void nick_set_in_ibex(Nick *this);
 
 ///
+bool nick_sel(Nick *this);
+
+///
+void nick_set_sel(Nick *this);
+
+///
 typedef struct nicks_nicks Nicks;
 
 ///

@@ -16,12 +16,12 @@
 
 static void help (void) {
   puts(
-    "fleas. v201802\n\n"
+    "fleas. v201803\n\n"
     "Use:\n"
-		"  fleas [i | b | ib] \n"
-		"  fleas [i | b | ib] <time_minutes> -> (e.g. fleas 5)\n"
-		"  fleas [i | b | ib] trace <flea> -> (e.g. fleas trace 12543)\n"
-    "  fleas [i | b | ib] dup (remove duplicate fleas)\n"
+		"  fleas [s | b | sb] \n"
+		"  fleas [s | b | sb] <time_minutes> -> (e.g. fleas 5)\n"
+		"  fleas [s | b | sb] trace <flea> -> (e.g. fleas trace 12543)\n"
+    "  fleas [s | b | sb] dup (remove duplicate fleas)\n"
 		"  fleas stop\n"
 		"  fleas force (remove stop lock)\n"
 		"  fleas backup <dir> -> (e.g. fleas backup ./)\n"
@@ -207,7 +207,7 @@ int main (int argc, char **argv) {
   sys_init("fleas");
 
   if (argc > 1) {
-    if (!strcmp(argv[1], "i")) {
+    if (!strcmp(argv[1], "s")) {
       options_init(false, true);
       argv_rotation();
       --argc;
@@ -215,7 +215,7 @@ int main (int argc, char **argv) {
       options_init(true, false);
       argv_rotation();
       --argc;
-    } else if (!strcmp(argv[1], "ib")) {
+    } else if (!strcmp(argv[1], "sb")) {
       options_init(true, true);
       argv_rotation();
       --argc;

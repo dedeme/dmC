@@ -6,12 +6,14 @@
 struct nick_Nick {
   char *id;
   bool in_ibex;
+  bool sel;
 };
 
 Nick *nick_new(char *id) {
   Nick *this = MALLOC(Nick);
   this->id = id;
   this->in_ibex = false;
+  this->sel = false;
   return this;
 }
 
@@ -28,6 +30,16 @@ bool nick_in_ibex(Nick *this) {
 inline
 void nick_set_in_ibex(Nick *this) {
   this->in_ibex = true;
+}
+
+inline
+bool nick_sel(Nick *this) {
+  return this->sel;
+}
+
+inline
+void nick_set_sel(Nick *this) {
+  this->sel = true;
 }
 
 struct nicks_nicks {

@@ -1,19 +1,19 @@
 // Copyright 4-Mar-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Best family of Ibex
+/// Best family of Selected
 
-#ifndef IBEST_H
-  # define IBEST_H
+#ifndef SBEST_H
+  # define SBEST_H
 
 #include <dmc/Json.h>
 #include "Flea.h"
 
 ///
-Flea *ibest_new(Flea *f);
+Flea *sbest_new(Flea *f);
 
 ///
-Flea *ibest_restore(Flea *f, Json *serial);
+Flea *sbest_restore(Flea *f, Json *serial);
 
 #endif
 

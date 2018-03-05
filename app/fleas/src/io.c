@@ -24,8 +24,8 @@ void io_init(void) {
     file_mkdir(data_dir_base);
     file_mkdir(path_cat(data_dir_base, "all", NULL));
     file_mkdir(path_cat(data_dir_base, "best", NULL));
-    file_mkdir(path_cat(data_dir_base, "ibex", NULL));
-    file_mkdir(path_cat(data_dir_base, "ibexBest", NULL));
+    file_mkdir(path_cat(data_dir_base, "sel", NULL));
+    file_mkdir(path_cat(data_dir_base, "selBest", NULL));
   }
 
   fversion = path_cat(data_dir_base, "version.txt", NULL);
@@ -39,10 +39,10 @@ void io_init(void) {
   }
 
   Options *opts = options_get();
-  data_dir_opt = options_ibex(opts)
+  data_dir_opt = options_sel(opts)
     ? options_best(opts)
-      ? path_cat(data_dir_base, "ibexBest", NULL)
-      : path_cat(data_dir_base, "ibex", NULL)
+      ? path_cat(data_dir_base, "selBest", NULL)
+      : path_cat(data_dir_base, "sel", NULL)
     : options_best(opts)
       ? path_cat(data_dir_base, "best", NULL)
       : path_cat(data_dir_base, "all", NULL)
@@ -64,37 +64,32 @@ Nicks *io_nicks(void) {
   char *data_db = path_cat(bolsa_data_dir, "data.db", NULL);
   Map/*Json*/ *data = json_robject(file_read(data_db));
 
-  Map/*Json*/ *status = json_robject(map_get(data, "status"));
+  Map/*Json*/ *companies = json_robject(map_get(data, "companies"));
 
-  if (arr_size((Arr *)status) != NICKS_NUMBER)
+  if (arr_size((Arr *)companies) != NICKS_NUMBER)
     THROW
       "arr_size(status) is %d, but ought to be %d",
-      arr_size((Arr *)status), NICKS_NUMBER
+      arr_size((Arr *)companies), NICKS_NUMBER
     _THROW
 
   Nicks *nks = nicks_new(NICKS_NUMBER);
   RANGE0(i, NICKS_NUMBER) {
-    Kv *kv = (Kv *)arr_get((Arr *)status, i);
-    char *v = json_rstring(kv->value);
-    if (*v) {
-      THROW exc_illegal_argument(kv->key, "blank", v) _THROW
+    Kv *kv = (Kv *)arr_get((Arr *)companies, i);
+    Arr/*Json*/ *av = json_rarray(kv->value);
+    if (*json_rstring(arr_get(av, C_STATUS))) {
+      THROW exc_illegal_argument(
+        kv->key, "blank", json_rstring(arr_get(av, C_STATUS))
+      )_THROW
     }
     Nick *nick = nick_new(kv->key);
+    if (json_rbool(arr_get(av, C_SELECTED))) {
+      nick_set_sel(nick);
+    }
+    if (json_rbool(arr_get(av, C_IBEX))) {
+      nick_set_in_ibex(nick);
+    }
     nicks_set(nks, i, nick);
   }_RANGE
-
-  Map/*Json*/ *ibex = json_robject(map_get(data, "ibex"));
-  EACH((Arr *)ibex, Kv, kv) {
-    bool v = json_rbool(kv->value);
-    if (v) {
-      RANGE0(i, NICKS_NUMBER){
-        if (!strcmp(nick_id(nicks_get(nks, i)), kv->key)) {
-          nick_set_in_ibex(nicks_get(nks, i));
-          break;
-        }
-      }_RANGE
-    }
-  }_EACH
 
   return nks;
 }

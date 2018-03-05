@@ -31,10 +31,19 @@
 #define FLEAS_NUMBER 5000
 
 ///
+enum Company_property {
+  C_STATUS,
+  C_SELECTED,
+  C_IBEX,
+  C_INVERTIA,
+  C_INFOMERCADOS
+};
+
+///
 enum Family_option {
   FAMILIES_ALL,
   FAMILY_BEST,
-  FAMILY_IBEX_BEST
+  FAMILY_SEL_BEST
 };
 
 ///

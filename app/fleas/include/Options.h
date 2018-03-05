@@ -17,13 +17,13 @@ typedef struct options_Options Options;
 bool options_best(Options *this);
 
 ///
-bool options_ibex(Options *this);
+bool options_sel(Options *this);
 
 /*.-.*/
 
 /// options_init initialize the global variable 'options'. This function only
 /// can be called once.
-void options_init(bool best, bool ibex);
+void options_init(bool best, bool sel);
 
 /// options_get returns the global variable 'options' intialized with
 /// 'options_init'
