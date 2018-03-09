@@ -2,5 +2,6 @@ lib
 obj
 bin
 _test
+.directory
 gitk
 *.geany

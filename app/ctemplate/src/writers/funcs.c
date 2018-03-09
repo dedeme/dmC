@@ -33,7 +33,7 @@ void funcs_write(RW *rw, Structure *st) {
         value = str_replace(p->type, "(*)", "(*value)");
       }
       rw_writeln(rw, str_printf(
-        "void %sset_%s(%s this, %s) {",
+        "void %sset_%s(%s *this, %s) {",
         st->head->prefix, p->id, st->head->id, value
       ));
       rw_writeln(rw, str_printf("  this->%s = value;", p->id));
@@ -55,7 +55,7 @@ void funcs_write(RW *rw, Structure *st) {
       rw_writeln(rw, "");
       rw_writeln(rw, "inline");
       rw_writeln(rw, str_printf(
-        "void %sset_%s(%s this, %s) {",
+        "void %sset_%s(%s *this, %s) {",
         st->head->prefix, v->id, st->head->id, str_printf("%svalue", v->type)
       ));
       rw_writeln(rw, str_printf("  this->%s = value;", v->id));
@@ -82,7 +82,7 @@ void funcs_write(RW *rw, Structure *st) {
       rw_writeln(rw, "inline");
       char *value = str_replace(f->type, "(*)", "(*value)");
       rw_writeln(rw, str_printf(
-        "void %sset_%s(%s this, %s) {",
+        "void %sset_%s(%s *this, %s) {",
         st->head->prefix, f->id, st->head->id, value
       ));
       rw_writeln(rw, str_printf("  this->%s = value;", f->id));
