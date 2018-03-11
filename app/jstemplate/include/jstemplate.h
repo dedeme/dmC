@@ -51,7 +51,7 @@
 /// returnType must be the last line.<br>
 /// If returnType is missing, is value is set to 'void'.
 /// <h3>vars: Declares 'let' variables out of class.
-/// They will be linked with &lt;&lt;&lt;link:</h3>
+/// They will be linked with &lt;&lt;&lt;links:</h3>
 ///   &lt;&lt;&lt;vars:
 ///   field1:type
 ///   field2:type
@@ -61,14 +61,14 @@
 /// field is a get field<br>
 /// @field is a get/set field
 /// <h3>consts: Declares constants out of class.
-/// They will be linked with &lt;&lt;&lt;link:</h3>
+/// They will be linked with &lt;&lt;&lt;links:</h3>
 ///   &lt;&lt;&lt;consts:
 ///   field1:type
 ///   field2:type
 ///   ...
 ///   >>>
 /// <h3>pars: Declares 'this_' variables.
-/// They will be linked with &lt;&lt;&lt;link:</h3>
+/// They will be linked with &lt;&lt;&lt;links:</h3>
 ///   &lt;&lt;&lt;pars:
 ///   field1:type
 ///   field2:type

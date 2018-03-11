@@ -6,20 +6,17 @@
 #include <ctype.h>
 
 struct Par {
-  bool sta;
   bool writing;
   char *id;
   char *tp;
 };
 
 static struct Par *par_new(
-  bool sta,
   bool writing,
   char *id,
   char *tp
 ) {
   struct Par *this = MALLOC(struct Par);
-  this->sta = sta;
   this->writing = writing;
   this->id = id;
   this->tp = tp;
@@ -221,9 +218,6 @@ static char *t_func(char *kind, char *name, Arr/*char*/ *lines) {
 
       buf_add(js, id);
       buf_add(js, ", ");
-
-      free(tp);
-      free(id);
     }
 
   }
@@ -254,11 +248,6 @@ static char *t_func(char *kind, char *name, Arr/*char*/ *lines) {
 static char *t_vars(char *kind, Arr/*char*/ *lines) {
   Buf *bf = buf_new();
 
-  bool sta = false;
-  if (!strcmp(kind, "pars")) {
-    sta = true;
-  }
-
   EACH(lines, char, l) {
     if (*l) {
       bool writing = false;
@@ -283,7 +272,7 @@ static char *t_vars(char *kind, Arr/*char*/ *lines) {
 				THROW "Field type is missing in '%s'", l _THROW
       }
 
-      struct Par *par = par_new(sta, writing, id, tp);
+      struct Par *par = par_new(writing, id, tp);
       arr_add(pars, par);
 
       char *val = "null";
@@ -333,15 +322,9 @@ static char *t_links(Arr/*char*/ *lines) {
     buf_add(bf, p->tp);
     buf_add(bf, "} */\n  ");
 
-    if (p->sta) {
-      buf_add(bf, "static ");
-    }
-
     buf_add(bf, p->id);
     buf_add(bf, " () {\n    return ");
-    if (!p->sta) {
-      buf_add(bf, "this._");
-    }
+    buf_add(bf, "this._");
     buf_add(bf, p->id);
     buf_add(bf, ";\n  }\n\n");
 
@@ -351,16 +334,11 @@ static char *t_links(Arr/*char*/ *lines) {
       buf_add(bf, "  /**\n   * @param {");
       buf_add(bf, p->tp);
       buf_add(bf, "} value\n   * @return {void}\n   */\n  ");
-      if (p->sta) {
-        buf_add(bf, "static ");
-      }
       buf_add(bf, "set");
       buf_add(bf, p->id);
       buf_add(bf, " (value) {\n    ");
       *p->id = tmp;
-      if (!p->sta) {
-        buf_add(bf, "this._");
-      }
+      buf_add(bf, "this._");
       buf_add(bf, p->id);
       buf_add(bf, " = value;\n  }\n\n");
     }
@@ -398,7 +376,6 @@ int main (int argc, char **argv) {
 			if (strcmp(ltrim, ">>>")) {
         arr_add(lines, ltrim);
       } else {
-        free(ltrim);
         char *code;
         if (!strcmp(template_type, "class")) {
           code = t_class(template_name, lines);
