@@ -12,6 +12,7 @@ struct _Follow {
   size_t nick;
   UdCalc2 *calc;
   double inc;
+  double close;
 };
 
 static struct _Follow *_follow_new(size_t nick, size_t closes_size) {
@@ -19,6 +20,7 @@ static struct _Follow *_follow_new(size_t nick, size_t closes_size) {
   this->nick = nick;
   this->calc = udcalc2_new(closes_size, QUOTES_NUMBER);
   this->inc = -10.0;
+  this->close = -1;
   return this;
 }
 
@@ -93,6 +95,7 @@ static void process(
   if (!udcalc2_add(&follow->inc, follow->calc, close)) {
     return;
   }
+  follow->close = close;
 
   if (this->interval_counter >= this->interval_value) {
     if (!nick) {
@@ -100,7 +103,7 @@ static void process(
     }
 
     if (close > 0) {
-      size_t stocks = pf_get(flea_portfolio(f), nick);
+      size_t stocks = pf_stocks(flea_portfolio(f), nick);
       if (stocks) {
         this->cash += stocks * close;
       }
@@ -109,13 +112,16 @@ static void process(
     if (nick == this->last_nick) {
       this->interval_counter = 0;
 
+      Arr/*struct _Follow*/ *sorted_follow = arr_new();
+      EACH(this->extra, struct _Follow, f) {
+        arr_add(sorted_follow, f);
+      }_EACH
       FNE(sort, struct _Follow, f1, f2) {
         return f2->inc > f1->inc;
       }_FN
-      arr_sort(this->extra, sort);
+      arr_sort(sorted_follow, sort);
 
-      Arr/*size_t*/ *nicks_to_buy = arr_new();
-      size_t *nick_to_buy;
+      Arr/*Tp[size_t,double]*/ *nicks_to_buy = arr_new();
       size_t up_level = this->level_value + (int)(this->cash / flea_bet(f));
       if (up_level > this->last_nick) {
         up_level = this->last_nick + 1;
@@ -126,21 +132,26 @@ static void process(
           up_level, arr_size(this->extra)
         _THROW
       }
+      size_t *nick_to_buy;
+      double *last_close;
       RANGE(i, this->level_value, up_level) {
-        struct _Follow *follow = arr_get(this->extra, i);
+        struct _Follow *follow = arr_get(sorted_follow, i);
         if (follow->inc < -1) {
           break;
         }
         nick_to_buy = MALLOC(size_t);
         *nick_to_buy = follow->nick;
-        arr_add(nicks_to_buy, nick_to_buy);
+        last_close = MALLOC(double);
+        *last_close = follow->close;
+        arr_add(nicks_to_buy, tp_new(nick_to_buy, last_close));
       }_RANGE
 
       EACH(flea_portfolio(f), Pf_entry, e) {
         bool contains = false;
         size_t pnick = pf_entry_nick(e);
-        EACH(nicks_to_buy, size_t, nick) {
-          if (*nick == pnick) {
+        EACH(nicks_to_buy, Tp, tp) {
+          size_t nick = *((size_t *)tp->e1);
+          if (nick == pnick) {
             contains = true;
             break;
           }
@@ -150,16 +161,19 @@ static void process(
         }
       }_EACH
 
-      EACH(nicks_to_buy, size_t, nick) {
+      EACH(nicks_to_buy, Tp, tp) {
+        size_t nick = *((size_t *)tp->e1);
+        double last_close = *((double *)tp->e2);
         bool contains = false;
         EACH(flea_portfolio(f), Pf_entry, e) {
-          if (*nick == pf_entry_nick(e)) {
+          if (nick == pf_entry_nick(e)) {
             contains = true;
             break;
           }
         }_EACH
         if (!contains) {
-          arr_add(flea_buys(f), buy_new(*nick, flea_bet(f)));
+          size_t stocks = buy_calc(flea_bet(f), last_close);
+          arr_add(flea_buys(f), buy_new_limit(nick, stocks, last_close));
         }
       }_EACH
     }

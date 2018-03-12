@@ -93,8 +93,9 @@ static void process(
   size_t nick,
   Quote *q
 ) {
+  double close = quote_close(q);
   struct _Best *ud = arr_get(this->extra, nick);
-  enum udcalc_Result r = udcalc_add(ud->calc, quote_close(q));
+  enum udcalc_Result r = udcalc_add(ud->calc, close);
 
   if (r == UDCALC_NOT_VALID) {
     return;
@@ -102,7 +103,8 @@ static void process(
 
   if (r == UDCALC_BUY) {
     if (ud->can_buy) {
-      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
+      size_t stocks = buy_calc(flea_bet(f), close);
+      arr_add(flea_buys(f), buy_new_limit(nick, stocks, close));
     }
     ud->can_buy = false;
     ud->can_sell = true;
@@ -110,7 +112,7 @@ static void process(
     ud->can_buy = true;
     if (r == UDCALC_SELL) {
       if (ud->can_sell) {
-        size_t stocks = pf_get(flea_portfolio(f), nick);
+        size_t stocks = pf_stocks(flea_portfolio(f), nick);
         if (stocks) {
           arr_add(flea_sells(f), sell_new(nick, stocks));
         }

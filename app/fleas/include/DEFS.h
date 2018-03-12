@@ -21,8 +21,8 @@
 /// Minimal cycles to be in bests
 #define TEST_INTERVAL 10
 
-/// Mininal buy operations to survive
-#define MIN_BUYS 45
+/// Mininal operations to survive
+#define MIN_OPERATIONS 90
 
 ///
 #define INITIAL_CASH 125000

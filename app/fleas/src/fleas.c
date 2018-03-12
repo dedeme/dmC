@@ -91,7 +91,7 @@ static void process(size_t minutes, size_t traced) {
       );
       if (
         cash > (INITIAL_CASH + 1) &&
-        stat_buys(flea_stats(f)) > MIN_BUYS
+        stat_buys(flea_stats(f)) + stat_sells(flea_stats(f)) > MIN_OPERATIONS
       ) {
         flea_reset(f);
       } else {

@@ -34,8 +34,10 @@ static void process(
   size_t nick,
   Quote *q
 ) {
-  if (flea_bet(f) < flea_cash(f)) {
-    arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
+  double close = quote_close(q);
+  if (flea_bet(f) < flea_cash(f) && close > 0.01) {
+    size_t stocks = buy_calc(flea_bet(f), close);
+    arr_add(flea_buys(f), buy_new_limit(nick, stocks, close));
   }
 }
 

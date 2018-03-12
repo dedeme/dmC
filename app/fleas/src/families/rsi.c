@@ -117,10 +117,11 @@ static void process(
     ? 100.0
     : 100.0 - 100.0 / (1 + rsi->ups_avg / rsi->downs_avg);
 
-  size_t stocks = pf_get(flea_portfolio(f), nick);
+  size_t stocks = pf_stocks(flea_portfolio(f), nick);
   if (rsiv > this->up) {
     if (rsi->can_buy && !stocks) {
-      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
+      size_t stocks = buy_calc(flea_bet(f), close);
+      arr_add(flea_buys(f), buy_new_limit(nick, stocks, close));
     }
     rsi->can_buy = false;
     rsi->can_sell = true;

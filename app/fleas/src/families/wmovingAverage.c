@@ -83,8 +83,9 @@ static void process(
   size_t nick,
   Quote *q
 ) {
+  double close = quote_close(q);
   struct _WmovingAverage *ma = arr_get(this->extra, nick);
-  enum wmacalc_Result r = wmacalc_add(ma->calc, quote_close(q));
+  enum wmacalc_Result r = wmacalc_add(ma->calc, close);
 
   if (r == WMACALC_NOT_VALID) {
     return;
@@ -92,7 +93,8 @@ static void process(
 
   if (r == WMACALC_BUY) {
     if (ma->can_buy) {
-      arr_add(flea_buys(f), buy_new(nick, flea_bet(f)));
+      size_t stocks = buy_calc(flea_bet(f), close);
+      arr_add(flea_buys(f), buy_new_limit(nick, stocks, close));
     }
     ma->can_buy = false;
     ma->can_sell = true;
@@ -100,7 +102,7 @@ static void process(
     ma->can_buy = true;
     if (r == WMACALC_SELL) {
       if (ma->can_sell) {
-        size_t stocks = pf_get(flea_portfolio(f), nick);
+        size_t stocks = pf_stocks(flea_portfolio(f), nick);
         if (stocks) {
           arr_add(flea_sells(f), sell_new(nick, stocks));
         }

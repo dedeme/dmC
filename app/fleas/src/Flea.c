@@ -322,14 +322,21 @@ void flea_process(
 
   arr_shuffle(this->extra->buys);
   EACH(this->extra->buys, Buy, b) {
-    if (buy_money(b) <= this->extra->cash) {
-      size_t stocks = 0;
+    if (flea_bet(this) <= this->extra->cash) {
       double cost = 0.0;
-      double open = quote_open(day[buy_nick(b)]);
-      if (open > 0) {
-        buy_do(&stocks, &cost, b, open);
+      Quote *q = day[buy_nick(b)];
+      double price = quote_open(q);
+      if (buy_limit(b) && price > buy_price(b)) {
+        if (quote_min(q) < price) {
+          price = buy_price(b);
+          cost = buy_do(b);
+        }
+      } else if (price > 0) {
+        b = buy_new_limit(buy_nick(b), buy_stocks(b), price);
+        cost = buy_do(b);
       }
-      if (stocks > 0) {
+
+      if (cost > 0) {
         size_t nick = buy_nick(b);
         Pf *portfolio = this->extra->portfolio;
 
@@ -340,7 +347,7 @@ void flea_process(
           beforePortfolio = pf_copy(portfolio);
         }
 
-        pf_add(portfolio, nick, stocks);
+        pf_add(portfolio, nick, buy_stocks(b), price);
         this->extra->cash -= cost;
         ++this->extra->nbuys;
 
@@ -356,7 +363,7 @@ void flea_process(
             beforeCash,
             beforePortfolio,
             nick_id(nicks_get(nicks, nick)),
-            buy_money(b),
+            buy_stocks(b) * buy_price(b),
             0,
             this->extra->cash,
             afterPortfolio,
@@ -368,6 +375,7 @@ void flea_process(
     }
   }_EACH
   this->extra->buys = arr_new();
+
 
   RANGE0(nick_ix, NICKS_NUMBER) {
     if (

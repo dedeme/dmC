@@ -66,6 +66,7 @@ static Json *portfolio_serialize(Pf *pf, Nicks *nicks) {
     Arr/*Json*/ *ajs = arr_new();
     jarr_astring(ajs, nick_id(nicks_get(nicks, pf_entry_nick(pe))));
     jarr_auint(ajs,pf_entry_stocks(pe));
+    jarr_adouble(ajs,pf_entry_price(pe), 4);
     jarr_aarray(r, ajs);
   }_EACH
   return json_warray(r);
