@@ -332,7 +332,7 @@ void io_duplicates(void) {
   }_RANGE
 
   io_set_fleas(fleaId, cycle, fleas);
-  printf("Removed %d fleas\n", n);
+  printf("Removed %zu fleas\n", n);
 }
 
 /*

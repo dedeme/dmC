@@ -174,7 +174,6 @@ void process_file(char *file) {
       line = file_read_line(lck);
     }
   }
-  free(line);
 
   file_close(lck);
 }

@@ -1,0 +1,10 @@
+// Copy
+// Recopy
+
+/**
+ * A comment
+ */
+# [Str] -> Int
+static main (args) {
+  return 0;
+}

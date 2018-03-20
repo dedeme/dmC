@@ -22,7 +22,7 @@
 #define TEST_INTERVAL 10
 
 /// Mininal operations to survive
-#define MIN_OPERATIONS 90
+#define MIN_SELLS 45
 
 ///
 #define INITIAL_CASH 125000

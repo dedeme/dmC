@@ -27,7 +27,7 @@ static struct _Sbest *_updown_new(
 }
 
 struct sbest_Sbest {
-  Gen *length; // v + 61
+  Gen *length; // v + 15
   Gen *buy_strip; // v * 0.001
   Gen *sell_strip; // v * 0.001
 
@@ -45,7 +45,7 @@ static Sbest *new(Gen *length, Gen *buy_strip, Gen *sell_strip) {
   this->buy_strip = buy_strip;
   this->sell_strip = sell_strip;
 
-  this->sbest_len = gen_actual(this->length) + 61;
+  this->sbest_len = gen_actual(this->length) + 15;
   this->mbuy = 1 + (double)gen_actual(buy_strip) * 0.001;
   this->msell = 1 - (double)gen_actual(sell_strip) * 0.001;
   this->extra = NULL;
@@ -167,7 +167,7 @@ static Flea *mk_fextra(Flea *f, Sbest *this) {
 }
 
 Flea *sbest_new(Flea *f) {
-  Gen *length = gen_new(9);
+  Gen *length = gen_new(10);
   Gen *buy_strip = gen_new(301);
   Gen *sell_strip = gen_new(301);
 

@@ -44,7 +44,7 @@ static void process(size_t minutes, size_t traced) {
   Date t1 = date_now();
   for (;;) {
     size_t cycle = db_cycle(db);
-    printf("Cycle %d\n", cycle);
+    printf("Cycle %zu\n", cycle);
 
     Fleas *fleas = db_fleas(db);
     size_t killed = 0;
@@ -91,7 +91,7 @@ static void process(size_t minutes, size_t traced) {
       );
       if (
         cash > (INITIAL_CASH + 1) &&
-        stat_buys(flea_stats(f)) + stat_sells(flea_stats(f)) > MIN_OPERATIONS
+        stat_sells(flea_stats(f)) > MIN_SELLS
       ) {
         flea_reset(f);
       } else {
@@ -164,7 +164,7 @@ static void process(size_t minutes, size_t traced) {
 
     Date t2 = date_now();
     double min = (t2 - t1) / 60.0;
-    printf("Killed: %d\n%.2f minutes\n\n", killed, min);
+    printf("Killed: %zu\n%.2f minutes\n\n", killed, min);
 
     if (min >= minutes) {
       break;
