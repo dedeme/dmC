@@ -17,7 +17,6 @@ Structure *structure_read(RW *rw) {
   st->body->vs = arr_new();
   st->body->fs = arr_new();
   if (rw_rc(rw)->indent) st->body = body_read(rw, st->head);
-  else rw_read(rw);
 
   return st;
 }
