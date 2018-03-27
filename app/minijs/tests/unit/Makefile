@@ -2,9 +2,14 @@ PRG = tests_minijs
 LIB = dmc
 
 C_FILES = $(wildcard src/*.c) \
+					../../src/Cpath.c \
+					$(wildcard ../../src/ast/*.c) \
+					$(wildcard ../../src/types/*.c) \
 					$(wildcard ../../src/lexer/*.c) \
 					$(wildcard ../../src/parser/*.c)
 H_FILES = $(wildcard include/*.h) \
+					$(wildcard ../../include/ast/*.h) \
+					$(wildcard ../../include/types/*.h) \
 					$(wildcard ../../include/lexer/*.h) \
 					$(wildcard ../../include/parser/*.h)
 

@@ -7,8 +7,13 @@
   # define LEXER_LEXER_H
 
 #include <dmc/all.h>
+#include "Cpath.h"
+#include "ast/Class.h"
 
 /// lexer_run starts lexer
-char *lexer_run(Arr/*char*/ *paths, char *main_file);
+void lexer_run(Arr/*char*/ *paths, Cpath *main_file);
+
+/// lexer_compile retun can be null
+Class *lexer_compile(Cpath *cpath);
 
 #endif

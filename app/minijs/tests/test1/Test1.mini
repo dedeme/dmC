@@ -1,10 +1,15 @@
-// Copy
-// Recopy
 
-/**
- * A comment
- */
-# [Str] -> Int
-static main (args) {
-  return 0;
+// such
+
+# Int
+var f;
+
+/*
+# (:Int)
+=@age \ {
+  return 3;
 }
+
+val a = "3";
+*/
+

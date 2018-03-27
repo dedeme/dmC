@@ -194,7 +194,7 @@ static Json *trace_data(Follow *this, size_t nick) {
   REPEAT(this->closes_size){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT
-  jarr_aarray(jsr, closes);
+  arr_add(jsr, json_warray(closes));
 
   jarr_adouble(jsr, follow->inc, 4);
 

@@ -134,7 +134,7 @@ static Json *trace_data(Sbest *this, size_t nick) {
   REPEAT(this->sbest_len){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT
-  jarr_aarray(jsr, closes);
+  arr_add(jsr, json_warray(closes));
 
   jarr_abool(jsr, ud->can_buy);
   jarr_abool(jsr, ud->can_sell);

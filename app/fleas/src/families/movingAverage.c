@@ -128,7 +128,7 @@ static Json *trace_data(MovingAverage *this, size_t nick) {
   REPEAT(this->avg_len){
     jarr_adouble(closes, *cls++, 4);
   }_REPEAT
-  jarr_aarray(jsr, closes);
+  arr_add(jsr, json_warray(closes));
 
   jarr_adouble(jsr, macalc_sum(ma->calc), 4);
   jarr_abool(jsr, ma->can_buy);

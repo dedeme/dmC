@@ -211,14 +211,14 @@ static Json *trace_data(FollowMa *this, size_t nick) {
   REPEAT(this->closes_short_size){
     jarr_adouble(closes, (double)*cls++, 4);
   }_REPEAT
-  jarr_aarray(jsr, closes);
+  arr_add(jsr, json_warray(closes));
 
   closes = arr_new();
   cls = macalc2_long_values(follow->calc);
   REPEAT(this->closes_long_size){
     jarr_adouble(closes, (double)*cls++, 4);
   }_REPEAT
-  jarr_aarray(jsr, closes);
+  arr_add(jsr, json_warray(closes));
 
   jarr_adouble(jsr, (double)follow->inc, 4);
 

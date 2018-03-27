@@ -183,7 +183,7 @@ static void process(size_t minutes, size_t traced) {
     EACH(traces, Trace, tr) {
       arr_add(jtraces, trace_serialize(tr, nicks));
     }_EACH
-    jarr_aarray(traces_data, jtraces);
+    arr_add(traces_data, json_warray(jtraces));
 
     io_save_traces(json_warray(traces_data));
   }
