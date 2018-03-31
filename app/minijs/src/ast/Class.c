@@ -2,7 +2,6 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "ast/Class.h"
-#include "ast/Cvalue.h"
 
 /*.
 struct: @Class
@@ -67,3 +66,30 @@ Class *class_mk(Cpath *cpath) {
 
   return r;
 }
+
+void class_add_cvalue(Class *this, Cvalue *cval) {
+  if (type_type(dvalue_type(cvalue_dvalue(cval))) == UNKNOWN)
+    THROW "Type of %s is unknown", dvalue_id(cvalue_dvalue(cval)) _THROW
+
+  Cvalue *old_val = NULL;
+  EACH(this->cvalues, Cvalue, val) {
+    if (!strcmp(
+      dvalue_id(cvalue_dvalue(val)),
+      dvalue_id(cvalue_dvalue(cval))
+    )) {
+      old_val = val;
+      break;
+    }
+  }_EACH
+  if (old_val)
+    THROW
+      "Identifier '%s' is duplicate\nFirst was defined in %s:%zu[%zu]",
+      dvalue_id(cvalue_dvalue(cval)),
+      cpath_id(class_cpath(this)),
+      pos_nline(dvalue_pos(cvalue_dvalue(old_val))),
+      pos_nchar(dvalue_pos(cvalue_dvalue(old_val)))
+    _THROW
+
+  arr_add(this->cvalues, cval);
+}
+

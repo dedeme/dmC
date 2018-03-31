@@ -75,9 +75,11 @@ Class *lexer_compile(Cpath *cpath) {
     file_mkdir(parent);
     file_write(of, class_serialize(c));
   } CATCH(e) {
-    if (e[strlen(e) - 1] == '\1')
-      file_del(of);
-    else
+    if (e[strlen(e) - 1] == '\1') {
+      if (file_exists(of)) {
+        file_del(of);
+      }
+    } else
       THROW e _THROW
   }_TRY
 

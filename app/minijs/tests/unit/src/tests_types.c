@@ -21,8 +21,14 @@ void tests_types() {
   Arr/*Type*/ *ps2;
   Arr/*Type*/ *ps3;
 
-  Txpos *tx = mk_tx("* more");
+  Txpos *tx = mk_tx("(Int:) more");
   tx = block_type(&tp, tx);
+type_restore(type_serialize(tp));
+
+
+  tx = mk_tx("* more");
+  tx = block_type(&tp, tx);
+  assert(!strcmp("*", type_to_str(tp)));
   assert(type_type(tp) == ANY);
   assert(*txpos_start(tx) == 'm');
   assert(txpos_nline(tx) == 1);
@@ -30,6 +36,7 @@ void tests_types() {
 
   tx = mk_tx("Int   ");
   tx = block_type(&tp, tx);
+  assert(!strcmp("Int", type_to_str(tp)));
   assert(type_type(tp) == DATA);
   assert(!strcmp(type_id(tp), "Int"));
   assert(!*txpos_start(tx));
@@ -38,6 +45,7 @@ void tests_types() {
 
   tx = mk_tx("(Int,*:)   \n m");
   tx = block_type(&tp, tx);
+  assert(!strcmp("(Int,*:)", type_to_str(tp)));
   assert(type_type(tp) == FN);
   assert(!strcmp(type_id(tp), ""));
   assert(*txpos_start(tx) == 'm');
@@ -53,6 +61,7 @@ void tests_types() {
 
   tx = mk_tx("(  Int  , \n *  : )    m");
   tx = block_type(&tp, tx);
+  assert(!strcmp("(Int,*:)", type_to_str(tp)));
   assert(type_type(tp) == FN);
   assert(!strcmp(type_id(tp), ""));
   assert(*txpos_start(tx) == 'm');
@@ -67,6 +76,7 @@ void tests_types() {
 
   tx = mk_tx("(Int,*:Str)   \n m");
   tx = block_type(&tp, tx);
+  assert(!strcmp("(Int,*:Str)", type_to_str(tp)));
   assert(type_type(tp) == FN);
   assert(!strcmp(type_id(tp), ""));
   assert(*txpos_start(tx) == 'm');
@@ -83,6 +93,7 @@ void tests_types() {
 
   tx = mk_tx("(  Int  , \n *  : *)    m");
   tx = block_type(&tp, tx);
+  assert(!strcmp("(Int,*:*)", type_to_str(tp)));
   assert(type_type(tp) == FN);
   assert(!strcmp(type_id(tp), ""));
   assert(*txpos_start(tx) == 'm');
@@ -173,6 +184,7 @@ void tests_types() {
 
   tx = mk_tx("(MyClass<[Int]>,*:Other<{*},[Int]>)   \n m");
   tx = block_type(&tp, tx);
+  assert(!strcmp("(MyClass<[Int]>,*:Other<{*},[Int]>)", type_to_str(tp)));
   assert(type_type(tp) == FN);
   assert(!strcmp(type_id(tp), ""));
   assert(*txpos_start(tx) == 'm');
@@ -212,6 +224,14 @@ void tests_types() {
   assert(arr_size(ps3) == 1);
   assert(type_type(arr_get(ps3, 0)) == DATA);
   assert(!strcmp(type_id(arr_get(ps3, 0)), "Int"));
+
+  tx = mk_tx("Dict < K , V >   \n m");
+  tx = block_type(&tp, tx);
+  assert(!strcmp("Dict<K,V>", type_to_str(tp)));
+
+  tx = mk_tx("(Dict <K, V >,   * : Any  )   \n m");
+  tx = block_type(&tp, tx);
+  assert(!strcmp("(Dict<K,V>,*:Any)", type_to_str(tp)));
 
   printf( "    Finished\n");
 }

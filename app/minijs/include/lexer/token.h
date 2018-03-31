@@ -16,19 +16,51 @@ Txpos *token_blanks(Txpos *tx);
 /// the end of text.
 Txpos *token_skip_stat(Txpos *tx);
 
+/// Values must not be '\n'. It does not fail. Only advances a character.
+Txpos *token_cconst0(Txpos *tx, char value);
+
 /// Values must not be '\n'. It does not fail.
 Txpos *token_cconst(Txpos *tx, char value);
 
 /// Values must not contain '\n'. It does not fail.
 Txpos *token_const(Txpos *tx, char *value);
 
+/// Looks if next character is one in 'values'.<br>values does not contains '\n'
+/// <br>Only advances one character.
+Txpos *token_csplit0(char *r, Txpos *tx, char *values);
+
+/// Looks if next character is one in 'values'.<br>values does not contains '\n'
+Txpos *token_csplit(char *r, Txpos *tx, char *values);
+
+/// Looks if next chars are one in 'values'. Values are group of characters
+/// separated by one blank.<br>values does not contains '\n'
+Txpos *token_split(char **r, Txpos *tx, char *values);
+
 /// Creates and reads a list. If fails it throws a tx_exception.
 Txpos *token_list(
-  Arr/*char*/ **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
+  Arr **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
 );
+
+/// Creates and reads a list. It does not fail. Also 'read' must not fail.
+Txpos *token_fn_list(Arr **list, Txpos *tx, Txpos *(*read)(void **, Txpos *));
 
 /// Creates and reads a identifier. It does not fail.
 Txpos *token_id(char **id, Txpos *tx);
+
+/// Creates and reads a identifier with or without point. It does not fail.
+Txpos *token_point_id(char **id, Txpos *tx);
+
+///
+Txpos *token_bool(char **value, Txpos *tx);
+
+///
+Txpos *token_lunary(char **op, Txpos *tx);
+
+///
+Txpos *token_runary(char **op, Txpos *tx);
+
+///
+Txpos *token_binary(char **op, Txpos *tx);
 
 
 #endif

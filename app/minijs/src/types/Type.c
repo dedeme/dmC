@@ -5,11 +5,20 @@
 #include "lexer/token.h"
 
 /*.
-struct: Type
+struct: @Type
   type: enum Type_t: _uint
   id:char *: _string
   params: Arr *: _array type
 */
+
+static Type *t_unknown = NULL;
+static Type *t_bool = NULL;
+static Type *t_byte = NULL;
+static Type *t_int = NULL;
+static Type *t_float = NULL;
+static Type *t_char = NULL;
+static Type *t_str = NULL;
+static Type *t_any = NULL;
 
 /*.-.*/
 struct type_Type {
@@ -18,7 +27,7 @@ struct type_Type {
   Arr *params;
 };
 
-Type *type_new(enum Type_t type, char *id, Arr *params) {
+Type *_type_new(enum Type_t type, char *id, Arr *params) {
   Type *this = MALLOC(Type);
   this->type = type;
   this->id = id;
@@ -42,6 +51,9 @@ Arr *type_params(Type *this) {
 }
 
 Json *type_serialize(Type *this) {
+  if (!this) {
+    return json_wnull();
+  }
   Arr/*Json*/ *serial = arr_new();
   jarr_auint(serial, this->type);
   jarr_astring(serial, this->id);
@@ -50,6 +62,9 @@ Json *type_serialize(Type *this) {
 }
 
 Type *type_restore(Json *s) {
+  if (json_rnull(s)) {
+    return NULL;
+  }
   Arr/*Json*/ *serial = json_rarray(s);
   Type *this = MALLOC(Type);
   size_t i = 0;
@@ -59,6 +74,68 @@ Type *type_restore(Json *s) {
   return this;
 }
 /*.-.*/
+
+inline
+Type *type_new_unknown() {
+  return t_unknown
+    ? t_unknown : (t_unknown = _type_new(UNKNOWN, "", arr_new()));
+}
+
+inline
+Type *type_new_bool() {
+  return t_bool ? t_bool : (t_bool = _type_new(DATA, "Bool", arr_new()));
+}
+
+inline
+Type *type_new_byte() {
+  return t_byte ? t_byte : (t_bool = _type_new(DATA, "Byte", arr_new()));
+}
+
+inline
+Type *type_new_int() {
+  return t_int ? t_int : (t_int = _type_new(DATA, "Int", arr_new()));
+}
+
+inline
+Type *type_new_float() {
+  return t_float ? t_float : (t_float = _type_new(DATA, "Float", arr_new()));
+}
+
+inline
+Type *type_new_char() {
+  return t_char ? t_char : (t_char = _type_new(DATA, "Char", arr_new()));
+}
+
+inline
+Type *type_new_str() {
+  return t_str ? t_str : (t_str = _type_new(DATA, "Str", arr_new()));
+}
+
+inline
+Type *type_new_any() {
+  return t_any ? t_any : (t_any = _type_new(ANY, "", arr_new()));
+}
+
+Type *type_new_arr(Type *t) {
+  Arr/*Type*/ *a = arr_new();
+  arr_add(a, t);
+  return _type_new(ARR, "", a);
+}
+
+Type *type_new_map(Type *t) {
+  Arr/*Type*/ *a = arr_new();
+  arr_add(a, t);
+  return _type_new(MAP, "", a);
+}
+
+inline
+Type *type_new_fn(Arr/*Type*/ *ts) {
+  return _type_new(FN, "", ts);
+}
+
+Type *type_new_data(char *id, Arr/*Type*/ *generics) {
+  return _type_new(DATA, id, generics);
+}
 
 bool type_eq(Type *this, Type *other) {
   if (this->type != other->type) {
@@ -79,4 +156,58 @@ bool type_eq(Type *this, Type *other) {
   }_RANGE
 
   return true;
+}
+
+bool type_is_unknown(Type *this) {
+  if (this->type == UNKNOWN) {
+    return true;
+  }
+
+  EACH(this->params, Type, t) {
+    if (t && t->type == UNKNOWN) {
+      return true;
+    }
+  }_EACH
+
+  return false;
+}
+
+char *type_to_str(Type *this) {
+  switch (this->type) {
+  case DATA:
+    return str_printf("%s%s",
+      this->id,
+      arr_size(this->params) > 0
+        ? str_printf("<%s>", str_cjoin(
+            it_map(it_from(this->params), (void*(*)(void *))type_to_str),
+            ','
+          ))
+        : ""
+    );
+  case ARR:
+    return str_printf("[%s]", type_to_str(arr_get(this->params, 0)));
+  case MAP:
+    return str_printf("{%s}", type_to_str(arr_get(this->params, 0)));
+  case FN:
+    return str_printf("%s%s)",
+      str_printf("(%s:",
+        str_cjoin(
+          it_map(
+            it_take(it_from(this->params), arr_size(this->params) - 1),
+            (void*(*)(void *)) type_to_str
+          ),
+        ',')
+      ),
+      arr_nget(this->params, arr_size(this->params) - 1)
+        ? type_to_str(arr_get(this->params, arr_size(this->params) - 1))
+        : ""
+    );
+  case ANY:
+    return "*";
+  case UNKNOWN:
+    return "?";
+  default:
+    THROW "Type '%d' is unknown", this->type _THROW
+  }
+  return NULL;
 }

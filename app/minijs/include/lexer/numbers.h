@@ -9,11 +9,13 @@
 #include <dmc/all.h>
 #include "lexer/Txpos.h"
 
-/// strings_skip skips a number. It starts at the second character.
-Txpos *numbers_skip(Txpos *tx);
+///
+Txpos *numbers_byte(char **value, Txpos *tx);
 
-/// strings_skip_hex skips a hexadecimal number. It starts at the first
-/// character after 0x
-Txpos *numbers_skip_hex(Txpos *tx);
+///
+Txpos *numbers_int(char **value, Txpos *tx);
+
+/// Throws a tx_exception if float take an exponent and it is wrong.
+Txpos *numbers_float(char **value, Txpos *tx);
 
 #endif

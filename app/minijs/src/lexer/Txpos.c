@@ -84,7 +84,7 @@ void txpos_printf(Txpos *this, char *format, ...) {
   va_end(args);
 
   printf(
-    "%s:%zu[%zu]:%s\n",
+    "%s:%zu[%zu]: %s\n",
     cpath_fpath(this->cpath), this->nline, this->nchar, r
   );
 }
@@ -105,6 +105,6 @@ bool txpos_neq(Txpos *this, Txpos *other) {
 }
 
 inline
-Filepos *txpos_filepos(Txpos *this) {
-  return filepos_new(cpath_fpath(this->cpath), this->nline, this->nchar);
+Pos *txpos_pos(Txpos *this) {
+  return pos_new(this->nline, this->nchar);
 }

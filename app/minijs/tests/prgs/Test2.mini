@@ -1,0 +1,18 @@
+
+/// Test2
+
+
+# (:)
+-val f1 =  -> { val a=4; };
+
+# (Int:)
+-var f2 = a, c -> {
+  # Int
+  val b = exFun(a);
+
+  val c = 4;
+};
+
+/**
+& more
+*/

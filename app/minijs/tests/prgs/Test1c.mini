@@ -1,0 +1,30 @@
+
+// such
+
+# [Int]
+var sym = one. tow;
+
+var fax = [99, 88];
+var fax1 = ["a"];
+var fax2 = [true, false, true];
+# Bool
+var fax3 = [];
+# Int
+var fax4 = [null, 3, 4, one, one. two];
+
+val m0 = {one: 99, "two": 88};
+# {{Int}}
+val m1 = {};
+
+# Int
+var f;
+
+/*
+# (:Int)
+=@age \ {
+  return 3;
+}
+
+val a = "3";
+*/
+

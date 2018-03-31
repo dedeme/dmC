@@ -8,7 +8,7 @@
 
 #include "dmc/all.h"
 #include "Cpath.h"
-#include "lexer/Filepos.h"
+#include "lexer/Pos.h"
 
 /*.-.*/
 
@@ -61,6 +61,6 @@ bool txpos_eq(Txpos *this, Txpos *other);
 bool txpos_neq(Txpos *this, Txpos *other);
 
 ///
-Filepos *txpos_filepos(Txpos *this);
+Pos *txpos_pos(Txpos *this);
 
 #endif

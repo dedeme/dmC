@@ -5,26 +5,26 @@
 
 /*.
 struct: @Dvalue
-  pos: Filepos *: filepos
+  pos: Pos *: pos
   id: char *: _string
-  +tpos: Filepos *: filepos
+  +tpos: Pos *: pos
   +type: Type *: type
   +value: Value *: value
 */
 
 /*.-.*/
 struct dvalue_Dvalue {
-  Filepos *pos;
+  Pos *pos;
   char *id;
-  Filepos *tpos;
+  Pos *tpos;
   Type *type;
   Value *value;
 };
 
 Dvalue *_dvalue_new(
-  Filepos *pos,
+  Pos *pos,
   char *id,
-  Filepos *tpos,
+  Pos *tpos,
   Type *type,
   Value *value
 ) {
@@ -38,7 +38,7 @@ Dvalue *_dvalue_new(
 }
 
 inline
-Filepos *dvalue_pos(Dvalue *this) {
+Pos *dvalue_pos(Dvalue *this) {
   return this->pos;
 }
 
@@ -48,12 +48,12 @@ char *dvalue_id(Dvalue *this) {
 }
 
 inline
-Filepos *dvalue_tpos(Dvalue *this) {
+Pos *dvalue_tpos(Dvalue *this) {
   return this->tpos;
 }
 
 inline
-void dvalue_set_tpos(Dvalue *this, Filepos *value) {
+void dvalue_set_tpos(Dvalue *this, Pos *value) {
   this->tpos = value;
 }
 
@@ -79,9 +79,9 @@ void dvalue_set_value(Dvalue *this, Value *value) {
 
 Json *dvalue_serialize(Dvalue *this) {
   Arr/*Json*/ *serial = arr_new();
-  arr_add(serial, filepos_serialize(this->pos));
+  arr_add(serial, pos_serialize(this->pos));
   jarr_astring(serial, this->id);
-  arr_add(serial, filepos_serialize(this->tpos));
+  arr_add(serial, pos_serialize(this->tpos));
   arr_add(serial, type_serialize(this->type));
   arr_add(serial, value_serialize(this->value));
   return json_warray(serial);
@@ -91,9 +91,9 @@ Dvalue *dvalue_restore(Json *s) {
   Arr/*Json*/ *serial = json_rarray(s);
   Dvalue *this = MALLOC(Dvalue);
   size_t i = 0;
-  this->pos = filepos_restore(arr_get(serial, i++));
+  this->pos = pos_restore(arr_get(serial, i++));
   this->id = jarr_gstring(serial, i++);
-  this->tpos = filepos_restore(arr_get(serial, i++));
+  this->tpos = pos_restore(arr_get(serial, i++));
   this->type = type_restore(arr_get(serial, i++));
   this->value = value_restore(arr_get(serial, i++));
   return this;
@@ -101,10 +101,8 @@ Dvalue *dvalue_restore(Json *s) {
 /*.-.*/
 
 inline
-Dvalue *dvalue_new(Filepos *pos, char *id) {
+Dvalue *dvalue_new(Pos *pos, char *id) {
   return _dvalue_new(
-    pos, id, filepos_new(filepos_path(pos), 0, 0),
-    type_new(UNKNOWN, "", arr_new()),
-    value_new_null()
+    pos, id, pos_new(0, 0), type_new_unknown(), value_new_null()
   );
 }

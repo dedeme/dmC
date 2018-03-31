@@ -26,8 +26,6 @@ void *value_data(Value *this);
 
 /*.-.*/
 
-#endif
-
 ///
 Value *value_new_null(void);
 
@@ -49,6 +47,9 @@ Value *value_new_char(char *value);
 /// Value must be between "". Admit escape values kind \u0023.
 Value *value_new_str(char *value);
 
+/// Value must be between ``. Admit escape values kind \u0023.
+Value *value_new_str2(char *value);
+
 ///
 Value *value_new_arr(Arr/*Value*/ *values);
 
@@ -56,8 +57,7 @@ Value *value_new_arr(Arr/*Value*/ *values);
 Value *value_new_map(Arr/*char*/ *keys, Arr/*Value*/ *values);
 
 /// Paramas must be between "". Admit escape values kind \u0023.
-Value *value_new_fn(Arr/*char*/ *params, Arr/*Stat*/ *values);
-
+Value *value_new_fn(Arr/*char*/ *params, Arr/*Stat*/ *stats);
 /// Id must be a valid identifier
 Value *value_new_id(char *id);
 
@@ -65,17 +65,27 @@ Value *value_new_id(char *id);
 Value *value_new_fid(char *id, Arr/*Value*/ *values);
 
 /// Operator must be one of !, ++, --
-Value *value_new_lmonadic(char *operator, Value *value);
+Value *value_new_lunary(char *operator, Value *value);
 
 /// Operator must be one of ++, --
-Value *value_new_rmonadic(char *operator, Value *value);
+Value *value_new_runary(char *operator, Value *value);
 
-/// Operator must be one of +, -, *, /, %, ^, >, <, ==, !=, <=, <=, &&, ||, &,
+/// Operator must be one of +, -, *, /, %, ^, >, <, ==, !=, <=, >=, &&, ||, &,
 /// |, ^^, <<, >>, >>>, ?:
 Value *value_new_binary(char *operator, Value *v1, Value *v2);
 
 /// Operator a?x:y
-Value *value_new_ternary(char *operator, Value *v1, Value *v2, Value *v3);
+Value *value_new_ternary(Value *v1, Value *v2, Value *v3);
+
+/// Operator with. Example:
+///   val x = with(a) : a+b = 0 : a-b = 1 : _ = 2;
+/// The last 'conditions' is value_new_null().
+Value *value_new_with(
+  Value *v, Arr/*Value*/ *conditions, Arr/*Value*/ *values
+);
+
+/// Value in parenthesis
+Value *value_new_group(Value *v1);
 
 ///
 Json *value_serialize(Value *this);
@@ -83,5 +93,5 @@ Json *value_serialize(Value *this);
 ///
 Value *value_restore(Json *s);
 
-///
-bool value_eq(Value *this, Value *other);
+#endif
+

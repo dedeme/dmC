@@ -1,0 +1,42 @@
+
+// such
+
+var fax = 1245;
+var fax1 = 1t;
+var fax2 = 0x12AafFt;
+
+val fint = 0x23AFaf;
+val fint1 = 23456;
+val fint2 = 0;
+
+var f0 = .5e-5;
+var f1 = .5e+35;
+var f2 = 3.e12;
+var f3 = 123214.33;
+var f4 = 123214.33e-1;
+
+# Str
+var sym = a;
+
+# Str
+var sym2 = a$0 . b$ . c;
+
+# Int
+val fun0 = $a();
+# Int
+val fun1 = $ab([a, "d"]);
+# Int
+val fun3 = $abcd ( 1, "a", f() ) ;
+
+# Int
+var f;
+
+/*
+# (:Int)
+=@age \ {
+  return 3;
+}
+
+val a = "3";
+*/
+

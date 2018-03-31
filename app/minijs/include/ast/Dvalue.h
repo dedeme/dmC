@@ -15,7 +15,7 @@
 #include <dmc/all.h>
 #include "types/Type.h"
 #include "ast/Value.h"
-#include "lexer/Filepos.h"
+#include "lexer/Pos.h"
 
 /*.-.*/
 
@@ -23,16 +23,16 @@
 typedef struct dvalue_Dvalue Dvalue;
 
 ///
-Filepos *dvalue_pos(Dvalue *this);
+Pos *dvalue_pos(Dvalue *this);
 
 ///
 char *dvalue_id(Dvalue *this);
 
 ///
-Filepos *dvalue_tpos(Dvalue *this);
+Pos *dvalue_tpos(Dvalue *this);
 
 ///
-void dvalue_set_tpos(Dvalue *this, Filepos *value);
+void dvalue_set_tpos(Dvalue *this, Pos *value);
 
 ///
 Type *dvalue_type(Dvalue *this);
@@ -54,6 +54,6 @@ Dvalue *dvalue_restore(Json *s);
 
 /*.-.*/
 
-Dvalue *dvalue_new(Filepos *pos, char *id);
+Dvalue *dvalue_new(Pos *pos, char *id);
 
 #endif

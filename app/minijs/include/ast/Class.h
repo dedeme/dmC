@@ -8,6 +8,7 @@
 
 #include "dmc/all.h"
 #include "Cpath.h"
+#include "ast/Cvalue.h"
 
 /*.-.*/
 
@@ -32,5 +33,7 @@ Class *class_restore(Json *s);
 /*.-.*/
 
 Class *class_mk(Cpath *cpath);
+
+void class_add_cvalue(Class *this, Cvalue *cval);
 
 #endif

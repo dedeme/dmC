@@ -5,102 +5,82 @@
 #include "ast/Value.h"
 #include "DEFS.h"
 
+static bool value_ok(Value *v) {
+  char *serial = value_serialize(v);
+  return !strcmp(serial, value_serialize(value_restore(serial)));
+}
+
 void tests_value() {
   printf("Value test\n");
 
   Value *v = value_new_null();
-  Value *v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_bool("true");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_byte("12b");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_int("12345");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_float("12.34");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_char("'a'");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_str("\"abc\"");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   Arr/*char*/ *ks = arr_new();
   Arr/*Value*/ *a = arr_new();
   v = value_new_arr(a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_map(ks, a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fn(ks, arr_new());
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fid("id", a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   arr_add(a, value_new_str("\"abc\""));
   arr_add(ks, value_new_str("\"abc\""));
   v = value_new_arr(a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_map(ks, a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fn(ks, arr_new());
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fid("id", a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
-  arr_add(a, v2);
+  arr_add(a, value_restore(value_serialize(v)));
   arr_add(ks, value_new_str("\"abc2\""));
   v = value_new_arr(a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_map(ks, a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fn(ks, arr_new());
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
   v = value_new_fid("id", a);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
   v = value_new_id("a");
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  assert(value_ok(v));
 
-  v = value_new_lmonadic("a", v);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
+  v = value_new_lunary("a", v);
+  assert(value_ok(v));
 
-  Value *v1 = value_new_rmonadic("a", v);
-  v2 = value_restore(value_serialize(v1));
-  assert(value_eq(v1, v2));
+  Value *v1 = value_new_runary("a", v);
+  assert(value_ok(v1));
 
-  Value *v3 = value_new_binary("a", v, v1);
-  v2 = value_restore(value_serialize(v3));
-  assert(value_eq(v3, v2));
+  Value *v2 = value_new_binary("a", v, v1);
+  assert(value_ok(v2));
 
-  v = value_new_ternary("a", v, v1, v3);
-  v2 = value_restore(value_serialize(v));
-  assert(value_eq(v, v2));
-
+  v = value_new_ternary(v, v1, v2);
+  assert(value_ok(v));
 
   printf( "    Finished\n");
 }

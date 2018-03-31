@@ -68,16 +68,17 @@ Txpos *token_blanks(Txpos *tx) {
 }
 
 Txpos *token_skip_stat(Txpos *tx) {
-  char *p = txpos_start(tx);
-  char *end = txpos_end(tx);
-
+  int brackets = 0;
+  char *p;
   for (;;) {
-    if (p == end) {
+    p = txpos_start(tx);
+
+    if (p == txpos_end(tx)) {
       break;
     }
 
     char ch = *p;
-    if (ch == ';') {
+    if (ch == ';' && brackets == 0) {
       tx = txpos_move(tx, p + 1, txpos_nline(tx), txpos_nchar(tx) + 1);
       break;
     }
@@ -89,7 +90,7 @@ Txpos *token_skip_stat(Txpos *tx) {
 
     if (ch == '/') {
       Txpos *r = token_blanks(tx);
-      if (!txpos_eq(tx, r)) {
+      if (txpos_neq(tx, r)) {
         tx = r;
         continue;
       }
@@ -106,10 +107,24 @@ Txpos *token_skip_stat(Txpos *tx) {
       continue;
     }
 
+    if (ch == '{') {
+      ++brackets;
+    } else if (ch == '}' && brackets) {
+      --brackets;
+    }
+
     tx = txpos_move(tx, p + 1, txpos_nline(tx), txpos_nchar(tx) + 1);
   }
 
   return token_blanks(tx);
+}
+
+Txpos *token_cconst0(Txpos *tx, char value) {
+  char *p = txpos_start(tx);
+  if (*p == value) {
+    return txpos_move(tx, p + 1, txpos_nline(tx), txpos_nchar(tx) + 1);
+  }
+  return tx;
 }
 
 Txpos *token_cconst(Txpos *tx, char value) {
@@ -133,17 +148,57 @@ Txpos *token_const(Txpos *tx, char *value) {
   return tx;
 }
 
+Txpos *token_csplit0(char *r, Txpos *tx, char *values) {
+  char *p = txpos_start(tx);
+  char value;
+  while ((value = *values++)) {
+    if (*p == value) {
+      *r = value;
+      return txpos_move(tx, p + 1, txpos_nline(tx), txpos_nchar(tx) + 1);
+    }
+  }
+  return tx;
+}
+
+Txpos *token_csplit(char *r, Txpos *tx, char *values) {
+  char *p = txpos_start(tx);
+  char value;
+  while ((value = *values++)) {
+    if (*p == value) {
+      *r = value;
+      return token_blanks(
+        txpos_move(tx, p + 1, txpos_nline(tx), txpos_nchar(tx) + 1)
+      );
+    }
+  }
+  return tx;
+}
+
+Txpos *token_split(char **r, Txpos *tx, char *values) {
+  char *p = txpos_start(tx);
+  EACH(str_csplit(values, ' '), char, value) {
+    if (str_starts(p, value)) {
+      *r = value;
+      size_t size = strlen(value);
+      return token_blanks(
+        txpos_move(tx, p + size, txpos_nline(tx), txpos_nchar(tx) + size)
+      );
+    }
+  }_EACH
+  return tx;
+}
+
 Txpos *token_list(
-  Arr/*char*/ **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
+  Arr **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
 ) {
-  Arr/*char*/ *l = arr_new();
+  Arr *l = arr_new();
 
   Txpos *r = token_cconst(tx, close);
   if (txpos_eq(tx, r)) {
     void *e;
     r = read(&e, tx);
     if (txpos_eq(tx, r))
-      TH(tx) "Expected a valid identifier" _TH
+      TH(tx) "Expected a valid element" _TH
     tx = r;
 
     arr_add(l, e);
@@ -155,12 +210,53 @@ Txpos *token_list(
       } else {
         r = token_cconst(tx, ',');
         if (txpos_eq(tx, r))
-          TH(tx) "Expected ','" _TH
+          TH(tx) "Expected ',' (comma)" _TH
         tx = r;
 
         r = read(&e, tx);
         if (txpos_eq(tx, r))
-          TH(tx) "Expected a valid identifier" _TH
+          TH(tx) "Expected a valid element" _TH
+        tx = r;
+
+        arr_add(l, e);
+      }
+    }
+  }
+
+  *list = l;
+  return r;
+}
+
+Txpos *token_fn_list(Arr **list, Txpos *tx, Txpos *(*read)(void **, Txpos *)) {
+  Txpos *start = tx;
+  Arr *l = arr_new();
+
+  Txpos *r = token_const(tx, "->");
+  if (txpos_eq(tx, r)) {
+    void *e;
+    r = read(&e, tx);
+    if (txpos_eq(tx, r)) {
+      return start;
+    }
+    tx = r;
+
+    arr_add(l, e);
+
+    for (;;) {
+      r = token_const(tx, "->");
+      if (txpos_neq(tx, r)) {
+        break;
+      } else {
+        r = token_cconst(tx, ',');
+        if (txpos_eq(tx, r)) {
+          return start;
+        }
+        tx = r;
+
+        r = read(&e, tx);
+        if (txpos_eq(tx, r)) {
+          return start;
+        }
         tx = r;
 
         arr_add(l, e);
@@ -211,4 +307,91 @@ Txpos *token_id(char **id, Txpos *tx) {
     *id = "";
     return tx;
   }
+}
+
+Txpos *token_point_id(char **id, Txpos *tx) {
+  Txpos *r;
+  Buf *bf = buf_new();
+  char *i;
+  Txpos *prepoint = NULL;
+  for (;;) {
+    if (txpos_eq(tx, r = token_id(&i, tx))) {
+      if (prepoint) {
+        tx = prepoint;
+      }
+      break;
+    }
+    tx = r;
+    if (prepoint) {
+      buf_cadd(bf, '.');
+    }
+    buf_add(bf, i);
+    if (txpos_eq(tx, r = token_cconst(tx, '.'))) {
+      break;
+    }
+    prepoint = tx;
+    tx = r;
+  }
+
+  *id = buf_to_str(bf);
+  return tx;
+}
+
+Txpos *token_bool(char **value, Txpos *tx) {
+  Txpos *r;
+  if (txpos_neq(tx, r = token_const(tx, "true"))) {
+    *value = "true";
+    return r;
+  }
+  if (txpos_neq(tx, r = token_const(tx, "false"))) {
+    *value = "false";
+    return r;
+  }
+  return tx;
+}
+
+Txpos *token_lunary(char **op, Txpos *tx) {
+  Txpos *r;
+  char ch;
+
+  if (txpos_neq(tx, r = token_csplit(&ch, tx, "!"))) {
+    *op = " ";
+    **op = ch;
+    return r;
+  }
+
+  if (txpos_neq(tx, r = token_split(op, tx, "++ --"))) {
+    return r;
+  }
+
+  return tx;
+}
+
+Txpos *token_runary(char **op, Txpos *tx) {
+  Txpos *r;
+  if (txpos_neq(tx, r = token_split(op, tx, "++ --"))) {
+    return r;
+  }
+
+  return tx;
+}
+
+Txpos *token_binary(char **op, Txpos *tx) {
+  char *ch1 = "+-*/%^><&|";
+  char *chs = "== != <= <= && || ^^ >>> << >> ?:";
+
+  Txpos *r;
+  char ch;
+
+  if (txpos_neq(tx, r = token_csplit(&ch, tx, ch1))) {
+    *op = " ";
+    **op = ch;
+    return r;
+  }
+
+  if (txpos_neq(tx, r = token_split(op, tx, chs))) {
+    return r;
+  }
+
+  return tx;
 }

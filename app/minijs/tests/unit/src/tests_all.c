@@ -5,19 +5,19 @@
 #include "tests_types.h"
 #include "tests_value.h"
 #include "tests_strings.h"
-#include "tests_numbers.h"
+#include "tests_token.h"
 #include "Cpath.h"
 
 int main() {
   sys_init("minijs tests");
 
   Arr/*char*/ *paths = arr_new();
-  arr_add(paths, "../test1");
+  arr_add(paths, "../prgs");
   cpath_init(paths);
-/*
-  tests_types();
+
+  tests_types();/*
   tests_value();
-  tests_strings();*/
-  tests_numbers();
+  tests_strings();
+  tests_token();*/
   return 0;
 }

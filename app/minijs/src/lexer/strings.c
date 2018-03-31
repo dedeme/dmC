@@ -35,8 +35,8 @@ static Txpos *skip_double(Txpos *tx) {
           TH(tx) "End of 'txpos' reached" _TH
         p += len;
         nchar += 2;
+      }
       break;
-    }
     case '\n':
       TH(tx) "End of line reached" _TH
     default:
@@ -136,4 +136,35 @@ Txpos *strings_skip(Txpos *tx, char delimiter) {
   default: THROW "'%c' unknown string delimiter", delimiter _THROW
   }
   return NULL;
+}
+
+Txpos *strings_read(enum Vtype_t *type, char **value, Txpos *tx) {
+  Txpos *r;
+  char ch;
+  if (txpos_neq(tx, r = token_csplit0(&ch, tx, "\"'`"))) {
+    char *p = txpos_start(r);
+    r = txpos_move(tx, p, txpos_nline(tx), txpos_nchar(tx) + 1);
+    switch (ch) {
+    case '"':
+      r = skip_double(r);
+      p = str_sub(p, 0, txpos_start(r) - p);
+      *type = VSTR;
+      *value = str_sub(p, 0, str_last_cindex(p, '"'));
+      break;
+    case '\'':
+      r = skip_single(r);
+      p = str_sub(p, 0, txpos_start(r) - p);
+      *type = VCHAR;
+      *value = str_sub(p, 0, str_last_cindex(p, '\''));
+      break;
+    default:
+      r = skip_back(r);
+      p = str_sub(p, 0, txpos_start(r) - p);
+      *type = VSTR2;
+      *value = str_sub(p, 0, str_last_cindex(p, '`'));
+    }
+
+    tx = r;
+  }
+  return tx;
 }

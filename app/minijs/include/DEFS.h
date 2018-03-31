@@ -6,12 +6,16 @@
 #ifndef DEFS_H
   # define DEFS_H
 
+///
 #define VERSION "201803"
 
+///
 #define TH(tx) {txpos_printf((tx),
 
+///
 #define _TH ); THROW "\1" _THROW}
 
+///
 enum Vtype_t {
   VNULL,
   VBOOL,
@@ -20,17 +24,21 @@ enum Vtype_t {
   VFLOAT,
   VCHAR,
   VSTR,
+  VSTR2,
   VARR,
   VMAP,
   VFN,
   VID,
   VFID,
-  VLMONADIC,
-  VRMONADIC,
+  VLUNARY,
+  VRUNARY,
   VBINARY,
-  VTERNARY
+  VTERNARY,
+  VWITH,
+  VGROUP
 };
 
+///
 enum Type_t {
   DATA,
   ARR,
@@ -40,10 +48,13 @@ enum Type_t {
   UNKNOWN
 };
 
+///
 enum Stat_t {
-  DECLARATION
+  SVAL,
+  SVAR
 };
 
+///
 enum Cvalue_t {
   VAL,
   VAR,
@@ -51,6 +62,5 @@ enum Cvalue_t {
   GETTER,
   SETTER
 };
-
 
 #endif
