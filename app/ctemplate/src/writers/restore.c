@@ -13,6 +13,7 @@ void restore_write(RW *rw, Structure *st) {
   rw_writeln(rw, str_printf(
     "%s *%srestore(Json *s) {", st->head->id, st->head->prefix
   ));
+  rw_writeln(rw, "  if (json_rnull(s)) return NULL;");
   rw_writeln(rw, "  Arr/*Json*/ *serial = json_rarray(s);");
   rw_writeln(rw, str_printf(
     "  %s *this = MALLOC(%s);", st->head->id, st->head->id

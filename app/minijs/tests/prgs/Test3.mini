@@ -1,0 +1,16 @@
+
+# (:)
+f1 = a -> {
+  val a = 3;
+
+  print(a);
+  p.print();
+  p.print(a + b,"a", x -> {a(b);}, -34);
+  return;
+};
+
+# (:Int)
+f2 = -> {
+  a.b.c([(#Int)"a", x -> {a(b);}]);
+  return (#Int) [3 + 4] * 2;
+};

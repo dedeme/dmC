@@ -16,12 +16,7 @@
 typedef struct cvalue_Cvalue Cvalue;
 
 ///
-Cvalue *cvalue_new(
-  bool is_public,
-  bool is_static,
-  enum Cvalue_t type,
-  Dvalue *dvalue
-);
+Pos *cvalue_pos(Cvalue *this);
 
 ///
 bool cvalue_is_public(Cvalue *this);
@@ -43,6 +38,24 @@ Cvalue *cvalue_restore(Json *s);
 
 /*.-.*/
 
+///
+Cvalue *cvalue_new_val(
+  Pos *pos,
+  bool is_public,
+  bool is_static,
+  Dvalue *dvalue
+);
+
+///
+Cvalue *cvalue_new_var(
+  Pos *pos,
+  bool is_public,
+  bool is_static,
+  Dvalue *dvalue
+);
+
+/// cvalue_id throw exception if this is not of ctype VAL, VAR, METHOD, GETTER
+/// or SETTER.
 char *cvalue_id(Cvalue *this);
 
 #endif

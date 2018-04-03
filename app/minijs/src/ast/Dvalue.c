@@ -103,6 +103,6 @@ Dvalue *dvalue_restore(Json *s) {
 inline
 Dvalue *dvalue_new(Pos *pos, char *id) {
   return _dvalue_new(
-    pos, id, pos_new(0, 0), type_new_unknown(), value_new_null()
+    pos, id, pos_new(0, 0), type_new_unknown(), value_new_null(pos)
   );
 }

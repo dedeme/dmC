@@ -5,6 +5,8 @@
 #include "lexer/strings.h"
 #include "DEFS.h"
 
+static char *reserved = " new ";
+
 Txpos *token_blanks(Txpos *tx) {
   char *p = txpos_start(tx);
   char *end = txpos_end(tx);
@@ -272,7 +274,7 @@ Txpos *token_id(char **id, Txpos *tx) {
   char *start = txpos_start(tx);
   char *p = start;
 
-  char ch = *p;
+  char ch = *p++;
   if (
     !txpos_at_end(tx) &&
     (
@@ -307,6 +309,71 @@ Txpos *token_id(char **id, Txpos *tx) {
     *id = "";
     return tx;
   }
+}
+
+Txpos *token_directive(Txpos *tx, char *value) {
+  char *start = txpos_start(tx);
+  char *p = start;
+
+  char ch = *p++;
+  if (!txpos_at_end(tx) && ch == '_' ) {
+
+    ch = *p++;
+    while (
+      !txpos_at_end(tx) &&
+      ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+    ) {
+      ch = *p++;
+    }
+    --p;
+
+    int len = p - start;
+    char *d = ATOMIC(len + 1);
+    memcpy(d, start, len);
+    d[len] = 0;
+
+    if (!strcmp(d, value)) {
+      return token_blanks(
+        txpos_move(tx, p, txpos_nline(tx), txpos_nchar(tx) + len)
+      );
+    }
+  }
+
+  return tx;
+}
+
+Txpos *token_path(char **path, Txpos *tx) {
+  char *start = txpos_start(tx);
+  char *p = start;
+
+  char ch = *p++;
+  if (
+    txpos_at_end(tx) ||
+    ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z'))
+  ) {
+    return tx;
+  }
+
+  for (;;) {
+    ch = *p++;
+    if (
+      !txpos_at_end(tx) &&
+      ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '/')
+    ) {
+      continue;
+    }
+    break;
+  }
+  --p;
+  int len = p - start;
+  char *ptmp = ATOMIC(len + 1);
+  memcpy(ptmp, start, len);
+  ptmp[len] = 0;
+  *path = ptmp;
+
+  return token_blanks(
+    txpos_move(tx, p, txpos_nline(tx), txpos_nchar(tx) + len)
+  );
 }
 
 Txpos *token_point_id(char **id, Txpos *tx) {
@@ -394,4 +461,8 @@ Txpos *token_binary(char **op, Txpos *tx) {
   }
 
   return tx;
+}
+
+bool token_is_reserved(char *id) {
+  return str_index(reserved, str_printf(" %s ", id)) != -1;
 }

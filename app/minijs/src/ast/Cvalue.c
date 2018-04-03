@@ -4,7 +4,8 @@
 #include "ast/Cvalue.h"
 
 /*.
-struct: Cvalue
+struct: @Cvalue
+  pos: Pos *: pos
   is_public: bool: _bool
   is_static: bool: _bool
   type: enum Cvalue_t: _uint
@@ -13,24 +14,32 @@ struct: Cvalue
 
 /*.-.*/
 struct cvalue_Cvalue {
+  Pos *pos;
   bool is_public;
   bool is_static;
   enum Cvalue_t type;
   Dvalue *dvalue;
 };
 
-Cvalue *cvalue_new(
+Cvalue *_cvalue_new(
+  Pos *pos,
   bool is_public,
   bool is_static,
   enum Cvalue_t type,
   Dvalue *dvalue
 ) {
   Cvalue *this = MALLOC(Cvalue);
+  this->pos = pos;
   this->is_public = is_public;
   this->is_static = is_static;
   this->type = type;
   this->dvalue = dvalue;
   return this;
+}
+
+inline
+Pos *cvalue_pos(Cvalue *this) {
+  return this->pos;
 }
 
 inline
@@ -55,6 +64,7 @@ Dvalue *cvalue_dvalue(Cvalue *this) {
 
 Json *cvalue_serialize(Cvalue *this) {
   Arr/*Json*/ *serial = arr_new();
+  arr_add(serial, pos_serialize(this->pos));
   jarr_abool(serial, this->is_public);
   jarr_abool(serial, this->is_static);
   jarr_auint(serial, this->type);
@@ -66,6 +76,7 @@ Cvalue *cvalue_restore(Json *s) {
   Arr/*Json*/ *serial = json_rarray(s);
   Cvalue *this = MALLOC(Cvalue);
   size_t i = 0;
+  this->pos = pos_restore(arr_get(serial, i++));
   this->is_public = jarr_gbool(serial, i++);
   this->is_static = jarr_gbool(serial, i++);
   this->type = jarr_guint(serial, i++);
@@ -75,6 +86,29 @@ Cvalue *cvalue_restore(Json *s) {
 /*.-.*/
 
 inline
+Cvalue *cvalue_new_val(
+  Pos *pos,
+  bool is_public,
+  bool is_static,
+  Dvalue *dvalue
+) {
+  return _cvalue_new(pos, is_public, is_static, VAL, dvalue);
+}
+
+inline
+Cvalue *cvalue_new_var(
+  Pos *pos,
+  bool is_public,
+  bool is_static,
+  Dvalue *dvalue
+) {
+  return _cvalue_new(pos, is_public, is_static, VAR, dvalue);
+}
+
+inline
 char *cvalue_id(Cvalue *this) {
+  if (!this->dvalue)
+    THROW "This is not a Dvalue" _THROW
+
   return dvalue_id(this->dvalue);
 }

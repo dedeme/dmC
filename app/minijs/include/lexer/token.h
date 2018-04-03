@@ -8,6 +8,7 @@
 
 #include <dmc/all.h>
 #include "lexer/Txpos.h"
+#include "Cpath.h"
 
 ///
 Txpos *token_blanks(Txpos *tx);
@@ -44,10 +45,16 @@ Txpos *token_list(
 /// Creates and reads a list. It does not fail. Also 'read' must not fail.
 Txpos *token_fn_list(Arr **list, Txpos *tx, Txpos *(*read)(void **, Txpos *));
 
-/// Creates and reads a identifier. It does not fail.
+/// Creates and reads an identifier. It does not fail.
 Txpos *token_id(char **id, Txpos *tx);
 
-/// Creates and reads a identifier with or without point. It does not fail.
+/// Creates and reads a directive. It does not fail.
+Txpos *token_directive(Txpos *tx, char *value);
+
+/// Creates and reads a cpath. It does not fail.
+Txpos *token_path(char **path, Txpos *tx);
+
+/// Creates and reads an identifier with or without point. It does not fail.
 Txpos *token_point_id(char **id, Txpos *tx);
 
 ///
@@ -62,5 +69,7 @@ Txpos *token_runary(char **op, Txpos *tx);
 ///
 Txpos *token_binary(char **op, Txpos *tx);
 
+///
+bool token_is_reserved(char *id);
 
 #endif

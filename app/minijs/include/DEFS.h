@@ -15,7 +15,15 @@
 ///
 #define _TH ); THROW "\1" _THROW}
 
-///
+/// Import types
+enum Itype_t {
+  ISINGLE,
+  IID,
+  IADDS,
+  ISUBS
+};
+
+/// Value types
 enum Vtype_t {
   VNULL,
   VBOOL,
@@ -38,7 +46,7 @@ enum Vtype_t {
   VGROUP
 };
 
-///
+/// Type types
 enum Type_t {
   DATA,
   ARR,
@@ -48,19 +56,19 @@ enum Type_t {
   UNKNOWN
 };
 
-///
+/// Statement types
 enum Stat_t {
   SVAL,
-  SVAR
+  SVAR,
+  SFN,
+  SRETURN
 };
 
-///
+/// Cvalue types
 enum Cvalue_t {
   VAL,
   VAR,
-  METHOD,
-  GETTER,
-  SETTER
+  METHOD
 };
 
 #endif

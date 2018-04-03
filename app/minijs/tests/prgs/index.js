@@ -1,4 +1,4 @@
 (function () {
 'use strict'
-Test2.main();
+Test3.main();
 }());

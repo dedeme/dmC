@@ -51,9 +51,7 @@ Arr *type_params(Type *this) {
 }
 
 Json *type_serialize(Type *this) {
-  if (!this) {
-    return json_wnull();
-  }
+  if (!this) return json_wnull();
   Arr/*Json*/ *serial = arr_new();
   jarr_auint(serial, this->type);
   jarr_astring(serial, this->id);
@@ -62,9 +60,7 @@ Json *type_serialize(Type *this) {
 }
 
 Type *type_restore(Json *s) {
-  if (json_rnull(s)) {
-    return NULL;
-  }
+  if (json_rnull(s)) return NULL;
   Arr/*Json*/ *serial = json_rarray(s);
   Type *this = MALLOC(Type);
   size_t i = 0;

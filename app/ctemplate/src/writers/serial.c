@@ -13,6 +13,7 @@ void serial_write(RW *rw, Structure *st) {
   rw_writeln(rw, str_printf(
     "Json *%sserialize(%s *this) {", st->head->prefix, st->head->id
   ));
+  rw_writeln(rw, "  if (!this) return json_wnull();");
   rw_writeln(rw, "  Arr/*Json*/ *serial = arr_new();");
 
   EACH(st->body->ps, Param, p) {

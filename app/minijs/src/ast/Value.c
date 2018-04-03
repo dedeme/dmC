@@ -6,8 +6,9 @@
 
 /*.
 -struct: @Value
+  pos: Pos *
   vtype: enum Vtype_t
-  type: Type *
+  +type: Type *
   data: void *
 */
 
@@ -33,17 +34,29 @@ static Type *eq_type(Arr/*Value*/ *values) {
 
 /*.-.*/
 struct value_Value {
+  Pos *pos;
   enum Vtype_t vtype;
   Type *type;
   void *data;
 };
 
-Value *_value_new(enum Vtype_t vtype, Type *type, void *data) {
+Value *_value_new(
+  Pos *pos,
+  enum Vtype_t vtype,
+  Type *type,
+  void *data
+) {
   Value *this = MALLOC(Value);
+  this->pos = pos;
   this->vtype = vtype;
   this->type = type;
   this->data = data;
   return this;
+}
+
+inline
+Pos *value_pos(Value *this) {
+  return this->pos;
 }
 
 inline
@@ -57,58 +70,65 @@ Type *value_type(Value *this) {
 }
 
 inline
+void value_set_type(Value *this, Type *value) {
+  this->type = value;
+}
+
+inline
 void *value_data(Value *this) {
   return this->data;
 }
 /*.-.*/
 
 inline
-Value *value_new_null(void) {
-  return v_null ? v_null : (v_null = _value_new(VNULL, type_new_unknown(), ""));
+Value *value_new_null(Pos *pos) {
+  return v_null
+    ? v_null
+    : (v_null = _value_new(pos, VNULL, type_new_unknown(), ""));
 }
 
 inline
-Value *value_new_bool(char *value) {
-  return _value_new(VBOOL, type_new_bool(), value);
+Value *value_new_bool(Pos *pos, char *value) {
+  return _value_new(pos, VBOOL, type_new_bool(), value);
 }
 
 inline
-Value *value_new_byte(char *value) {
-  return _value_new(VBYTE, type_new_byte(), value);
+Value *value_new_byte(Pos *pos, char *value) {
+  return _value_new(pos, VBYTE, type_new_byte(), value);
 }
 
-Value *value_new_int(char *value) {
-  return _value_new(VINT, type_new_int(), value);
+Value *value_new_int(Pos *pos, char *value) {
+  return _value_new(pos, VINT, type_new_int(), value);
 }
 
-Value *value_new_float(char *value) {
-  return _value_new(VFLOAT, type_new_float(), value);
+Value *value_new_float(Pos *pos, char *value) {
+  return _value_new(pos, VFLOAT, type_new_float(), value);
 }
 
-Value *value_new_char(char *value) {
-  return _value_new(VCHAR, type_new_char(), value);
+Value *value_new_char(Pos *pos, char *value) {
+  return _value_new(pos, VCHAR, type_new_char(), value);
 }
 
-Value *value_new_str(char *value) {
-  return _value_new(VSTR, type_new_str(DATA, "Str", arr_new()), value);
+Value *value_new_str(Pos *pos, char *value) {
+  return _value_new(pos, VSTR, type_new_str(DATA, "Str", arr_new()), value);
 }
 
-Value *value_new_str2(char *value) {
-  return _value_new(VSTR2, type_new_str(), value);
+Value *value_new_str2(Pos *pos, char *value) {
+  return _value_new(pos, VSTR2, type_new_str(), value);
 }
 
-Value *value_new_arr(Arr/*Value*/ *values) {
-  return _value_new(VARR, type_new_arr(eq_type(values)), values);
+Value *value_new_arr(Pos *pos, Arr/*Value*/ *values) {
+  return _value_new(pos, VARR, type_new_arr(eq_type(values)), values);
 }
 
-Value *value_new_map(Arr/*char*/ *keys, Arr/*Value*/ *values) {
+Value *value_new_map(Pos *pos, Arr/*char*/ *keys, Arr/*Value*/ *values) {
   Arr *data2 = arr_new();
   arr_add(data2, keys);
   arr_add(data2, values);
-  return _value_new(VMAP, type_new_map(eq_type(values)), data2);
+  return _value_new(pos, VMAP, type_new_map(eq_type(values)), data2);
 }
 
-Value *value_new_fn(Arr/*char*/ *params, Arr/*Statement*/ *stats) {
+Value *value_new_fn(Pos *pos, Arr/*char*/ *params, Arr/*Statement*/ *stats) {
   Arr/*Type*/ *ps = arr_new();
   REPEAT(arr_size(params) + 1){
     arr_add(ps, type_new_unknown());
@@ -116,66 +136,68 @@ Value *value_new_fn(Arr/*char*/ *params, Arr/*Statement*/ *stats) {
   Arr *data2 = arr_new();
   arr_add(data2, params);
   arr_add(data2, stats);
-  return _value_new(VFN, type_new_fn(ps), data2);
+  return _value_new(pos, VFN, type_new_fn(ps), data2);
 }
 
-Value *value_new_id(char *id) {
-  return _value_new(VID, type_new_unknown(), id);
+Value *value_new_id(Pos *pos, char *id) {
+  return _value_new(pos, VID, type_new_unknown(), id);
 }
 
-Value *value_new_fid(char *id, Arr/*Value*/ *values) {
+Value *value_new_fid(Pos *pos, char *id, Arr/*Value*/ *values) {
   Arr *data2 = arr_new();
   arr_add(data2, id);
   arr_add(data2, values);
-  return _value_new(VFID, type_new_unknown(), data2);
+  return _value_new(pos, VFID, type_new_unknown(), data2);
 }
 
-Value *value_new_lunary(char *operator, Value *value) {
+Value *value_new_lunary(Pos *pos, char *operator, Value *value) {
   Arr *data2 = arr_new();
   arr_add(data2, operator);
   arr_add(data2, value);
-  return _value_new(VLUNARY, type_new_unknown(), data2);
+  return _value_new(pos, VLUNARY, type_new_unknown(), data2);
 }
 
-Value *value_new_runary(char *operator, Value *value) {
+Value *value_new_runary(Pos *pos, char *operator, Value *value) {
   Arr *data2 = arr_new();
   arr_add(data2, operator);
   arr_add(data2, value);
-  return _value_new(VRUNARY, type_new_unknown(), data2);
+  return _value_new(pos, VRUNARY, type_new_unknown(), data2);
 }
 
-Value *value_new_binary(char *operator, Value *v1, Value *v2) {
+Value *value_new_binary(Pos *pos, char *operator, Value *v1, Value *v2) {
   Arr *data2 = arr_new();
   arr_add(data2, operator);
   arr_add(data2, v1);
   arr_add(data2, v2);
-  return _value_new(VBINARY, type_new_unknown(), data2);
+  return _value_new(pos, VBINARY, type_new_unknown(), data2);
 }
 
-Value *value_new_ternary(Value *v1, Value *v2, Value *v3) {
+Value *value_new_ternary(Pos *pos, Value *v1, Value *v2, Value *v3) {
   Arr *data2 = arr_new();
   arr_add(data2, v1);
   arr_add(data2, v2);
   arr_add(data2, v3);
-  return _value_new(VTERNARY, type_new_unknown(), data2);
+  return _value_new(pos, VTERNARY, type_new_unknown(), data2);
 }
 
 Value *value_new_with(
-  Value *v, Arr/*Value*/ *conditions, Arr/*Value*/ *values
+  Pos *pos, Value *v, Arr/*Value*/ *conditions, Arr/*Value*/ *values
 ) {
   Arr *data2 = arr_new();
   arr_add(data2, v);
   arr_add(data2, conditions);
   arr_add(data2, values);
-  return _value_new(VWITH, type_new_unknown(), data2);
+  return _value_new(pos, VWITH, type_new_unknown(), data2);
 }
 
-Value *value_new_group(Value *v1) {
-  return _value_new(VGROUP, value_type(v1), v1);
+Value *value_new_group(Pos *pos, Value *v1) {
+  return _value_new(pos, VGROUP, value_type(v1), v1);
 }
 
 Json *value_serialize(Value *this) {
+  if (!this) return json_wnull();
   Arr/*Json*/ *serial = arr_new();
+  arr_add(serial, pos_serialize(this->pos));
   jarr_auint(serial, this->vtype);
   arr_add(serial, type_serialize(this->type));
 
@@ -252,9 +274,11 @@ Json *value_serialize(Value *this) {
 }
 
 Value *value_restore(Json *s) {
+  if (json_rnull(s)) return NULL;
   Arr/*Json*/ *serial = json_rarray(s);
   Value *this = MALLOC(Value);
   size_t i = 0;
+  this->pos = pos_restore(arr_get(serial, i++));
   this->vtype = jarr_guint(serial, i++);
   this->type = type_restore(arr_get(serial, i++));
 

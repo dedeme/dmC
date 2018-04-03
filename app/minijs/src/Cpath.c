@@ -72,6 +72,11 @@ Cpath *cpath_new(char *path) {
     THROW exc_illegal_state("'paths' was not initialized") _THROW
   if (*path == '/')
     THROW "'%s' is an absolute path", path _THROW
+  if (path[strlen(path) - 1] == '/')
+    THROW "'%s' ends with '/'", path _THROW
+  if (str_index(path, "__") != -1)
+    THROW "'%s' has '//'", path _THROW
+
 
   Cpath *this = _cpath_new(path);
   char *fpath = str_printf("%s.mini", path);

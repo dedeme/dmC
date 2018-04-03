@@ -3,6 +3,7 @@
 
 #include "lexer/block.h"
 #include "lexer/token.h"
+#include "lexer/head.h"
 #include "lexer/Pos.h"
 #include "lexer/values.h"
 #include "ast/Cvalue.h"
@@ -12,10 +13,49 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
   Class *c = class_mk(cpath);
   Txpos *r;
 
+  if (txpos_neq(tx, r = head_local(tx))) {
+    tx = r;
+    class_set_public(c, false);
+  }
+
+  Arr/*char*/ *generics = arr_new();
+  tx = head_generics(&generics, tx);
+  class_set_generics(c, generics);
+
+  Arr/*Import*/ *imports = arr_new();
+  tx = head_imports(&imports, tx);
+  class_set_imports(c, imports);
+
+  Implement *extends = implement_new(txpos_pos(tx), "", arr_new());
+  tx = head_extends(&extends, tx);
+  class_set_extends(c, extends);
+
+  Arr/*Implement*/ *implements = arr_new();
+  tx = head_implements(&implements, tx);
+  class_set_implements(c, implements);
+
+
   bool fail = false;
+  bool is_public = true;
   while (!txpos_at_end(tx)) {
+    if (txpos_neq(tx, r = token_cconst(tx, ';'))) {
+      tx = r;
+      continue;
+    }
     TRY {
       Txpos *start = tx;
+
+      if (txpos_neq(tx, r = token_directive(tx, "_private"))) {
+        if (is_public) {
+          is_public = false;
+          tx = r;
+          while (txpos_neq(tx, r = token_cconst(tx, ';'))) {
+            tx = r;
+          }
+        } else
+          TH(tx) "Duplicate directive '_private'" _TH
+      }
+
       bool is_typed = false;
       Type *tp;
       if (txpos_neq(tx, r = token_cconst(tx, '#'))) {
@@ -26,60 +66,109 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
         tp = type_new_unknown();
       }
 
-      bool is_public = true;
-      if (txpos_neq(tx, r = token_cconst(tx, '-'))) {
-        tx = r;
-        is_public = false;
-      }
-
-      bool is_getter_setter = false;
-      if (txpos_neq(tx, r = token_cconst(tx, '='))) {
-        tx = r;
-        is_getter_setter = true;
-      }
-
-      bool is_static = true;
-      if (txpos_neq(tx, r = token_cconst(tx, '@'))) {
-        tx = r;
-        is_static = false;
-      }
-
       char *id;
       if (txpos_eq(tx, r = token_id(&id, tx)))
         TH(tx) "Expected an identifier" _TH
       tx = r;
 
-      if (!strcmp(id, "val")) {
-        if (is_getter_setter) TH(tx) "'=' is incompatible with 'val'" _TH
-        if (!is_static) TH(tx) "'@' is incompatible with 'val'" _TH
+      if (!strcmp(id, "new")) {
+        if (!is_typed)
+          TH(tx) "Method type is missing (%s)", id _TH
+        if (type_type(tp) != FN)
+          TH(tx) "Method type must be function (%s)", id _TH
 
-        Dvalue *dvalue;
-        tx = block_declaration(&dvalue, tx, tp);
+        if (txpos_eq(tx, r = token_cconst(tx, '=')))
+          TH(tx) "Expected '='" _TH
+        tx = r;
 
-        if (value_vtype(dvalue_value(dvalue)) == VNULL)
-            TH(tx) "'val %s' can not be null", dvalue_id(dvalue) _TH
 
-        TRY {
-          class_add_cvalue(c, cvalue_new(is_public, is_static, VAL, dvalue));
-        } CATCH(e) {
-          TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
-        }_TRY
-      } else if (!strcmp(id, "var")) {
-        if (is_getter_setter) TH(tx) "'=' is incompatible with 'var'" _TH
-        if (!is_static) TH(tx) "'@' is incompatible with 'var'" _TH
+        Pos *pos = txpos_pos(tx);
+        Dvalue *dvalue = dvalue_new(pos, id);
+        dvalue_set_type(dvalue, tp);
+        dvalue_set_tpos(dvalue, pos);
 
-        Dvalue *dvalue;
-        tx = block_declaration(&dvalue, tx, tp);
+        Arr/*Cvalue*/ *cvalues;
+        tx = values_new_read(&cvalues, tx, dvalue, is_public);
 
-        TRY {
-          class_add_cvalue(c, cvalue_new(is_public, is_static, VAR, dvalue));
-        } CATCH(e) {
-          TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
-        }_TRY
+        if (txpos_eq(tx, r = token_cconst(tx, ';')))
+          TH(tx) "Expected ';'" _TH
+          tx = r;
+
+        EACH(cvalues, Cvalue, v) {
+          Pos *pos = cvalue_pos(v);
+          TRY {
+            class_add_cvalue(c, v);
+          } CATCH(e) {
+            printf(
+              "%s:%zu[%zu]: %s\n",
+              cpath_fpath(txpos_cpath(tx)), pos_nline(pos), pos_nchar(pos),
+              str_sub_end(e, str_cindex(e, '\n') + 1)
+            );
+            THROW "\1" _THROW
+          }_TRY
+        }_EACH
       } else {
-        if (is_typed)
-          TH(tx) "Expected a typed declaration" _TH
-        THROW "Unknown dentifier '%s'", id _THROW
+        if (token_is_reserved(id))
+          TH(tx) "'%d' is a reserved word", id _TH
+
+        if (!strcmp(id, "val")) {
+          Dvalue *dvalue;
+          tx = block_declaration(&dvalue, tx, tp);
+
+          if (value_vtype(dvalue_value(dvalue)) == VNULL)
+              TH(tx) "'val %s' can not be null", dvalue_id(dvalue) _TH
+
+          TRY {
+            class_add_cvalue(
+              c, cvalue_new_val(txpos_pos(start), is_public, true, dvalue)
+            );
+          } CATCH(e) {
+            TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
+          }_TRY
+        } else if (!strcmp(id, "var")) {
+          Dvalue *dvalue;
+          tx = block_declaration(&dvalue, tx, tp);
+
+          TRY {
+            class_add_cvalue(
+              c, cvalue_new_var(txpos_pos(start), is_public, true, dvalue)
+            );
+          } CATCH(e) {
+            TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
+          }_TRY
+        } else {
+          if (!is_typed)
+            TH(tx) "Method type is missing (%s)", id _TH
+          if (type_type(tp) != FN)
+            TH(tx) "Method type must be function (%s)", id _TH
+
+          if (txpos_eq(tx, r = token_cconst(tx, '=')))
+            TH(tx) "Expected '='" _TH
+          tx = r;
+
+          Pos *pos = txpos_pos(tx);
+          Value *val;
+          tx = values_read(&val, tx, false);
+
+          if (type_type(value_type(val)) != FN)
+            TH(tx) "Method value must be function (%s)", id _TH
+
+          if (txpos_eq(tx, r = token_cconst(tx, ';')))
+            TH(tx) "Expected ';'" _TH
+          tx = r;
+
+          Dvalue *dvalue = dvalue_new(pos, id);
+          dvalue_set_type(dvalue, tp);
+          dvalue_set_tpos(dvalue, pos);
+          dvalue_set_value(dvalue, val);
+          TRY {
+            class_add_cvalue(
+              c, cvalue_new_val(txpos_pos(start), is_public, true, dvalue)
+            );
+          } CATCH(e) {
+            TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
+          }_TRY
+        }
       }
     } CATCH(e) {
       if (e[strlen(e) - 1] == '\1') {
@@ -165,6 +254,8 @@ Txpos *block_declaration(Dvalue **d, Txpos *tx, Type *tp) {
   char *id;
   if (txpos_eq(tx, r = token_id(&id, tx)))
     TH(tx) "Expected an identifier" _TH
+  if (token_is_reserved(id))
+    TH(tx) "'%s' is a reserved word", id _TH
   tx = r;
 
   if (txpos_neq(tx, r = token_cconst(tx, ';'))) {
@@ -183,11 +274,7 @@ Txpos *block_declaration(Dvalue **d, Txpos *tx, Type *tp) {
 
   pos = txpos_pos(tx);
   Value *val;
-  if (!strcmp(id, "new")) {
-    THROW "Without implementation" _THROW
-  } else {
-    tx = values_read(&val, tx, false);
-  }
+  tx = values_read(&val, tx, false);
 
   if (txpos_eq(tx, r = token_cconst(tx, ';')))
     TH(tx) "Expected ';'" _TH

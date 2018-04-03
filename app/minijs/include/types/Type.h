@@ -13,7 +13,6 @@
 
 #include <dmc/all.h>
 #include "DEFS.h"
-#include "lexer/Txpos.h"
 
 /*.-.*/
 

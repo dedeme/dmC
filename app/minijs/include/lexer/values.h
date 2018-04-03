@@ -8,9 +8,14 @@
 
 #include <dmc/all.h>
 #include "lexer/Txpos.h"
-#include "ast/Value.h"
+#include "ast/Cvalue.h"
 
 /// values_read reads a Value. If fails throws a tx_exception.
 Txpos *values_read(Value **val, Txpos *tx, bool is_group);
+
+/// values_new_read reads the function 'new'. If fails trows a tx_exception
+Txpos *values_new_read(
+  Arr/*Cvalue*/ **values, Txpos *tx, Dvalue *dvalue, bool is_public
+);
 
 #endif

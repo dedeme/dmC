@@ -1,17 +1,82 @@
 
 /// Test2
 
+_local
+<T, U>
 
+_import {
+  a/b/One,
+  a/b/One as Two,
+  a/b *,
+  a/b (One, Two as Three),
+  a/b * (One, Tow)
+}
+
+_extends a/b/One (T as Str, U as Int)
+
+_implements {
+  a/b/One (T as [Str]),
+  a/b/Two ()
+}
+
+;;;
+var a = 2;
+
+val ne=9;; ;;
+
+# (Int, *, Int:)
+new = +ax, b, -ccc -> {
+  _public  {
+    val x = 23;
+    # Int
+    var z;
+  }
+  _private {
+    #Int
+    var ccc = ccc;
+  }
+
+  val a = "";
+}
+
+# (:Int)
+inter = -> {; ;;
+};; ;
+
+# (:Int)
+inter2 = -> {val a = 12;}
+
+# (:Int)
+inter3=->{}
+
+# (:Int)
+inter4=->{;;;};;;
+
+// ----------------------------------------------------------------------- //
+_private
+// ----------------------------------------------------------------------- //
+;; ;
 # (:)
--val f1 =  -> { val a=4; };
+val f1 =  -> { val a=4; };
 
 # (Int:)
--var f2 = a, c -> {
+var f2 = a, c -> {
   # Int
-  val b = exFun(a);
+  val b = a.exFun((#DDeme<Deme>)a);
 
-  val c = 4;
+  var c = 4;
+//  a.print(f);
 };
+
+# (Int, Int:(Str, A<Str>:Str))
+fn2 = a, b -> {
+  val m = a-> {;;;
+    # (Int:)
+    var a = a-> { val b = 12;};;;;; };
+}
+
+
+# (Int, Int:(Str:Str))fn3=a,b->{val m=a->{#(Int:)var a=a->{val b=12;};};};
 
 /**
 & more
