@@ -2,8 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Cpath.h"
-
-static Arr/*char*/ *paths = NULL;
+#include "global.h"
 
 /*.
 -struct: @Cpath
@@ -12,7 +11,9 @@ static Arr/*char*/ *paths = NULL;
   fpath: char * = ""
   id: char * = ""
   file: char * = ""
+  parent: char * = ""
   lib: char * = ""
+  js: char * = ""
 */
 
 /*.-.*/
@@ -22,7 +23,9 @@ struct cpath_Cpath {
   char *fpath;
   char *id;
   char *file;
+  char *parent;
   char *lib;
+  char *js;
 };
 
 Cpath *_cpath_new(char *path) {
@@ -31,7 +34,9 @@ Cpath *_cpath_new(char *path) {
   this->fpath = "";
   this->id = "";
   this->file = "";
+  this->parent = "";
   this->lib = "";
+  this->js = "";
   return this;
 }
 
@@ -56,20 +61,22 @@ char *cpath_file(Cpath *this) {
 }
 
 inline
+char *cpath_parent(Cpath *this) {
+  return this->parent;
+}
+
+inline
 char *cpath_lib(Cpath *this) {
   return this->lib;
 }
+
+inline
+char *cpath_js(Cpath *this) {
+  return this->js;
+}
 /*.-.*/
 
-void cpath_init(Arr/*char*/ *ps) {
-  if (paths)
-    THROW exc_illegal_state("'paths' already was initialized") _THROW
-  paths = ps;
-}
-
 Cpath *cpath_new(char *path) {
-  if (!paths)
-    THROW exc_illegal_state("'paths' was not initialized") _THROW
   if (*path == '/')
     THROW "'%s' is an absolute path", path _THROW
   if (path[strlen(path) - 1] == '/')
@@ -82,7 +89,7 @@ Cpath *cpath_new(char *path) {
   char *fpath = str_printf("%s.mini", path);
 
   Arr/*char*/ *roots = arr_new();
-  EACH(paths, char, p) {
+  EACH(global_roots(), char, p) {
     if (file_exists(path_cat(p, fpath, NULL))) {
       arr_add(roots, p);
       this->id = str_creplace(path, '/', '_');
@@ -91,7 +98,9 @@ Cpath *cpath_new(char *path) {
         : path_cat(file_cwd(), p, path, NULL);
       this->fpath = fpath;
       this->file = str_printf("%s.mini", f);
+      this->parent = path_parent(this->file);
       this->lib = path_cat(sys_home(), "paths", f + 1, NULL);
+      this->js = str_printf("%s.js", this->lib);
     }
   }_EACH
 
@@ -110,10 +119,17 @@ Cpath *cpath_new(char *path) {
   return this;
 }
 
+inline
+bool cpath_eq(Cpath *this, Cpath *other) {
+  return !strcmp(this->id, other->id);
+}
+
+inline
 Json *cpath_serialize(Cpath *this) {
   return json_wstring(this->path);
 }
 
+inline
 Cpath *cpath_restore(Json *s) {
   return cpath_new(json_rstring(s));
 }

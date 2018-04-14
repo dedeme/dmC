@@ -2,7 +2,11 @@
 // such
 
 # [Int]
-var sym = one. tow;
+var sym0 = one ;
+# [Int]
+var sym = one . tow[2];
+# ([Int]:)
+var sym1 = one.tow()(sym);
 
 var fax = [99, 88];
 var fax1 = ["a"];
@@ -12,12 +16,30 @@ var fax3 = [];
 # Int
 var fax4 = [null, 3, 4, one, one. two];
 
+val ffax = [99, 88][1];
+# *
+val ffax2 = [a, 88][1];
+# Str
+val ffax3 = [a, 88][1](abc).toStr();
+
 val m0 = {one: 99, "two": 88};
 # {{Int}}
 val m1 = {};
+val m2 = {one: 99, "two": 88}["fs"];
 
 # Int
 var f;
+
+val par0 = (13);
+
+# Str
+val par2 = (13 + 1) . toStr()[3].toStr("a");
+
+# Int
+var par3 = ("abc" + "a")[4]();
+
+# Int
+var par4 = ("abc" + "a")()(a, "b");
 
 /*
 # (:Int)

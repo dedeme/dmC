@@ -90,9 +90,9 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
         Arr/*Cvalue*/ *cvalues;
         tx = values_new_read(&cvalues, tx, dvalue, is_public);
 
-        if (txpos_eq(tx, r = token_cconst(tx, ';')))
-          TH(tx) "Expected ';'" _TH
+        while (txpos_neq(tx, r = token_cconst(tx, ';'))) {
           tx = r;
+        }
 
         EACH(cvalues, Cvalue, v) {
           Pos *pos = cvalue_pos(v);
@@ -108,9 +108,6 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
           }_TRY
         }_EACH
       } else {
-        if (token_is_reserved(id))
-          TH(tx) "'%d' is a reserved word", id _TH
-
         if (!strcmp(id, "val")) {
           Dvalue *dvalue;
           tx = block_declaration(&dvalue, tx, tp);
@@ -136,7 +133,38 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
           } CATCH(e) {
             TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
           }_TRY
+        } else if (!strcmp(id, "enum")) {
+          if (txpos_eq(tx, r = token_cconst(tx, '(')))
+            TH(tx) "Expected '('" _TH
+          tx = r;
+          Txpos *start2 = tx;
+          Arr/*char*/ *ids;
+          tx = token_list(
+            &ids, tx, ')', (Txpos *(*)(void **, Txpos *))token_valid_id
+          );
+          if (!arr_size(ids))
+            TH(tx) "Variables are missing" _TH
+          int n = 0;
+          EACH(ids, char, id) {
+            Dvalue *dvalue = dvalue_new(txpos_pos(start2), id);
+            dvalue_set_tpos(dvalue, dvalue_pos(dvalue));
+            dvalue_set_type(dvalue, type_new_int());
+            dvalue_set_value(dvalue, value_new_int(
+              dvalue_pos(dvalue),
+              str_printf("%d", n++)
+            ));
+            TRY {
+              class_add_cvalue(
+                c, cvalue_new_val(txpos_pos(start2), is_public, true, dvalue)
+              );
+            } CATCH(e) {
+              TH(start) str_sub_end(e, str_cindex(e, '\n') + 1) _TH
+            }_TRY
+          }_EACH
         } else {
+          if (token_is_reserved(id))
+            TH(tx) "'%s' is a reserved word", id _TH
+
           if (!is_typed)
             TH(tx) "Method type is missing (%s)", id _TH
           if (type_type(tp) != FN)
@@ -152,10 +180,6 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
 
           if (type_type(value_type(val)) != FN)
             TH(tx) "Method value must be function (%s)", id _TH
-
-          if (txpos_eq(tx, r = token_cconst(tx, ';')))
-            TH(tx) "Expected ';'" _TH
-          tx = r;
 
           Dvalue *dvalue = dvalue_new(pos, id);
           dvalue_set_type(dvalue, tp);
@@ -275,11 +299,13 @@ Txpos *block_declaration(Dvalue **d, Txpos *tx, Type *tp) {
   pos = txpos_pos(tx);
   Value *val;
   tx = values_read(&val, tx, false);
-
-  if (txpos_eq(tx, r = token_cconst(tx, ';')))
-    TH(tx) "Expected ';'" _TH
+/*
+  if (txpos_eq(tx, r = token_cconst(tx, ';'))) {
+    if (*txpos_start(tx) != '}')
+      TH(tx) "Expectedxx ';'" _TH
+  }
   tx = r;
-
+*/
   Dvalue *dvalue = dvalue_new(pos, id);
   if (type_is_unknown(tp)) {
     tp = value_type(val);

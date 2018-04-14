@@ -10,10 +10,10 @@
 #include "Cpath.h"
 #include "ast/Class.h"
 
-/// lexer_run starts lexer
-void lexer_run(Arr/*char*/ *paths, Cpath *main_file);
+/// lexer_run clean unused library files
+void lexer_init();
 
-/// lexer_compile retun can be null
+/// lexer_compile throws an exception if it fails
 Class *lexer_compile(Cpath *cpath);
 
 #endif

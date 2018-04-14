@@ -148,7 +148,7 @@ static Txpos *read_implement(Implement **implement, Txpos *tx) {
   Txpos *start = tx;
 
   char *path;
-  if (txpos_eq(tx, r = token_path(&path, tx)))
+  if (txpos_eq(tx, r = token_id(&path, tx)))
     TH(tx) "Path is missing" _TH
   tx = r;
 
@@ -175,7 +175,7 @@ Txpos *head_extends(Implement **export, Txpos *tx) {
   tx = r;
 
   if (txpos_eq(tx, r = read_implement(export, tx)))
-    TH(tx) "'_extends' path is missing" _TH
+    TH(tx) "'_extends' super is missing" _TH
 
   return r;
 }
@@ -188,7 +188,7 @@ Txpos *head_implements(Arr/*Implement*/ **implements, Txpos *tx) {
   tx = r;
 
   if (txpos_eq(tx, r = token_cconst(tx, '{')))
-    TH(tx) "'_implements' paths are missing" _TH
+    TH(tx) "'_implements' parents are missing" _TH
   tx = r;
 
   Arr/*Implements*/ *imps;

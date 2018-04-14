@@ -7,6 +7,7 @@
 #include "lexer/token.h"
 #include "lexer/stats.h"
 #include "lexer/block.h"
+#include "lexer/attachs.h"
 #include "DEFS.h"
 
 static Txpos *read_null(Value **v, Txpos *tx) {
@@ -22,8 +23,9 @@ static Txpos *read_bool(Value **v, Txpos *tx) {
   Txpos *r;
   char *value;
   if (txpos_neq(tx, r = token_bool(&value, tx))) {
-    *v = value_new_bool(txpos_pos(tx), value);
-    tx = r;
+    Arr /*Attach*/ *atts = arr_new();
+    tx = attachs_read_dot(atts, r);
+    *v = value_new_bool(txpos_pos(tx), atts, value);
   }
   return tx;
 }
@@ -32,8 +34,9 @@ static Txpos *read_byte(Value **v, Txpos *tx) {
   Txpos *r;
   char *value;
   if (txpos_neq(tx, r = numbers_byte(&value, tx))) {
-    *v = value_new_byte(txpos_pos(tx), value);
-    tx = r;
+    Arr /*Attach*/ *atts = arr_new();
+    tx = attachs_read_dot(atts, r);
+    *v = value_new_byte(txpos_pos(tx), atts, value);
   }
   return tx;
 }
@@ -63,19 +66,25 @@ static Txpos *read_string(Value **v, Txpos *tx) {
   char *value;
   enum Vtype_t type;
   if (txpos_neq(tx, r = strings_read(&type, &value, tx))) {
+
+    Arr /*Attach*/ *atts = arr_new();
     switch (type) {
     case VSTR:
-      *v = value_new_str(txpos_pos(tx), value);
+      r = attachs_read_dot_sub(atts, r);
+      *v = value_new_str(txpos_pos(tx), atts, value);
       break;
     case VCHAR:
-      *v = value_new_char(txpos_pos(tx), value);
+      r = attachs_read_dot(atts, r);
+      *v = value_new_char(txpos_pos(tx), atts, value);
       break;
     case VSTR2:
-      *v = value_new_str2(txpos_pos(tx), value);
+      r = attachs_read_dot_sub(atts, r);
+      *v = value_new_str2(txpos_pos(tx), atts, value);
       break;
     default:
       THROW "'%d' unknown type" _THROW
     }
+
     tx = r;
   }
   return tx;
@@ -84,35 +93,11 @@ static Txpos *read_string(Value **v, Txpos *tx) {
 static Txpos *read_id(Value **v, Txpos *tx) {
   Txpos *r;
   char *value;
-  if (txpos_neq(tx, r = token_point_id(&value, tx))) {
-    *v = value_new_id(txpos_pos(tx), value);
-    tx = r;
+  if (txpos_neq(tx, r = token_valid_id(&value, tx))) {
+    Arr /*Attach*/ *atts = arr_new();
+    tx = attachs_read_all(atts, r);
+    *v = value_new_id(txpos_pos(tx), atts, value);
   }
-  return tx;
-}
-
-static Txpos *read_fid(Value **v, Txpos *tx) {
-  Txpos *start = tx;
-  Txpos *r;
-  char *id;
-  if (txpos_eq(tx, r = token_point_id(&id, tx))) {
-    return tx;
-  }
-  tx = r;
-
-  if (txpos_eq(tx, r = token_cconst(tx, '('))) {
-    return start;
-  }
-  tx = r;
-
-  Arr/*Value*/ *list;
-  Txpos *read(void **value, Txpos *tx) {
-    return values_read((Value **)value, tx, false);
-  }
-  tx = token_list(&list, tx, ')', read);
-
-  *v = value_new_fid(txpos_pos(start), id, list);
-
   return tx;
 }
 
@@ -130,7 +115,10 @@ static Txpos *read_arr(Value **v, Txpos *tx) {
   }
   tx = token_list(&list, tx, ']', read);
 
-  *v = value_new_arr(txpos_pos(start), list);
+
+  Arr /*Attach*/ *atts = arr_new();
+  tx = attachs_read_dot_sub(atts, tx);
+  *v = value_new_arr(txpos_pos(start), atts, list);
 
   return tx;
 }
@@ -152,11 +140,8 @@ static Txpos *read_map(Value **v, Txpos *tx) {
     if (txpos_neq(tx, r = read_string(&kv, tx))) {
       arr_add(key_value, kv);
       tx = r;
-    } else if (txpos_neq(tx, r = read_id(&kv, tx))) {
-      arr_add(key_value, kv);
-      tx = r;
     } else
-      TH(tx) "Map key must be a string" _TH
+      TH(tx) "Literal map key must be a literal string" _TH
 
     if (txpos_eq(tx, r = token_cconst(tx, ':')))
       TH(tx) "Expected ':' (colon)" _TH
@@ -170,15 +155,16 @@ static Txpos *read_map(Value **v, Txpos *tx) {
   }
   tx = token_list(&list, tx, '}', read);
 
-  Arr/*Value*/ *keys = arr_new();
-  Arr/*Value*/ *values = arr_new();
+  Arr/*Value*/ *kvs = arr_new();
   RANGE0(i, arr_size(list)) {
     Arr/*Value*/ *kv = arr_get(list, i);
-    arr_add(keys, arr_get(kv, 0));
-    arr_add(values, arr_get(kv, 1));
+    arr_add(kvs, arr_get(kv, 0));
+    arr_add(kvs, arr_get(kv, 1));
   }_RANGE
 
-  *v = value_new_map(txpos_pos(start), keys, values);
+  Arr /*Attach*/ *atts = arr_new();
+  tx = attachs_read_dot_sub(atts, tx);
+  *v = value_new_map(txpos_pos(start), atts, kvs);
   return tx;
 }
 
@@ -232,6 +218,46 @@ static Txpos *read_with(Value **v, Txpos *tx) {
   return tx;
 }
 
+static Txpos *read_new(Value **v, Txpos *tx) {
+  Txpos *start = tx;
+  Txpos *r;
+  char *id;
+  if (txpos_eq(tx, r = token_id(&id, tx))) {
+    return tx;
+  }
+  if (strcmp(id, "new")) {
+    return tx;
+  }
+  tx = r;
+
+  Type *tp;
+  r = block_type(&tp, tx);
+
+  char *tid = str_printf(" %s ", type_id(tp));
+  switch (type_type(tp)) {
+    case FN: TH(tx) "A function can not be declared 'new'" _TH
+    case ANY: TH(tx) "A type 'Any' can not be declared 'new'" _TH
+    case DATA:
+      if (str_index(" Bool Byte Int Float Char Str ", tid) != -1)
+        TH(tx) "A type '%s' can not be declared 'new'", type_id(tp) _TH
+      break;
+    default: THROW "Bad type" _THROW
+  }
+  tx = r;
+
+  if (txpos_eq(tx, r = token_cconst(tx, '(')))
+    TH(tx) "Expected '('" _TH
+  tx = r;
+
+  Arr/*Value*/ *vs;
+  tx = token_list(
+    &vs, tx, ')', (Txpos *(*)(void **, Txpos *))values_read0
+  );
+
+  *v = value_new_new(txpos_pos(start), tp, vs);
+  return tx;
+}
+
 static Txpos *read_cast(Value **v, Txpos *tx) {
   Txpos *r;
   if (txpos_eq(tx, r = token_const(tx, "(#"))){
@@ -265,7 +291,10 @@ static Txpos *read_group(Value **v, Txpos *tx) {
   Value *value;
   tx = values_read(&value, tx, true);
 
-  *v = value_new_group(txpos_pos(start), value);
+  Arr /*Attach*/ *atts = arr_new();
+  tx = attachs_read_all(atts, tx);
+
+  *v = value_new_group(txpos_pos(start), atts, value);
   return tx;
 }
 
@@ -350,7 +379,7 @@ static Txpos *read_fn(Value **v, Txpos *tx) {
 
   EACH(params, char, p) {
     if (token_is_reserved(p))
-      TH(start) "'%s' is a reserverd word", p _TH
+      TH(start) "'%s' is a reserved word", p _TH
   }_EACH
 
   if (txpos_eq(tx, r = token_cconst(tx, '{')))
@@ -395,7 +424,7 @@ Txpos *values_read(Value **val, Txpos *tx, bool is_group) {
     tx = r;
   } else if (txpos_neq(tx, r = read_with(&vr, tx))) {
     tx = r;
-  } else if(txpos_neq(tx, r = read_fid(&vr, tx))) {
+  } else if (txpos_neq(tx, r = read_new(&vr, tx))) {
     tx = r;
   } else if(txpos_neq(tx, r = read_id(&vr, tx))) {
     tx = r;
@@ -425,6 +454,11 @@ Txpos *values_read(Value **val, Txpos *tx, bool is_group) {
   return tx;
 }
 
+inline
+Txpos *values_read0(Value **val, Txpos *tx) {
+  return values_read(val, tx, false);
+}
+
 static Txpos *read_new_cvalue(Cvalue **cvalue, Txpos *tx, bool is_public) {
   Txpos *r;
   Txpos *start = tx;
@@ -440,9 +474,6 @@ static Txpos *read_new_cvalue(Cvalue **cvalue, Txpos *tx, bool is_public) {
   if (txpos_eq(tx, r = token_id(&id, tx)))
     TH(tx) "Expected an identifier" _TH
   tx = r;
-
-  if (token_is_reserved(id))
-    TH(tx) "'%d' is a reserved word", id _TH
 
   if (!strcmp(id, "val")) {
     Dvalue *dvalue;
@@ -479,7 +510,7 @@ static Txpos *read_param (Kv/*Kv[Pos]*/ **param, Txpos *tx) {
   char *id;
   r = token_id(&id, tx);
   if (token_is_reserved(id))
-    TH(tx) "'%s' is a reserverd word", id _TH
+    TH(tx) "'%s' is a reserved word", id _TH
   tx = r;
 
   *param = kv_new(id, kv_new(value, pos));
@@ -522,7 +553,7 @@ Txpos *values_new_read(
       Type *dvalue_type = arr_get(dvalue_types, i);
       Pos *pos = ((Kv *)kv->value)->value;
 
-      Value *v = value_new_id(pos, id);
+      Value *v = value_new_id(pos, arr_new(), id);
 
       Dvalue *dv = dvalue_new(pos, id);
       dvalue_set_tpos(dv, pos);
@@ -549,6 +580,10 @@ Txpos *values_new_read(
     tx = r;
 
     for (;;) {
+      if (txpos_neq(tx, r = token_cconst(tx, ';'))) {
+        tx = r;
+        continue;
+      }
       if (txpos_neq(tx, r = token_cconst(tx, '}'))) {
         tx = r;
         break;
@@ -568,6 +603,10 @@ Txpos *values_new_read(
     tx = r;
 
     for (;;) {
+      if (txpos_neq(tx, r = token_cconst(tx, ';'))) {
+        tx = r;
+        continue;
+      }
       if (txpos_neq(tx, r = token_cconst(tx, '}'))) {
         tx = r;
         break;

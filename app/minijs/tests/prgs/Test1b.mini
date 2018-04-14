@@ -5,7 +5,12 @@
 var fax = " a\"\\bñc ";
 var fax1 = ' ';
 var fax2 = 'ñ';
-var fax3 = ` abñc ${x + y} `;
+var fax3 = ` abñc ${x + y} `[1];
+
+val f2 = "a"[1];
+
+# Int
+val f3 = "" . length . toStr()[2];
 
 _private
 

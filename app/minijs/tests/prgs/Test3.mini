@@ -2,15 +2,80 @@
 # (:)
 f1 = a -> {
   val a = 3;
+  a = 45;
+  a[4] = "abc" + "a";
+  ax()[1] = 12;
+
+  while (a == 33) {
+    a = a + 1;
+    break
+  }
+
+  do {
+    a = a + 1;
+    return a
+  } while (a == 33);
+
+  for (x = 3, 8, -1) { // for
+  }
+
+  for (i, 3, 2) { // for0
+
+  }
+
+  for (x :: array) { // for_each
+  }
+
+  if (a == b) {
+    return x;
+  }
+
+  if (a == b) {
+    return x
+  } else {
+    return y
+  }
+
+  if (a == b) {
+    return x;
+  } elif (a == c) {
+  }
+
+  if (a == b) {
+    return x
+  } elif (a == c) {
+  } else {
+    return z
+  }
 
   print(a);
   p.print();
-  p.print(a + b,"a", x -> {a(b);}, -34);
-  return;
-};
+  p.print(a + b,"a", x -> {a(b)}, -34);
+  return
+}
 
 # (:Int)
 f2 = -> {
-  a.b.c([(#Int)"a", x -> {a(b);}]);
+  a();
+  a.b.c([(#Int)"a", x -> {a(b)}]);
   return (#Int) [3 + 4] * 2;
-};
+  break;
+  continue;
+
+  try {
+    throw x;
+  } catch (e) {
+  } finally {
+  }
+
+}
+
+val A = 1;
+val B = 2;
+
+enum (D, VV, C);
+
+var c1 = new Class("abc", f);
+var c2 = new Class<Str>();
+var c3 = new Class<Str>(f);
+

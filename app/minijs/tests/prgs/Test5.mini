@@ -1,0 +1,29 @@
+
+# (:)
+val main = -> {
+  var x = null;
+  val x2 = true;
+  val x3 = true.eq(false)[1](3, 5);
+  val x4 = 12;
+  val x5 = (123.02e-12).toString()[1];
+  val x6 = 12t;
+  val s1 = 'a';
+  val s2 = "";
+  val s3 = "abc";
+  val s4 = `ab${3+4}`;
+  var a1 = [];
+  val a2 = [12t];
+  val a3 = ["a", "b", 4, true];
+  val m1 = {};
+  val m2 = {"1": 12t};
+  val m3 = {"1": "a", "2": 4, "3": true, "four" : four};
+  val n1 = new N();
+  val n2 = new N2(3);
+  val n3 = new N3<Str>(a, true);
+  x = false;
+  n2 = new N2<T,N>(r);
+  f0 = f();
+  f1 = f1(1);
+  f2 = f2(1, 2)
+}
+

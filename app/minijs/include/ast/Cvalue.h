@@ -54,8 +54,7 @@ Cvalue *cvalue_new_var(
   Dvalue *dvalue
 );
 
-/// cvalue_id throw exception if this is not of ctype VAL, VAR, METHOD, GETTER
-/// or SETTER.
+///
 char *cvalue_id(Cvalue *this);
 
 #endif

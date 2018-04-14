@@ -2,9 +2,11 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "minijs.h"
+#include "global.h"
 #include "Cpath.h"
 #include "lexer/lexer.h"
-#include "parser/Program.h"
+#include "types/Dtype.h"
+#include "parser/parser.h"
 #include "DEFS.h"
 
 static void help (void) {
@@ -29,9 +31,11 @@ static void help (void) {
 
 int main (int argc, char **argv) {
   sys_init("minijs");
+  global_init();
+  lexer_init();
 
   char *js = "";
-  Arr/*char*/ *paths = arr_new();
+  Arr/*char*/ *paths = global_roots();
   char *main_file = "";
 
   bool js_set = false;
@@ -102,7 +106,6 @@ int main (int argc, char **argv) {
     arr_insert(paths, 0, ".");
   }
 
-  cpath_init(paths);
   Cpath *main_path = cpath_new(main_file);
 
   if (!*js) {
@@ -110,8 +113,20 @@ int main (int argc, char **argv) {
   }
   file_mkdir(path_parent(js));
 
-  lexer_run(paths, main_path);
-  program_print(program_new(main_path), js);
+  bool fail = false;
+  TRY {
+    Obj *tp = parser_type(false, main_path, "main");
+    if (!tp)
+      THROW exc_null_pointer("dtp") _THROW
 
-  return 0;
+    //  lexer_run(paths, main_path);
+    //  program_print(program_new(main_path), js);
+  } CATCH(e) {
+    if (e[strlen(e) - 1] == '\1') {
+      fail = true;
+    } else
+      THROW e _THROW
+  }_TRY
+
+  return fail ? 1 : 0;
 }

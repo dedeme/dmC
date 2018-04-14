@@ -4,13 +4,14 @@
 #include "lexer/Txpos.h"
 
 /*.
--struct: Txpos
+-struct: @Txpos
   cpath: Cpath *
   text: char *
   start: char *
   end: char *
   nline: size_t
   nchar: size_t
+  previous: Txpos *
 */
 
 /*.-.*/
@@ -21,15 +22,17 @@ struct txpos_Txpos {
   char *end;
   size_t nline;
   size_t nchar;
+  Txpos *previous;
 };
 
-Txpos *txpos_new(
+Txpos *_txpos_new(
   Cpath *cpath,
   char *text,
   char *start,
   char *end,
   size_t nline,
-  size_t nchar
+  size_t nchar,
+  Txpos *previous
 ) {
   Txpos *this = MALLOC(Txpos);
   this->cpath = cpath;
@@ -38,6 +41,7 @@ Txpos *txpos_new(
   this->end = end;
   this->nline = nline;
   this->nchar = nchar;
+  this->previous = previous;
   return this;
 }
 
@@ -70,11 +74,30 @@ inline
 size_t txpos_nchar(Txpos *this) {
   return this->nchar;
 }
+
+inline
+Txpos *txpos_previous(Txpos *this) {
+  return this->previous;
+}
 /*.-.*/
 
 inline
+Txpos *txpos_new(
+  Cpath *cpath,
+  char *text,
+  char *start,
+  char *end,
+  size_t nline,
+  size_t nchar
+) {
+  return _txpos_new(cpath, text, start, end, nline, nchar, NULL);
+}
+
+inline
 Txpos *txpos_move(Txpos *this, char *pos, size_t nline, size_t nchar) {
-  return txpos_new(this->cpath, this->text, pos, this->end, nline, nchar);
+  return _txpos_new(
+    this->cpath, this->text, pos, this->end, nline, nchar, this
+  );
 }
 
 void txpos_printf(Txpos *this, char *format, ...) {

@@ -5,7 +5,8 @@
 #include "lexer/strings.h"
 #include "DEFS.h"
 
-static char *reserved = " new ";
+static char *reserved = " new return break continue switch case if elif else "
+  "default while do for enum try catch finally val var native ";
 
 Txpos *token_blanks(Txpos *tx) {
   char *p = txpos_start(tx);
@@ -465,4 +466,46 @@ Txpos *token_binary(char **op, Txpos *tx) {
 
 bool token_is_reserved(char *id) {
   return str_index(reserved, str_printf(" %s ", id)) != -1;
+}
+
+Txpos *token_valid_id(char **id, Txpos *tx) {
+  Txpos *r;
+  if (txpos_neq(tx, r = token_id(id, tx))) {
+    if (token_is_reserved(*id))
+      TH(tx) "'%s' is a reserved word", *id _TH
+    tx = r;
+  }
+  return tx;
+}
+
+Txpos *token_native(char **text, Txpos *tx, char *mark) {
+  int len_mark = strlen(mark);
+  char *p = txpos_start(tx);
+  char *start = p;
+  char *end = txpos_end(tx);
+  int nchar = txpos_nchar(tx);
+  int nline = txpos_nline(tx);
+
+  for (;;) {
+    if (!*p)
+      THROW "Unexpected end before txpos_end()" _THROW
+    if (p == end)
+      TH(tx) "Mark end of native '%s' is missing", mark _TH
+
+    if (!memcmp(p, mark, len_mark)) {
+      break;
+    }
+    if (*p == '\n') {
+      ++nline;
+      nchar = 0;
+    } else {
+      ++nchar;
+    }
+    ++p;
+  }
+
+  *text = str_sub(start, 0, p - start);
+  return token_blanks(
+    txpos_move(tx, p + len_mark, nline, nchar + len_mark)
+  );
 }

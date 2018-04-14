@@ -16,16 +16,6 @@
 typedef struct txpos_Txpos Txpos;
 
 ///
-Txpos *txpos_new(
-  Cpath *cpath,
-  char *text,
-  char *start,
-  char *end,
-  size_t nline,
-  size_t nchar
-);
-
-///
 Cpath *txpos_cpath(Txpos *this);
 
 ///
@@ -43,9 +33,24 @@ size_t txpos_nline(Txpos *this);
 ///
 size_t txpos_nchar(Txpos *this);
 
+///
+Txpos *txpos_previous(Txpos *this);
+
 /*.-.*/
 
-///
+/// txpos_new creates a new Txpos. The value of 'txpos_previous()' is set to
+/// NULL.
+Txpos *txpos_new(
+  Cpath *cpath,
+  char *text,
+  char *start,
+  char *end,
+  size_t nline,
+  size_t nchar
+);
+
+/// txpos_move change 'this' position. It last positio is saved in
+/// 'txpos_previous()'
 Txpos *txpos_move(Txpos *this, char *pos, size_t nline, size_t nchar);
 
 /// Print msg

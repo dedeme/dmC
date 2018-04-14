@@ -3,15 +3,18 @@ LIB = dmc
 
 C_FILES = $(wildcard src/*.c) \
 					../../src/Cpath.c \
+					../../src/global.c \
 					$(wildcard ../../src/ast/*.c) \
 					$(wildcard ../../src/types/*.c) \
 					$(wildcard ../../src/lexer/*.c) \
-					$(wildcard ../../src/parser/*.c)
+					$(wildcard ../../src/parser/*.c) \
+					$(wildcard ../../src/js/*.c)
 H_FILES = $(wildcard include/*.h) \
 					$(wildcard ../../include/ast/*.h) \
 					$(wildcard ../../include/types/*.h) \
 					$(wildcard ../../include/lexer/*.h) \
-					$(wildcard ../../include/parser/*.h)
+					$(wildcard ../../include/parser/*.h) \
+					$(wildcard ../../include/js/*.h)
 
 LIB_PATH = ../../lib/lib$(LIB)
 LIB_INCLUDE = ../../lib/lib$(LIB)/include

@@ -42,7 +42,8 @@ Txpos *token_list(
   Arr **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
 );
 
-/// Creates and reads a list. It does not fail. Also 'read' must not fail.
+/// Creates and reads a function definition parameter list. It does not fail.
+/// Also 'read' must not fail.
 Txpos *token_fn_list(Arr **list, Txpos *tx, Txpos *(*read)(void **, Txpos *));
 
 /// Creates and reads an identifier. It does not fail.
@@ -71,5 +72,12 @@ Txpos *token_binary(char **op, Txpos *tx);
 
 ///
 bool token_is_reserved(char *id);
+
+/// Read an id. It fails when id is a reserved word and throws a tx_exception;
+/// but if there is not one id to read does not fail and return 'tx'
+Txpos *token_valid_id(char **id, Txpos *tx);
+
+/// Read text until mark
+Txpos *token_native(char **text, Txpos *tx, char *mark);
 
 #endif

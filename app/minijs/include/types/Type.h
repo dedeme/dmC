@@ -37,28 +37,28 @@ Type *type_restore(Json *s);
 /*.-.*/
 
 ///
-Type *type_new_unknown();
+Type *type_new_unknown(void);
 
 ///
-Type *type_new_bool();
+Type *type_new_bool(void);
 
 ///
-Type *type_new_byte();
+Type *type_new_byte(void);
 
 ///
-Type *type_new_int();
+Type *type_new_int(void);
 
 ///
-Type *type_new_float();
+Type *type_new_float(void);
 
 ///
-Type *type_new_char();
+Type *type_new_char(void);
 
 ///
-Type *type_new_str();
+Type *type_new_str(void);
 
 ///
-Type *type_new_any();
+Type *type_new_any(void);
 
 ///
 Type *type_new_arr(Type *t);

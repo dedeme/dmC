@@ -13,6 +13,10 @@
 #define TH(tx) {txpos_printf((tx),
 
 ///
+#define TH2(class, pos) {txpos_printf(\
+  txpos_new(class_cpath(class), "", 0, 0, pos_nline(pos), pos_nchar(pos)),
+
+///
 #define _TH ); THROW "\1" _THROW}
 
 /// Import types
@@ -37,13 +41,20 @@ enum Vtype_t {
   VMAP,
   VFN,
   VID,
-  VFID,
   VLUNARY,
   VRUNARY,
   VBINARY,
   VTERNARY,
   VWITH,
-  VGROUP
+  VGROUP,
+  VNEW
+};
+
+/// Identifier type
+enum Attach_t {
+  ADOT,
+  ASUB,
+  AFN
 };
 
 /// Type types
@@ -61,14 +72,26 @@ enum Stat_t {
   SVAL,
   SVAR,
   SFN,
-  SRETURN
+  SASSIGN,
+  SRETURN,
+  SBREAK,
+  SCONTINUE,
+  SBLOCK,
+  SWHILE,
+  SDO,
+  SFOR0,
+  SFOR,
+  SFOR_EACH,
+  SIF,
+  STRY,
+  STHROW,
+  SNATIVE
 };
 
 /// Cvalue types
 enum Cvalue_t {
   VAL,
-  VAR,
-  METHOD
+  VAR
 };
 
 #endif

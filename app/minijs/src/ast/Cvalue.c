@@ -107,8 +107,5 @@ Cvalue *cvalue_new_var(
 
 inline
 char *cvalue_id(Cvalue *this) {
-  if (!this->dvalue)
-    THROW "This is not a Dvalue" _THROW
-
   return dvalue_id(this->dvalue);
 }

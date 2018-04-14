@@ -1,6 +1,15 @@
 
 // such
 
+# Byte
+var by = null;  // such
+
+val b1 = true;
+var b2 = false;
+
+# Str
+val b3 = true.toStr(a, b)["abc"](a)()(1, c.a).toStr();
+
 var fax = 1245;
 var fax1 = 1t;
 var fax2 = 0x12AafFt;
@@ -11,12 +20,16 @@ val fint2 = 0;
 
 var f0 = .5e-5;
 var f1 = .5e+35;
-var f2 = 3.e12;
+var f2 = (3.e12);
 var f3 = 123214.33;
 var f4 = 123214.33e-1;
 
 # Str
+var f5 = 3t.toStr();
+
+# Str
 var sym = a;
+
 
 # Str
 var sym2 = a$0 . b$ . c;

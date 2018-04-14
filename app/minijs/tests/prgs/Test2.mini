@@ -5,6 +5,8 @@ _local
 <T, U>
 
 _import {
+  One,
+  One as Two,
   a/b/One,
   a/b/One as Two,
   a/b *,
@@ -12,11 +14,12 @@ _import {
   a/b * (One, Tow)
 }
 
-_extends a/b/One (T as Str, U as Int)
+_extends OnlyOne (T as Str, U as Int)
 
 _implements {
-  a/b/One (T as [Str]),
-  a/b/Two ()
+  One (T as [Str]),
+  Two,
+  Three ()
 }
 
 ;;;
@@ -24,30 +27,31 @@ var a = 2;
 
 val ne=9;; ;;
 
-# (Int, *, Int:)
+# (Int, *, Int:Test2)
 new = +ax, b, -ccc -> {
-  _public  {
+  _public  {;;
     val x = 23;
     # Int
     var z;
   }
   _private {
     #Int
-    var ccc = ccc;
+    var ccc = ccc
   }
 
   val a = "";
-}
+  val b = "";
+};
 
 # (:Int)
 inter = -> {; ;;
 };; ;
 
 # (:Int)
-inter2 = -> {val a = 12;}
+inter2 = -> {val a = 12;};
 
 # (:Int)
-inter3=->{}
+inter3=->{};
 
 # (:Int)
 inter4=->{;;;};;;
@@ -73,7 +77,7 @@ fn2 = a, b -> {
   val m = a-> {;;;
     # (Int:)
     var a = a-> { val b = 12;};;;;; };
-}
+};
 
 
 # (Int, Int:(Str:Str))fn3=a,b->{val m=a->{#(Int:)var a=a->{val b=12;};};};
