@@ -3,6 +3,7 @@
 
 #include "lexer/token.h"
 #include "lexer/strings.h"
+#include "ast/ops.h"
 #include "DEFS.h"
 
 static char *reserved = " new return break continue switch case if elif else "
@@ -377,34 +378,6 @@ Txpos *token_path(char **path, Txpos *tx) {
   );
 }
 
-Txpos *token_point_id(char **id, Txpos *tx) {
-  Txpos *r;
-  Buf *bf = buf_new();
-  char *i;
-  Txpos *prepoint = NULL;
-  for (;;) {
-    if (txpos_eq(tx, r = token_id(&i, tx))) {
-      if (prepoint) {
-        tx = prepoint;
-      }
-      break;
-    }
-    tx = r;
-    if (prepoint) {
-      buf_cadd(bf, '.');
-    }
-    buf_add(bf, i);
-    if (txpos_eq(tx, r = token_cconst(tx, '.'))) {
-      break;
-    }
-    prepoint = tx;
-    tx = r;
-  }
-
-  *id = buf_to_str(bf);
-  return tx;
-}
-
 Txpos *token_bool(char **value, Txpos *tx) {
   Txpos *r;
   if (txpos_neq(tx, r = token_const(tx, "true"))) {
@@ -422,13 +395,13 @@ Txpos *token_lunary(char **op, Txpos *tx) {
   Txpos *r;
   char ch;
 
-  if (txpos_neq(tx, r = token_csplit(&ch, tx, "!"))) {
+  if (txpos_neq(tx, r = token_csplit(&ch, tx, ops_u1()))) {
     *op = " ";
     **op = ch;
     return r;
   }
 
-  if (txpos_neq(tx, r = token_split(op, tx, "++ --"))) {
+  if (txpos_neq(tx, r = token_split(op, tx, ops_u()))) {
     return r;
   }
 
@@ -437,7 +410,7 @@ Txpos *token_lunary(char **op, Txpos *tx) {
 
 Txpos *token_runary(char **op, Txpos *tx) {
   Txpos *r;
-  if (txpos_neq(tx, r = token_split(op, tx, "++ --"))) {
+  if (txpos_neq(tx, r = token_split(op, tx, ops_u()))) {
     return r;
   }
 
@@ -445,8 +418,8 @@ Txpos *token_runary(char **op, Txpos *tx) {
 }
 
 Txpos *token_binary(char **op, Txpos *tx) {
-  char *ch1 = "+-*/%^><&|";
-  char *chs = "== != <= <= && || ^^ >>> << >> ?:";
+  char *ch1 = ops_b1();
+  char *chs = "== != <= >= && || ^^ >>> << >> ?:";
 
   Txpos *r;
   char ch;

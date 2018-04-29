@@ -23,10 +23,10 @@ bool final_class_public(Final_class *this);
 
 /*.-.*/
 
-/// private true if path can be called although it is local
-Final_class *final_class_new(bool local, Cpath *path);
-
 ///
-Obj *final_class_object_type(Final_class *this, char *object);
+Final_class *final_class_new(Cpath *path);
+
+/// If 'object' can be found, it throws a tx_exception
+Obj *final_class_object(Final_class *this, char *object);
 
 #endif

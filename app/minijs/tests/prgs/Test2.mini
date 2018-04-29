@@ -27,15 +27,15 @@ var a = 2;
 
 val ne=9;; ;;
 
-# (Int, *, Int:Test2)
+: (Int, *, Int:Test2)
 new = +ax, b, -ccc -> {
   _public  {;;
     val x = 23;
-    # Int
+    : Int
     var z;
   }
   _private {
-    #Int
+    :Int
     var ccc = ccc
   }
 
@@ -43,44 +43,44 @@ new = +ax, b, -ccc -> {
   val b = "";
 };
 
-# (:Int)
+: (:Int)
 inter = -> {; ;;
 };; ;
 
-# (:Int)
+: (:Int)
 inter2 = -> {val a = 12;};
 
-# (:Int)
+: (:Int)
 inter3=->{};
 
-# (:Int)
+: (:Int)
 inter4=->{;;;};;;
 
 // ----------------------------------------------------------------------- //
 _private
 // ----------------------------------------------------------------------- //
 ;; ;
-# (:)
+: (:)
 val f1 =  -> { val a=4; };
 
-# (Int:)
+: (Int:)
 var f2 = a, c -> {
-  # Int
-  val b = a.exFun((#DDeme<Deme>)a);
+  : Int
+  val b = a.exFun((:DDeme<Deme>)a);
 
   var c = 4;
 //  a.print(f);
 };
 
-# (Int, Int:(Str, A<Str>:Str))
+: (Int, Int:(Str, A<Str>:Str))
 fn2 = a, b -> {
   val m = a-> {;;;
-    # (Int:)
+    : (Int:)
     var a = a-> { val b = 12;};;;;; };
 };
 
 
-# (Int, Int:(Str:Str))fn3=a,b->{val m=a->{#(Int:)var a=a->{val b=12;};};};
+: (Int, Int:(Str:Str))fn3=a,b->{val m=a->{:(Int:)var a=a->{val b=12;};};};
 
 /**
 & more

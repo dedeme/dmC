@@ -185,10 +185,10 @@ Value *value_new_bool(Pos *pos, Arr/*Attach*/ *atts, char *value) {
 }
 
 inline
-Value *value_new_byte(Pos *pos, Arr/*Attach*/ *atts, char *value) {
+Value *value_new_byte(Pos *pos, char *value) {
   return _value_new(
-    pos, VBYTE, arr_size(atts) ? type_new_unknown() : type_new_byte(),
-    to_arr(value), arr_new(), atts, arr_new()
+    pos, VBYTE, type_new_byte(),
+    to_arr(value), arr_new(), arr_new(), arr_new()
   );
 }
 
@@ -252,7 +252,7 @@ Value *value_new_map(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *values) {
       ? arr_size(atts) == 1 && attach_type(arr_get(atts, 0)) == ASUB
         ? eq_type_map(values)
         : type_new_unknown()
-      : type_new_arr(eq_type_map(values)),
+      : type_new_map(eq_type_map(values)),
     arr_new(), values, atts, arr_new()
   );
 }

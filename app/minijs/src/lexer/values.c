@@ -34,9 +34,8 @@ static Txpos *read_byte(Value **v, Txpos *tx) {
   Txpos *r;
   char *value;
   if (txpos_neq(tx, r = numbers_byte(&value, tx))) {
-    Arr /*Attach*/ *atts = arr_new();
-    tx = attachs_read_dot(atts, r);
-    *v = value_new_byte(txpos_pos(tx), atts, value);
+    *v = value_new_byte(txpos_pos(tx), value);
+    tx = r;
   }
   return tx;
 }
@@ -165,6 +164,7 @@ static Txpos *read_map(Value **v, Txpos *tx) {
   Arr /*Attach*/ *atts = arr_new();
   tx = attachs_read_dot_sub(atts, tx);
   *v = value_new_map(txpos_pos(start), atts, kvs);
+
   return tx;
 }
 
@@ -189,7 +189,8 @@ static Txpos *read_with(Value **v, Txpos *tx) {
 
   Arr/*Value*/ *conditions = arr_new();
   Arr/*Value*/ *values = arr_new();
-  Value *v1, *v2;
+  Arr/*Value*/ *vs1 = arr_new();
+  Value *v2;
   bool cont = true;
   while (cont) {
     if (txpos_eq(tx, r = token_cconst(tx, ':')))
@@ -197,21 +198,27 @@ static Txpos *read_with(Value **v, Txpos *tx) {
     tx = r;
 
     if (txpos_neq(tx, r = token_cconst(tx, '_'))) {
-      v1 = value_new_null(txpos_pos(start));
+      arr_add(vs1, value_new_null(txpos_pos(start)));
+      tx = r;
+      if (txpos_eq(tx, r = token_cconst(tx, '=')))
+        TH(tx) "Expected '='" _TH
       tx = r;
       cont = false;
     } else {
-      tx = values_read(&v1, tx, false);
+      /**/Txpos *read(void **value, Txpos *tx) {
+      /**/  return values_read((Value **)value, tx, false);
+      /**/}
+      tx = token_list(&vs1, tx, '=', read);
+      if (!arr_size(vs1))
+        TH(tx) "Expected a value" _TH
     }
-
-    if (txpos_eq(tx, r = token_cconst(tx, '=')))
-      TH(tx) "Expected '='" _TH
-    tx = r;
 
     tx = values_read(&v2, tx, false);
 
-    arr_add(conditions, v1);
-    arr_add(values, v2);
+    EACH(vs1, Value, v1) {
+      arr_add(conditions, v1);
+      arr_add(values, v2);
+    }_EACH
   }
 
   *v = value_new_with(txpos_pos(start), value, conditions, values);
@@ -260,7 +267,7 @@ static Txpos *read_new(Value **v, Txpos *tx) {
 
 static Txpos *read_cast(Value **v, Txpos *tx) {
   Txpos *r;
-  if (txpos_eq(tx, r = token_const(tx, "(#"))){
+  if (txpos_eq(tx, r = token_const(tx, "(:"))){
     return tx;
   }
   tx = r;
@@ -309,6 +316,12 @@ static Txpos *read_lunary(Value **v, Txpos *tx) {
 
   Value *value;
   tx = values_read(&value, tx, false);
+  if (
+    ((*op == '-' && *(op + 1) == '-') || (*op == '+' && *(op + 1) == '+'))
+    &&
+    (value_vtype(value) != VID || arr_size(value_attachs(value)))
+  )
+    TH(tx) "'%s' Only can be applied to an identifier", op _TH
 
   *v = value_new_lunary(txpos_pos(start), op, value);
   return tx;
@@ -322,6 +335,9 @@ static Txpos *read_runary(Value **v, Txpos *tx) {
     return tx;
   }
   tx = r;
+
+  if (value_vtype(*v) != VID || arr_size(value_attachs(*v)))
+    TH(tx) "'%s' Only can be applied to an identifier", op _TH
 
   *v = value_new_runary(txpos_pos(start), op, *v);
   return tx;
@@ -463,7 +479,7 @@ static Txpos *read_new_cvalue(Cvalue **cvalue, Txpos *tx, bool is_public) {
   Txpos *r;
   Txpos *start = tx;
   Type *tp;
-  if (txpos_neq(tx, r = token_cconst(tx, '#'))) {
+  if (txpos_neq(tx, r = token_cconst(tx, ':'))) {
     tx = r;
     tx = block_type(&tp, tx);
   } else {

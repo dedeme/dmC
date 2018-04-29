@@ -120,6 +120,11 @@ Cpath *cpath_new(char *path) {
 }
 
 inline
+Cpath *cpath_from_id(char *id) {
+  return cpath_new(str_creplace(id, '_', '/'));
+}
+
+inline
 bool cpath_eq(Cpath *this, Cpath *other) {
   return !strcmp(this->id, other->id);
 }

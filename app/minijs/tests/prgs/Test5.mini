@@ -1,12 +1,12 @@
 
-# (:)
+: (:)
 val main = -> {
   var x = null;
   val x2 = true;
   val x3 = true.eq(false)[1](3, 5);
   val x4 = 12;
   val x5 = (123.02e-12).toString()[1];
-  val x6 = 12t;
+  val x6 = (12t).g();
   val s1 = 'a';
   val s2 = "";
   val s3 = "abc";
@@ -24,6 +24,16 @@ val main = -> {
   n2 = new N2<T,N>(r);
   f0 = f();
   f1 = f1(1);
-  f2 = f2(1, 2)
+  f2 = f2(1, 2);
+  val v0 = !a ;
+  val v1 = !h--;
+  val v2 = a + 23;
+  val v2 = a + 23 % (3 + 2);
+  val v3 = a == 3 ? "abc" : "cde";
+  v3 = a == 3 ? a == 2 ? "abc" : "xx" : 3;
+  val w = with (3 + a )
+    : 2, 6 = 0
+    : b + 5 = 16
+    : _ = -1;
 }
 

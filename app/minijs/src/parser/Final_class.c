@@ -6,10 +6,12 @@
 #include "lexer/lexer.h"
 #include "lexer/Txpos.h"
 #include "global.h"
+#include "parser/Lobj.h"
+#include "parser/parser.h"
 
 #include "js/wclass.h"
 
-/*.+.
+/*.
 -struct:@Final_class
   cpath: Cpath *
   public: bool
@@ -47,7 +49,7 @@ bool final_class_public(Final_class *this) {
 }
 /*.-.*/
 
-Final_class *final_class_new(bool local, Cpath *path) {
+Final_class *final_class_new(Cpath *path) {
   Class *c = NULL;
   EACH(global_classes(), Class, cl) {
     if (cpath_eq(class_cpath(cl), path)) {
@@ -74,7 +76,7 @@ Final_class *final_class_new(bool local, Cpath *path) {
   return this;
 }
 
-Obj *final_class_object_type(Final_class *this, char *object) {
+Obj *final_class_object(Final_class *this, char *object) {
   EACH(this->objects, Kv, kv) {
     if (!strcmp(kv->key, object)) {
       return kv->value;
@@ -95,24 +97,35 @@ Obj *final_class_object_type(Final_class *this, char *object) {
 
   EACH(class_cvalues(c), Cvalue, v) {
     if (!strcmp(cvalue_id(v), object)) {
-      Type *tp = dvalue_type(cvalue_dvalue(v));
+      Dvalue *dv = cvalue_dvalue(v);
+      Type *tp = dvalue_type(dv);
       if (type_is_unknown(tp))
         THROW exc_illegal_state("type of 'tp' is unknown") _THROW
 
-      wclass_object(c, this->imports, v);
+      Type *tpv = parser_value_type(this, lobjs_new(), tp, dvalue_value(dv));
 
+      if (!tpv)
+        TH3(this, cvalue_pos(v)) "Value type is 'void'" _TH
+
+      bool is_static = cvalue_is_static(v);
       Obj *o = obj_new(
+        is_static ? str_printf("%s.%s", cpath_id(path), object) : object,
         tp,
         cvalue_pos(v),
         cvalue_is_public(v),
-        cvalue_is_static(v),
+        is_static,
         cvalue_type(v) == VAL
       );
       map_put(this->objects, object, o);
+
+      wclass_object(c, this->imports, v);
       return o;
     }
   }_EACH
 
-  THROW "test 'supers' unimplemented" _THROW
+  // test 'supers' unimplemented
+
+  TH2(c, pos_new(0,0)) "'%s.%s' not found", cpath_id(path), object _TH
+
   return NULL;
 }

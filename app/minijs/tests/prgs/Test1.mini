@@ -1,13 +1,13 @@
 
 // such
 
-# Byte
+: Byte
 var by = null;  // such
 
 val b1 = true;
 var b2 = false;
 
-# Str
+: Str
 val b3 = true.toStr(a, b)["abc"](a)()(1, c.a).toStr();
 
 var fax = 1245;
@@ -24,28 +24,28 @@ var f2 = (3.e12);
 var f3 = 123214.33;
 var f4 = 123214.33e-1;
 
-# Str
-var f5 = 3t.toStr();
+: Str
+var f5 = (3t).toStr();
 
-# Str
+: Str
 var sym = a;
 
 
-# Str
+: Str
 var sym2 = a$0 . b$ . c;
 
-# Int
+: Int
 val fun0 = $a();
-# Int
+: Int
 val fun1 = $ab([a, "d"]);
-# Int
+: Int
 val fun3 = $abcd ( 1, "a", f() ) ;
 
-# Int
+: Int
 var f;
 
 /*
-# (:Int)
+: (:Int)
 =@age \ {
   return 3;
 }

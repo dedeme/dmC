@@ -19,10 +19,16 @@
 typedef struct attach_Attach Attach;
 
 ///
+Pos *attach_pos(Attach *this);
+
+///
 enum Attach_t attach_type(Attach *this);
 
 ///
 char *attach_id(Attach *this);
+
+///
+void attach_set_id(Attach *this, char *value);
 
 ///
 Arr *attach_values(Attach *this);
@@ -36,12 +42,12 @@ Attach *attach_restore(Json *s);
 /*.-.*/
 
 ///
-Attach *attach_new_dot(char *id);
+Attach *attach_new_dot(Pos *pos, char *id);
 
 ///
-Attach *attach_new_sub(Value *v);
+Attach *attach_new_sub(Pos *pos, Value *v);
 
 ///
-Attach *attach_new_fn(Arr/*Value*/ *vs);
+Attach *attach_new_fn(Pos *pos, Arr/*Value*/ *vs);
 
 #endif

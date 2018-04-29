@@ -1,5 +1,5 @@
 
-# (:)
+: (:)
 f1 = a -> {
   val a = 3;
   a = 45;
@@ -54,11 +54,11 @@ f1 = a -> {
   return
 }
 
-# (:Int)
+: (:Int)
 f2 = -> {
   a();
-  a.b.c([(#Int)"a", x -> {a(b)}]);
-  return (#Int) [3 + 4] * 2;
+  a.b.c([(: Int)"a", x -> {a(b)}]);
+  return (: Int) [3 + 4] * 2;
   break;
   continue;
 

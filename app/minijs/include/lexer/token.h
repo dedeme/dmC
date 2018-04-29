@@ -55,9 +55,6 @@ Txpos *token_directive(Txpos *tx, char *value);
 /// Creates and reads a cpath. It does not fail.
 Txpos *token_path(char **path, Txpos *tx);
 
-/// Creates and reads an identifier with or without point. It does not fail.
-Txpos *token_point_id(char **id, Txpos *tx);
-
 ///
 Txpos *token_bool(char **value, Txpos *tx);
 

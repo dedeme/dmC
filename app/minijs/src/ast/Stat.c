@@ -133,8 +133,17 @@ Stat *stat_new_fn(Pos *pos, Value *value) {
   return this;
 }
 
-Stat *stat_new_assign(Pos *pos, Value *left_value, Value *right_value) {
+Stat *stat_new_inc(Pos *pos, Value *value) {
+  Stat *this = _new(pos, SINC);
+  arr_add(this->values, value);
+  return this;
+}
+
+Stat *stat_new_assign(
+  Pos *pos, char *op, Value *left_value, Value *right_value
+) {
   Stat *this = _new(pos, SASSIGN);
+  arr_add(this->ids, op);
   arr_add(this->values, left_value);
   arr_add(this->values, right_value);
   return this;
@@ -183,22 +192,31 @@ Stat *stat_new_do(Pos *pos, Value *condition, Arr/*Stat*/ *block) {
   return this;
 }
 
-Stat *stat_new_for0(Pos *pos, Arr/*Value*/ *values, Arr/*Stat*/ *block) {
+Stat *stat_new_for0(
+  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
+) {
   Stat *this = _new(pos, SFOR0);
+  arr_add(this->ids, var);
   this->values = values;
   arr_add(this->blocks, block);
   return this;
 }
 
-Stat *stat_new_for(Pos *pos, Arr/*Value*/ *values, Arr/*Stat*/ *block) {
+Stat *stat_new_for(
+  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
+) {
   Stat *this = _new(pos, SFOR);
+  arr_add(this->ids, var);
   this->values = values;
   arr_add(this->blocks, block);
   return this;
 }
 
-Stat *stat_new_for_each(Pos *pos, Value *value, Arr/*Stat*/ *block) {
+Stat *stat_new_for_each(
+  Pos *pos, char *var, Value *value, Arr/*Stat*/ *block
+) {
   Stat *this = _new(pos, SFOR_EACH);
+  arr_add(this->ids, var);
   arr_add(this->values, value);
   arr_add(this->blocks, block);
   return this;

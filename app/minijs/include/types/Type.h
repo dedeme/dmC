@@ -76,6 +76,9 @@ Type *type_new_data(char *id, Arr/*Type*/ *generics);
 ///
 bool type_eq(Type *this, Type *other);
 
+/// If type is a not standard DATA must use its complete path_id
+bool type_child(Type *this, Type *child);
+
 ///
 bool type_is_unknown(Type *this);
 

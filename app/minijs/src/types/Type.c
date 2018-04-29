@@ -3,6 +3,9 @@
 
 #include "types/Type.h"
 #include "lexer/token.h"
+#include "ast/Class.h"
+#include "Cpath.h"
+#include "global.h"
 
 /*.
 struct: @Type
@@ -134,6 +137,12 @@ Type *type_new_data(char *id, Arr/*Type*/ *generics) {
 }
 
 bool type_eq(Type *this, Type *other) {
+  if (!this) {
+    return !other;
+  }
+  if (!other) {
+    return false;
+  }
   if (this->type != other->type) {
     return false;
   }
@@ -146,7 +155,7 @@ bool type_eq(Type *this, Type *other) {
   }
 
   RANGE0(i, arr_size(this->params)) {
-    if (!type_eq(arr_get(this->params, i), arr_get(other->params, i))) {
+    if (!type_eq(arr_nget(this->params, i), arr_nget(other->params, i))) {
       return false;
     }
   }_RANGE
@@ -154,7 +163,98 @@ bool type_eq(Type *this, Type *other) {
   return true;
 }
 
+bool type_child(Type *this, Type *child) {
+  if (!this) {
+    return !child;
+  }
+
+  if (!child) {
+    return false;
+  }
+
+  if (this->type == ANY) {
+    return true;
+  }
+
+  if (type_eq(this, child)) {
+    return true;
+  }
+
+  if (
+    this->type == FN &&
+    this->type == FN &&
+    arr_size(this->params) == arr_size(child->params)
+  ) {
+    RANGE0(i, arr_size(this->params)) {
+      void *pthis = arr_nget(this->params, i);
+      void *pchild = arr_nget(child->params, i);
+      if (!type_child(pthis, pchild)) {
+        return false;
+      }
+    }_RANGE
+    return true;
+  }
+
+  if (
+    this->type == DATA &&
+    this->type == DATA
+  ) {
+    if (str_index(
+      " Bool Byte Int Float Char Str ", str_printf(" %s ", this->id)
+      ) == -1
+    ) {
+      Cpath *tpath = cpath_new(this->id);
+      Cpath *cpath = cpath_new(child->id);
+
+      Class *tclass = NULL;
+      EACH(global_classes(), Class, cl) {
+        if (cpath_eq(class_cpath(cl), tpath)) {
+          tclass = cl;
+          break;
+        }
+      }_EACH
+      if (!tclass) {
+        return false;
+      }
+
+      Class *cclass = NULL;
+      EACH(global_classes(), Class, cl) {
+        if (cpath_eq(class_cpath(cl), cpath)) {
+          cclass = cl;
+          break;
+        }
+      }_EACH
+      if (!cclass) {
+        return false;
+      }
+
+      Arr/*Cvalue*/ *cvalues = class_cvalues(cclass);
+      EACH(class_cvalues(tclass), Cvalue, tv) {
+        bool ok = false;
+        EACH(cvalues, Cvalue, cv) {
+          if (!strcmp(cvalue_id(tv), cvalue_id(cv))) {
+            ok = type_eq(
+              dvalue_type(cvalue_dvalue(tv)),
+              dvalue_type(cvalue_dvalue(cv))
+            );
+            break;
+          }
+        }_EACH
+        if (!ok) {
+          return false;
+        }
+      }_EACH
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool type_is_unknown(Type *this) {
+  if (!this) {
+    return false;
+  }
   if (this->type == UNKNOWN) {
     return true;
   }
@@ -169,6 +269,9 @@ bool type_is_unknown(Type *this) {
 }
 
 char *type_to_str(Type *this) {
+  if (!this) {
+    return "NULL";
+  }
   switch (this->type) {
   case DATA:
     return str_printf("%s%s",

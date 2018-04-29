@@ -9,16 +9,16 @@ var fax3 = ` abñc ${x + y} `[1];
 
 val f2 = "a"[1];
 
-# Int
+: Int
 val f3 = "" . length . toStr()[2];
 
 _private
 
-# Int
+: Int
 var f;
 
 /*
-# (:Int)
+: (:Int)
 =@age \ {
   return 3;
 }

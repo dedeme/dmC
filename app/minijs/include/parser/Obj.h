@@ -17,12 +17,16 @@ typedef struct obj_Obj Obj;
 
 ///
 Obj *obj_new(
+  char *absolute_id,
   Type *type,
   Pos *pos,
   bool is_public,
   bool is_static,
   bool is_val
 );
+
+///
+char *obj_absolute_id(Obj *this);
 
 ///
 Type *obj_type(Obj *this);

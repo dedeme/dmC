@@ -4,9 +4,12 @@
 #include "minijs.h"
 #include "global.h"
 #include "Cpath.h"
+#include "ast/ops.h"
+#include "lexer/Txpos.h"
 #include "lexer/lexer.h"
 #include "types/Dtype.h"
 #include "parser/parser.h"
+#include "js/wprogram.h"
 #include "DEFS.h"
 
 static void help (void) {
@@ -31,11 +34,12 @@ static void help (void) {
 
 int main (int argc, char **argv) {
   sys_init("minijs");
+  ops_init();
   global_init();
   lexer_init();
 
   char *js = "";
-  Arr/*char*/ *paths = global_roots();
+  Arr/*char*/ *paths = arr_new();
   char *main_file = "";
 
   bool js_set = false;
@@ -105,7 +109,9 @@ int main (int argc, char **argv) {
   if (!it_contains_str(it_from(paths), ".")) {
     arr_insert(paths, 0, ".");
   }
-
+  EACH(paths, char, p) {
+    arr_add(global_roots(), p);
+  }_EACH
   Cpath *main_path = cpath_new(main_file);
 
   if (!*js) {
@@ -115,10 +121,22 @@ int main (int argc, char **argv) {
 
   bool fail = false;
   TRY {
-    Obj *tp = parser_type(false, main_path, "main");
-    if (!tp)
-      THROW exc_null_pointer("dtp") _THROW
+    Obj *ob = parser_class_obj(cpath_parent(main_path), main_path, "main");
+    if (!obj_is_public(ob))
+      TH(txpos_new(main_path, "", "", "", 0, 0)) "'main' must be public" _TH
+    if (!obj_is_val(ob))
+      TH(txpos_new(main_path, "", "", "", 0, 0))
+        "'main' must be declared as 'val'"
+      _TH
+    Type *tp = obj_type(ob);
+    if (type_type(tp) != FN)
+      TH(txpos_new(main_path, "", "", "", 0, 0)) "'main' must be a function" _TH
+    if (arr_size(type_params(tp)) != 1)
+      TH(txpos_new(main_path, "", "", "", 0, 0))
+        "'main' must not have parameters"
+      _TH
 
+    wprogram_write(main_path, js);
     //  lexer_run(paths, main_path);
     //  program_print(program_new(main_path), js);
   } CATCH(e) {

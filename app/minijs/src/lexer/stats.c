@@ -27,7 +27,7 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
 
   bool is_typed = false;
   Type *tp;
-  if (txpos_neq(tx, r = token_cconst(tx, '#'))) {
+  if (txpos_neq(tx, r = token_cconst(tx, ':'))) {
     tx = r;
     tx = block_type(&tp, tx);
     is_typed = true;
@@ -36,8 +36,24 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
   }
 
   char *id;
-  if (txpos_eq(tx, r = token_point_id(&id, tx)))
-    TH(tx) "Expected an identifier" _TH
+  if (txpos_eq(tx, r = token_id(&id, tx))) {
+    Value *v;
+    tx = values_read0(&v, tx);
+    enum Vtype_t vtp = value_vtype(v);
+    if (vtp != VLUNARY)
+      TH(tx) "Expected an identifier" _TH
+
+    char *op = arr_get(value_ids(v), 0);
+    if (strcmp(op, "++") && strcmp(op, "--"))
+      TH(tx) "Expected an identifier" _TH
+
+    *stat = stat_new_inc(txpos_pos(start), v);
+    if (txpos_eq(tx, r = token_cconst(tx, ';')) && *txpos_start(tx) != '}')
+      TH(tx) "Expected ';'" _TH
+    tx = r;
+
+    return tx;
+  }
   tx = r;
 
   if (!strcmp(id, "val")) {
@@ -153,23 +169,23 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
         &vs, tx, ')', (Txpos *(*)(void **, Txpos *)) values_read0
       );
       if (!arr_size(vs) || arr_size(vs) > 3)
-        TH(tx) exc_range(1, 4, arr_size(vs)) _TH
+        TH(tx) exc_range(1, 3, arr_size(vs)) _TH
       kind_for = 1;
     } else if (txpos_neq(tx, r = token_cconst(tx, ','))) {
       tx = r;
       tx = token_list(
         &vs, tx, ')', (Txpos *(*)(void **, Txpos *)) values_read0
       );
-      if (!arr_size(vs) || arr_size(vs) > 3)
-        TH(tx) exc_range(1, 3, arr_size(vs)) _TH
+      if (!arr_size(vs) || arr_size(vs) > 2)
+        TH(tx) exc_range(1, 2, arr_size(vs)) _TH
       kind_for = 0;
     } else if (txpos_neq(tx, r = token_const(tx, "::"))) {
       tx = r;
       tx = token_list(
         &vs, tx, ')', (Txpos *(*)(void **, Txpos *)) values_read0
       );
-      if (!arr_size(vs) || arr_size(vs) > 3)
-        TH(tx) exc_range(1, 2, arr_size(vs)) _TH
+      if (!arr_size(vs) || arr_size(vs) > 1)
+        TH(tx) exc_range(1, 1, arr_size(vs)) _TH
       kind_for = 2;
     } else
         TH(tx) "Expected '=', ',' or '::'" _TH
@@ -183,9 +199,9 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
 
     *stat = kind_for
       ? kind_for == 1
-        ? stat_new_for(txpos_pos(start), vs, block)
-        : stat_new_for_each(txpos_pos(start), arr_get(vs, 0), block)
-      : stat_new_for0(txpos_pos(start), vs, block);
+        ? stat_new_for(txpos_pos(start), id2, vs, block)
+        : stat_new_for_each(txpos_pos(start), id2, arr_get(vs, 0), block)
+      : stat_new_for0(txpos_pos(start), id2, vs, block);
     end_at_block = true;
 
   } else if (!strcmp(id, "if")) {
@@ -379,6 +395,17 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
     tx = token_native(&text, tx, id2);
     *stat = stat_new_native(txpos_pos(start), text);
 
+  } else if (
+    txpos_neq(tx, r = token_const(tx, "++")) ||
+    txpos_neq(tx, r = token_const(tx, "--"))
+  ) {
+    Value *v;
+    tx = values_read0(&v, start);
+    enum Vtype_t vtp = value_vtype(v);
+    if (vtp != VRUNARY)
+      TH(tx) "Expected a function call" _TH
+
+    *stat = stat_new_inc(txpos_pos(start), v);
   } else {
 
     if (token_is_reserved(id))
@@ -387,7 +414,8 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
     Arr/*Attach*/ *atts = arr_new();
     tx = attachs_read_all(atts, tx);
 
-    if (txpos_neq(tx, r = token_cconst(tx, '='))) {
+    char *op;
+    if (txpos_neq(tx, r = token_split(&op, tx, "= += -= *= /= %="))) {
       tx = r;
       if (
         arr_size(atts) &&
@@ -398,7 +426,8 @@ Txpos *stats_read(Stat **stat, Txpos *tx) {
       Value *lv = value_new_id(txpos_pos(start), atts, id);
       Value *rv;
       tx = values_read(&rv, tx, false);
-      *stat = stat_new_assign(txpos_pos(start), lv, rv);
+      *stat = stat_new_assign(txpos_pos(start), op, lv, rv);
+
     } else {
       if (
         !arr_size(atts) ||

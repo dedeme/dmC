@@ -5,6 +5,7 @@
 
 /*.
 -struct: Obj
+  absolute_id: char *
   type: Type *
   pos: Pos *
   is_public: bool
@@ -14,6 +15,7 @@
 
 /*.-.*/
 struct obj_Obj {
+  char *absolute_id;
   Type *type;
   Pos *pos;
   bool is_public;
@@ -22,6 +24,7 @@ struct obj_Obj {
 };
 
 Obj *obj_new(
+  char *absolute_id,
   Type *type,
   Pos *pos,
   bool is_public,
@@ -29,12 +32,18 @@ Obj *obj_new(
   bool is_val
 ) {
   Obj *this = MALLOC(Obj);
+  this->absolute_id = absolute_id;
   this->type = type;
   this->pos = pos;
   this->is_public = is_public;
   this->is_static = is_static;
   this->is_val = is_val;
   return this;
+}
+
+inline
+char *obj_absolute_id(Obj *this) {
+  return this->absolute_id;
 }
 
 inline

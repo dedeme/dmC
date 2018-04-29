@@ -3,47 +3,47 @@
 
 var p = (1);
 
-# Int
+: Int
 var p2 = (abc);
 
-# Int
-var p3 = --(-45++)--;
+: Int
+var p3 = -a++;
 
-# Int
+: Int
 var v1 = !abc;
 
-# Int
+: Int
 var v2 = !true;
 
-# Int
-var v3 = ++ 23;
+: Int
+var v3 = ++ z;
 
-# Int
+: Int
 val v4 = +13t;
 
-# Int
-val v5 = --123t;
+: Int
+val v5 = --t;
 
-# Int
+: Int
 val v6 = - 23.23e23;
 
-# Int
+: Int
 var sym = !(f(a, [b, c]));
 
-# Int
+: Int
 var bin = 3 + cde - 2;
 
-#Int
+:Int
 var ter = a ? 0 : b ? --z : a + b;
 
-#Int
+:Int
 val w = with (3 + a )
-  : 2 = 0
+  : 2, 6 = 0
   : b + 5 = 16
   : _ = -1;
 
 /*
-# (:Int)
+: (:Int)
 =@age \ {
   return 3;
 }

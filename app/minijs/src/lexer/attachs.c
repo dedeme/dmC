@@ -12,13 +12,14 @@ Txpos *attachs_read_dot(Arr/*Attach*/ *atts, Txpos *tx) {
     return tx;
   }
   tx = r;
+  Pos *pos = txpos_pos(tx);
 
   char *id;
   if (txpos_eq(tx, r = token_id(&id, tx)))
     TH(tx) "Expected an identifier" _TH
   tx = r;
 
-  arr_add(atts, attach_new_dot(id));
+  arr_add(atts, attach_new_dot(pos, id));
   return attachs_read_all(atts, tx);
 }
 
@@ -30,6 +31,7 @@ Txpos *attachs_read_dot_sub(Arr/*Attach*/ *atts, Txpos *tx) {
     tx = r;
     return tx;
   }
+  Pos *pos = txpos_pos(tx);
 
   if (txpos_eq(tx, r = token_cconst(tx, '['))) {
     return tx;
@@ -43,7 +45,7 @@ Txpos *attachs_read_dot_sub(Arr/*Attach*/ *atts, Txpos *tx) {
     TH(tx) "Expected ']'" _TH
   tx = r;
 
-  arr_add(atts, attach_new_sub(val));
+  arr_add(atts, attach_new_sub(pos, val));
   return attachs_read_all(atts, tx);
 }
 
@@ -64,6 +66,7 @@ Txpos *attachs_read_all(Arr/*Attach*/ *atts, Txpos *tx) {
     tx = r;
     return tx;
   }
+  Pos *pos = txpos_pos(tx);
 
   if (txpos_eq(tx, r = token_cconst(tx, '('))) {
     return tx;
@@ -73,7 +76,7 @@ Txpos *attachs_read_all(Arr/*Attach*/ *atts, Txpos *tx) {
   Arr/*Value*/ *vs;
   tx = token_list(&vs, tx, ')', read_value);
 
-  arr_add(atts, attach_new_fn(vs));
+  arr_add(atts, attach_new_fn(pos, vs));
   return attachs_read_all(atts, tx);
 }
 

@@ -95,6 +95,59 @@ static void write_id(Buf *bf, Map/*char*/ *imports, Value *v) {
   write_atts(bf, imports, value_attachs(v));
 }
 
+static void write_lunary(Buf *bf, Map/*char*/ *imports, Value *v) {
+  buf_add(bf, arr_get(value_ids(v), 0));
+  wval_writebf(bf, imports, arr_get(value_values(v), 0));
+}
+
+static void write_runary(Buf *bf, Map/*char*/ *imports, Value *v) {
+  wval_writebf(bf, imports, arr_get(value_values(v), 0));
+  buf_add(bf, arr_get(value_ids(v), 0));
+}
+
+static void write_binary(Buf *bf, Map/*char*/ *imports, Value *v) {
+  wval_writebf(bf, imports, arr_get(value_values(v), 0));
+  char *op = arr_get(value_ids(v), 0);
+  buf_add(bf,
+    !strcmp(op, "==") ? "==="
+    : !strcmp(op, "!=") ? "!=="
+    : op
+  );
+  wval_writebf(bf, imports, arr_get(value_values(v), 1));
+}
+
+static void write_ternary(Buf *bf, Map/*char*/ *imports, Value *v) {
+  wval_writebf(bf, imports, arr_get(value_values(v), 0));
+  buf_cadd(bf, '?');
+  wval_writebf(bf, imports, arr_get(value_values(v), 1));
+  buf_cadd(bf, ':');
+  wval_writebf(bf, imports, arr_get(value_values(v), 2));
+}
+
+static void write_with(Buf *bf, Map/*char*/ *imports, Value *v) {
+  buf_add(bf, "(function (_tmp) {\nswitch (_tmp) {\n");
+  Arr/*Value*/ *vs = value_values(v);
+  Buf *tmp = buf_new();
+  wval_writebf(tmp, imports, arr_get(vs, 0));
+
+  int len = arr_size(vs) / 2;
+  int lix = 1;
+  int rix = len + 1;
+  Buf *lv, *rv;
+  RANGE0(i, len - 2) {
+    lv = buf_new();
+    rv = buf_new();
+    wval_writebf(lv, imports, arr_get(vs, lix + i));
+    wval_writebf(rv, imports, arr_get(vs, rix + i));
+    buf_add(bf, str_printf("case %s: return %s;\n", buf_str(lv), buf_str(rv)));
+  }_RANGE
+  rv = buf_new();
+  wval_writebf(rv, imports, arr_get(vs, arr_size(vs) - 1));
+  buf_add(bf, str_printf("default: return %s;\n", buf_str(rv)));
+
+  buf_add(bf, str_printf("}\n})(%s)", buf_str(tmp)));
+}
+
 static void write_group(Buf *bf, Map/*char*/ *imports, Value *v) {
   buf_cadd(bf, '(');
   wval_writebf(bf, imports, arr_get(value_values(v), 0));
@@ -153,14 +206,19 @@ void wval_writebf(Buf *bf, Map/*char*/ *imports, Value *v) {
       write_id(bf, imports, v);
       break;
     case VLUNARY:
+      write_lunary(bf, imports, v);
       break;
     case VRUNARY:
+      write_runary(bf, imports, v);
       break;
     case VBINARY:
+      write_binary(bf, imports, v);
       break;
     case VTERNARY:
+      write_ternary(bf, imports, v);
       break;
     case VWITH:
+      write_with(bf, imports, v);
       break;
     case VGROUP:
       write_group(bf, imports, v);

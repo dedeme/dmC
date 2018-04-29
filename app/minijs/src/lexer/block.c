@@ -58,7 +58,7 @@ Class *block_top_class(Txpos *tx, Cpath *cpath) {
 
       bool is_typed = false;
       Type *tp;
-      if (txpos_neq(tx, r = token_cconst(tx, '#'))) {
+      if (txpos_neq(tx, r = token_cconst(tx, ':'))) {
         tx = r;
         tx = block_type(&tp, tx);
         is_typed = true;

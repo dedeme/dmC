@@ -53,6 +53,9 @@ void cpath_init(Arr/*char*/ *paths);
 /// not exist. Also throws an expception if 'path' is absolute.
 Cpath *cpath_new(char *path);
 
+/// Creates a Cpath from its cpath_id. It calls cpath_new
+Cpath *cpath_from_id(char *id);
+
 ///
 bool cpath_eq(Cpath *this, Cpath *other);
 

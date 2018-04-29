@@ -17,6 +17,10 @@
   txpos_new(class_cpath(class), "", 0, 0, pos_nline(pos), pos_nchar(pos)),
 
 ///
+#define TH3(class, pos) {txpos_printf(\
+  txpos_new(final_class_cpath(class), "", 0, 0, pos_nline(pos), pos_nchar(pos)),
+
+///
 #define _TH ); THROW "\1" _THROW}
 
 /// Import types
@@ -72,6 +76,7 @@ enum Stat_t {
   SVAL,
   SVAR,
   SFN,
+  SINC,
   SASSIGN,
   SRETURN,
   SBREAK,

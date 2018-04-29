@@ -56,7 +56,7 @@ Value *value_new_bool(Pos *pos, Arr/*Attach*/ *atts, char *value);
 
 /// Value must be digits < 256 ending with t (e.g. 124b) + Hexadecimal<br>
 /// 'value' only contains digits.
-Value *value_new_byte(Pos *pos, Arr/*Attach*/ *atts, char *value);
+Value *value_new_byte(Pos *pos, char *value);
 
 /// Value must be digits (no control of range)
 Value *value_new_int(Pos *pos, char *value);
@@ -79,7 +79,7 @@ Value *value_new_arr(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *values);
 /// kvs are pairs of key-value. 'kvs' elements number is pair.
 Value *value_new_map(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *kvs);
 
-/// 
+///
 Value *value_new_fn(Pos *pos, Arr/*char*/ *params, Arr/*Stat*/ *stats);
 
 /// Id must be a valid identifier
