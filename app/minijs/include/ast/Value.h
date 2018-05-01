@@ -1,15 +1,38 @@
-// Copyright 25-Mar-2018 ºDeme
+// Copyright 30-Apr-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Ast value model
+/// Right value
 
 #ifndef AST_VALUE_H
-  #define AST_VALUE_H
+  # define AST_VALUE_H
 
 #include <dmc/all.h>
-#include "types/Type.h"
-#include "lexer/Pos.h"
-#include "DEFS.h"
+#include "ast/Type.h"
+#include "Pos.h"
+#include "Achar.h"
+#include "Avatt.h"
+
+/// Value types
+enum Value_t {
+  VNULL,
+  VBOOL,
+  VBYTE,
+  VINT,
+  VFLOAT,
+  VCHAR,
+  VSTR,
+  VSTR2,
+  VARR,
+  VMAP,
+  VFN,
+  VID,
+  VGROUP,
+  VNEW
+};
+
+typedef Arr Avalue;
+
+typedef Arr Astat;
 
 /*.-.*/
 
@@ -17,28 +40,28 @@
 typedef struct value_Value Value;
 
 ///
-Pos *value_pos(Value *this);
+Value *value_new(
+  enum Value_t vtype,
+  Pos *pos,
+  Type *type,
+  Avatt *attachs,
+  char *data
+);
 
 ///
-enum Vtype_t value_vtype(Value *this);
+enum Value_t value_vtype(Value *this);
+
+///
+Pos *value_pos(Value *this);
 
 ///
 Type *value_type(Value *this);
 
 ///
-void value_set_type(Value *this, Type *value);
+Avatt *value_attachs(Value *this);
 
 ///
-Arr *value_ids(Value *this);
-
-///
-Arr *value_values(Value *this);
-
-///
-Arr *value_attachs(Value *this);
-
-///
-Arr *value_stats(Value *this);
+char *value_data(Value *this);
 
 ///
 Json *value_serialize(Value *this);
@@ -51,65 +74,44 @@ Value *value_restore(Json *s);
 ///
 Value *value_new_null(Pos *pos);
 
-/// Value must be 'true' or 'false'
-Value *value_new_bool(Pos *pos, Arr/*Attach*/ *atts, char *value);
+/// Value must be 't' or 'f'
+Value *value_new_bool(Pos *pos, Avatt *atts, char *value);
 
-/// Value must be digits < 256 ending with t (e.g. 124b) + Hexadecimal<br>
-/// 'value' only contains digits.
+/// Value must be digits < 256
 Value *value_new_byte(Pos *pos, char *value);
 
-/// Value must be digits (no control of range)
+/// Value must be digits
 Value *value_new_int(Pos *pos, char *value);
 
-/// Value must be a number with '.'
+/// Value must be a floating number
 Value *value_new_float(Pos *pos, char *value);
 
-/// Value must be between ''. Admit escape values kind \u0023.
-Value *value_new_char(Pos *pos, Arr/*Attach*/ *atts, char *value);
+/// Admit escape values kind of \u0023.
+Value *value_new_char(Pos *pos, Avatt *atts, char *value);
 
-/// Value must be between "". Admit escape values kind \u0023.
-Value *value_new_str(Pos *pos, Arr/*Attach*/ *atts, char *value);
+/// Admit escape values kind of \u0023.
+Value *value_new_str(Pos *pos, Avatt *atts, char *value);
 
-/// Value must be between ``. Admit escape values kind \u0023.
-Value *value_new_str2(Pos *pos, Arr/*Attach*/ *atts, char *value);
+/// Admit escape values kind \u0023 and interpolations ${}
+Value *value_new_str2(Pos *pos, Avatt *atts, char *value);
 
-///
-Value *value_new_arr(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *values);
+/// Values are serialized in value_data()
+Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values);
 
-/// kvs are pairs of key-value. 'kvs' elements number is pair.
-Value *value_new_map(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *kvs);
+/// kvs are serialized in value_data()
+Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m);
 
-///
-Value *value_new_fn(Pos *pos, Arr/*char*/ *params, Arr/*Stat*/ *stats);
+/// stats are serialized in value_data()
+Value *value_new_fn(Pos *pos, Achar *params, Astat *stats);
 
 /// Id must be a valid identifier
-Value *value_new_id(Pos *pos, Arr/*Attach*/ *atts, char *id);
+Value *value_new_id(Pos *pos, Avatt *atts, char *id);
 
-/// Operator must be one of !, ++, --, +, -
-Value *value_new_lunary(Pos *pos, char *operator, Value *value);
+/// Values are serialized in value_data()
+Value *value_new_new(Pos *pos, Type *tp, Avalue *values);
 
-/// Operator must be one of ++, --
-Value *value_new_runary(Pos *pos, char *operator, Value *value);
-
-/// Operator must be one of +, -, *, /, %, ^, >, <, ==, !=, <=, >=, &&, ||, &,
-/// |, ^^, <<, >>, >>>, ?:
-Value *value_new_binary(Pos *pos, char *operator, Value *v1, Value *v2);
-
-/// Operator a?x:y
-Value *value_new_ternary(Pos *pos, Value *v1, Value *v2, Value *v3);
-
-/// Operator with. Example:
-///   val x = with(a) : a+b = 0 : a-b = 1 : _ = 2;
-/// The last 'conditions' is value_new_null().
-Value *value_new_with(
-  Pos *pos, Value *v, Arr/*Value*/ *conditions, Arr/*Value*/ *values
-);
-
-/// 'tp' is saved as 'id' removing generics.
-Value *value_new_new(Pos *pos, Type *tp, Arr/*Value*/ *values);
-
-/// Value in parenthesis
-Value *value_new_group(Pos *pos, Arr/*Attach*/ *atts, Value *v1);
+/// Value in parenthesis. v1 is serialized in value_data()
+Value *value_new_group(Pos *pos, Avatt *atts, Value *v1);
 
 #endif
 

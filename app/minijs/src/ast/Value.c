@@ -1,94 +1,47 @@
-// Copyright 25-Mar-2018 ºDeme
+// Copyright 30-Apr-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "ast/Value.h"
-#include "ast/Attach.h"
-#include "ast/Stat.h"
+#include "ast/Atype.h"
+#include "ast/Avalue.h"
+#include "ast/Astat.h"
 
 /*.
-struct: @Value
+struct: Value
+  vtype: enum Value_t : _uint
   pos: Pos *: pos
-  vtype: enum Vtype_t: _uint
-  +type: Type *: type
-  ids: Arr *: _sarray
-  values: Arr *: _array value
-  attachs: Arr *: _array attach
-  stats: Arr *: _array stat
+  type: Type *: type
+  attachs: Avatt *: avatt
+  data: char *: _string
 */
-
-static Value *v_null = NULL;
-
-// rq_type return 'values' type or UNKNOWN if 'values' has different types,
-// has some NULL or is empty.
-static Type *eq_type(Arr/*Value*/ *values) {
-  if (!arr_size(values)) {
-    return type_new_unknown();
-  }
-  Type *tp = value_type(arr_get(values, 0));
-  if (type_is_unknown(tp)){
-    return tp;
-  }
-  EACH(values, Value, v) {
-    if (!type_eq(value_type(v), tp)) {
-      return type_new_unknown();
-    }
-  }_EACH
-  return tp;
-}
-
-// rq_type return 'values' type or UNKNOWN if 'values' has different types,
-// has some NULL or is empty.
-static Type *eq_type_map(Arr/*Value*/ *values) {
-  if (!arr_size(values)) {
-    return type_new_unknown();
-  }
-  Type *tp = value_type(arr_get(values, 1));
-  if (type_is_unknown(tp)){
-    return tp;
-  }
-  bool is_key = true;
-  EACH(values, Value, v) {
-    if (is_key) {
-      is_key = false;
-      continue;
-    }
-    is_key = true;
-    if (!type_eq(value_type(v), tp)) {
-      return type_new_unknown();
-    }
-  }_EACH
-  return tp;
-}
-
 /*.-.*/
 struct value_Value {
+  enum Value_t vtype;
   Pos *pos;
-  enum Vtype_t vtype;
   Type *type;
-  Arr *ids;
-  Arr *values;
-  Arr *attachs;
-  Arr *stats;
+  Avatt *attachs;
+  char *data;
 };
 
-Value *_value_new(
+Value *value_new(
+  enum Value_t vtype,
   Pos *pos,
-  enum Vtype_t vtype,
   Type *type,
-  Arr *ids,
-  Arr *values,
-  Arr *attachs,
-  Arr *stats
+  Avatt *attachs,
+  char *data
 ) {
   Value *this = MALLOC(Value);
-  this->pos = pos;
   this->vtype = vtype;
+  this->pos = pos;
   this->type = type;
-  this->ids = ids;
-  this->values = values;
   this->attachs = attachs;
-  this->stats = stats;
+  this->data = data;
   return this;
+}
+
+inline
+enum Value_t value_vtype(Value *this) {
+  return this->vtype;
 }
 
 inline
@@ -97,50 +50,28 @@ Pos *value_pos(Value *this) {
 }
 
 inline
-enum Vtype_t value_vtype(Value *this) {
-  return this->vtype;
-}
-
-inline
 Type *value_type(Value *this) {
   return this->type;
 }
 
 inline
-void value_set_type(Value *this, Type *value) {
-  this->type = value;
-}
-
-inline
-Arr *value_ids(Value *this) {
-  return this->ids;
-}
-
-inline
-Arr *value_values(Value *this) {
-  return this->values;
-}
-
-inline
-Arr *value_attachs(Value *this) {
+Avatt *value_attachs(Value *this) {
   return this->attachs;
 }
 
 inline
-Arr *value_stats(Value *this) {
-  return this->stats;
+char *value_data(Value *this) {
+  return this->data;
 }
 
 Json *value_serialize(Value *this) {
   if (!this) return json_wnull();
   Arr/*Json*/ *serial = arr_new();
-  arr_add(serial, pos_serialize(this->pos));
   jarr_auint(serial, this->vtype);
+  arr_add(serial, pos_serialize(this->pos));
   arr_add(serial, type_serialize(this->type));
-  jarr_aarray(serial, this->ids, (Json*(*)(void*))json_wstring);
-  jarr_aarray(serial, this->values, (Json*(*)(void*)) value_serialize);
-  jarr_aarray(serial, this->attachs, (Json*(*)(void*)) attach_serialize);
-  jarr_aarray(serial, this->stats, (Json*(*)(void*)) stat_serialize);
+  arr_add(serial, avatt_serialize(this->attachs));
+  jarr_astring(serial, this->data);
   return json_warray(serial);
 }
 
@@ -149,202 +80,120 @@ Value *value_restore(Json *s) {
   Arr/*Json*/ *serial = json_rarray(s);
   Value *this = MALLOC(Value);
   size_t i = 0;
-  this->pos = pos_restore(arr_get(serial, i++));
   this->vtype = jarr_guint(serial, i++);
+  this->pos = pos_restore(arr_get(serial, i++));
   this->type = type_restore(arr_get(serial, i++));
-  this->ids = jarr_garray(serial, i++, (void*(*)(Json*))json_rstring);
-  this->values = jarr_garray(serial, i++, (void*(*)(Json*)) value_restore);
-  this->attachs = jarr_garray(serial, i++, (void*(*)(Json*)) attach_restore);
-  this->stats = jarr_garray(serial, i++, (void*(*)(Json*)) stat_restore);
+  this->attachs = avatt_restore(arr_get(serial, i++));
+  this->data = jarr_gstring(serial, i++);
   return this;
 }
 /*.-.*/
 
-static Arr/*char*/ *to_arr(char *v) {
-  Arr/*char*/ *a = arr_new();
-  arr_add(a, v);
-  return a;
-}
-
 inline
 Value *value_new_null(Pos *pos) {
-  return v_null
-    ? v_null
-    : (v_null = _value_new(
-        pos, VNULL, type_new_unknown(),
-        arr_new(), arr_new(), arr_new(), arr_new()
-      ));
+  return value_new(VNULL, pos, type_new_unknown(), avatt_new(), "");
 }
 
 inline
-Value *value_new_bool(Pos *pos, Arr/*Attach*/ *atts, char *value) {
-  return _value_new(
-    pos, VBOOL, arr_size(atts) ? type_new_unknown() : type_new_bool(),
-    to_arr(value), arr_new(), atts, arr_new()
-  );
+Value *value_new_bool(Pos *pos, Avatt *atts, char *value) {
+  return value_new(VBOOL, pos, type_new_bool(), atts, value);
 }
 
 inline
 Value *value_new_byte(Pos *pos, char *value) {
-  return _value_new(
-    pos, VBYTE, type_new_byte(),
-    to_arr(value), arr_new(), arr_new(), arr_new()
-  );
+  return value_new(VBYTE, pos, type_new_byte(), avatt_new(), value);
 }
 
+inline
 Value *value_new_int(Pos *pos, char *value) {
-  return _value_new(
-    pos, VINT, type_new_int(),
-    to_arr(value), arr_new(), arr_new(), arr_new()
-  );
+  return value_new(VINT, pos, type_new_int(), avatt_new(), value);
 }
 
+inline
 Value *value_new_float(Pos *pos, char *value) {
-  return _value_new(
-    pos, VFLOAT, type_new_float(),
-    to_arr(value), arr_new(), arr_new(), arr_new()
+  return value_new(VFLOAT, pos, type_new_float(), avatt_new(), value);
+}
+
+inline
+Value *value_new_char(Pos *pos, Avatt *atts, char *value) {
+  return value_new(VCHAR, pos, type_new_char(), atts, value);
+}
+
+inline
+Value *value_new_str(Pos *pos, Avatt *atts, char *value) {
+  return value_new(VSTR, pos, type_new_str(), atts, value);
+}
+
+inline
+Value *value_new_str2(Pos *pos, Avatt *atts, char *value) {
+  return value_new(VSTR2, pos, type_new_str(), atts, value);
+}
+
+static Type *common_type(Atype *types) {
+  Type *r = atype_get(types, 0);
+  EACH(types, Type, t) {
+    if (!type_eq(t, r)) {
+      return type_new_unknown();
+    }
+  }_EACH
+  return r;
+}
+
+static Type *ct_value(Avalue *vs) {
+  Atype *ts = atype_new();
+  EACH(vs, Value, v) {
+    atype_add(ts, v->type);
+  }_EACH
+  return common_type(ts);
+}
+
+inline
+Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values) {
+  return value_new(
+    VARR, pos, type_new_arr(ct_value(values)), atts, avalue_serialize(values)
   );
 }
 
-Value *value_new_char(Pos *pos, Arr/*Attach*/ *atts, char *value) {
-  return _value_new(
-    pos, VCHAR, arr_size(atts) ? type_new_unknown() : type_new_char(),
-    to_arr(value), arr_new(), atts, arr_new()
+static Type *ct_value2(Map/*Value*/ *m) {
+  Atype *ts = atype_new();
+  Value *v;
+  EACH(m, Kv, kv) {
+    v = kv->value;
+    atype_add(ts, v->type);
+  }_EACH
+  return common_type(ts);
+}
+
+Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m) {
+  Map/*Json*/ *jm = map_new();
+  EACH(m, Kv, kv) {
+    arr_add(jm, kv_new(kv->key, value_serialize(kv->value)));
+  }_EACH
+  return value_new(
+    VMAP, pos, type_new_arr(ct_value2(m)), atts, json_wobject(jm)
   );
 }
 
-Value *value_new_str(Pos *pos, Arr/*Attach*/ *atts, char *value) {
-  return _value_new(
-    pos, VSTR, arr_size(atts)
-      ? arr_size(atts) == 1 && attach_type(arr_get(atts, 0)) == ASUB
-        ? type_new_char()
-        : type_new_unknown()
-      : type_new_str(),
-    to_arr(value), arr_new(), atts, arr_new()
+Value *value_new_fn(Pos *pos, Achar *params, Astat *stats) {
+  Arr/*Json*/ *js = arr_new();
+  arr_add(js, achar_serialize(params));
+  arr_add(js, astat_serialize(stats));
+  return value_new(
+    VFN, pos, type_new_unknown(), avatt_new(), json_warray(js)
   );
 }
 
-Value *value_new_str2(Pos *pos, Arr/*Attach*/ *atts, char *value) {
-  return _value_new(
-    pos, VSTR2, arr_size(atts)
-      ? arr_size(atts) == 1 && attach_type(arr_get(atts, 0)) == ASUB
-        ? type_new_char()
-        : type_new_unknown()
-      : type_new_str(),
-    to_arr(value), arr_new(), atts, arr_new()
-  );
+inline
+Value *value_new_id(Pos *pos, Avatt *atts, char *id) {
+  return value_new(VID, pos, type_new_unknown(), atts, id);
 }
 
-Value *value_new_arr(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *values) {
-  return _value_new(
-    pos, VARR, arr_size(atts)
-      ? arr_size(atts) == 1 && attach_type(arr_get(atts, 0)) == ASUB
-        ? eq_type(values)
-        : type_new_unknown()
-      : type_new_arr(eq_type(values)),
-    arr_new(), values, atts, arr_new()
-  );
+inline
+Value *value_new_new(Pos *pos, Type *tp, Avalue *values) {
+  return value_new(VNEW, pos, tp, avatt_new(), avalue_serialize(values));
 }
 
-Value *value_new_map(Pos *pos, Arr/*Attach*/ *atts, Arr/*Value*/ *values) {
-  return _value_new(
-    pos, VMAP,  arr_size(atts)
-      ? arr_size(atts) == 1 && attach_type(arr_get(atts, 0)) == ASUB
-        ? eq_type_map(values)
-        : type_new_unknown()
-      : type_new_map(eq_type_map(values)),
-    arr_new(), values, atts, arr_new()
-  );
-}
-
-Value *value_new_fn(Pos *pos, Arr/*char*/ *params, Arr/*Statement*/ *stats) {
-  Arr/*Type*/ *ps = arr_new();
-  REPEAT(arr_size(params) + 1){
-    arr_add(ps, type_new_unknown());
-  }_REPEAT
-  return _value_new(
-    pos, VFN, type_new_fn(ps),
-    params, arr_new(), arr_new(), stats
-  );
-}
-
-Value *value_new_id(Pos *pos, Arr/*Attach*/ *atts, char *id) {
-  return _value_new(
-    pos, VID, type_new_unknown(),
-    to_arr(id), arr_new(), atts, arr_new()
-  );
-}
-
-Value *value_new_lunary(Pos *pos, char *operator, Value *value) {
-  Arr/*Value*/ *values = arr_new();
-  arr_add(values, value);
-  return _value_new(
-    pos, VLUNARY, type_new_unknown(),
-    to_arr(operator), values, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_runary(Pos *pos, char *operator, Value *value) {
-  Arr/*Value*/ *values = arr_new();
-  arr_add(values, value);
-  return _value_new(
-    pos, VRUNARY, type_new_unknown(),
-    to_arr(operator), values, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_binary(Pos *pos, char *operator, Value *v1, Value *v2) {
-  Arr/*Value*/ *values = arr_new();
-  arr_add(values, v1);
-  arr_add(values, v2);
-  return _value_new(
-    pos, VBINARY, type_new_unknown(),
-    to_arr(operator), values, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_ternary(Pos *pos, Value *v1, Value *v2, Value *v3) {
-  Arr/*Value*/ *values = arr_new();
-  arr_add(values, v1);
-  arr_add(values, v2);
-  arr_add(values, v3);
-  return _value_new(
-    pos, VTERNARY, type_new_unknown(),
-    arr_new(), values, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_with(
-  Pos *pos, Value *v, Arr/*Value*/ *conditions, Arr/*Value*/ *values
-) {
-  Arr/*Value*/ *vs = it_to(
-    it_cat(it_unary(v), it_cat(it_from(conditions), it_from(values)))
-  );
-  return _value_new(
-    pos, VWITH, type_new_unknown(),
-    arr_new(), vs, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_new(Pos *pos, Type *tp, Arr/*Value*/ *values) {
-  char *id = type_to_str(tp);
-  char ix = str_cindex(id, '<');
-  if (ix != -1) {
-    id = str_sub(id, 0, ix);
-  }
-  Arr/*char*/ *ids = arr_new();
-  arr_add(ids, id);
-  return _value_new(
-    pos, VNEW, tp,
-    ids, values, arr_new(), arr_new()
-  );
-}
-
-Value *value_new_group(Pos *pos, Arr/*Attach*/ *atts, Value *v1) {
-  Arr/*Value*/ *values = arr_new();
-  arr_add(values, v1);
-  return _value_new(
-    pos, VGROUP, arr_size(atts) ? type_new_unknown() : value_type(v1),
-    arr_new(), values, atts, arr_new()
-  );
+inline
+Value *value_new_group(Pos *pos, Avatt *atts, Value *v1) {
+  return value_new(VGROUP, pos, v1->type, atts, value_serialize(v1));
 }
