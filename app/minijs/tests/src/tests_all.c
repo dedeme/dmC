@@ -2,16 +2,34 @@
 // GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "tests_all.h"
+#include "Cpath.h"
 #include "tests_imported.h"
 #include "tests_program.h"
 #include "tests_type.h"
 #include "tests_builtins.h"
+#include "tests_cpath.h"
+#include "tests_rempty.h"
+#include "tests_rimports.h"
+#include "tests_rgenerics.h"
+#include "tests_rextend.h"
+#include "tests_rtype.h"
 
 int main() {
-  sys_init("minijs tests");
-/*  tests_imported();
+  sys_init("minijs_tests");
+  Achar *roots = achar_new();
+  achar_add(roots, "data");
+  cpath_init(roots);
+/*
+  tests_imported();
   tests_program();
-  tests_type();*/
+  tests_type();
   tests_builtins();
+  tests_cpath();
+  tests_rempty();
+  tests_rimports();
+  tests_rgenerics();
+  tests_rextend();*/
+  tests_rtype();
+
   return 0;
 }

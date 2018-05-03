@@ -6,10 +6,18 @@
 #include "builtin/tbyte.h"
 #include "builtin/tint.h"
 #include "builtin/tfloat.h"
+#include "builtin/tchar.h"
+#include "builtin/tstr.h"
+#include "builtin/tarr.h"
+#include "builtin/tmap.h"
 
 void tall_add(Arr/*class*/ *builtins) {
   tbool_add(builtins);
   tbyte_add(builtins);
   tint_add(builtins);
   tfloat_add(builtins);
+  tchar_add(builtins);
+  tstr_add(builtins);
+  tarr_add(builtins);
+  tmap_add(builtins);
 }

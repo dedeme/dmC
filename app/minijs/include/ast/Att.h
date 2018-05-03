@@ -17,11 +17,15 @@ typedef struct att_Att Att;
 
 ///
 Att *att_new(
+  bool is_public,
   char *id,
   Type *type,
   bool is_val,
   Value *_value
 );
+
+///
+bool att_is_public(Att *this);
 
 ///
 char *att_id(Att *this);

@@ -4,67 +4,93 @@
 #include "builtin/tint.h"
 
 void tint_add(Arr/*class*/ *builtins) {
+  Atype *params;
+  Type *tp;
+  Type *tbool = type_new_bool();
+  Type *tbyte = type_new_byte();
+  Type *tint = type_new_int();
+  Type *tchar = type_new_char();
+  Type *tstr = type_new_str();
   Class *c = class_new("Int");
   Aatt *statics = class_statics(c);
 
-  Atype *params = atype_new();
-  atype_add(params, type_new_int());
-  atype_add(params, type_new_int());
-  Type *unary = type_new_fn(params);
-  aatt_add(statics, att_new("minus", unary, true, NULL));
-  aatt_add(statics, att_new("rinc", unary, true, NULL));
-  aatt_add(statics, att_new("rdec", unary, true, NULL));
-  aatt_add(statics, att_new("abs", unary, true, NULL));
-  aatt_add(statics, att_new("rnd", unary, true, NULL));
+  params = atype_new();
+  atype_add(params, tint);
+  atype_add(params, tint);
+  tp = type_new_fn(params);
+  aatt_add(statics, att_new(true, "minus", tp, true, NULL));
+  aatt_add(statics, att_new(true, "bnot", tp, true, NULL));
+  aatt_add(statics, att_new(true, "rinc", tp, true, NULL));
+  aatt_add(statics, att_new(true, "rdec", tp, true, NULL));
+  aatt_add(statics, att_new(true, "rnd", tp, true, NULL));
 
   params = atype_new();
-  atype_add(params, type_new_int());
+  atype_add(params, tint);
   atype_add(params, type_new_void());
-  unary = type_new_fn(params);
-  aatt_add(statics, att_new("linc", unary, true, NULL));
-  aatt_add(statics, att_new("ldec", unary, true, NULL));
+  tp = type_new_fn(params);
+  aatt_add(statics, att_new(true, "linc", tp, true, NULL));
+  aatt_add(statics, att_new(true, "ldec", tp, true, NULL));
 
   params = atype_new();
-  atype_add(params, type_new_int());
-  atype_add(params, type_new_int());
-  atype_add(params, type_new_bool());
-  Type *binary = type_new_fn(params);
+  atype_add(params, tint);
+  atype_add(params, tint);
+  atype_add(params, tbool);
+  tp = type_new_fn(params);
 
-  aatt_add(statics, att_new("eq", binary, true, NULL));
-  aatt_add(statics, att_new("neq", binary, true, NULL));
-  aatt_add(statics, att_new("lt", binary, true, NULL));
-  aatt_add(statics, att_new("gt", binary, true, NULL));
-  aatt_add(statics, att_new("leq", binary, true, NULL));
-  aatt_add(statics, att_new("geq", binary, true, NULL));
+  aatt_add(statics, att_new(true, "eq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "neq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "lt", tp, true, NULL));
+  aatt_add(statics, att_new(true, "gt", tp, true, NULL));
+  aatt_add(statics, att_new(true, "leq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "geq", tp, true, NULL));
 
   params = atype_new();
-  atype_add(params, type_new_int());
-  atype_add(params, type_new_int());
-  atype_add(params, type_new_int());
-  binary = type_new_fn(params);
+  atype_add(params, tint);
+  atype_add(params, tint);
+  atype_add(params, tint);
+  tp = type_new_fn(params);
 
-  aatt_add(statics, att_new("plus", binary, true, NULL));
-  aatt_add(statics, att_new("sub", binary, true, NULL));
-  aatt_add(statics, att_new("mul", binary, true, NULL));
-  aatt_add(statics, att_new("div", binary, true, NULL));
-  aatt_add(statics, att_new("mod", binary, true, NULL));
-  aatt_add(statics, att_new("pow", binary, true, NULL));
-  aatt_add(statics, att_new("max", binary, true, NULL));
-  aatt_add(statics, att_new("min", binary, true, NULL));
+  aatt_add(statics, att_new(true, "plus", tp, true, NULL));
+  aatt_add(statics, att_new(true, "sub", tp, true, NULL));
+  aatt_add(statics, att_new(true, "mul", tp, true, NULL));
+  aatt_add(statics, att_new(true, "div", tp, true, NULL));
+  aatt_add(statics, att_new(true, "mod", tp, true, NULL));
+  aatt_add(statics, att_new(true, "pow", tp, true, NULL));
+  aatt_add(statics, att_new(true, "max", tp, true, NULL));
+  aatt_add(statics, att_new(true, "min", tp, true, NULL));
+  aatt_add(statics, att_new(true, "and", tp, true, NULL));
+  aatt_add(statics, att_new(true, "or", tp, true, NULL));
+  aatt_add(statics, att_new(true, "xor", tp, true, NULL));
+  aatt_add(statics, att_new(true, "lshift", tp, true, NULL));
+  aatt_add(statics, att_new(true, "rshift", tp, true, NULL));
+  aatt_add(statics, att_new(true, "rshift0", tp, true, NULL));
 
   Aatt *instance = class_instance(c);
 
   params = atype_new();
-  atype_add(params, type_new_str());
-  aatt_add(instance, att_new("toStr", type_new_fn(params), true, NULL));
+  atype_add(params, tstr);
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "toStr", tp, true, NULL));
 
   params = atype_new();
-  atype_add(params, type_new_byte());
-  aatt_add(instance, att_new("toByte", type_new_fn(params), true, NULL));
+  atype_add(params, tchar);
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "toChar", tp, true, NULL));
+
+  params = atype_new();
+  atype_add(params, tbyte);
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "toByte", tp, true, NULL));
 
   params = atype_new();
   atype_add(params, type_new_float());
-  aatt_add(instance, att_new("toFloat", type_new_fn(params), true, NULL));
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "toFloat", tp, true, NULL));
+
+  params = atype_new();
+  atype_add(params, tint);
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "abs", tp, true, NULL));
 
   arr_add(builtins, c);
 }

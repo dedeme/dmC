@@ -1,0 +1,9 @@
+<A>
+
+_import
+  Empty
+  local (Local < B)
+  . *
+
+_extend
+  Abc<A, B>

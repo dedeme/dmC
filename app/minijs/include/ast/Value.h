@@ -27,6 +27,7 @@ enum Value_t {
   VFN,
   VID,
   VGROUP,
+  VCAST,
   VNEW
 };
 
@@ -111,7 +112,10 @@ Value *value_new_id(Pos *pos, Avatt *atts, char *id);
 Value *value_new_new(Pos *pos, Type *tp, Avalue *values);
 
 /// Value in parenthesis. v1 is serialized in value_data()
-Value *value_new_group(Pos *pos, Avatt *atts, Value *v1);
+Value *value_new_group(Pos *pos, Avatt *atts, Value *v);
+
+/// v1 is serialized in value_data()
+Value *value_new_cast(Pos *pos, Type *tp, Value *v);
 
 #endif
 

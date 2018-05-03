@@ -5,6 +5,7 @@
 
 /*.
 struct: Att
+  is_public: bool: _bool
   id:char *: _string
   type: Type *: type
   is_val: bool: _bool
@@ -13,6 +14,7 @@ struct: Att
 
 /*.-.*/
 struct att_Att {
+  bool is_public;
   char *id;
   Type *type;
   bool is_val;
@@ -20,17 +22,24 @@ struct att_Att {
 };
 
 Att *att_new(
+  bool is_public,
   char *id,
   Type *type,
   bool is_val,
   Value *_value
 ) {
   Att *this = MALLOC(Att);
+  this->is_public = is_public;
   this->id = id;
   this->type = type;
   this->is_val = is_val;
   this->_value = _value;
   return this;
+}
+
+inline
+bool att_is_public(Att *this) {
+  return this->is_public;
 }
 
 inline
@@ -51,6 +60,7 @@ bool att_is_val(Att *this) {
 Json *att_serialize(Att *this) {
   if (!this) return json_wnull();
   Arr/*Json*/ *serial = arr_new();
+  jarr_abool(serial, this->is_public);
   jarr_astring(serial, this->id);
   arr_add(serial, type_serialize(this->type));
   jarr_abool(serial, this->is_val);
@@ -63,6 +73,7 @@ Att *att_restore(Json *s) {
   Arr/*Json*/ *serial = json_rarray(s);
   Att *this = MALLOC(Att);
   size_t i = 0;
+  this->is_public = jarr_gbool(serial, i++);
   this->id = jarr_gstring(serial, i++);
   this->type = type_restore(arr_get(serial, i++));
   this->is_val = jarr_gbool(serial, i++);

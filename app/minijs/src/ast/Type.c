@@ -76,58 +76,58 @@ Type *type_restore(Json *s) {
 inline
 Type *type_new_unknown() {
   return t_unknown
-    ? t_unknown : (t_unknown = _type_new(UNKNOWN, "", arr_new()));
+    ? t_unknown : (t_unknown = _type_new(UNKNOWN, "", atype_new()));
 }
 
 inline
 Type *type_new_bool() {
-  return t_bool ? t_bool : (t_bool = _type_new(DATA, "Bool", arr_new()));
+  return t_bool ? t_bool : (t_bool = _type_new(DATA, "Bool", atype_new()));
 }
 
 inline
 Type *type_new_byte() {
-  return t_byte ? t_byte : (t_byte = _type_new(DATA, "Byte", arr_new()));
+  return t_byte ? t_byte : (t_byte = _type_new(DATA, "Byte", atype_new()));
 }
 
 inline
 Type *type_new_int() {
-  return t_int ? t_int : (t_int = _type_new(DATA, "Int", arr_new()));
+  return t_int ? t_int : (t_int = _type_new(DATA, "Int", atype_new()));
 }
 
 inline
 Type *type_new_float() {
-  return t_float ? t_float : (t_float = _type_new(DATA, "Float", arr_new()));
+  return t_float ? t_float : (t_float = _type_new(DATA, "Float", atype_new()));
 }
 
 inline
 Type *type_new_char() {
-  return t_char ? t_char : (t_char = _type_new(DATA, "Char", arr_new()));
+  return t_char ? t_char : (t_char = _type_new(DATA, "Char", atype_new()));
 }
 
 inline
 Type *type_new_str() {
-  return t_str ? t_str : (t_str = _type_new(DATA, "Str", arr_new()));
+  return t_str ? t_str : (t_str = _type_new(DATA, "Str", atype_new()));
 }
 
 inline
 Type *type_new_any() {
-  return t_any ? t_any : (t_any = _type_new(ANY, "", arr_new()));
+  return t_any ? t_any : (t_any = _type_new(ANY, "", atype_new()));
 }
 
 inline
 Type *type_new_void() {
-  return t_void ? t_void : (t_void = _type_new(VOID, "", arr_new()));
+  return t_void ? t_void : (t_void = _type_new(VOID, "", atype_new()));
 }
 
 Type *type_new_arr(Type *t) {
-  Arr/*Type*/ *a = arr_new();
-  arr_add(a, t);
+  Atype *a = atype_new();
+  atype_add(a, t);
   return _type_new(DATA, "Arr", a);
 }
 
 Type *type_new_map(Type *t) {
-  Arr/*Type*/ *a = arr_new();
-  arr_add(a, t);
+  Atype *a = atype_new();
+  atype_add(a, t);
   return _type_new(DATA, "Map", a);
 }
 
@@ -157,7 +157,7 @@ bool type_eq(Type *this, Type *other) {
   }
 
   RANGE0(i, arr_size(this->params)) {
-    if (!type_eq(arr_get(this->params, i), arr_get(other->params, i))) {
+    if (!type_eq(atype_get(this->params, i), atype_get(other->params, i))) {
       return false;
     }
   }_RANGE
@@ -212,13 +212,13 @@ bool type_child(Type *this, Type *child) {
   if (!cchild)
     THROW "Class '%s' does not exist", child->id _THROW
 
-  char *super = class_super(cchild);
-  if (!*super) {
+  Achar *super = class_super(cchild);
+  if (!arr_size(super)) {
     return false;
   }
-  Class *csuper = imported__class(im, super);
+  Class *csuper = imported__class(im, achar_get(super, 0));
   if (!csuper)
-    THROW "Class '%s' does not exist", super _THROW
+    THROW "Class '%s' does not exist", achar_get(super, 0) _THROW
   Type *tsuper = class__type(csuper, this->params);
   if (!tsuper) {
     return false;
@@ -246,15 +246,20 @@ bool type_is_unknown(Type *this) {
 char *type_to_str(Type *this) {
   switch (this->type) {
   case DATA:
-    return str_printf("%s%s",
-      this->id,
-      arr_size(this->params) > 0
-        ? str_printf("<%s>", str_cjoin(
-            it_map(it_from(this->params), (void*(*)(void *))type_to_str),
-            ','
-          ))
-        : ""
-    );
+    return
+      !strcmp(this->id, "Arr")
+      ? str_printf("[%s]", type_to_str(atype_get(this->params, 0)))
+      : !strcmp(this->id, "Map")
+        ? str_printf("{%s}", type_to_str(atype_get(this->params, 0)))
+        : str_printf("%s%s",
+          this->id,
+          arr_size(this->params) > 0
+            ? str_printf("<%s>", str_cjoin(
+                it_map(it_from(this->params), (void*(*)(void *))type_to_str),
+                ','
+              ))
+            : ""
+        );
   case FN:
     return str_printf("%s%s)",
       str_printf("(%s:",
@@ -265,9 +270,7 @@ char *type_to_str(Type *this) {
           ),
         ',')
       ),
-      arr_nget(this->params, arr_size(this->params) - 1)
-        ? type_to_str(arr_get(this->params, arr_size(this->params) - 1))
-        : ""
+      type_to_str(arr_get(this->params, arr_size(this->params) - 1))
     );
   case ANY:
     return "*";

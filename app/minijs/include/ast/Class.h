@@ -26,10 +26,7 @@ bool class_local(Class *this);
 void class_set_local(Class *this, bool value);
 
 ///
-char *class_super(Class *this);
-
-///
-void class_set_super(Class *this, char *value);
+Achar *class_super(Class *this);
 
 ///
 Achar *class_generics(Class *this);
@@ -57,6 +54,12 @@ Class *class_new(char *id);
 /// class__type returns null if arr_size(generics) is different to this.generics
 /// size.
 Type *class__type(Class *this, Atype *generics);
+
+///
+bool class_contains_id(Class *this, char *id);
+
+/// Returns false if 'id' is duplicated.
+bool class_add_import(Class *this, char *id, char *value);
 
 #endif
 

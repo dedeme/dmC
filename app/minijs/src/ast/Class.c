@@ -7,7 +7,7 @@
 struct: @Class
   id: char *: _string
   +local: bool: _bool
-  +super: char *: _string
+  super: Achar *: achar
   generics: Achar *: achar
   imports: Mchar *: mchar
   statics: Aatt *: aatt
@@ -18,7 +18,7 @@ struct: @Class
 struct class_Class {
   char *id;
   bool local;
-  char *super;
+  Achar *super;
   Achar *generics;
   Mchar *imports;
   Aatt *statics;
@@ -28,7 +28,7 @@ struct class_Class {
 Class *_class_new(
   char *id,
   bool local,
-  char *super,
+  Achar *super,
   Achar *generics,
   Mchar *imports,
   Aatt *statics,
@@ -61,13 +61,8 @@ void class_set_local(Class *this, bool value) {
 }
 
 inline
-char *class_super(Class *this) {
+Achar *class_super(Class *this) {
   return this->super;
-}
-
-inline
-void class_set_super(Class *this, char *value) {
-  this->super = value;
 }
 
 inline
@@ -95,7 +90,7 @@ Json *class_serialize(Class *this) {
   Arr/*Json*/ *serial = arr_new();
   jarr_astring(serial, this->id);
   jarr_abool(serial, this->local);
-  jarr_astring(serial, this->super);
+  arr_add(serial, achar_serialize(this->super));
   arr_add(serial, achar_serialize(this->generics));
   arr_add(serial, mchar_serialize(this->imports));
   arr_add(serial, aatt_serialize(this->statics));
@@ -110,7 +105,7 @@ Class *class_restore(Json *s) {
   size_t i = 0;
   this->id = jarr_gstring(serial, i++);
   this->local = jarr_gbool(serial, i++);
-  this->super = jarr_gstring(serial, i++);
+  this->super = achar_restore(arr_get(serial, i++));
   this->generics = achar_restore(arr_get(serial, i++));
   this->imports = mchar_restore(arr_get(serial, i++));
   this->statics = aatt_restore(arr_get(serial, i++));
@@ -122,7 +117,7 @@ Class *class_restore(Json *s) {
 inline
 Class *class_new(char *id) {
   return _class_new(
-    id, false, "", achar_new(), mchar_new(), aatt_new(), aatt_new()
+    id, false, achar_new(), achar_new(), mchar_new(), aatt_new(), aatt_new()
   );
 }
 
@@ -131,4 +126,38 @@ Type *class__type(Class *this, Atype *generics) {
     return NULL;
   }
   return type_new_data(this->id, generics);
+}
+
+bool class_contains_id(Class *this, char *id) {
+  EACH(this->generics, char, g) {
+    if (!strcmp(id, g)) {
+      return true;
+    }
+  }_EACH
+
+  if (map_has_key(this->imports, id)) {
+    return true;
+  }
+
+  EACH(this->statics, Att, a) {
+    if (!strcmp(id, att_id(a))) {
+      return true;
+    }
+  }_EACH
+
+  EACH(this->instance, Att, a) {
+    if (!strcmp(id, att_id(a))) {
+      return true;
+    }
+  }_EACH
+
+  return false;
+}
+
+bool class_add_import(Class *this, char *id, char *value) {
+  if (class_contains_id(this, id)) {
+    return false;
+  }
+  mchar_put(this->imports, id, value);
+  return true;
 }

@@ -2,13 +2,13 @@ PRG = minijs
 
 C_FILES = $(wildcard src/*.c) \
           $(wildcard src/ast/*.c) \
-          $(wildcard src/types/*.c) \
+          $(wildcard src/builtin/*.c) \
           $(wildcard src/lexer/*.c) \
           $(wildcard src/parser/*.c) \
           $(wildcard src/js/*.c)
 H_FILES = $(wildcard include/*.h) \
           $(wildcard include/ast/*.h) \
-          $(wildcard include/types/*.h) \
+          $(wildcard include/builtin/*.h) \
           $(wildcard include/lexer/*.h) \
           $(wildcard include/parser/*.h) \
           $(wildcard include/js/*.h)

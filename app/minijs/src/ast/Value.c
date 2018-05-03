@@ -194,6 +194,11 @@ Value *value_new_new(Pos *pos, Type *tp, Avalue *values) {
 }
 
 inline
-Value *value_new_group(Pos *pos, Avatt *atts, Value *v1) {
-  return value_new(VGROUP, pos, v1->type, atts, value_serialize(v1));
+Value *value_new_group(Pos *pos, Avatt *atts, Value *v) {
+  return value_new(VGROUP, pos, v->type, atts, value_serialize(v));
+}
+
+inline
+Value *value_new_cast(Pos *pos, Type *tp, Value *v) {
+  return value_new(VCAST, pos, tp, avatt_new(), value_serialize(v));
 }

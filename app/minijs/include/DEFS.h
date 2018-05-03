@@ -10,15 +10,14 @@
 #define VERSION "201803"
 
 ///
-#define TH(tx) {txpos_printf((tx),
+#define TH(tx) {tx_printf((tx),
 
 ///
-#define TH2(class, pos) {txpos_printf(\
-  txpos_new(class_cpath(class), "", 0, 0, pos_nline(pos), pos_nchar(pos)),
+#define TH1(path, pos) \
+  TH(tx_new((path), "", "", pos_nline(pos), pos_nchar(pos)))
 
 ///
-#define TH3(class, pos) {txpos_printf(\
-  txpos_new(final_class_cpath(class), "", 0, 0, pos_nline(pos), pos_nchar(pos)),
+#define TH2(class, pos) TH1(cpath_fpath(class_cpath(class)), pos)
 
 ///
 #define _TH ); THROW "\1" _THROW}

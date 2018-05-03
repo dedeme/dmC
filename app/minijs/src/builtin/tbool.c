@@ -4,37 +4,45 @@
 #include "builtin/tbool.h"
 
 void tbool_add(Arr/*class*/ *builtins) {
+  Atype *params;
+  Type *tbool = type_new_bool();
+  Type *tstr = type_new_str();
+  Type *tp;
   Class *c = class_new("Bool");
   Aatt *statics = class_statics(c);
 
-  Atype *params = atype_new();
-  atype_add(params, type_new_bool());
-  atype_add(params, type_new_bool());
-  Type *unary = type_new_fn(params);
-  aatt_add(statics, att_new("not", unary, true, NULL));
-  aatt_add(statics, att_new("rnd", unary, true, NULL));
-
+  params = atype_new();
+  atype_add(params, tbool);
+  tp = type_new_fn(params);
+  aatt_add(statics, att_new(true, "rnd", tp, true, NULL));
 
   params = atype_new();
-  atype_add(params, type_new_bool());
-  atype_add(params, type_new_bool());
-  atype_add(params, type_new_bool());
-  Type *binary = type_new_fn(params);
+  atype_add(params, tbool);
+  atype_add(params, tbool);
+  tp = type_new_fn(params);
+  aatt_add(statics, att_new(true, "not", tp, true, NULL));
 
-  aatt_add(statics, att_new("eq", binary, true, NULL));
-  aatt_add(statics, att_new("neq", binary, true, NULL));
-  aatt_add(statics, att_new("lt", binary, true, NULL));
-  aatt_add(statics, att_new("gt", binary, true, NULL));
-  aatt_add(statics, att_new("leq", binary, true, NULL));
-  aatt_add(statics, att_new("geq", binary, true, NULL));
+  params = atype_new();
+  atype_add(params, tbool);
+  atype_add(params, tbool);
+  atype_add(params, tbool);
+  tp = type_new_fn(params);
 
-  aatt_add(statics, att_new("and", binary, true, NULL));
-  aatt_add(statics, att_new("or", binary, true, NULL));
+  aatt_add(statics, att_new(true, "eq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "neq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "lt", tp, true, NULL));
+  aatt_add(statics, att_new(true, "gt", tp, true, NULL));
+  aatt_add(statics, att_new(true, "leq", tp, true, NULL));
+  aatt_add(statics, att_new(true, "geq", tp, true, NULL));
+
+  aatt_add(statics, att_new(true, "and", tp, true, NULL));
+  aatt_add(statics, att_new(true, "or", tp, true, NULL));
 
   Aatt *instance = class_instance(c);
   params = atype_new();
-  atype_add(params, type_new_str());
-  aatt_add(instance, att_new("toStr", type_new_fn(params), true, NULL));
+  atype_add(params, tstr);
+  tp = type_new_fn(params);
+  aatt_add(instance, att_new(true, "toStr", tp, true, NULL));
 
   arr_add(builtins, c);
 }
