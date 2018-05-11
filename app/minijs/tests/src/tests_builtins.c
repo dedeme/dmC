@@ -239,7 +239,7 @@ void tests_builtins() {
   test_st("geq", "(Char,Char:Bool)");
 
   test_ins("toStr", "(:Str)");
-  test_ins("toBytes", "(:Arr<Byte>)");
+  test_ins("toBytes", "(:[Byte])");
   test_ins("toInt", "(:Int)");
 
   test_ins("isUpper", "(:Bool)");
@@ -272,7 +272,7 @@ void tests_builtins() {
   test_st("leq", "(Str,Str:Bool)");
   test_st("geq", "(Str,Str:Bool)");
 
-  test_st("join", "(Arr<Str>,Str:Str)");
+  test_st("join", "([Str],Str:Str)");
 
   test_ins("toStr", "(:Str)");
   test_ins("lower", "(:Str)");
@@ -283,7 +283,7 @@ void tests_builtins() {
 
   test_ins("len", "(:Int)");
 
-  test_ins("toBytes", "(:Arr<Byte>)");
+  test_ins("toBytes", "(:[Byte])");
 
   test_ins("contains", "(Str:Bool)");
   test_ins("starts", "(Str:Bool)");
@@ -298,7 +298,7 @@ void tests_builtins() {
   test_ins("sub0", "(Int:Str)");
   test_ins("subEnd", "(Int:Str)");
 
-  test_ins("split", "(Str:Arr<Str>)");
+  test_ins("split", "(Str:[Str])");
 
   test_ins("sub", "(Int,Int:Str)");
 
@@ -316,41 +316,41 @@ void tests_builtins() {
   statics = class_statics(c);
   instance = class_instance(c);
 
-  test_st("eq", "(Arr<A>,Arr<A>:Bool)");
-  test_st("neq", "(Arr<A>,Arr<A>:Bool)");
-  test_st("lt", "(Arr<A>,Arr<A>:Bool)");
-  test_st("gt", "(Arr<A>,Arr<A>:Bool)");
-  test_st("leq", "(Arr<A>,Arr<A>:Bool)");
-  test_st("geq", "(Arr<A>,Arr<A>:Bool)");
+  test_st("eq", "([A],[A]:Bool)");
+  test_st("neq", "([A],[A]:Bool)");
+  test_st("lt", "([A],[A]:Bool)");
+  test_st("gt", "([A],[A]:Bool)");
+  test_st("leq", "([A],[A]:Bool)");
+  test_st("geq", "([A],[A]:Bool)");
 
-  test_st("plus", "(Arr<A>,Arr<A>:Arr<A>)");
+  test_st("plus", "([A],[A]:[A])");
 
   test_ins("toStr", "(:Str)");
   test_ins("size", "(:Int)");
 
-  test_ins("shuffle", "(:Arr<A>)");
-  test_ins("reverse", "(:Arr<A>)");
+  test_ins("shuffle", "(:[A])");
+  test_ins("reverse", "(:[A])");
 
   test_ins("pop", "(:A)");
   test_ins("pop0", "(:A)");
   test_ins("peek", "(:A)");
   test_ins("peek0", "(:A)");
 
-  test_ins("push", "(A:Arr<A>)");
-  test_ins("push0", "(A:Arr<A>)");
+  test_ins("push", "(A:[A])");
+  test_ins("push0", "(A:[A])");
 
   test_ins("get", "(Int:A)");
   test_ins("remove", "(Int:A)");
 
-  test_ins("sub0", "(Int:Arr<A>)");
-  test_ins("subEnd", "(Int:Arr<A>)");
-  test_ins("remove0", "(Int:Arr<A>)");
-  test_ins("removeEnd", "(Int:Arr<A>)");
+  test_ins("sub0", "(Int:[A])");
+  test_ins("subEnd", "(Int:[A])");
+  test_ins("remove0", "(Int:[A])");
+  test_ins("removeEnd", "(Int:[A])");
 
-  test_ins("sub", "(Int,Int:Arr<A>)");
-  test_ins("removeRange", "(Int,Int:Arr<A>)");
+  test_ins("sub", "(Int,Int:[A])");
+  test_ins("removeRange", "(Int,Int:[A])");
 
-  test_ins("set", "(Int,A:Arr<A>)");
+  test_ins("set", "(Int,A:[A])");
 
   size = arr_size(class_statics(c));
   size += arr_size(class_instance(c));
@@ -364,21 +364,21 @@ void tests_builtins() {
   statics = class_statics(c);
   instance = class_instance(c);
 
-  test_st("eq", "(Map<A>,Map<A>:Bool)");
-  test_st("neq", "(Map<A>,Map<A>:Bool)");
+  test_st("eq", "({A},{A}:Bool)");
+  test_st("neq", "({A},{A}:Bool)");
 
-  test_st("plus", "(Map<A>,Map<A>:Map<A>)");
+  test_st("plus", "({A},{A}:{A})");
 
   test_ins("toStr", "(:Str)");
-  test_ins("keys", "(:Arr<Str>)");
-  test_ins("values", "(:Arr<A>)");
-  test_ins("keysValues", "(:Arr<Arr<*>>)");
+  test_ins("keys", "(:[Str])");
+  test_ins("values", "(:[A])");
+  test_ins("keysValues", "(:[[*]])");
   test_ins("size", "(:Int)");
 
   test_ins("get", "(Str:A)");
   test_ins("remove", "(Str:A)");
 
-  test_ins("set", "(Str,A:Map<A>)");
+  test_ins("set", "(Str,A:{A})");
 
   size = arr_size(class_statics(c));
   size += arr_size(class_instance(c));

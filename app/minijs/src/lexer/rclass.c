@@ -74,6 +74,8 @@ static Tx *rextend(Tx *tx, Class *c) {
   Achar *gs;
   if (tx_eq(tx, r = token_generic_id(&id, &gs, tx)))
     TH(tx) "Expected an identifier" _TH
+  if (token_is_reserved(id))
+    TH(tx) "'%s' is a reserved word", id _TH
   if (class_contains_id(c, id))
     TH(tx) "Identifier '%s' is duplicated", id _TH
   tx = r;

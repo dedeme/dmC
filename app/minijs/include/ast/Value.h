@@ -28,7 +28,11 @@ enum Value_t {
   VID,
   VGROUP,
   VCAST,
-  VNEW
+  VNEW,
+  VLUNARY,
+  VRUNARY,
+  VBINARY,
+  VTERNARY
 };
 
 typedef Arr Avalue;
@@ -78,7 +82,7 @@ Value *value_new_null(Pos *pos);
 /// Value must be 't' or 'f'
 Value *value_new_bool(Pos *pos, Avatt *atts, char *value);
 
-/// Value must be digits < 256
+/// Value must be digits
 Value *value_new_byte(Pos *pos, char *value);
 
 /// Value must be digits
@@ -106,7 +110,7 @@ Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m);
 Value *value_new_fn(Pos *pos, Achar *params, Astat *stats);
 
 /// Id must be a valid identifier
-Value *value_new_id(Pos *pos, Avatt *atts, char *id);
+Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics);
 
 /// Values are serialized in value_data()
 Value *value_new_new(Pos *pos, Type *tp, Avalue *values);
@@ -116,6 +120,18 @@ Value *value_new_group(Pos *pos, Avatt *atts, Value *v);
 
 /// v1 is serialized in value_data()
 Value *value_new_cast(Pos *pos, Type *tp, Value *v);
+
+///
+Value *value_new_lunary(Pos *pos, char *op, Value *v);
+
+///
+Value *value_new_runary(Pos *pos, char *op, Value *v);
+
+///
+Value *value_new_binary(Pos *pos, Type *tp, char *op, Value *v1, Value *v2);
+
+///
+Value *value_new_ternary(Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3);
 
 #endif
 

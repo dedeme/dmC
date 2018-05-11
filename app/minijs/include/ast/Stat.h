@@ -20,6 +20,7 @@ enum Stat_t {
   SCONTINUE,
   SBLOCK,
   SWHILE,
+  SFOR,
   SIF,
   STRY,
   STHROW,
@@ -71,7 +72,7 @@ Stat *stat_restore(Json *s);
 /// [SVAL]
 Stat *stat_new_val(Pos *pos, char *id, Value *value);
 
-/// [SVAL]
+/// [SVAR]
 Stat *stat_new_var(Pos *pos, char *id, Value *value);
 
 /// [SASSIGN] 'op' is saved in stat_id
@@ -100,6 +101,14 @@ Stat *stat_new_block(Pos *pos, Astat *block);
 
 /// [SWHILE]
 Stat *stat_new_while(Pos *pos, Value *condition, Astat *block);
+
+/// [SFOR] for has four parts:
+///   1: Astat(0):
+///       Initial assignements. Statemments of type SVAR, SAVAL or SASSIGN
+///   2: Avalue: Loop conditions.
+///   3: Astat (1): Final conditions
+///   4: Astat (2): Block
+Stat *stat_new_for(Pos *pos, Avalue *values, Aastat *blocks);
 
 /// [SIF] If 'if' has clause 'else' arr_size(blocks) == arr_size(values) + 1
 Stat *stat_new_if(Pos *pos, Avalue *values, Aastat *blocks);

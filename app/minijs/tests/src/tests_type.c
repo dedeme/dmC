@@ -25,8 +25,8 @@ void tests_type() {
   test(type_new_float(), DATA, "Float");
   test(type_new_char(), DATA, "Char");
   test(type_new_str(), DATA, "Str");
-  test(type_new_arr(type_new_int()), DATA, "Arr<Int>");
-  test(type_new_map(type_new_int()), DATA, "Map<Int>");
+  test(type_new_arr(type_new_int()), DATA, "[Int]");
+  test(type_new_map(type_new_int()), DATA, "{Int}");
   Atype *ts = atype_new();
   atype_add(ts, type_new_void());
   test(type_new_fn(ts), FN, "(:)");

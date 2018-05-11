@@ -184,8 +184,11 @@ Value *value_new_fn(Pos *pos, Achar *params, Astat *stats) {
 }
 
 inline
-Value *value_new_id(Pos *pos, Avatt *atts, char *id) {
-  return value_new(VID, pos, type_new_unknown(), atts, id);
+Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics) {
+  Achar *data = achar_new();
+  achar_add(data, id);
+  achar_add(data, achar_serialize(generics));
+  return value_new(VID, pos, type_new_unknown(), atts, achar_serialize(data));
 }
 
 inline
@@ -201,4 +204,40 @@ Value *value_new_group(Pos *pos, Avatt *atts, Value *v) {
 inline
 Value *value_new_cast(Pos *pos, Type *tp, Value *v) {
   return value_new(VCAST, pos, tp, avatt_new(), value_serialize(v));
+}
+
+Value *value_new_lunary(Pos *pos, char *op, Value *v) {
+  Achar *data = achar_new();
+  achar_add(data, op);
+  achar_add(data, value_serialize(v));
+  return value_new(
+    VLUNARY, pos, value_type(v), avatt_new(), achar_serialize(data)
+  );
+}
+
+Value *value_new_runary(Pos *pos, char *op, Value *v) {
+  Achar *data = achar_new();
+  achar_add(data, op);
+  achar_add(data, value_serialize(v));
+  return value_new(
+    VLUNARY, pos, value_type(v), avatt_new(), achar_serialize(data)
+  );
+}
+
+Value *value_new_binary(Pos *pos, Type *tp, char *op, Value *v1, Value *v2) {
+  Avalue *vs = avalue_new();
+  avalue_add(vs, v1);
+  avalue_add(vs, v2);
+  Achar *data = achar_new();
+  achar_add(data, op);
+  achar_add(data, avalue_serialize(vs));
+  return value_new(VBINARY, pos, tp, avatt_new(), achar_serialize(data));
+}
+
+Value *value_new_ternary(Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3) {
+  Avalue *vs = avalue_new();
+  avalue_add(vs, v1);
+  avalue_add(vs, v2);
+  avalue_add(vs, v3);
+  return value_new(VTERNARY, pos, tp, avatt_new(), avalue_serialize(vs));
 }

@@ -16,18 +16,21 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   Tx *tx_type = tx;
   Tx *r;
   if (tx_eq(tx, r = rtype(&tp, tx))) {
-    tp = NULL;
+    tp = type_new_unknown();
   }
   tx = r;
 
-  char *val_var;
+  char *val_var = NULL;
   if (tx_eq(tx, r = token_id(&val_var, tx)))
+    if (type_is_unknown(tp)) {
+      return tx;
+    }
     TH(tx) "Expected 'val' or 'var'" _TH
   if (!strcmp(val_var, "val")) {
     is_val = true;
   } else if (!strcmp(val_var, "var")) {
     is_val = false;
-  } else {
+  }  else {
     TH(tx) "Expected 'val' or 'var'" _TH
   }
   tx = r;
@@ -35,7 +38,7 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   tx = token_valid_id(&id, tx);
 
   if (tx_neq(tx, r = token_cconst(tx, ';'))) {
-    if (!tp)
+    if (type_is_unknown(tp))
       TH(tx_type) "Type declaration is needed" _TH
 
     aatt_add(
@@ -51,7 +54,7 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
 
   tx = rvalue(&v, tx);
 
-  if (!tp) {
+  if (type_is_unknown(tp)) {
     Type *vtp = value_type(v);
     if (type_is_unknown(vtp))
       TH(tx_type) "Type declaration is needed" _TH

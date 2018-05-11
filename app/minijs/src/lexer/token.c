@@ -5,8 +5,8 @@
 #include "DEFS.h"
 #include "ast/ops.h"
 
-static char *reserved = " new return break continue switch case if elif else "
-  "default while do for enum try catch finally val var native true false ";
+static char *reserved = " new return break continue with if elif else "
+  "while for enum try catch finally val var native true false null";
 
 Tx *token_blanks(Tx *tx) {
   char *p = tx_start(tx);
@@ -66,6 +66,7 @@ Tx *token_blanks(Tx *tx) {
 
   return tx_move(tx, p, nline, nchar);
 }
+
 /*
 Tx *token_skip_block(Tx *tx) {
   int brackets = 0;
@@ -119,6 +120,21 @@ Tx *token_skip_block(Tx *tx) {
   return token_blanks(tx);
 }
 */
+
+Tx *token_char(char *ch, Tx *tx) {
+  char *p = tx_start(tx);
+  size_t nline = tx_nline(tx);
+  size_t nchar = tx_nchar(tx);
+
+  if (!*p) {
+    return tx;
+  }
+  *ch = *p;
+  if (*p == '\n') {
+    return tx_move(tx, ++p, ++nline, 0);
+  }
+  return tx_move(tx, ++p, nline, ++nchar);
+}
 
 Tx *token_cconst0(Tx *tx, char value) {
   char *p = tx_start(tx);
@@ -388,13 +404,15 @@ Tx *token_lunary(char **op, Tx *tx) {
   Tx *r;
   char ch;
 
-  if (tx_neq(tx, r = token_csplit(&ch, tx, ops_u1()))) {
-    *op = " ";
-    **op = ch;
+  if (tx_neq(tx, r = token_split(op, tx, ops_u2()))) {
     return r;
   }
 
-  if (tx_neq(tx, r = token_split(op, tx, ops_u2()))) {
+  if (tx_neq(tx, r = token_csplit(&ch, tx, ops_u1()))) {
+    char *o = ATOMIC(2);
+    *o = ch;
+    *(o + 1) = 0;
+    *op = o;
     return r;
   }
 
@@ -414,13 +432,15 @@ Tx *token_binary(char **op, Tx *tx) {
   Tx *r;
   char ch;
 
-  if (tx_neq(tx, r = token_csplit(&ch, tx, ops_b1()))) {
-    *op = " ";
-    **op = ch;
+  if (tx_neq(tx, r = token_split(op, tx, ops_b2()))) {
     return r;
   }
 
-  if (tx_neq(tx, r = token_split(op, tx, ops_b2()))) {
+  if (tx_neq(tx, r = token_csplit(&ch, tx, ops_b1()))) {
+    char *o = ATOMIC(2);
+    *o = ch;
+    *(o + 1) = 0;
+    *op = o;
     return r;
   }
 
@@ -443,7 +463,7 @@ Tx *token_valid_id(char **id, Tx *tx) {
 
 Tx *token_generic_id(char **id, Achar **generics, Tx *tx) {
   Tx *r;
-  if (tx_eq(tx, r = token_valid_id(id, tx))) {
+  if (tx_eq(tx, r = token_id(id, tx))) {
     return tx;
   }
   tx = r;
@@ -454,6 +474,9 @@ Tx *token_generic_id(char **id, Achar **generics, Tx *tx) {
   }
   tx = r;
   tx = token_list(generics, tx, '>', (Tx*(*)(void**, Tx*))token_valid_id);
+
+  if (!arr_size(*generics))
+    TH(r) "Empty generics brackets '<>' is not allowed" _TH
 
   return tx;
 }
@@ -467,7 +490,7 @@ Tx *token_native(char **text, Tx *tx, char *mark) {
 
   for (;;) {
     if (!*p)
-      TH(tx) "Mark end of native '%s' is missing", mark _TH
+      TH(tx) "Mark '%s' is missing", mark _TH
 
     if (!memcmp(p, mark, len_mark)) {
       break;

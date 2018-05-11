@@ -10,7 +10,7 @@
 #define B1 OPS_PLUS OPS_SUB OPS_MUL OPS_DIV OPS_PER OPS_POW\
  OPS_GT OPS_LT OPS_AND OPS_OR
 #define B2 OPS_EQ " " OPS_NEQ " " OPS_LEQ " " OPS_GEQ " " OPS_XOR " " OPS_SR3\
-  " " OPS_SL " " OPS_SR " " OPS_NULL
+  " " OPS_SL " " OPS_SR " " OPS_LAND " " OPS_LOR " " OPS_NIL
 #define A1 OPS_ASSIGN
 #define A2 OPS_PLUS_ASSIGN " " OPS_MINUS_ASSIGN " " OPS_MUL_ASSIGN\
   " " OPS_DIV_ASSIGN " " OPS_PER_ASSIGN " " OPS_POW_ASSIGN " " OPS_AND_ASSIGN\
@@ -44,6 +44,30 @@ char *ops_a1(void) {
 inline
 char *ops_a2(void) {
   return A2;
+}
+
+int ops_order(char *op) {
+  switch(*(op + 1)) {
+  case '=': return 4;
+  case '<':
+  case '>': return 3;
+  case '^': return 6;
+  case '&': return 8;
+  case '|': return 9;
+  }
+
+  switch (*op) {
+  case '<':
+  case '>': return 4;
+  case '+':
+  case '-': return 2;
+  case '*':
+  case '/':
+  case '%': return 1;
+  case '&': return 5;
+  case '|': return 7;
+  }
+  return 0; // ^
 }
 
 #undef U1

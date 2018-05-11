@@ -13,6 +13,15 @@
 #include "tests_rgenerics.h"
 #include "tests_rextend.h"
 #include "tests_rtype.h"
+#include "tests_rnull.h"
+#include "tests_rbool.h"
+#include "tests_rnumber.h"
+#include "tests_rstring.h"
+#include "tests_rid.h"
+#include "tests_rcast.h"
+#include "tests_rgroup.h"
+#include "tests_rnary.h"
+#include "tests_rwith.h"
 
 int main() {
   sys_init("minijs_tests");
@@ -28,8 +37,17 @@ int main() {
   tests_rempty();
   tests_rimports();
   tests_rgenerics();
-  tests_rextend();*/
+  tests_rextend();
   tests_rtype();
+  tests_rnull();
+  tests_rbool();
+  tests_rnumber();
+  tests_rstring();
+  tests_rid();
+  tests_rcast();
+  tests_rgroup();
+  tests_rnary();*/
+  tests_rwith();
 
   return 0;
 }

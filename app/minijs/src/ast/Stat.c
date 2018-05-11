@@ -154,6 +154,11 @@ Stat *stat_new_while(Pos *pos, Value *condition, Astat *block) {
 }
 
 inline
+Stat *stat_new_for(Pos *pos, Avalue *values, Aastat *blocks) {
+  return stat_new(SFOR, pos, "", values, blocks);
+}
+
+inline
 Stat *stat_new_if(Pos *pos, Avalue *values, Aastat *blocks) {
   return stat_new(SIF, pos, "", values, blocks);
 }

@@ -4,6 +4,27 @@
 /// Value reader.<p>
 ///
 /// <b>Template</b>
+///   defn |
+///   with value cwith* dwith
+///   new gid fatt attach* nary*
+///   (value) |
+///   lunary value |
+///   gid unary? nary |
+///   single attach* nary*
+/// where
+///   defn :: id,* -> block
+///   cwith :: | value,+ : value
+///   dwith :: | : value
+///   lunary :: token_lunary
+///   single :: gid | literal
+///   attach :: patt | satt | fatt
+///   runary :: token_runary
+///   nary ::
+///     binary value |
+///     ? value : value
+///   patt :: . id
+///   satt :: [value]
+///   fatt :: (value,*)
 /// <b>Examples</b>
 
 #ifndef LEXER_RVALUE_H

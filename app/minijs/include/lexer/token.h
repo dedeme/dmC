@@ -16,6 +16,10 @@ Tx *token_blanks(Tx *tx);
 /// the end of text.
 Tx *token_skip_bock(Tx *tx);
 
+/// Reads one character. It does not fail. Only advance one character.<br>
+/// tx does not change if next character is '0'
+Tx *token_char(char *ch, Tx *tx);
+
 /// Values must not be '\n'. It does not fail. Only advances a character.
 Tx *token_cconst0(Tx *tx, char value);
 
@@ -76,13 +80,11 @@ Tx *token_valid_id(char **id, Tx *tx);
 
 /// Read an id with o without generics. If there are not generics '*generics'
 /// is initialized to an empty array.<p>
-/// It fails when id or one generic is a reserved word and throws a
-/// tx_exception; but if there is not one id to read does not fail and return
-/// 'tx'.<p>
+/// If genericks is like '<>' throw a tx_exception.<p>
 /// Throws tx_exception.
 Tx *token_generic_id(char **id, Achar **generics, Tx *tx);
 
-/// Read text until mark.<p>
+/// Read text until mark. Tx moves after mark.<p>
 /// Throws tx_exception if mark is missing.
 Tx *token_native(char **text, Tx *tx, char *mark);
 
