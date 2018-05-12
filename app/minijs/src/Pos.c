@@ -32,17 +32,16 @@ size_t pos_nchar(Pos *this) {
   return this->nchar;
 }
 
-Json *pos_serialize(Pos *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *pos_serialize(Pos *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_auint(serial, this->nline);
   jarr_auint(serial, this->nchar);
-  return json_warray(serial);
+  return serial;
 }
 
-Pos *pos_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Pos *pos_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Pos *this = MALLOC(Pos);
   size_t i = 0;
   this->nline = jarr_guint(serial, i++);

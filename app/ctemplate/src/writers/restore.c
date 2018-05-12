@@ -11,10 +11,9 @@ void restore_write(RW *rw, Structure *st) {
 
   rw_writeln(rw, "");
   rw_writeln(rw, str_printf(
-    "%s *%srestore(Json *s) {", st->head->id, st->head->prefix
+    "%s *%srestore(Arr/*Json*/ *serial) {", st->head->id, st->head->prefix
   ));
-  rw_writeln(rw, "  if (json_rnull(s)) return NULL;");
-  rw_writeln(rw, "  Arr/*Json*/ *serial = json_rarray(s);");
+  rw_writeln(rw, "  if (!arr_size(serial)) return NULL;");
   rw_writeln(rw, str_printf(
     "  %s *this = MALLOC(%s);", st->head->id, st->head->id
   ));
@@ -35,7 +34,7 @@ void restore_write(RW *rw, Structure *st) {
 
     if (!*j) {
       rw_writeln(rw, str_printf(
-        "  this->%s = %s_restore(arr_get(serial, i++));", p->id, s
+        "  this->%s = %s_restore(json_rarray(arr_get(serial, i++)));", p->id, s
       ));
     } else if (*j == 'A') {
       rw_writeln(rw, str_printf(

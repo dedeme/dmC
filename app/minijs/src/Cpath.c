@@ -142,13 +142,15 @@ bool cpath_eq(Cpath *this, Cpath *other) {
 }
 
 inline
-Json *cpath_serialize(Cpath *this) {
-  return json_wstring(this->path);
+Arr/*Json*/ *cpath_serialize(Cpath *this) {
+  Arr/*Json*/ *r = arr_new();
+  arr_add(r, json_wstring(this->path));
+  return r;
 }
 
 inline
-Cpath *cpath_restore(Json *s) {
-  return cpath_new(json_rstring(s));
+Cpath *cpath_restore(Arr/*Json*/ *s) {
+  return cpath_new(json_rstring(arr_get(s, 0)));
 }
 
 Arr/*Cpath*/ *cpath_dirs(char *dir) {

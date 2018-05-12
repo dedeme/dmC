@@ -12,7 +12,7 @@ struct: Value
   pos: Pos *: pos
   type: Type *: type
   attachs: Avatt *: avatt
-  data: char *: _string
+  data: Achar *: achar
 */
 /*.-.*/
 struct value_Value {
@@ -20,7 +20,7 @@ struct value_Value {
   Pos *pos;
   Type *type;
   Avatt *attachs;
-  char *data;
+  Achar *data;
 };
 
 Value *value_new(
@@ -28,7 +28,7 @@ Value *value_new(
   Pos *pos,
   Type *type,
   Avatt *attachs,
-  char *data
+  Achar *data
 ) {
   Value *this = MALLOC(Value);
   this->vtype = vtype;
@@ -60,73 +60,78 @@ Avatt *value_attachs(Value *this) {
 }
 
 inline
-char *value_data(Value *this) {
+Achar *value_data(Value *this) {
   return this->data;
 }
 
-Json *value_serialize(Value *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *value_serialize(Value *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_auint(serial, this->vtype);
-  arr_add(serial, pos_serialize(this->pos));
-  arr_add(serial, type_serialize(this->type));
-  arr_add(serial, avatt_serialize(this->attachs));
-  jarr_astring(serial, this->data);
-  return json_warray(serial);
+  arr_add(serial, json_warray(pos_serialize(this->pos)));
+  arr_add(serial, json_warray(type_serialize(this->type)));
+  arr_add(serial, json_warray(avatt_serialize(this->attachs)));
+  arr_add(serial, json_warray(achar_serialize(this->data)));
+  return serial;
 }
 
-Value *value_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Value *value_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Value *this = MALLOC(Value);
   size_t i = 0;
   this->vtype = jarr_guint(serial, i++);
-  this->pos = pos_restore(arr_get(serial, i++));
-  this->type = type_restore(arr_get(serial, i++));
-  this->attachs = avatt_restore(arr_get(serial, i++));
-  this->data = jarr_gstring(serial, i++);
+  this->pos = pos_restore(json_rarray(arr_get(serial, i++)));
+  this->type = type_restore(json_rarray(arr_get(serial, i++)));
+  this->attachs = avatt_restore(json_rarray(arr_get(serial, i++)));
+  this->data = achar_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/
 
+Achar *mk_achar(char *value) {
+  Achar *r = achar_new();
+  achar_add(r, value);
+  return r;
+}
+
 inline
 Value *value_new_null(Pos *pos) {
-  return value_new(VNULL, pos, type_new_unknown(), avatt_new(), "");
+  return value_new(VNULL, pos, type_new_unknown(), avatt_new(), mk_achar(""));
 }
 
 inline
 Value *value_new_bool(Pos *pos, Avatt *atts, char *value) {
-  return value_new(VBOOL, pos, type_new_bool(), atts, value);
+  return value_new(VBOOL, pos, type_new_bool(), atts, mk_achar(value));
 }
 
 inline
 Value *value_new_byte(Pos *pos, char *value) {
-  return value_new(VBYTE, pos, type_new_byte(), avatt_new(), value);
+  return value_new(VBYTE, pos, type_new_byte(), avatt_new(), mk_achar(value));
 }
 
 inline
 Value *value_new_int(Pos *pos, char *value) {
-  return value_new(VINT, pos, type_new_int(), avatt_new(), value);
+  return value_new(VINT, pos, type_new_int(), avatt_new(), mk_achar(value));
 }
 
 inline
 Value *value_new_float(Pos *pos, char *value) {
-  return value_new(VFLOAT, pos, type_new_float(), avatt_new(), value);
+  return value_new(VFLOAT, pos, type_new_float(), avatt_new(), mk_achar(value));
 }
 
 inline
 Value *value_new_char(Pos *pos, Avatt *atts, char *value) {
-  return value_new(VCHAR, pos, type_new_char(), atts, value);
+  return value_new(VCHAR, pos, type_new_char(), atts, mk_achar(value));
 }
 
 inline
 Value *value_new_str(Pos *pos, Avatt *atts, char *value) {
-  return value_new(VSTR, pos, type_new_str(), atts, value);
+  return value_new(VSTR, pos, type_new_str(), atts, mk_achar(value));
 }
 
 inline
 Value *value_new_str2(Pos *pos, Avatt *atts, char *value) {
-  return value_new(VSTR2, pos, type_new_str(), atts, value);
+  return value_new(VSTR2, pos, type_new_str(), atts, mk_achar(value));
 }
 
 static Type *common_type(Atype *types) {
@@ -170,7 +175,7 @@ Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m) {
     arr_add(jm, kv_new(kv->key, value_serialize(kv->value)));
   }_EACH
   return value_new(
-    VMAP, pos, type_new_arr(ct_value2(m)), atts, json_wobject(jm)
+    VMAP, pos, type_new_arr(ct_value2(m)), atts, mk_achar(json_wobject(jm))
   );
 }
 
@@ -179,16 +184,14 @@ Value *value_new_fn(Pos *pos, Achar *params, Astat *stats) {
   arr_add(js, achar_serialize(params));
   arr_add(js, astat_serialize(stats));
   return value_new(
-    VFN, pos, type_new_unknown(), avatt_new(), json_warray(js)
+    VFN, pos, type_new_unknown(), avatt_new(), js
   );
 }
 
 inline
 Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics) {
-  Achar *data = achar_new();
-  achar_add(data, id);
-  achar_add(data, achar_serialize(generics));
-  return value_new(VID, pos, type_new_unknown(), atts, achar_serialize(data));
+  achar_add(generics, id);
+  return value_new(VID, pos, type_new_unknown(), atts, generics);
 }
 
 inline
@@ -207,20 +210,18 @@ Value *value_new_cast(Pos *pos, Type *tp, Value *v) {
 }
 
 Value *value_new_lunary(Pos *pos, char *op, Value *v) {
-  Achar *data = achar_new();
+  Achar *data = value_serialize(v);
   achar_add(data, op);
-  achar_add(data, value_serialize(v));
   return value_new(
-    VLUNARY, pos, value_type(v), avatt_new(), achar_serialize(data)
+    VLUNARY, pos, value_type(v), avatt_new(), data
   );
 }
 
 Value *value_new_runary(Pos *pos, char *op, Value *v) {
-  Achar *data = achar_new();
+  Achar *data = value_serialize(v);
   achar_add(data, op);
-  achar_add(data, value_serialize(v));
   return value_new(
-    VLUNARY, pos, value_type(v), avatt_new(), achar_serialize(data)
+    VRUNARY, pos, value_type(v), avatt_new(), data
   );
 }
 
@@ -228,10 +229,9 @@ Value *value_new_binary(Pos *pos, Type *tp, char *op, Value *v1, Value *v2) {
   Avalue *vs = avalue_new();
   avalue_add(vs, v1);
   avalue_add(vs, v2);
-  Achar *data = achar_new();
+  Achar *data = avalue_serialize(vs);
   achar_add(data, op);
-  achar_add(data, avalue_serialize(vs));
-  return value_new(VBINARY, pos, tp, avatt_new(), achar_serialize(data));
+  return value_new(VBINARY, pos, tp, avatt_new(), data);
 }
 
 Value *value_new_ternary(Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3) {

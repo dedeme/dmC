@@ -34,10 +34,10 @@ char *type_id(Type *this);
 Atype *type_params(Type *this);
 
 ///
-Json *type_serialize(Type *this);
+Arr/*Json*/ *type_serialize(Type *this);
 
 ///
-Type *type_restore(Json *s);
+Type *type_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

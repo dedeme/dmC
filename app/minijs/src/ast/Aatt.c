@@ -27,18 +27,18 @@ Att *aatt__get(Aatt *this, char *id) {
   return NULL;
 }
 
-Json *aatt_serialize(Aatt *this) {
+Arr/*Json*/ *aatt_serialize(Aatt *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Att, t) {
-    arr_add(r, att_serialize(t));
+    arr_add(r, json_warray(att_serialize(t)));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Aatt *aatt_restore(Json *j) {
+Aatt *aatt_restore(Arr/*Json*/ *j) {
   Aatt *r = arr_new();
-  EACH(json_rarray(j), char, js) {
-    aatt_add(r, att_restore(js));
+  EACH(j, char, js) {
+    aatt_add(r, att_restore(json_rarray(js)));
   }_EACH
   return r;
 }

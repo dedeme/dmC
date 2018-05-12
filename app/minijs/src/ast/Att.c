@@ -57,27 +57,26 @@ bool att_is_val(Att *this) {
   return this->is_val;
 }
 
-Json *att_serialize(Att *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *att_serialize(Att *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_abool(serial, this->is_public);
   jarr_astring(serial, this->id);
-  arr_add(serial, type_serialize(this->type));
+  arr_add(serial, json_warray(type_serialize(this->type)));
   jarr_abool(serial, this->is_val);
-  arr_add(serial, value_serialize(this->_value));
-  return json_warray(serial);
+  arr_add(serial, json_warray(value_serialize(this->_value)));
+  return serial;
 }
 
-Att *att_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Att *att_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Att *this = MALLOC(Att);
   size_t i = 0;
   this->is_public = jarr_gbool(serial, i++);
   this->id = jarr_gstring(serial, i++);
-  this->type = type_restore(arr_get(serial, i++));
+  this->type = type_restore(json_rarray(arr_get(serial, i++)));
   this->is_val = jarr_gbool(serial, i++);
-  this->_value = value_restore(arr_get(serial, i++));
+  this->_value = value_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/

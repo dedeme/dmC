@@ -15,8 +15,8 @@ static void check_byte(Value *v, char *n) {
   assert(!strcmp(type_id(value_type(v)), "Byte"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), n)) {
-    printf("Expected: %s\nActual:%s\n", n, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), n)) {
+    printf("Expected: %s\nActual:%s\n", n, achar_get(value_data(v), 0));
     assert(false);
   }
 }
@@ -27,8 +27,8 @@ static void check_int(Value *v, char *n) {
   assert(!strcmp(type_id(value_type(v)), "Int"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), n)) {
-    printf("Expected: %s\nActual:%s\n", n, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), n)) {
+    printf("Expected: %s\nActual:%s\n", n, achar_get(value_data(v), 0));
     assert(false);
   }
 }
@@ -39,8 +39,8 @@ static void check_float(Value *v, char *n) {
   assert(!strcmp(type_id(value_type(v)), "Float"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), n)) {
-    printf("Expected: %s\nActual:%s\n", n, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), n)) {
+    printf("Expected: %s\nActual:%s\n", n, achar_get(value_data(v), 0));
     assert(false);
   }
 }

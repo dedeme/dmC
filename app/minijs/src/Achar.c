@@ -26,18 +26,25 @@ inline
 char *achar_get(Achar *this, int ix) {
   return arr_get(this, ix);
 }
+Achar *achar_copy(Achar *this) {
+  Achar *r = achar_new();
+  EACH(this, char, s) {
+    achar_add(r, s);
+  }_EACH
+  return r;
+}
 
-Json *achar_serialize(Achar *this) {
+Arr/*Json*/ *achar_serialize(Achar *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, char, s) {
     arr_add(r, json_wstring(s));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Achar *achar_restore(Json *j) {
+Achar *achar_restore(Arr/*Json*/ *j) {
   Achar *r = arr_new();
-  EACH(json_rarray(j), char, js) {
+  EACH(j, char, js) {
     achar_add(r, json_rstring(js));
   }_EACH
   return r;

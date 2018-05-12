@@ -5,6 +5,8 @@
 #include "ast/Class.h"
 #include "ast/Imported.h"
 
+#define JS json_warray
+
 void tests_builtins() {
   puts("Builtins");
 
@@ -15,8 +17,8 @@ void tests_builtins() {
   puts("--> Bool");
   Class *c = imported__class(im, "Bool");
   assert(c);
-  char *cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  char *cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   Aatt *statics = class_statics(c);
   Aatt *instance = class_instance(c);
 
@@ -70,8 +72,8 @@ void tests_builtins() {
   puts("--> Byte");
   c = imported__class(im, "Byte");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -115,8 +117,8 @@ void tests_builtins() {
   puts("--> Int");
   c = imported__class(im, "Int");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -163,8 +165,8 @@ void tests_builtins() {
   puts("--> Float");
   c = imported__class(im, "Float");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -226,8 +228,8 @@ void tests_builtins() {
   puts("--> Char");
   c = imported__class(im, "Char");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -260,8 +262,8 @@ void tests_builtins() {
   puts("--> Str");
   c = imported__class(im, "Str");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -311,8 +313,8 @@ void tests_builtins() {
   puts("--> Arr");
   c = imported__class(im, "Arr");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 
@@ -359,8 +361,8 @@ void tests_builtins() {
   puts("--> Map");
   c = imported__class(im, "Map");
   assert(c);
-  cs = class_serialize(c);
-  assert(!strcmp(cs, class_serialize(class_restore(cs))));
+  cs = JS(class_serialize(c));
+  assert(!strcmp(cs, JS(class_serialize(class_restore(class_serialize(c))))));
   statics = class_statics(c);
   instance = class_instance(c);
 

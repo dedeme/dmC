@@ -21,10 +21,10 @@ void avatt_add(Avatt *this, Vatt *t);
 Vatt *avatt_get(Avatt *this, int ix);
 
 ///
-Json *avatt_serialize(Avatt *this);
+Arr/*Json*/ *avatt_serialize(Avatt *this);
 
 ///
-Avatt *avatt_restore(Json *j);
+Avatt *avatt_restore(Arr/*Json*/ *j);
 
 
 #endif

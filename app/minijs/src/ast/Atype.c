@@ -18,18 +18,18 @@ Type *atype_get(Atype *this, int ix) {
   return arr_get(this, ix);
 }
 
-Json *atype_serialize(Atype *this) {
+Arr/*Json*/ *atype_serialize(Atype *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Type, t) {
-    arr_add(r, type_serialize(t));
+    arr_add(r, json_warray(type_serialize(t)));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Atype *atype_restore(Json *j) {
+Atype *atype_restore(Arr/*Json*/ *j) {
   Atype *r = arr_new();
-  EACH(json_rarray(j), char, js) {
-    atype_add(r, type_restore(js));
+  EACH(j, char, js) {
+    atype_add(r, type_restore(json_rarray(js)));
   }_EACH
   return r;
 }

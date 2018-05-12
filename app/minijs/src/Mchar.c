@@ -26,18 +26,17 @@ char *mchar_get(Mchar *this, char *key) {
   return map_oget(this, key, key);
 }
 
-Json *mchar_serialize(Mchar *this) {
+Arr/*Json*/ *mchar_serialize(Mchar *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Kv, kv) {
     arr_add(r, json_wstring(kv->key));
     arr_add(r, json_wstring(kv->value));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Mchar *mchar_restore(Json *j) {
+Mchar *mchar_restore(Arr/*Json*/ *js) {
   Arr/*Kv*/ *r = arr_new();
-  Arr/*Json*/ *js = json_rarray(j);
   size_t size = arr_size(js);
   size_t i = 0;
   while (i < size) {

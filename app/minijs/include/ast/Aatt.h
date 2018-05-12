@@ -24,10 +24,10 @@ Att *aatt_get(Aatt *this, int ix);
 Att *aatt__get(Aatt *this, char *id);
 
 ///
-Json *aatt_serialize(Aatt *this);
+Arr/*Json*/ *aatt_serialize(Aatt *this);
 
 ///
-Aatt *aatt_restore(Json *j);
+Aatt *aatt_restore(Arr/*Json*/ *j);
 
 
 #endif

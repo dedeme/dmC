@@ -28,7 +28,7 @@ int main() {
   Achar *roots = achar_new();
   achar_add(roots, "data");
   cpath_init(roots);
-/*
+
   tests_imported();
   tests_program();
   tests_type();
@@ -46,7 +46,7 @@ int main() {
   tests_rid();
   tests_rcast();
   tests_rgroup();
-  tests_rnary();*/
+  tests_rnary();
   tests_rwith();
 
   return 0;

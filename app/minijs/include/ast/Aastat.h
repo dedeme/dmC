@@ -21,10 +21,10 @@ void aastat_add(Aastat *this, Astat *a);
 Astat *aastat_get(Aastat *this, int ix);
 
 ///
-Json *aastat_serialize(Aastat *this);
+Arr/*Json*/ *aastat_serialize(Aastat *this);
 
 ///
-Aastat *aastat_restore(Json *j);
+Aastat *aastat_restore(Arr/*Json*/ *j);
 
 
 #endif

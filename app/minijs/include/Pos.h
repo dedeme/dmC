@@ -23,10 +23,10 @@ size_t pos_nline(Pos *this);
 size_t pos_nchar(Pos *this);
 
 ///
-Json *pos_serialize(Pos *this);
+Arr/*Json*/ *pos_serialize(Pos *this);
 
 ///
-Pos *pos_restore(Json *s);
+Pos *pos_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

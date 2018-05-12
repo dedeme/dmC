@@ -12,11 +12,13 @@
 static Value *inject(Pos *pos, char *op, Value *v1, Value *v2) {
   if (value_vtype(v2) == VBINARY) {
     int nop = ops_order(op);
-    Achar *data = achar_restore(value_data(v2));
-    char *op2 = achar_get(data, 0);
+    Achar *data = value_data(v2);
+    char *op2 = achar_get(data, arr_size(data) - 1);
     int nop2 = ops_order(op2);
     if (nop2 > nop) {
-      Avalue *vs = avalue_restore(achar_get(data, 1));
+      Achar *tmp = achar_copy(data);
+      arr_remove(tmp, arr_size(tmp) - 1);
+      Avalue *vs = avalue_restore(tmp);
       v1 = inject(pos, op, v1, avalue_get(vs, 0));
       v2 = avalue_get(vs, 1);
       op = op2;

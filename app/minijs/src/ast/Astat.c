@@ -18,18 +18,18 @@ Stat *astat_get(Astat *this, int ix) {
   return arr_get(this, ix);
 }
 
-Json *astat_serialize(Astat *this) {
+Arr/*Json*/ *astat_serialize(Astat *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Stat, t) {
-    arr_add(r, stat_serialize(t));
+    arr_add(r, json_warray(stat_serialize(t)));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Astat *astat_restore(Json *j) {
+Astat *astat_restore(Arr/*Json*/ *j) {
   Astat *r = arr_new();
-  EACH(json_rarray(j), char, js) {
-    astat_add(r, stat_restore(js));
+  EACH(j, char, js) {
+    astat_add(r, stat_restore(json_rarray(js)));
   }_EACH
   return r;
 }

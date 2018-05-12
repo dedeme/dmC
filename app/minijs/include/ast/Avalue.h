@@ -21,10 +21,10 @@ void avalue_add(Avalue *this, Value *t);
 Value *avalue_get(Avalue *this, int ix);
 
 ///
-Json *avalue_serialize(Avalue *this);
+Arr/*Json*/ *avalue_serialize(Avalue *this);
 
 ///
-Avalue *avalue_restore(Json *j);
+Avalue *avalue_restore(Arr/*Json*/ *j);
 
 
 #endif

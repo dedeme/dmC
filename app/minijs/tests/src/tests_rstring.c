@@ -15,8 +15,8 @@ static void check_char(Value *v, char *s) {
   assert(!strcmp(type_id(value_type(v)), "Char"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), s)) {
-    printf("Expected: %s\nActual:%s\n", s, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), s)) {
+    printf("Expected: %s\nActual:%s\n", s, achar_get(value_data(v), 0));
     assert(false);
   }
 }
@@ -27,8 +27,8 @@ static void check_str(Value *v, char *s) {
   assert(!strcmp(type_id(value_type(v)), "Str"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), s)) {
-    printf("Expected: %s\nActual:%s\n", s, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), s)) {
+    printf("Expected: %s\nActual:%s\n", s, achar_get(value_data(v), 0));
     assert(false);
   }
 }
@@ -39,8 +39,8 @@ static void check_str2(Value *v, char *s) {
   assert(!strcmp(type_id(value_type(v)), "Str"));
   assert(arr_size(value_attachs(v)) == 0);
 
-  if (strcmp(value_data(v), s)) {
-    printf("Expected: %s\nActual:%s\n", s, value_data(v));
+  if (strcmp(achar_get(value_data(v), 0), s)) {
+    printf("Expected: %s\nActual:%s\n", s, achar_get(value_data(v), 0));
     assert(false);
   }
 }

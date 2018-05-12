@@ -151,14 +151,14 @@ Class *rclass(Cpath *path) {
   }
   time_t tmini = file_info(mini)->st_mtime;
   if (tcache > tmini) {
-    c = class_restore(file_read(cache));
+    c = class_restore(json_rarray(file_read(cache)));
   } else {
     char *tx = file_read(mini);
     c = read(path, tx);
     if (!file_exists(path_parent(cache))) {
       file_mkdir(path_parent(cache));
     }
-    file_write(cache, class_serialize(c));
+    file_write(cache, json_warray(class_serialize(c)));
   }
 
   imported_add(im, c);

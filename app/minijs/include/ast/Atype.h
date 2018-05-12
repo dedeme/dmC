@@ -21,10 +21,10 @@ void atype_add(Atype *this, Type *t);
 Type *atype_get(Atype *this, int ix);
 
 ///
-Json *atype_serialize(Atype *this);
+Arr/*Json*/ *atype_serialize(Atype *this);
 
 ///
-Atype *atype_restore(Json *j);
+Atype *atype_restore(Arr/*Json*/ *j);
 
 
 #endif

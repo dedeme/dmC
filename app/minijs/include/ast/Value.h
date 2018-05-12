@@ -50,7 +50,7 @@ Value *value_new(
   Pos *pos,
   Type *type,
   Avatt *attachs,
-  char *data
+  Achar *data
 );
 
 ///
@@ -66,13 +66,13 @@ Type *value_type(Value *this);
 Avatt *value_attachs(Value *this);
 
 ///
-char *value_data(Value *this);
+Achar *value_data(Value *this);
 
 ///
-Json *value_serialize(Value *this);
+Arr/*Json*/ *value_serialize(Value *this);
 
 ///
-Value *value_restore(Json *s);
+Value *value_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

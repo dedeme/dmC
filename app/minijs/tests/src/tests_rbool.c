@@ -17,12 +17,12 @@ void tests_rbool() {
   tx = mk_tx("true");
   rvalue(&v, tx);
   assert(value_vtype(v) == VBOOL);
-  assert(!strcmp(value_data(v), "true"));
+  assert(!strcmp(achar_get(value_data(v), 0), "true"));
 
   tx = mk_tx("false");
   rvalue(&v, tx);
   assert(value_vtype(v) == VBOOL);
-  assert(!strcmp(value_data(v), "false"));
+  assert(!strcmp(achar_get(value_data(v), 0), "false"));
 
   puts("    Finished");
 }

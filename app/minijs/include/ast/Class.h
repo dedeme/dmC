@@ -41,10 +41,10 @@ Aatt *class_statics(Class *this);
 Aatt *class_instance(Class *this);
 
 ///
-Json *class_serialize(Class *this);
+Arr/*Json*/ *class_serialize(Class *this);
 
 ///
-Class *class_restore(Json *s);
+Class *class_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

@@ -85,31 +85,30 @@ Aatt *class_instance(Class *this) {
   return this->instance;
 }
 
-Json *class_serialize(Class *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *class_serialize(Class *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_astring(serial, this->id);
   jarr_abool(serial, this->local);
-  arr_add(serial, achar_serialize(this->super));
-  arr_add(serial, achar_serialize(this->generics));
-  arr_add(serial, mchar_serialize(this->imports));
-  arr_add(serial, aatt_serialize(this->statics));
-  arr_add(serial, aatt_serialize(this->instance));
-  return json_warray(serial);
+  arr_add(serial, json_warray(achar_serialize(this->super)));
+  arr_add(serial, json_warray(achar_serialize(this->generics)));
+  arr_add(serial, json_warray(mchar_serialize(this->imports)));
+  arr_add(serial, json_warray(aatt_serialize(this->statics)));
+  arr_add(serial, json_warray(aatt_serialize(this->instance)));
+  return serial;
 }
 
-Class *class_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Class *class_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Class *this = MALLOC(Class);
   size_t i = 0;
   this->id = jarr_gstring(serial, i++);
   this->local = jarr_gbool(serial, i++);
-  this->super = achar_restore(arr_get(serial, i++));
-  this->generics = achar_restore(arr_get(serial, i++));
-  this->imports = mchar_restore(arr_get(serial, i++));
-  this->statics = aatt_restore(arr_get(serial, i++));
-  this->instance = aatt_restore(arr_get(serial, i++));
+  this->super = achar_restore(json_rarray(arr_get(serial, i++)));
+  this->generics = achar_restore(json_rarray(arr_get(serial, i++)));
+  this->imports = mchar_restore(json_rarray(arr_get(serial, i++)));
+  this->statics = aatt_restore(json_rarray(arr_get(serial, i++)));
+  this->instance = aatt_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/

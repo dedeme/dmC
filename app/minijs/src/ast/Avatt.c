@@ -18,17 +18,17 @@ Vatt *avatt_get(Avatt *this, int ix) {
   return arr_get(this, ix);
 }
 
-Json *avatt_serialize(Avatt *this) {
+Arr/*Json*/ *avatt_serialize(Avatt *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Vatt, t) {
     arr_add(r, vatt_serialize(t));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Avatt *avatt_restore(Json *j) {
+Avatt *avatt_restore(Arr/*Json*/ *j) {
   Avatt *r = arr_new();
-  EACH(json_rarray(j), char, js) {
+  EACH(j, char, js) {
     avatt_add(r, vatt_restore(js));
   }_EACH
   return r;

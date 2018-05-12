@@ -24,10 +24,10 @@ Stat *astat_get(Astat *this, int ix);
 Type *astat_type(Astat this);
 
 ///
-Json *astat_serialize(Astat *this);
+Arr/*Json*/ *astat_serialize(Astat *this);
 
 ///
-Astat *astat_restore(Json *j);
+Astat *astat_restore(Arr/*Json*/ *j);
 
 
 #endif

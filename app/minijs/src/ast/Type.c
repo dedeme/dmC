@@ -52,23 +52,22 @@ Atype *type_params(Type *this) {
   return this->params;
 }
 
-Json *type_serialize(Type *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *type_serialize(Type *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_auint(serial, this->type);
   jarr_astring(serial, this->id);
-  arr_add(serial, atype_serialize(this->params));
-  return json_warray(serial);
+  arr_add(serial, json_warray(atype_serialize(this->params)));
+  return serial;
 }
 
-Type *type_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Type *type_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Type *this = MALLOC(Type);
   size_t i = 0;
   this->type = jarr_guint(serial, i++);
   this->id = jarr_gstring(serial, i++);
-  this->params = atype_restore(arr_get(serial, i++));
+  this->params = atype_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/

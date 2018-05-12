@@ -64,27 +64,26 @@ Aastat *stat_blocks(Stat *this) {
   return this->blocks;
 }
 
-Json *stat_serialize(Stat *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *stat_serialize(Stat *this) {
   Arr/*Json*/ *serial = arr_new();
+  if (!this) return serial;
   jarr_auint(serial, this->type);
-  arr_add(serial, pos_serialize(this->pos));
+  arr_add(serial, json_warray(pos_serialize(this->pos)));
   jarr_astring(serial, this->id);
-  arr_add(serial, avalue_serialize(this->values));
-  arr_add(serial, aastat_serialize(this->blocks));
-  return json_warray(serial);
+  arr_add(serial, json_warray(avalue_serialize(this->values)));
+  arr_add(serial, json_warray(aastat_serialize(this->blocks)));
+  return serial;
 }
 
-Stat *stat_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Stat *stat_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Stat *this = MALLOC(Stat);
   size_t i = 0;
   this->type = jarr_guint(serial, i++);
-  this->pos = pos_restore(arr_get(serial, i++));
+  this->pos = pos_restore(json_rarray(arr_get(serial, i++)));
   this->id = jarr_gstring(serial, i++);
-  this->values = avalue_restore(arr_get(serial, i++));
-  this->blocks = aastat_restore(arr_get(serial, i++));
+  this->values = avalue_restore(json_rarray(arr_get(serial, i++)));
+  this->blocks = aastat_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/

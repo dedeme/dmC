@@ -24,10 +24,13 @@ void achar_add(Achar *this, char *s);
 char *achar_get(Achar *this, int ix);
 
 ///
-Json *achar_serialize(Achar *this);
+Achar *achar_copy(Achar *this);
 
 ///
-Achar *achar_restore(Json *j);
+Arr/*Json*/ *achar_serialize(Achar *this);
+
+///
+Achar *achar_restore(Arr/*Json*/ *j);
 
 
 #endif

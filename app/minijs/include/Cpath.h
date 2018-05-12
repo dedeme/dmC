@@ -61,10 +61,10 @@ Cpath *cpath_from_id(char *id);
 bool cpath_eq(Cpath *this, Cpath *other);
 
 ///
-Json *cpath_serialize(Cpath *this);
+Arr/*Json*/ *cpath_serialize(Cpath *this);
 
 ///
-Cpath *cpath_restore(Json *s);
+Cpath *cpath_restore(Arr/*Json*/ *s);
 
 /// Returns every cpath in relative directory 'dir'.
 Arr/*Cpath*/ *cpath_dirs(char *dir);

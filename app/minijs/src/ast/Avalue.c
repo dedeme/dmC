@@ -18,18 +18,18 @@ Value *avalue_get(Avalue *this, int ix) {
   return arr_get(this, ix);
 }
 
-Json *avalue_serialize(Avalue *this) {
+Arr/*Json*/ *avalue_serialize(Avalue *this) {
   Arr/*Json*/ *r = arr_new();
   EACH(this, Value, t) {
-    arr_add(r, value_serialize(t));
+    arr_add(r, json_warray(value_serialize(t)));
   }_EACH
-  return json_warray(r);
+  return r;
 }
 
-Avalue *avalue_restore(Json *j) {
+Avalue *avalue_restore(Arr/*Json*/ *j) {
   Avalue *r = arr_new();
-  EACH(json_rarray(j), char, js) {
-    avalue_add(r, value_restore(js));
+  EACH(j, char, js) {
+    avalue_add(r, value_restore(json_rarray(js)));
   }_EACH
   return r;
 }

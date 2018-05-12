@@ -14,7 +14,7 @@ static void wrestore(RW *rw, Structure *st) {
   rw_writeln(rw, "");
   rw_writeln(rw, "///");
   rw_writeln(rw, str_printf(
-    "%s *%srestore(Json *s);", st->head->id, st->head->prefix
+    "%s *%srestore(Arr/*Json*/ *s);", st->head->id, st->head->prefix
   ));
 }
 
@@ -26,7 +26,7 @@ static void wserial(RW *rw, Structure *st) {
   rw_writeln(rw, "");
   rw_writeln(rw, "///");
   rw_writeln(rw, str_printf(
-    "Json *%sserialize(%s *this);", st->head->prefix, st->head->id
+    "Arr/*Json*/ *%sserialize(%s *this);", st->head->prefix, st->head->id
   ));
 }
 

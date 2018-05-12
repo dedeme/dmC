@@ -4,6 +4,8 @@
 #include "tests_rimports.h"
 #include "lexer/rclass.h"
 
+#define JS json_warray
+
 void tests_rimports() {
   puts("Reader: imports");
 
@@ -24,8 +26,8 @@ void tests_rimports() {
   assert(!arr_size(class_statics(c)));
   assert(!arr_size(class_instance(c)));
   assert(!strcmp(
-    class_serialize(c),
-    class_serialize(class_restore(class_serialize(c)))
+    JS(class_serialize(c)),
+    JS(class_serialize(class_restore(class_serialize(c))))
   ));
 
   c = rclass(cpath_new("imports/F1"));
@@ -41,8 +43,8 @@ void tests_rimports() {
   assert(!arr_size(class_statics(c)));
   assert(!arr_size(class_instance(c)));
   assert(!strcmp(
-    class_serialize(c),
-    class_serialize(class_restore(class_serialize(c)))
+    JS(class_serialize(c)),
+    JS(class_serialize(class_restore(class_serialize(c))))
   ));
 
   c = rclass(cpath_new("imports/F2"));
@@ -58,8 +60,8 @@ void tests_rimports() {
   assert(!arr_size(class_statics(c)));
   assert(!arr_size(class_instance(c)));
   assert(!strcmp(
-    class_serialize(c),
-    class_serialize(class_restore(class_serialize(c)))
+    JS(class_serialize(c)),
+    JS(class_serialize(class_restore(class_serialize(c))))
   ));
 
   puts("    Finished");

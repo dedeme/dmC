@@ -37,10 +37,10 @@ Type *att_type(Att *this);
 bool att_is_val(Att *this);
 
 ///
-Json *att_serialize(Att *this);
+Arr/*Json*/ *att_serialize(Att *this);
 
 ///
-Att *att_restore(Json *s);
+Att *att_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

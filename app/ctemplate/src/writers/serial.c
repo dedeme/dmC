@@ -11,10 +11,10 @@ void serial_write(RW *rw, Structure *st) {
 
   rw_writeln(rw, "");
   rw_writeln(rw, str_printf(
-    "Json *%sserialize(%s *this) {", st->head->prefix, st->head->id
+    "Arr/*Json*/ *%sserialize(%s *this) {", st->head->prefix, st->head->id
   ));
-  rw_writeln(rw, "  if (!this) return json_wnull();");
   rw_writeln(rw, "  Arr/*Json*/ *serial = arr_new();");
+  rw_writeln(rw, "  if (!this) return serial;");
 
   EACH(st->body->ps, Param, p) {
     char *s = p->serial;
@@ -31,7 +31,7 @@ void serial_write(RW *rw, Structure *st) {
 
     if (!*j) {
       rw_writeln(rw, str_printf(
-        "  arr_add(serial, %s_serialize(this->%s));", s, p->id
+        "  arr_add(serial, json_warray(%s_serialize(this->%s)));", s, p->id
       ));
     } else if (*j == 'd') {
       rw_writeln(rw, str_printf(
@@ -62,6 +62,6 @@ void serial_write(RW *rw, Structure *st) {
     }
   }_EACH
 
-  rw_writeln(rw, "  return json_warray(serial);");
+  rw_writeln(rw, "  return serial;");
   rw_writeln(rw, "}");
 }

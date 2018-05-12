@@ -60,10 +60,10 @@ Avalue *stat_values(Stat *this);
 Aastat *stat_blocks(Stat *this);
 
 ///
-Json *stat_serialize(Stat *this);
+Arr/*Json*/ *stat_serialize(Stat *this);
 
 ///
-Stat *stat_restore(Json *s);
+Stat *stat_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 

@@ -25,10 +25,10 @@ bool  mchar_contains(Mchar *this, char *key);
 char *mchar_get(Mchar *this, char *key);
 
 ///
-Json *mchar_serialize(Mchar *this);
+Arr/*Json*/ *mchar_serialize(Mchar *this);
 
 ///
-Mchar *mchar_restore(Json *j);
+Mchar *mchar_restore(Arr/*Json*/ *j);
 
 #endif
 
