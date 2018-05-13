@@ -61,6 +61,20 @@ void tests_rnary() {
   assert(type_eq(value_type(v0), value_type(v)));
   assert(!strcmp(type_id(value_type(v0)), "Int"));
 
+  puts("--> runary");
+
+  tx = mk_tx("x++");
+  tx = rvalue(&v, tx);
+  a = value_data(v);
+  op = rm_last(a);
+  assert(!strcmp(op, "++"));
+  v0 = value_restore(a);
+  assert(value_vtype(v0) == VID);
+  a = value_data(v0);
+  assert(!strcmp(achar_get(a, 0), "x"));
+  assert(type_eq(value_type(v0), value_type(v)));
+  assert(type_is_unknown(value_type(v0)));
+
   puts("--> binary");
 
   tx = mk_tx("1 + 2");

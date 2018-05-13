@@ -5,7 +5,7 @@
 
 /*.
 -struct: Tx
-  -path: char *
+  path: char *
   text: char *
   start: char *
   nline: size_t
@@ -35,6 +35,11 @@ Tx *tx_new(
   this->nline = nline;
   this->nchar = nchar;
   return this;
+}
+
+inline
+char *tx_path(Tx *this) {
+  return this->path;
 }
 
 inline

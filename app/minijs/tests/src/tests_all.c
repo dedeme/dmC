@@ -17,6 +17,8 @@
 #include "tests_rbool.h"
 #include "tests_rnumber.h"
 #include "tests_rstring.h"
+#include "tests_rarr.h"
+#include "tests_rmap.h"
 #include "tests_rid.h"
 #include "tests_rcast.h"
 #include "tests_rgroup.h"
@@ -43,6 +45,8 @@ int main() {
   tests_rbool();
   tests_rnumber();
   tests_rstring();
+  tests_rarr();
+  tests_rmap();
   tests_rid();
   tests_rcast();
   tests_rgroup();

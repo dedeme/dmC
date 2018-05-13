@@ -5,9 +5,12 @@
 #include "lexer/token.h"
 #include "lexer/rnumber.h"
 #include "lexer/rstring.h"
+#include "lexer/rarr.h"
+#include "lexer/rmap.h"
 #include "lexer/rwith.h"
 #include "lexer/rlunary.h"
 #include "lexer/rnary.h"
+#include "lexer/rblock.h"
 #include "lexer/rtype.h"
 #include "ast/Avalue.h"
 #include "DEFS.h"
@@ -76,7 +79,9 @@ Tx *rvalue(Value **v, Tx *tx) {
 
   if (tx_neq(tx, r = token_const(tx, "->"))) { // Function
     tx = r;
-    *v = value_new_fn(pos, avalue_new(), NULL);
+    Astat *sts;
+    tx = rblock(&sts, tx);
+    *v = value_new_fn(pos, achar_new(), sts);
     return tx;
   }
 
@@ -135,6 +140,12 @@ Tx *rvalue(Value **v, Tx *tx) {
     } else if (tx_neq(tx, r = rstring(&v0, tx))) {
       tx = add_attachs(r, value_attachs(v0));
       return rnary(v, tx, v0);
+    } else if (tx_neq(tx, r = rarr(&v0, tx))) {
+      tx = add_attachs(r, value_attachs(v0));
+      return rnary(v, tx, v0);
+    } else if (tx_neq(tx, r = rmap(&v0, tx))) {
+      tx = add_attachs(r, value_attachs(v0));
+      return rnary(v, tx, v0);
     }
     TH(tx) "Expected a value" _TH
   }
@@ -162,8 +173,13 @@ Tx *rvalue(Value **v, Tx *tx) {
     if (tx_neq(tx, r = token_cconst(tx, ','))) { // Function
       tx = r;
       Achar *params;
-      tx = token_list(&params, tx, '-', (Tx *(*)(void **, Tx *))token_id);
-      *v = value_new_fn(pos, params, NULL);
+      tx = token_fn_list(&params, tx, token_valid_id);
+      arr_insert(params, 0, id);
+
+      Astat *sts;
+      tx = rblock(&sts, tx);
+
+      *v = value_new_fn(pos, params, sts);
       return tx;
     }
 
@@ -171,7 +187,11 @@ Tx *rvalue(Value **v, Tx *tx) {
       tx = r;
       Achar *params = achar_new();
       achar_add(params, id);
-      *v = value_new_fn(pos, params, NULL);
+
+      Astat *sts;
+      tx = rblock(&sts, tx);
+
+      *v = value_new_fn(pos, params, sts);
       return tx;
     }
   }

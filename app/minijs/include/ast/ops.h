@@ -110,4 +110,8 @@ char *ops_a2(void);
 
 ///
 int ops_order(char *op);
+
+///
+bool ops_is_bool(char *op);
+
 #endif

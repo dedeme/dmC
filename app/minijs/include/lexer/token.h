@@ -44,9 +44,9 @@ Tx *token_split(char **r, Tx *tx, char *values);
 /// Throws tx_exception.
 Tx *token_list(Arr **list, Tx *tx, char close, Tx *(*read)(void **, Tx *));
 
-/// Creates and reads a function definition parameter list. It does not fail.
-/// Also 'read' must not fail.
-Tx *token_fn_list(Arr **list, Tx *tx, Tx *(*read)(void **, Tx *));
+/// Creates and reads a function definition parameter list. It can fail if
+/// 'read' fails.
+Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *));
 
 /// Creates and reads an identifier. It does not fail.
 Tx *token_id(char **id, Tx *tx);
@@ -68,6 +68,9 @@ Tx *token_runary(char **op, Tx *tx);
 
 ///
 Tx *token_binary(char **op, Tx *tx);
+
+///
+Tx *token_assign(char **op, Tx *tx);
 
 ///
 bool token_is_reserved(char *id);

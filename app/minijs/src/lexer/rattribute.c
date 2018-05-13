@@ -6,6 +6,7 @@
 #include "lexer/token.h"
 #include "lexer/rtype.h"
 #include "lexer/rvalue.h"
+#include "lexer/rnew.h"
 
 Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   Type *tp;
@@ -20,22 +21,65 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   }
   tx = r;
 
-  char *val_var = NULL;
-  if (tx_eq(tx, r = token_id(&val_var, tx)))
+  char *val_var_enum = NULL;
+  if (tx_eq(tx, r = token_id(&val_var_enum, tx))) {
     if (type_is_unknown(tp)) {
       return tx;
     }
     TH(tx) "Expected 'val' or 'var'" _TH
-  if (!strcmp(val_var, "val")) {
-    is_val = true;
-  } else if (!strcmp(val_var, "var")) {
-    is_val = false;
-  }  else {
-    TH(tx) "Expected 'val' or 'var'" _TH
   }
+
+  if (!strcmp(val_var_enum, "val")) {
+    is_val = true;
+  } else if (!strcmp(val_var_enum, "var")) {
+    is_val = false;
+  } else if (!strcmp(val_var_enum, "enum")) {
+    if (tx_eq(tx, r = token_cconst(tx, '(')))
+      TH(tx) "Expected '('" _TH
+    tx = r;
+    Achar *ids;
+    Tx *start = tx;
+    tx = token_list(&ids, tx, ')', (Tx *(*)(void **, Tx *))token_valid_id);
+    EACH(ids, char, id) {
+      aatt_add(
+        class_statics(c),
+        att_new(
+          is_public, id, type_new_int(), true,
+          value_new_int(tx_pos(start), str_printf("%d", _i))
+        )
+      );
+    }_EACH
+  } else {
+    TH(tx) "Expected 'val', 'var' or 'enum'" _TH
+  }
+
   tx = r;
 
-  tx = token_valid_id(&id, tx);
+  tx = token_id(&id, tx);
+
+  if (!strcmp(id, "new")) {
+    if (type_is_unknown(tp))
+      TH(tx_type) "Type declaration is needed" _TH
+    if (type_type(tp) != FN)
+      TH(tx_type) "Type of new must be 'function'" _TH
+
+    if (tx_eq(tx, r = token_cconst(tx, '=')))
+      TH(tx) "Expected '='" _TH
+    tx = r;
+
+    Value *v;
+    tx = rnew(&v, tx, c, tp, is_public);
+
+    aatt_add(
+      class_statics(c),
+      att_new(is_public, "new", tp, true, v)
+    );
+    return tx;
+  }
+
+
+  if (token_is_reserved(id))
+    TH(tx) "'%s' is a reserved word", id _TH
 
   if (tx_neq(tx, r = token_cconst(tx, ';'))) {
     if (type_is_unknown(tp))

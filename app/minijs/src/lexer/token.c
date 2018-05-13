@@ -6,7 +6,7 @@
 #include "ast/ops.h"
 
 static char *reserved = " new return break continue with if elif else "
-  "while for enum try catch finally val var native true false null";
+  "while for enum try catch finally val var native true false null ";
 
 Tx *token_blanks(Tx *tx) {
   char *p = tx_start(tx);
@@ -225,7 +225,7 @@ Tx *token_list(Arr **list, Tx *tx, char close, Tx *(*read)(void **, Tx *)) {
       } else {
         r = token_cconst(tx, ',');
         if (tx_eq(tx, r))
-          TH(tx) "Expected ',' (comma)" _TH
+          TH(tx) "Expected ',' (comma) or '%c'", close _TH
         tx = r;
 
         r = read(&e, tx);
@@ -242,13 +242,13 @@ Tx *token_list(Arr **list, Tx *tx, char close, Tx *(*read)(void **, Tx *)) {
   return r;
 }
 
-Tx *token_fn_list(Arr **list, Tx *tx, Tx *(*read)(void **, Tx *)) {
+Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *)) {
   Tx *start = tx;
   Arr *l = arr_new();
 
   Tx *r = token_const(tx, "->");
   if (tx_eq(tx, r)) {
-    void *e;
+    char *e;
     r = read(&e, tx);
     if (tx_eq(tx, r)) {
       return start;
@@ -428,15 +428,15 @@ Tx *token_runary(char **op, Tx *tx) {
   return tx;
 }
 
-Tx *token_binary(char **op, Tx *tx) {
+static Tx *bin(char **op, Tx *tx, char *ops1, char *ops2) {
   Tx *r;
   char ch;
 
-  if (tx_neq(tx, r = token_split(op, tx, ops_b2()))) {
+  if (tx_neq(tx, r = token_split(op, tx, ops2))) {
     return r;
   }
 
-  if (tx_neq(tx, r = token_csplit(&ch, tx, ops_b1()))) {
+  if (tx_neq(tx, r = token_csplit(&ch, tx, ops1))) {
     char *o = ATOMIC(2);
     *o = ch;
     *(o + 1) = 0;
@@ -445,6 +445,16 @@ Tx *token_binary(char **op, Tx *tx) {
   }
 
   return tx;
+}
+
+inline
+Tx *token_binary(char **op, Tx *tx) {
+  return bin(op, tx, ops_b1(), ops_b2());
+}
+
+inline
+Tx *token_assign(char **op, Tx *tx) {
+  return bin(op, tx, ops_a1(), ops_a2());
 }
 
 bool token_is_reserved(char *id) {

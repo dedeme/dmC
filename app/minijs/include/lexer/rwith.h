@@ -28,7 +28,7 @@
 #include "ast/Value.h"
 #include "Tx.h"
 
-/// rnary read a with operator<p>
+/// rwith read a with operator<p>
 /// Throws tx_excepton.<p>
 Tx *rwith(Value **v, Tx *tx);
 

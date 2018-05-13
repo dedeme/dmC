@@ -3,8 +3,8 @@
 
 /// Arr[Stat]
 
-#ifndef AST_ASTAT_H
-  # define AST_AATT_H
+#ifndef AST_AASTAT_H
+  # define AST_AASTAT_H
 
 #include "Astat.h"
 

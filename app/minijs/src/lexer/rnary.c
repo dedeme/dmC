@@ -32,7 +32,9 @@ static Value *inject(Pos *pos, char *op, Value *v1, Value *v2) {
   }
 
   Type *tp = type_new_unknown();
-  if (!type_is_unknown(value_type(v1))) {
+  if (ops_is_bool(op)) {
+    tp = type_new_bool();
+  } else if (!type_is_unknown(value_type(v1))) {
     tp = value_type(v1);
   } else if (!type_is_unknown(value_type(v2))) {
     tp = value_type(v2);

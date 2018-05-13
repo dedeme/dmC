@@ -4,8 +4,12 @@
 /// Class attribute reader.<p>
 ///
 /// <b>Template</b>
+///   enum (id,*)
 ///   type [val | var] id [; | = value]
 /// <b>Examples</b>
+///   enum ()
+///   enum (FIRST)
+///   enum (FIRST, SECOND, THIRD)
 ///   var v 23;
 ///   : Str val v2 = z
 ///   : (Int:) val f = n -> { }

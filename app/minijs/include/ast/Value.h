@@ -28,7 +28,6 @@ enum Value_t {
   VID,
   VGROUP,
   VCAST,
-  VNEW,
   VLUNARY,
   VRUNARY,
   VBINARY,
@@ -61,6 +60,9 @@ Pos *value_pos(Value *this);
 
 ///
 Type *value_type(Value *this);
+
+///
+void value_set_type(Value *this, Type *value);
 
 ///
 Avatt *value_attachs(Value *this);
@@ -103,17 +105,14 @@ Value *value_new_str2(Pos *pos, Avatt *atts, char *value);
 /// Values are serialized in value_data()
 Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values);
 
-/// kvs are serialized in value_data()
-Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m);
+/// 'values' contains successive key-value pairs
+Value *value_new_map(Pos *pos, Avatt *atts, Arr/*Value*/ *m);
 
 /// stats are serialized in value_data()
 Value *value_new_fn(Pos *pos, Achar *params, Astat *stats);
 
 /// Id must be a valid identifier
 Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics);
-
-/// Values are serialized in value_data()
-Value *value_new_new(Pos *pos, Type *tp, Avalue *values);
 
 /// Value in parenthesis. v1 is serialized in value_data()
 Value *value_new_group(Pos *pos, Avatt *atts, Value *v);

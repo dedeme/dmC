@@ -70,6 +70,12 @@ int ops_order(char *op) {
   return 0; // ^
 }
 
+inline
+bool ops_is_bool(char *op) {
+  int order = ops_order(op);
+  return order == 4 || order > 7;
+}
+
 #undef U1
 #undef U2
 #undef B1

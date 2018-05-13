@@ -25,6 +25,9 @@ Tx *tx_new(
 );
 
 ///
+char *tx_path(Tx *this);
+
+///
 char *tx_text(Tx *this);
 
 ///

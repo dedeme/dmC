@@ -10,7 +10,7 @@
 struct: Value
   vtype: enum Value_t : _uint
   pos: Pos *: pos
-  type: Type *: type
+  +type: Type *: type
   attachs: Avatt *: avatt
   data: Achar *: achar
 */
@@ -52,6 +52,11 @@ Pos *value_pos(Value *this) {
 inline
 Type *value_type(Value *this) {
   return this->type;
+}
+
+inline
+void value_set_type(Value *this, Type *value) {
+  this->type = value;
 }
 
 inline
@@ -145,6 +150,9 @@ static Type *common_type(Atype *types) {
 }
 
 static Type *ct_value(Avalue *vs) {
+  if (!arr_size(vs)) {
+    return type_new_unknown();
+  }
   Atype *ts = atype_new();
   EACH(vs, Value, v) {
     atype_add(ts, v->type);
@@ -160,22 +168,25 @@ Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values) {
 }
 
 static Type *ct_value2(Map/*Value*/ *m) {
+  if (!arr_size(m)) {
+    return type_new_unknown();
+  }
   Atype *ts = atype_new();
-  Value *v;
-  EACH(m, Kv, kv) {
-    v = kv->value;
-    atype_add(ts, v->type);
+  bool is_key = true;
+  EACH(m, Value, v) {
+    if (is_key) {
+      is_key = false;
+    } else {
+      atype_add(ts, v->type);
+      is_key = true;
+    }
   }_EACH
   return common_type(ts);
 }
 
-Value *value_new_map(Pos *pos, Avatt *atts, Map/*Value*/ *m) {
-  Map/*Json*/ *jm = map_new();
-  EACH(m, Kv, kv) {
-    arr_add(jm, kv_new(kv->key, value_serialize(kv->value)));
-  }_EACH
+Value *value_new_map(Pos *pos, Avatt *atts, Arr/*Value*/ *m) {
   return value_new(
-    VMAP, pos, type_new_arr(ct_value2(m)), atts, mk_achar(json_wobject(jm))
+    VMAP, pos, type_new_map(ct_value2(m)), atts, avalue_serialize(m)
   );
 }
 
@@ -192,11 +203,6 @@ inline
 Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics) {
   achar_add(generics, id);
   return value_new(VID, pos, type_new_unknown(), atts, generics);
-}
-
-inline
-Value *value_new_new(Pos *pos, Type *tp, Avalue *values) {
-  return value_new(VNEW, pos, tp, avatt_new(), avalue_serialize(values));
 }
 
 inline
