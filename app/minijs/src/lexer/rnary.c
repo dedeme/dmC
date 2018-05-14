@@ -47,17 +47,10 @@ Tx *rnary(Value **v, Tx *tx, Value *v1) {
   Tx *r;
   Pos *pos = tx_pos(tx);
   Value *v2;
+  Value *v3;
 
   if (tx_neq(tx, r = token_cconst(tx, '?'))) {
     tx = r;
-
-    if (tx_neq(tx, r = token_cconst(tx, ':'))) {
-      tx = rvalue(&v2, tx);
-      *v = value_new_binary(pos, value_type(v2), "?:", v1, v2);
-      return tx;
-    }
-
-    Value *v3;
 
     tx = rvalue(&v2, tx);
 

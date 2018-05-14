@@ -1,10 +1,12 @@
-// Copyright 6-May-2018 ºDeme
+// Copyright 14-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "lexer/rwith.h"
+#include "lexer/rcase.h"
 #include "lexer/token.h"
+#include "lexer/rblock.h"
 #include "lexer/rvalue.h"
 #include "ast/Avalue.h"
+#include "ast/Aastat.h"
 #include "ast/ops.h"
 #include "DEFS.h"
 
@@ -23,48 +25,36 @@ static Value *mk_or(Value *v0, Avalue *cs) {
   }
 }
 
-static Value *mk_ternary(
-  Value *v0, Arr/*Avalue*/ *conditions, Avalue *results
+static Stat *mk_if(
+  Value *v0, Arr/*Avalue*/ *conditions, Aastat *blocks, Pos *pos
 ) {
-  if (arr_size(results) == 1) {
-    return avalue_get(results, 0);
-  } else {
-    Avalue *cs = arr_get(conditions, 0);
-    Value *v2 = avalue_get(results, 0);
-    arr_remove(conditions, 0);
-    arr_remove(results, 0);
+  Avalue *values = avalue_new();
+  EACH(conditions, Avalue, cs) {
+    avalue_add(values, mk_or(v0, cs));
+  }_EACH
 
-    Value *v1 = mk_or(v0, cs);
-    Value *v3 = mk_ternary(v0, conditions, results);
-
-    Type *tp = value_type(v2);
-    Type *tp2 = value_type(v3);
-    if (type_is_unknown(tp)) {
-      tp = tp2;
-    }
-
-    return value_new_ternary(value_pos(v2), tp, v1, v2, v3);
-  }
+  return stat_new_if(pos, values, blocks);
 }
 
-Tx *rwith(Value **v, Tx *tx) {
+Tx *rcase(Stat **st, Tx *tx, Pos *pos) {
   Tx *r;
   Tx *start = tx;
 
   Value *v0;
   tx = rvalue(&v0, tx);
 
-  Value *tmp;
+  Astat *tmp;
   Arr/*Avalue*/ *conditions = arr_new();
-  Avalue *results = avalue_new();
+  Aastat *blocks = aastat_new();
   for (;;) {
-    if (tx_eq(tx, r = token_cconst(tx, '\\')))
-      TH(tx) "Expected '\\'" _TH
+    if (tx_eq(tx, r = token_cconst(tx, '\\'))) {
+      break;
+    }
     tx = r;
 
     if (tx_neq(tx, r = token_cconst(tx, ':'))) {
-      tx = rvalue(&tmp, r);
-      avalue_add(results, tmp);
+      tx = rblock(&tmp, r);
+      aastat_add(blocks, tmp);
       break;
     } else {
       Avalue *atmp;
@@ -73,15 +63,15 @@ Tx *rwith(Value **v, Tx *tx) {
         TH(tx) "Expected a value" _TH
       arr_add(conditions, atmp);
 
-      tx = rvalue(&tmp, tx);
-      avalue_add(results, tmp);
+      tx = rblock(&tmp, tx);
+      aastat_add(blocks, tmp);
     }
   }
 
   if (!arr_size(conditions))
     TH(start) "'with' requires at least a condition" _TH
 
-  *v = mk_ternary(v0, conditions, results);
+  *st = mk_if(v0, conditions, blocks, pos);
 
   return tx;
 }

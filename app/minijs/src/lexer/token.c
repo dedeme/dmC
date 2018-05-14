@@ -5,7 +5,7 @@
 #include "DEFS.h"
 #include "ast/ops.h"
 
-static char *reserved = " new return break continue with if elif else "
+static char *reserved = " new return break continue case with if elif else "
   "while for enum try catch finally val var native true false null ";
 
 Tx *token_blanks(Tx *tx) {

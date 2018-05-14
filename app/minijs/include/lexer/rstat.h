@@ -7,7 +7,7 @@
 ///   { stat* } | reserved | assign | fnValue
 /// where
 ///   reserved :: val | var | native | break | continue | return | throw |
-///               while | if | for | try
+///               while | if | for | try | case
 ///   assign :: value op value
 ///   val :: type? val id ; | type? val id = value
 ///   var :: type? var id ; | type? var id = value
@@ -18,6 +18,7 @@
 ///   if :: if (value) block elif* else?
 ///   for :: for (for_assign,*;value,*;stat*,) block
 ///   try :: try block catch (id) block finally?
+///   case :: case value ccase+ dcase? |
 ///   block :: stat | { stat*}
 ///   elif :: elif (value) block
 ///   else :: else block

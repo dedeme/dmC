@@ -6,6 +6,7 @@
 #include "lexer/rtype.h"
 #include "lexer/rvalue.h"
 #include "lexer/rblock.h"
+#include "lexer/rcase.h"
 #include "ast/Avalue.h"
 #include "ast/Aastat.h"
 #include "Pos.h"
@@ -317,6 +318,7 @@ Tx *rstat(Stat **st, Tx *tx) {
   else if (!strcmp(id, "if")) return rif(st, tx, pos);
   else if (!strcmp(id, "for")) return rfor(st, tx, pos);
   else if (!strcmp(id, "try")) return rtry(st, tx, pos);
+  else if (!strcmp(id, "case")) return rcase(st, tx, pos);
 
   Value *v;
   tx = rvalue(&v, start);

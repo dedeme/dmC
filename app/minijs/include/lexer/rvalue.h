@@ -5,16 +5,17 @@
 ///
 /// <b>Template</b>
 ///   defn |
-///   with value cwith* dwith
-///   new gid fatt attach* nary*
+///   with value cwith+ dwith? |
+///   (: type) value |
 ///   (value) |
 ///   lunary value |
-///   gid unary? nary |
+///   gid fatt attach* nary* | // New
+///   gid runary? nary | // gid ++
 ///   single attach* nary*
 /// where
 ///   defn :: id,* -> block
-///   cwith :: | value,+ : value
-///   dwith :: | : value
+///   cwith :: \ value,+ : value
+///   dwith :: \ : value
 ///   lunary :: token_lunary
 ///   single :: gid | literal
 ///   attach :: patt | satt | fatt

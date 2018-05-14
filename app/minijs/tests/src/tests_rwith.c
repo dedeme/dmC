@@ -24,7 +24,7 @@ void tests_rwith() {
   Achar *a;
   char *op;
 
-  tx = mk_tx("with a \\ : 4 ");
+  tx = mk_tx("with a \\ 2 : 4 ");
   rvalue(&v, tx);
 
   assert(value_vtype(v) == VINT);
