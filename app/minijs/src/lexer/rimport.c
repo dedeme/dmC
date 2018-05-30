@@ -37,6 +37,7 @@ Tx *rimport(Tx *tx, Class *c) {
         id, new, old
       _TH
     }
+
     if (class_contains_id(c, id))
       TH(tx_id) "Identifier '%s' is duplicated", id _TH
     if (!file_exists(cpath_file(cpath)))
@@ -102,8 +103,8 @@ Tx *rimport(Tx *tx, Class *c) {
   if (tx_neq(tx, r = token_cconst(tx, '('))) {
     tx = r;
     Achar *nulls;
-    tx = token_list(&nulls, tx, ')', ras);
-    if (!arr_size(nulls))
+    tx = token_list((Arr **)&nulls, tx, ')', ras);
+    if (!achar_size(nulls))
       TH(tx) "Expected an identifier" _TH
     return tx;
   }
@@ -119,7 +120,7 @@ Tx *rimport(Tx *tx, Class *c) {
     if (tx_neq(tx, r = token_cconst(tx, '('))) {
       tx = r;
       Achar *ids;
-      tx = token_list(&ids, tx, ')', (Tx *(*)(void **, Tx *))token_id);
+      tx = token_list((Arr **)&ids, tx, ')', (Tx *(*)(void **, Tx *))token_id);
 
       Arr/*Cpath*/ *tmp = arr_new();
       bool ok;
@@ -127,7 +128,7 @@ Tx *rimport(Tx *tx, Class *c) {
       EACH(cpaths, Cpath, cp) {
         ok = true;
         name = path_name(cpath_path(cp));
-        EACH(ids, char, id) {
+        EACH((Arr *)ids, char, id) {
           if (!strcmp(id, name)) {
             ok = false;
           }

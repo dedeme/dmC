@@ -12,11 +12,12 @@
 /// <b>Imports declarations</b>
 ///   _import
 ///   <a href="?*minijs@lexer/rimport">imports</a>
-/// <b>Extend declaration</b>
-///   _extend
-///   id
-/// <b>Public declaration</b>
-///   _public + val and var declarations
+/// <b>Extends declaration</b>
+///   _extends id
+/// <b>Implements declaration</b>
+///   _implements (id,*)
+/// <b>Public declarations</b>
+///   val and var declarations
 /// <b>Private declaration</b>
 ///   _private + val and var declarations
 

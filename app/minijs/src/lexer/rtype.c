@@ -6,20 +6,20 @@
 #include "ast/Atype.h"
 #include "DEFS.h"
 
-static Tx *rtp(Type **type, Tx *tx) {
+Tx *rtype2(Type **type, Tx *tx) {
   Type *tp;
   Tx *r;
   char *id;
 
   if (tx_neq(tx, r = token_cconst(tx, '('))) {
     Atype *params;
-    r = token_list(&params, r, ':', (Tx *(*)(void **, Tx *))rtp);
+    r = token_list(&params, r, ':', (Tx *(*)(void **, Tx *))rtype2);
     tx = r;
 
     if (tx_neq(tx, r = token_cconst(tx, ')'))) {
       atype_add(params, type_new_void());
     } else {
-      tx = rtp(&tp, tx);
+      tx = rtype2(&tp, tx);
       atype_add(params, tp);
       if (tx_eq(tx, r = token_cconst(tx, ')')))
         TH(tx) "Expected ')'" _TH
@@ -29,7 +29,7 @@ static Tx *rtp(Type **type, Tx *tx) {
   } else if (tx_neq(tx, r = token_cconst(tx, '['))) {
     tx = r;
 
-    tx = rtp(&tp, tx);
+    tx = rtype2(&tp, tx);
     if (tx_eq(tx, r = token_cconst(tx, ']')))
       TH(tx) "Expected ']'" _TH
 
@@ -37,7 +37,7 @@ static Tx *rtp(Type **type, Tx *tx) {
   } else if (tx_neq(tx, r = token_cconst(tx, '{'))) {
     tx = r;
 
-    tx = rtp(&tp, tx);
+    tx = rtype2(&tp, tx);
     if (tx_eq(tx, r = token_cconst(tx, '}')))
       TH(tx) "Expected '}'" _TH
 
@@ -51,7 +51,7 @@ static Tx *rtp(Type **type, Tx *tx) {
       tx = r;
 
       Atype *params;
-      r = token_list(&params, r, '>', (Tx *(*)(void **, Tx *))rtp);
+      r = token_list(&params, r, '>', (Tx *(*)(void **, Tx *))rtype2);
       if (arr_size(params) == 0)
         TH(tx) "Expected at least one parameter" _TH
 
@@ -74,5 +74,5 @@ Tx *rtype(Type **type, Tx *tx) {
     return tx;
   }
 
-  return rtp(type, r);
+  return rtype2(type, r);
 }

@@ -13,7 +13,7 @@ void tarr_add(Arr/*class*/ *builtins) {
   Type *tdata = type_new_data("A", arr_new());
   Type *tarr = type_new_arr(tdata);
   Class *c = class_new("Arr");
-  arr_add(class_generics(c), "A");
+  achar_add(class_generics(c), "A");
   Aatt *statics = class_statics(c);
 
   params = atype_new();

@@ -8,6 +8,7 @@ C_FILES = $(wildcard src/*.c) \
 					../src/Cpath.c \
 					$(wildcard ../src/builtin/*.c) \
 					$(wildcard ../src/lexer/*.c) \
+					$(wildcard ../src/parser/*.c) \
 					$(wildcard ../src/ast/*.c)
 H_FILES = $(wildcard include/*.h) \
 					../include/Achar.h \
@@ -16,6 +17,7 @@ H_FILES = $(wildcard include/*.h) \
 					../include/Cpath.h \
 					$(wildcard ../include/builtin/*.h) \
 					$(wildcard ../include/lexer/*.h) \
+					$(wildcard ../include/parser/*.h) \
 					$(wildcard ../include/ast/*.h)
 
 LIB_PATH = ../lib/lib$(LIB)

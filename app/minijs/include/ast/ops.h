@@ -3,6 +3,7 @@
 
 /// Operators.<p<
 /// Binary associativity
+///   -1: ?:
 ///   0: ^
 ///   1: * / %
 ///   2: + -
@@ -46,7 +47,7 @@
 #define OPS_SR ">>"
 #define OPS_LAND "&&"
 #define OPS_LOR "||"
-#define OPS_NIL ":?"
+#define OPS_NIL "?:"
 
 #define OPS_NOT2 "not"
 #define OPS_BNOT2 "bnot"

@@ -6,9 +6,9 @@
 #include "lexer/rvalue.h"
 
 static char *rm_last(Achar *achar) {
-  int ix = arr_size(achar) - 1;
-  char *r = arr_get(achar, ix);
-  arr_remove(achar, ix);
+  int ix = achar_size(achar) - 1;
+  char *r = achar_get(achar, ix);
+  achar_remove(achar, ix);
   return r;
 }
 
@@ -31,7 +31,7 @@ void tests_rid() {
   id = rm_last(data);
   generics = data;
   assert(!strcmp(id, "a"));
-  assert(arr_size(generics) == 0);
+  assert(achar_size(generics) == 0);
 
   tx = mk_tx("a<Str>");
   rvalue(&v, tx);
@@ -40,7 +40,7 @@ void tests_rid() {
   id = rm_last(data);
   generics = data;
   assert(!strcmp(id, "a"));
-  assert(arr_size(generics) == 1);
+  assert(achar_size(generics) == 1);
   assert(!strcmp(achar_get(generics, 0), "Str"));
 
   tx = mk_tx("a<Int, A>");
@@ -50,7 +50,7 @@ void tests_rid() {
   id = rm_last(data);
   generics = data;
   assert(!strcmp(id, "a"));
-  assert(arr_size(generics) == 2);
+  assert(achar_size(generics) == 2);
   assert(!strcmp(achar_get(generics, 0), "Int"));
   assert(!strcmp(achar_get(generics, 1), "A"));
 

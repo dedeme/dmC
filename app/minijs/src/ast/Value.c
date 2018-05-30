@@ -163,7 +163,8 @@ static Type *ct_value(Avalue *vs) {
 inline
 Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values) {
   return value_new(
-    VARR, pos, type_new_arr(ct_value(values)), atts, avalue_serialize(values)
+    VARR, pos, type_new_arr(ct_value(values)), atts,
+    (Achar *)avalue_serialize(values)
   );
 }
 
@@ -186,7 +187,7 @@ static Type *ct_value2(Map/*Value*/ *m) {
 
 Value *value_new_map(Pos *pos, Avatt *atts, Arr/*Value*/ *m) {
   return value_new(
-    VMAP, pos, type_new_map(ct_value2(m)), atts, avalue_serialize(m)
+    VMAP, pos, type_new_map(ct_value2(m)), atts, (Achar *)avalue_serialize(m)
   );
 }
 
@@ -195,7 +196,7 @@ Value *value_new_fn(Pos *pos, Achar *params, Astat *stats) {
   arr_add(js, achar_serialize(params));
   arr_add(js, astat_serialize(stats));
   return value_new(
-    VFN, pos, type_new_unknown(), avatt_new(), js
+    VFN, pos, type_new_unknown(), avatt_new(), (Achar *)js
   );
 }
 
@@ -207,16 +208,16 @@ Value *value_new_id(Pos *pos, Avatt *atts, char *id, Achar *generics) {
 
 inline
 Value *value_new_group(Pos *pos, Avatt *atts, Value *v) {
-  return value_new(VGROUP, pos, v->type, atts, value_serialize(v));
+  return value_new(VGROUP, pos, v->type, atts, (Achar *)value_serialize(v));
 }
 
 inline
 Value *value_new_cast(Pos *pos, Type *tp, Value *v) {
-  return value_new(VCAST, pos, tp, avatt_new(), value_serialize(v));
+  return value_new(VCAST, pos, tp, avatt_new(), (Achar *)value_serialize(v));
 }
 
 Value *value_new_lunary(Pos *pos, char *op, Value *v) {
-  Achar *data = value_serialize(v);
+  Achar *data = (Achar *)value_serialize(v);
   achar_add(data, op);
   return value_new(
     VLUNARY, pos, value_type(v), avatt_new(), data
@@ -224,7 +225,7 @@ Value *value_new_lunary(Pos *pos, char *op, Value *v) {
 }
 
 Value *value_new_runary(Pos *pos, char *op, Value *v) {
-  Achar *data = value_serialize(v);
+  Achar *data = (Achar *)value_serialize(v);
   achar_add(data, op);
   return value_new(
     VRUNARY, pos, value_type(v), avatt_new(), data
@@ -235,7 +236,7 @@ Value *value_new_binary(Pos *pos, Type *tp, char *op, Value *v1, Value *v2) {
   Avalue *vs = avalue_new();
   avalue_add(vs, v1);
   avalue_add(vs, v2);
-  Achar *data = avalue_serialize(vs);
+  Achar *data = (Achar *)avalue_serialize(vs);
   achar_add(data, op);
   return value_new(VBINARY, pos, tp, avatt_new(), data);
 }
@@ -245,5 +246,7 @@ Value *value_new_ternary(Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3) {
   avalue_add(vs, v1);
   avalue_add(vs, v2);
   avalue_add(vs, v3);
-  return value_new(VTERNARY, pos, tp, avatt_new(), avalue_serialize(vs));
+  return value_new(
+    VTERNARY, pos, tp, avatt_new(), (Achar *)avalue_serialize(vs)
+  );
 }

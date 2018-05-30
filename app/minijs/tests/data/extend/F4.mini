@@ -1,10 +1,12 @@
-<A>
+<A, C>
 
 _import
+  generics/F3
+  Empty
   Empty
   local (Local < B)
   . *
 
-_extend
-  Abc<A, B>
+_extends
+  F3<A, B, C>
 

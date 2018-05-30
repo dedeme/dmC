@@ -1,7 +1,7 @@
 // Copyright 30-Apr-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Arr[Stat]
+/// Arr[Astat]
 
 #ifndef AST_AASTAT_H
   # define AST_AASTAT_H

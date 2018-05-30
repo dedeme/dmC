@@ -17,7 +17,7 @@ static void check_char(Value *v, char *s) {
 
   if (strcmp(achar_get(value_data(v), 0), s)) {
     printf("Expected: %s\nActual:%s\n", s, achar_get(value_data(v), 0));
-    assert(false);
+    assert(false);     
   }
 }
 

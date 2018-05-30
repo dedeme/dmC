@@ -17,14 +17,14 @@ void tests_rcast() {
   tx = mk_tx("(:Str) m");
   rvalue(&v, tx);
   assert(value_vtype(v) == VCAST);
-  v0 = value_restore(value_data(v));
+  v0 = value_restore((Arr *)value_data(v));
   assert(value_vtype(v0) == VID);
   assert(!strcmp(type_to_str(value_type(v)), "Str"));
 
   tx = mk_tx("(:   Int  )m");
   rvalue(&v, tx);
   assert(value_vtype(v) == VCAST);
-  v0 = value_restore(value_data(v));
+  v0 = value_restore((Arr *)value_data(v));
   assert(value_vtype(v0) == VID);
   assert(!strcmp(type_to_str(value_type(v)), "Int"));
 

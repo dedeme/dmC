@@ -48,6 +48,7 @@ char *ops_a2(void) {
 
 int ops_order(char *op) {
   switch(*(op + 1)) {
+  case ':': return -1;
   case '=': return 4;
   case '<':
   case '>': return 3;

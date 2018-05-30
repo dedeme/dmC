@@ -33,4 +33,9 @@
 /// Throws tx_excepton.<p>
 Tx *rtype(Type **tp, Tx *tx);
 
+/// rtype2 reads one type in 'tp'.<p>
+/// 'tx' does not start with ':'.
+/// Throws tx_excepton.<p>
+Tx *rtype2(Type **tp, Tx *tx);
+
 #endif

@@ -244,7 +244,7 @@ Tx *token_list(Arr **list, Tx *tx, char close, Tx *(*read)(void **, Tx *)) {
 
 Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *)) {
   Tx *start = tx;
-  Arr *l = arr_new();
+  Achar *l = achar_new();
 
   Tx *r = token_const(tx, "->");
   if (tx_eq(tx, r)) {
@@ -255,7 +255,7 @@ Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *)) {
     }
     tx = r;
 
-    arr_add(l, e);
+    achar_add(l, e);
 
     for (;;) {
       r = token_const(tx, "->");
@@ -274,7 +274,7 @@ Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *)) {
         }
         tx = r;
 
-        arr_add(l, e);
+        achar_add(l, e);
       }
     }
   }
@@ -371,7 +371,8 @@ Tx *token_path(char **path, Tx *tx) {
     ch = *p++;
     if (
       !tx_at_end(tx) &&
-      ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '/')
+      ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '/' ||
+        (ch >= '0' && ch <= '9'))
     ) {
       continue;
     }
@@ -458,7 +459,7 @@ Tx *token_assign(char **op, Tx *tx) {
 }
 
 bool token_is_reserved(char *id) {
-  return str_index(reserved, str_printf(" %s ", id)) != -1;
+  return str_index(reserved, str_cat(" ", id, " ", NULL)) != -1;
 }
 
 Tx *token_valid_id(char **id, Tx *tx) {
@@ -479,13 +480,15 @@ Tx *token_generic_id(char **id, Achar **generics, Tx *tx) {
   tx = r;
 
   if (tx_eq(tx, r = token_cconst(tx, '<'))) {
-    *generics = arr_new();
+    *generics = achar_new();
     return tx;
   }
   tx = r;
-  tx = token_list(generics, tx, '>', (Tx*(*)(void**, Tx*))token_valid_id);
+  tx = token_list(
+    (Arr **)generics, tx, '>', (Tx*(*)(void**, Tx*))token_valid_id
+  );
 
-  if (!arr_size(*generics))
+  if (!achar_size(*generics))
     TH(r) "Empty generics brackets '<>' is not allowed" _TH
 
   return tx;

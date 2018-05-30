@@ -6,9 +6,9 @@
 #include "lexer/rvalue.h"
 
 static char *rm_last(Achar *achar) {
-  int ix = arr_size(achar) - 1;
-  char *r = arr_get(achar, ix);
-  arr_remove(achar, ix);
+  int ix = achar_size(achar) - 1;
+  char *r = achar_get(achar, ix);
+  achar_remove(achar, ix);
   return r;
 }
 
@@ -31,7 +31,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "-"));
-  v0 = value_restore(a);
+  v0 = value_restore((Arr *)a);
   assert(!strcmp(achar_get(value_data(v0), 0), "34"));
   assert(type_eq(value_type(v0), value_type(v)));
   assert(!strcmp(type_id(value_type(v0)), "Int"));
@@ -41,7 +41,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "++"));
-  v0 = value_restore(a);
+  v0 = value_restore((Arr *)a);
   assert(!strcmp(achar_get(value_data(v0), 0), "34"));
   assert(type_eq(value_type(v0), value_type(v)));
   assert(!strcmp(type_id(value_type(v0)), "Int"));
@@ -51,12 +51,12 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "--"));
-  v = value_restore(a);
+  v = value_restore((Arr *)a);
 
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "-"));
-  v0 = value_restore(a);
+  v0 = value_restore((Arr *)a);
   assert(!strcmp(achar_get(value_data(v0), 0), "34"));
   assert(type_eq(value_type(v0), value_type(v)));
   assert(!strcmp(type_id(value_type(v0)), "Int"));
@@ -68,7 +68,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "++"));
-  v0 = value_restore(a);
+  v0 = value_restore((Arr *)a);
   assert(value_vtype(v0) == VID);
   a = value_data(v0);
   assert(!strcmp(achar_get(a, 0), "x"));
@@ -84,7 +84,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "+"));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   assert(!strcmp(type_to_str(value_type(v0)), "Int"));
@@ -99,7 +99,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "+"));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VBINARY);
   a = value_data(v0);
@@ -116,7 +116,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "+"));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(!strcmp(type_to_str(value_type(v0)), "Int"));
   assert(!strcmp(achar_get(value_data(v0), 0), "1"));
@@ -133,12 +133,12 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "*"));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
 
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VGROUP);
   assert(!strcmp(type_to_str(value_type(v0)), "Int"));
-  v0 = value_restore(value_data(v0));
+  v0 = value_restore((Arr *)value_data(v0));
   assert(value_vtype(v0) == VBINARY);
   a = value_data(v0);
   op = rm_last(a);
@@ -153,7 +153,7 @@ void tests_rnary() {
   tx = mk_tx("a?1:2.0");
   tx = rvalue(&v, tx);
 
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v2 = avalue_get(vs, 2);
@@ -166,7 +166,7 @@ void tests_rnary() {
   tx = rvalue(&v, tx);
 
   assert(value_vtype(v) == VTERNARY);
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v2 = avalue_get(vs, 2);
@@ -175,12 +175,12 @@ void tests_rnary() {
   assert(value_vtype(v2) == VBINARY);
 
   assert(value_vtype(v0) == VGROUP);
-  v = value_restore(value_data(v0));
+  v = value_restore((Arr *)value_data(v0));
   assert(value_vtype(v) == VBINARY);
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "=="));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VINT);
   assert(!strcmp(achar_get(value_data(v0), 0), "5"));
@@ -194,7 +194,7 @@ void tests_rnary() {
   tx = rvalue(&v, tx);
 
   assert(value_vtype(v) == VTERNARY);
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v2 = avalue_get(vs, 2);
@@ -206,7 +206,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "=="));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VINT);
   assert(!strcmp(achar_get(value_data(v0), 0), "5"));
@@ -223,7 +223,7 @@ void tests_rnary() {
   a = value_data(v);
   op = rm_last(a);
   assert(!strcmp(op, "=="));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   assert(value_vtype(v0) == VINT);

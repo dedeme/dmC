@@ -5,11 +5,16 @@
 
 inline
 Achar *achar_new(void) {
-  return arr_new();
+  return (Achar *)arr_new();
+}
+
+inline
+size_t achar_size(Achar *this) {
+  return arr_size((Arr *)this);
 }
 
 bool achar_contains(Achar *this, char *s) {
-  EACH(this, char, e) {
+  EACH((Arr *)this, char, e) {
     if (!strcmp(e, s)){
       return true;
     }
@@ -19,16 +24,27 @@ bool achar_contains(Achar *this, char *s) {
 
 inline
 void achar_add(Achar *this, char *t) {
-  arr_add(this, t);
+  arr_add((Arr *)this, t);
+}
+
+inline
+void achar_remove(Achar *this, int ix) {
+  arr_remove((Arr *)this, ix);
 }
 
 inline
 char *achar_get(Achar *this, int ix) {
-  return arr_get(this, ix);
+  return arr_get((Arr *)this, ix);
 }
+
+inline
+void achar_insert(Achar *this, int ix, char *s) {
+  arr_insert((Arr *)this, ix, s);
+}
+
 Achar *achar_copy(Achar *this) {
   Achar *r = achar_new();
-  EACH(this, char, s) {
+  EACH((Arr *)this, char, s) {
     achar_add(r, s);
   }_EACH
   return r;
@@ -36,14 +52,14 @@ Achar *achar_copy(Achar *this) {
 
 Arr/*Json*/ *achar_serialize(Achar *this) {
   Arr/*Json*/ *r = arr_new();
-  EACH(this, char, s) {
+  EACH((Arr *)this, char, s) {
     arr_add(r, json_wstring(s));
   }_EACH
   return r;
 }
 
 Achar *achar_restore(Arr/*Json*/ *j) {
-  Achar *r = arr_new();
+  Achar *r = achar_new();
   EACH(j, char, js) {
     achar_add(r, json_rstring(js));
   }_EACH

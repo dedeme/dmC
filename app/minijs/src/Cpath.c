@@ -100,10 +100,10 @@ Cpath *cpath_new(char *path) {
   Cpath *this = _cpath_new(path);
   char *fpath = str_printf("%s.mini", path);
 
-  Arr/*char*/ *roots = arr_new();
-  EACH(_roots, char, p) {
+  Achar *roots = achar_new();
+  EACH((Arr *)_roots, char, p) {
     if (file_exists(path_cat(p, fpath, NULL))) {
-      arr_add(roots, p);
+      achar_add(roots, p);
       this->id = str_creplace(path, '/', '_');
       char *f = *p == '/'
         ? path_cat(p, path, NULL)
@@ -116,12 +116,12 @@ Cpath *cpath_new(char *path) {
     }
   }_EACH
 
-  if (!arr_size(roots))
+  if (!achar_size(roots))
     TH1(path, pos) "'%s' not found", path _TH
 
-  if (arr_size(roots) > 1) {
+  if (achar_size(roots) > 1) {
     Buf *bf = buf_new();
-    EACH(roots, char, r) {
+    EACH((Arr *)roots, char, r) {
       buf_add(bf, r);
       buf_cadd(bf, '\n');
     }_EACH
@@ -160,7 +160,7 @@ Arr/*Cpath*/ *cpath_dirs(char *dir) {
   Achar *dirs = _roots;
   if (*dir) {
     dirs = achar_new();
-    EACH(_roots, char, r) {
+    EACH((Arr *)_roots, char, r) {
       char *d = path_cat(r, dir, NULL);
       if (file_is_directory(d)) {
         achar_add(dirs, d);
@@ -169,7 +169,7 @@ Arr/*Cpath*/ *cpath_dirs(char *dir) {
   }
 
   Arr/*Cpath*/ *r = arr_new();
-  EACH(dirs, char, d) {
+  EACH((Arr *)dirs, char, d) {
     EACH(file_dir(d), char, f) {
       if (str_ends(f, ".mini")) {
         arr_add(r, cpath_new(str_printf(

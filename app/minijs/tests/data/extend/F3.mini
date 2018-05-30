@@ -1,4 +1,6 @@
 <A>
 
-_extend
-  Abc<A, B>
+_import generics/F3 < Gf3
+
+_extends
+  Gf3<A, A, A>

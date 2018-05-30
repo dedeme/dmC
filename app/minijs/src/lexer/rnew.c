@@ -44,10 +44,10 @@ Tx *rnew(Value **value, Tx *tx, Class *c, Type *tp, bool is_public) {
   Achar *new_ids;
   tx = token_fn_list(&new_ids, tx, new_id);
 
-  if (arr_size(params) != arr_size(new_ids))
+  if (arr_size(params) != achar_size(new_ids))
     TH(start)
       "Type definition requires '%d' paramters but function has '%d'",
-      arr_size(params), arr_size(new_ids)
+      arr_size(params), achar_size(new_ids)
     _TH
 
   Achar *ids = achar_new();
@@ -92,7 +92,7 @@ Tx *rnew(Value **value, Tx *tx, Class *c, Type *tp, bool is_public) {
           att_new(true, id, t, true, value_new_null(pos))
         );
     }
-  } _EACH
+  }_EACH
 
   int public = true;
   Stat *st;
@@ -115,13 +115,17 @@ Tx *rnew(Value **value, Tx *tx, Class *c, Type *tp, bool is_public) {
     if (stat_type(st) != SVAL && stat_type(st) != SVAR)
       TH(tx) "Expected 'val' or 'var' declaration" _TH
 
+    char *id = stat_id(st);
+    if (class_contains_id(c, id))
+      TH(tx) "Identifier '%s' is duplicated", id _TH
+
     Value *v = avalue_get(stat_values(st), 0);
     if (type_is_unknown(value_type(v)))
       TH(tx) "Type declaration is needed" _TH
 
     aatt_add(
       class_instance(c),
-      att_new(public, stat_id(st), value_type(v), stat_type(st) != SVAL, v)
+      att_new(public, id, value_type(v), stat_type(st) != SVAL, v)
     );
   }
 

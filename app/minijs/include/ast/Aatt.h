@@ -9,19 +9,25 @@
 #include "Att.h"
 
 ///
-typedef Arr Aatt;
+typedef struct aatt_Aatt Aatt;
 
 ///
 Aatt *aatt_new(void);
 
 ///
-void aatt_add(Aatt *this, Att *t);
+size_t aatt_size(Aatt *this);
+
+///
+void aatt_add(Aatt *this, Att *a);
 
 ///
 Att *aatt_get(Aatt *this, int ix);
 
 ///
 Att *aatt__get(Aatt *this, char *id);
+
+///
+void aatt_set(Aatt *this, int ix, Att *a);
 
 ///
 Arr/*Json*/ *aatt_serialize(Aatt *this);

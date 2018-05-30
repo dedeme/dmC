@@ -57,10 +57,10 @@ void tests_type() {
   Class *c0 = class_new("C0");
   imported_add(im, c0);
   Class *c1 = class_new("C1");
-  achar_add(class_super(c1), class_id(c0));
+  class_set_super(c1, class__type(c0, arr_new()));
   imported_add(im, c1);
   Class *c2 = class_new("C2");
-  achar_add(class_super(c2), class_id(c1));
+  class_set_super(c2, class__type(c1, arr_new()));
   imported_add(im, c2);
 
   test(class__type(c0, arr_new()), DATA, "C0");

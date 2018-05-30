@@ -21,26 +21,22 @@ static Tx *rval_var(Stat **st, Tx *tx, Pos *pos, Type *tp, bool is_val) {
   tx = r;
 
   Value *v;
-  if (tx_neq(tx, r = token_cconst(tx, ';'))) {
+  if (tx_eq(tx, r = token_cconst(tx, '='))) {
     if (type_is_unknown(tp))
       TH1(tx_path(tx), pos) "Type declaration is needed" _TH
 
     v = value_new_null(tx_pos(tx));
-    tx = r;
-  } else {
-    if (tx_eq(tx, r = token_cconst(tx, '=')))
-      TH(tx) "Expected '='" _TH
-    tx = r;
-
-    tx = rvalue(&v, tx);
-  }
-
-  if (type_is_unknown(tp)) {
-    Type *vtp = value_type(v);
-    if (type_is_unknown(vtp))
-      TH1(tx_path(tx), pos) "Type declaration is needed" _TH
-  } else {
     value_set_type(v, tp);
+  } else {
+    tx = rvalue(&v, r);
+
+    if (type_is_unknown(tp)) {
+      Type *vtp = value_type(v);
+      if (type_is_unknown(vtp))
+        TH1(tx_path(tx), pos) "Type declaration is needed" _TH
+    } else {
+      value_set_type(v, tp);
+    }
   }
 
   if (is_val) {
@@ -324,7 +320,7 @@ Tx *rstat(Stat **st, Tx *tx) {
   tx = rvalue(&v, start);
 
   while (value_vtype(v) == VGROUP && !arr_size(value_attachs(v))) {
-    v = value_restore(value_data(v));
+    v = value_restore((Arr *)value_data(v));
   }
 
   char *op;

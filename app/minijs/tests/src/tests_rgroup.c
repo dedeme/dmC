@@ -17,14 +17,14 @@ void tests_rgroup() {
   tx = mk_tx("(210)");
   rvalue(&v, tx);
   assert(value_vtype(v) == VGROUP);
-  v0 = value_restore(value_data(v));
+  v0 = value_restore((Arr *)value_data(v));
   assert(value_vtype(v0) == VINT);
   assert(!strcmp(type_to_str(value_type(v)), "Int"));
 
   tx = mk_tx("(  210.03 )");
   rvalue(&v, tx);
   assert(value_vtype(v) == VGROUP);
-  v0 = value_restore(value_data(v));
+  v0 = value_restore((Arr *)value_data(v));
   assert(value_vtype(v0) == VFLOAT);
   assert(!strcmp(type_to_str(value_type(v)), "Float"));
 

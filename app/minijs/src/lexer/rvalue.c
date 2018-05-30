@@ -151,7 +151,7 @@ Tx *rvalue(Value **v, Tx *tx) {
   }
   tx = r;
 
-  if (arr_size(generics) == 0) {
+  if (achar_size(generics) == 0) {
     if (!strcmp(id, "null")) { // Null
       *v = value_new_null(pos);
       return tx;
@@ -174,7 +174,7 @@ Tx *rvalue(Value **v, Tx *tx) {
       tx = r;
       Achar *params;
       tx = token_fn_list(&params, tx, token_valid_id);
-      arr_insert(params, 0, id);
+      achar_insert(params, 0, id);
 
       Astat *sts;
       tx = rblock(&sts, tx);

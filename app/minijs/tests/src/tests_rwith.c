@@ -6,9 +6,9 @@
 #include "lexer/rvalue.h"
 
 static char *rm_last(Achar *achar) {
-  int ix = arr_size(achar) - 1;
-  char *r = arr_get(achar, ix);
-  arr_remove(achar, ix);
+  int ix = achar_size(achar) - 1;
+  char *r = achar_get(achar, ix);
+  achar_remove(achar, ix);
   return r;
 }
 
@@ -24,17 +24,11 @@ void tests_rwith() {
   Achar *a;
   char *op;
 
-  tx = mk_tx("with a \\ 2 : 4 ");
-  rvalue(&v, tx);
-
-  assert(value_vtype(v) == VINT);
-  assert(!strcmp(achar_get(value_data(v), 0), "4"));
-
   tx = mk_tx("with a \\ 5 : true \\ : false ");
   rvalue(&v, tx);
 
   assert(value_vtype(v) == VTERNARY);
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v2 = avalue_get(vs, 2);
@@ -50,7 +44,7 @@ void tests_rwith() {
   rvalue(&v, tx);
 
   assert(value_vtype(v) == VTERNARY);
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v = avalue_get(vs, 2);
@@ -61,7 +55,7 @@ void tests_rwith() {
   assert(value_vtype(v1) == VBOOL);
 
   assert(value_vtype(v) == VTERNARY);
-  vs = avalue_restore(value_data(v));
+  vs = avalue_restore((Arr *)value_data(v));
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   v = avalue_get(vs, 2);
@@ -72,14 +66,14 @@ void tests_rwith() {
   assert(value_vtype(v1) == VBOOL);
   assert(value_vtype(v2) == VBOOL);
 
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   v1 = avalue_get(vs, 1);
   assert(value_vtype(v0) == VBINARY);
   a = value_data(v0);
   op = rm_last(a);
   assert(!strcmp(op, "=="));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VID);
   a = value_data(v0);
@@ -93,7 +87,7 @@ void tests_rwith() {
   a = value_data(v1);
   op = rm_last(a);
   assert(!strcmp(op, "=="));
-  vs = avalue_restore(a);
+  vs = avalue_restore((Arr *)a);
   v0 = avalue_get(vs, 0);
   assert(value_vtype(v0) == VID);
   a = value_data(v0);

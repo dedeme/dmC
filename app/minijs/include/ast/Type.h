@@ -9,6 +9,7 @@
 #include <dmc/all.h>
 
 typedef Arr Atype;
+typedef Map Mtype;
 
 ///
 enum Type_t {
@@ -91,6 +92,12 @@ bool type_is_unknown(Type *this);
 
 ///
 char *type_to_str(Type *this);
+
+/// type_reserved_id returns true if 'id' is a standard DATA type.
+bool type_reserved_id(char *id);
+
+/// type_replace replaces generics by their value.
+Type *type_replace(Type *this, Mtype *generics);
 
 #endif
 

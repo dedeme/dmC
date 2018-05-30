@@ -9,16 +9,19 @@
 #include <dmc/all.h>
 
 ///
-typedef Map Mchar;
+typedef struct mchar_Mchar Mchar;
 
 ///
 Mchar *mchar_new(void);
 
 ///
-void mchar_put(Mchar *this, char *key, char *value);
+size_t mchar_size(Mchar *this);
 
 ///
 bool  mchar_contains(Mchar *this, char *key);
+
+///
+void mchar_put(Mchar *this, char *key, char *value);
 
 /// mchar_get returns the value of 'key' or the same 'key' if such key does not
 /// exist.

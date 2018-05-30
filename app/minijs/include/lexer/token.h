@@ -83,7 +83,7 @@ Tx *token_valid_id(char **id, Tx *tx);
 
 /// Read an id with o without generics. If there are not generics '*generics'
 /// is initialized to an empty array.<p>
-/// If genericks is like '<>' throw a tx_exception.<p>
+/// If generics is empty ('<>'), it throws a tx_exception.<p>
 /// Throws tx_exception.
 Tx *token_generic_id(char **id, Achar **generics, Tx *tx);
 

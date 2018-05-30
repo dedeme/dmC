@@ -8,6 +8,8 @@ void tests_program() {
   puts("Program");
 
   Program *prg = program_get();
+  size_t prg_sz = program_size(prg);
+
   program_add(prg, class_new("a"));
   assert(program__class(prg, "a"));
   assert(!program__class(prg, "b"));
@@ -19,7 +21,7 @@ void tests_program() {
   assert(program__class(prg, "110"));
   assert(program__class(prg, "a"));
   assert(!program__class(prg, "b"));
-  assert(arr_size(prg) == 151);
+  assert(program_size(prg) - prg_sz == 151);
 
   puts("    Finished");
 }

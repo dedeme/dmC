@@ -39,8 +39,13 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
     tx = r;
     Achar *ids;
     Tx *start = tx;
-    tx = token_list(&ids, tx, ')', (Tx *(*)(void **, Tx *))token_valid_id);
-    EACH(ids, char, id) {
+    tx = token_list(
+      (Arr **)&ids, tx, ')', (Tx *(*)(void **, Tx *))token_valid_id
+    );
+    EACH((Arr *)ids, char, id) {
+      if (class_contains_id(c, id))
+        TH(tx) "Identifier '%s' is duplicated", id _TH
+
       aatt_add(
         class_statics(c),
         att_new(
@@ -56,6 +61,9 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   tx = r;
 
   tx = token_id(&id, tx);
+
+  if (class_contains_id(c, id))
+    TH(tx) "Identifier '%s' is duplicated", id _TH
 
   if (!strcmp(id, "new")) {
     if (type_is_unknown(tp))
@@ -81,7 +89,7 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
   if (token_is_reserved(id))
     TH(tx) "'%s' is a reserved word", id _TH
 
-  if (tx_neq(tx, r = token_cconst(tx, ';'))) {
+  if (tx_eq(tx, r = token_cconst(tx, '='))) {
     if (type_is_unknown(tp))
       TH(tx_type) "Type declaration is needed" _TH
 
@@ -91,9 +99,6 @@ Tx *rattribute(Tx *tx, Class *c, bool is_public) {
     );
     return r;
   }
-
-  if (tx_eq(tx, r = token_cconst(tx, '=')))
-    TH(tx) "Expected '='" _TH
   tx = r;
 
   tx = rvalue(&v, tx);

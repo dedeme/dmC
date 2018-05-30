@@ -24,7 +24,7 @@ void tests_rarr() {
 
   assert(value_vtype(v) == VARR);
   a = value_data(v);
-  assert(!arr_size(a));
+  assert(!achar_size(a));
   assert(type_is_unknown(value_type(v)));
 
   tx = mk_tx("[ a == b ] ");
@@ -32,7 +32,7 @@ void tests_rarr() {
 
   assert(value_vtype(v) == VARR);
   a = value_data(v);
-  assert(arr_size(a) == 1);
+  assert(achar_size(a) == 1);
   tp = value_type(v);
   assert(!strcmp(type_id(tp), "Arr"));
   params = type_params(tp);
@@ -45,7 +45,7 @@ void tests_rarr() {
 
   assert(value_vtype(v) == VARR);
   a = value_data(v);
-  assert(arr_size(a) == 2);
+  assert(achar_size(a) == 2);
   tp = value_type(v);
   assert(!strcmp(type_id(tp), "Arr"));
   params = type_params(tp);

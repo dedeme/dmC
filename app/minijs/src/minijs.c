@@ -2,6 +2,9 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "minijs.h"
+#include "Cpath.h"
+#include "ast/Program.h"
+#include "ast/Atype.h"
 #include "DEFS.h"
 
 static void help (void) {
@@ -28,7 +31,7 @@ int main (int argc, char **argv) {
   sys_init("minijs");
 
   char *js = "";
-  Arr/*char*/ *paths = arr_new();
+  Achar *paths = arr_new();
   char *main_file = "";
 
   bool js_set = false;
@@ -99,6 +102,20 @@ int main (int argc, char **argv) {
     arr_insert(paths, 0, ".");
   }
 
-  puts(js);
-  return 0;
+  bool fail = false;
+  TRY {
+    cpath_init(paths);
+    Cpath *main_path = cpath_new(main_file);
+    Sym *sym = program_att_main(cpath_id(main_path), atype_new());
+
+    puts(type_to_str(sym_type(sym)));
+    puts(js);
+  } CATCH(e) {
+    if (e[strlen(e) - 1] == '\1') {
+      fail = true;
+    } else
+      THROW e _THROW
+  }_TRY
+
+  return fail ? 1 : 0;
 }

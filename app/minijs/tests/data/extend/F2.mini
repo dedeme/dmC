@@ -1,4 +1,6 @@
 _local
 
-_extend
-  Abc < >
+_import sub *
+
+_extends
+  Import

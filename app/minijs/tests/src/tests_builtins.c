@@ -65,8 +65,8 @@ void tests_builtins() {
 
   test_ins("toStr", "(:Str)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 11);
 
   puts("--> Byte");
@@ -110,8 +110,8 @@ void tests_builtins() {
   test_ins("toInt", "(:Int)");
   test_ins("toFloat", "(:Float)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 29);
 
   puts("--> Int");
@@ -158,8 +158,8 @@ void tests_builtins() {
   test_ins("toFloat", "(:Float)");
   test_ins("abs", "(:Int)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 32);
 
   puts("--> Float");
@@ -221,8 +221,8 @@ void tests_builtins() {
   test_ins("sqrt", "(:Float)");
   test_ins("round", "(:Float)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 45);
 
   puts("--> Char");
@@ -255,8 +255,8 @@ void tests_builtins() {
 
   test_ins("repeat", "(Int:Str)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 17);
 
   puts("--> Str");
@@ -306,8 +306,8 @@ void tests_builtins() {
 
   test_ins("replace", "(Str,Str:Str)");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 27);
 
   puts("--> Arr");
@@ -354,8 +354,8 @@ void tests_builtins() {
 
   test_ins("set", "(Int,A:[A])");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 26);
 
   puts("--> Map");
@@ -382,8 +382,8 @@ void tests_builtins() {
 
   test_ins("set", "(Str,A:{A})");
 
-  size = arr_size(class_statics(c));
-  size += arr_size(class_instance(c));
+  size = aatt_size(class_statics(c));
+  size += aatt_size(class_instance(c));
   assert(size == 11);
 
   puts("    Finished");

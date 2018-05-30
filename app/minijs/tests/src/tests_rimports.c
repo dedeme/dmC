@@ -16,15 +16,14 @@ void tests_rimports() {
   imports = class_imports(c);
   assert(!strcmp(class_id(c), "sub_Import"));
   assert(class_local(c));
-  assert(arr_size(imports) == 4);
+  assert(mchar_size(imports) == 3);
   assert(!strcmp(mchar_get(imports, "Empty"), "sub_Empty"));
   assert(!strcmp(mchar_get(imports, "Emp"), "Empty"));
-  assert(!strcmp(mchar_get(imports, "Import"), "sub_Import"));
   assert(!strcmp(mchar_get(imports, "Local"), "local_Local"));
-  assert(!arr_size(class_generics(c)));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!achar_size(class_generics(c)));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))
@@ -34,14 +33,14 @@ void tests_rimports() {
   imports = class_imports(c);
   assert(!strcmp(class_id(c), "imports_F1"));
   assert(!class_local(c));
-  assert(arr_size(imports) == 3);
+  assert(mchar_size(imports) == 3);
   assert(!strcmp(mchar_get(imports, "Empty"), "Empty"));
   assert(!strcmp(mchar_get(imports, "Import"), "sub_Import"));
   assert(!strcmp(mchar_get(imports, "L"), "local_Local"));
-  assert(!arr_size(class_generics(c)));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!achar_size(class_generics(c)));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))
@@ -51,14 +50,14 @@ void tests_rimports() {
   imports = class_imports(c);
   assert(!strcmp(class_id(c), "imports_F2"));
   assert(!class_local(c));
-  assert(arr_size(imports) == 3);
+  assert(mchar_size(imports) == 3);
   assert(!strcmp(mchar_get(imports, "Empty"), "sub_Empty"));
   assert(!strcmp(mchar_get(imports, "Import"), "sub_Import"));
   assert(!strcmp(mchar_get(imports, "Local"), "local_Local"));
-  assert(!arr_size(class_generics(c)));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!achar_size(class_generics(c)));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))

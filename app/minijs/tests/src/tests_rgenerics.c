@@ -16,11 +16,11 @@ void tests_rgenerics() {
   generics = class_generics(c);
   assert(!strcmp(class_id(c), "generics_F1"));
   assert(!class_local(c));
-  assert(!arr_size(class_imports(c)));
-  assert(!arr_size(generics));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!mchar_size(class_imports(c)));
+  assert(!achar_size(generics));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))
@@ -30,12 +30,12 @@ void tests_rgenerics() {
   generics = class_generics(c);
   assert(!strcmp(class_id(c), "generics_F2"));
   assert(!class_local(c));
-  assert(!arr_size(class_imports(c)));
-  assert(arr_size(generics) == 1);
-  assert(!strcmp(arr_get(generics, 0), "A"));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!mchar_size(class_imports(c)));
+  assert(achar_size(generics) == 1);
+  assert(!strcmp(achar_get(generics, 0), "A"));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))
@@ -45,14 +45,14 @@ void tests_rgenerics() {
   generics = class_generics(c);
   assert(!strcmp(class_id(c), "generics_F3"));
   assert(!class_local(c));
-  assert(!arr_size(class_imports(c)));
-  assert(arr_size(generics) == 3);
-  assert(!strcmp(arr_get(generics, 0), "A"));
-  assert(!strcmp(arr_get(generics, 1), "B"));
-  assert(!strcmp(arr_get(generics, 2), "C"));
-  assert(arr_size(class_super(c)) == 0);
-  assert(!arr_size(class_statics(c)));
-  assert(!arr_size(class_instance(c)));
+  assert(!mchar_size(class_imports(c)));
+  assert(achar_size(generics) == 3);
+  assert(!strcmp(achar_get(generics, 0), "A"));
+  assert(!strcmp(achar_get(generics, 1), "B"));
+  assert(!strcmp(achar_get(generics, 2), "C"));
+  assert(type_type(class_super(c)) == VOID);
+  assert(!aatt_size(class_statics(c)));
+  assert(!aatt_size(class_instance(c)));
   assert(!strcmp(
     JS(class_serialize(c)),
     JS(class_serialize(class_restore(class_serialize(c))))

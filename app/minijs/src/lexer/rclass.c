@@ -9,6 +9,7 @@
 #include "lexer/Tx.h"
 #include "lexer/token.h"
 #include "lexer/rimport.h"
+#include "lexer/rtype.h"
 #include "lexer/rattribute.h"
 
 static Tx *rgenerics(Tx *tx, Class *c) {
@@ -17,13 +18,17 @@ static Tx *rgenerics(Tx *tx, Class *c) {
   // -------------------------------------------------------
   Tx *valid_id(void **id, Tx *tx) {
     Tx *r;
-    if (tx_eq(tx, r = token_valid_id((char**)id, tx))) {
+    char *i;
+    if (tx_eq(tx, r = token_valid_id(&i, tx))) {
       return tx;
     }
-    if (class_contains_id(c, *id))
-      TH(tx) "Identifier '%s' is duplicated", *id _TH
+    if (type_reserved_id(i))
+      TH(tx) "Identifier '%s' is a reserved type name", i _TH
+    if (class_contains_id(c, i))
+      TH(tx) "Identifier '%s' is duplicated", i _TH
 
-    achar_add(generics, *id);
+    *id = i;
+    achar_add(generics, i);
     return r;
   }
   // -------------------------------------------------------
@@ -36,7 +41,7 @@ static Tx *rgenerics(Tx *tx, Class *c) {
   tx = r;
 
   Achar *ids;
-  tx = token_list(&ids, tx, '>', valid_id);
+  tx = token_list((Arr **)&ids, tx, '>', valid_id);
 
   return tx;
 }
@@ -65,28 +70,65 @@ static Tx *rimports(Tx *tx, Class *c) {
 
 static Tx *rextend(Tx *tx, Class *c) {
   Tx *r;
-  if (tx_eq(tx, r = token_directive(tx, "_extend"))) {
+  if (tx_eq(tx, r = token_directive(tx, "_extends"))) {
     return tx;
   }
   tx = r;
 
-  char *id;
-  Achar *gs;
-  if (tx_eq(tx, r = token_generic_id(&id, &gs, tx)))
-    TH(tx) "Expected an identifier" _TH
+  Type *tp;
+  r = rtype2(&tp, tx);
+  if (type_type(tp) != DATA)
+    TH(tx) "Expected a class id" _TH
+  char *id = type_id(tp);
   if (token_is_reserved(id))
     TH(tx) "'%s' is a reserved word", id _TH
-  if (class_contains_id(c, id))
-    TH(tx) "Identifier '%s' is duplicated", id _TH
+  if (!class_contains_type(c, id) && !type_reserved_id(id))
+    TH(r) "Unknown symbol '%s'", id _TH
+  EACH(type_params(tp), Type, t) {
+    char *id = type_id(t);
+    if (!class_contains_type(c, id) && !type_reserved_id(id))
+      TH(r) "Unknown symbol '%s'", id _TH
+  }_EACH
   tx = r;
 
-  Achar *super = class_super(c);
-  arr_add(super, id);
-  EACH(gs, char, id) {
-    achar_add(super, id);
-  }_EACH
+  class_set_super(c, tp);
 
   return tx;
+}
+
+static Tx *rimplements(Tx *tx, Class *c) {
+  Tx *r;
+  if (tx_eq(tx, r = token_directive(tx, "_implements"))) {
+    return tx;
+  }
+  tx = r;
+
+  if (tx_eq(tx, r = token_cconst(tx, '(')))
+    TH(tx) "Expected '('" _TH
+  tx = r;
+
+  Atype *imps;
+  r = token_list(&imps, tx, ')', (Tx *(*)(void **, Tx *))rtype2);
+
+  Atype *is = class_implements(c);
+  EACH(imps, Type, tp) {
+    if (type_type(tp) != DATA)
+      TH(tx) "Expected class ids" _TH
+    char *id = type_id(tp);
+    if (token_is_reserved(id))
+      TH(tx) "'%s' is a reserved word", id _TH
+    if (!class_contains_type(c, id) && !type_reserved_id(id))
+      TH(r) "Unknown symbol '%s'", id _TH
+    EACH(type_params(tp), Type, t) {
+      char *id = type_id(t);
+      if (!class_contains_type(c, id) && !type_reserved_id(id))
+        TH(r) "Unknown symbol '%s'", id _TH
+    }_EACH
+
+    atype_add(is, tp);
+  }_EACH
+
+  return r;
 }
 
 static Tx *rattributes(Tx *tx, Class *c) {
@@ -127,6 +169,7 @@ static Class *read(Cpath *path, char *text) {
   tx = rlocal(tx, c);
   tx = rimports(tx, c);
   tx = rextend(tx, c);
+  tx = rimplements(tx, c);
   tx = rattributes(tx, c);
 
   if (!tx_at_end(tx))

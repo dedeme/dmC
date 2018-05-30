@@ -17,7 +17,7 @@
   TH(tx_new((path), "", "", pos_nline(pos), pos_nchar(pos)))
 
 ///
-#define TH2(class, pos) TH1(cpath_fpath(class_cpath(class)), pos)
+#define TH2(class, pos) TH1(cpath_fpath(cpath_from_id(class_id(class))), pos)
 
 ///
 #define _TH ); THROW "\1" _THROW}

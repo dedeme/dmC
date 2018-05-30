@@ -3,7 +3,10 @@
 
 #include "ast/Type.h"
 #include "ast/Atype.h"
+#include "ast/Mtype.h"
 #include "ast/Imported.h"
+
+static char *reserved = " Bool Byte Int Float Char Str Arr Map ";
 
 /*.
 struct: @Type
@@ -211,13 +214,13 @@ bool type_child(Type *this, Type *child) {
   if (!cchild)
     THROW "Class '%s' does not exist", child->id _THROW
 
-  Achar *super = class_super(cchild);
-  if (!arr_size(super)) {
+  Type *super = class_super(cchild);
+  if (type_type(super) == VOID) {
     return false;
   }
-  Class *csuper = imported__class(im, achar_get(super, 0));
+  Class *csuper = imported__class(im, type_id(super));
   if (!csuper)
-    THROW "Class '%s' does not exist", achar_get(super, 0) _THROW
+    THROW "Class '%s' does not exist", type_id(super) _THROW
   Type *tsuper = class__type(csuper, this->params);
   if (!tsuper) {
     return false;
@@ -281,4 +284,32 @@ char *type_to_str(Type *this) {
 
   THROW exc_illegal_state("Exhausted switch") _THROW
   return NULL;
+}
+
+bool type_reserved_id(char *id) {
+  return str_index(reserved, str_cat(" ", id, " ", NULL)) != -1;
+}
+
+Type *type_replace(Type *this, Mtype *generics) {
+  enum Type_t ttype = type_type(this);
+
+  if (ttype == ANY || ttype == VOID || ttype == UNKNOWN) {
+    return this;
+  }
+
+  Atype *ps = atype_new();
+  EACH(type_params(this), Type, t) {
+    atype_add(ps, type_replace(t, generics));
+  }_EACH
+
+  if (ttype == FN) {
+    return type_new_fn(ps);
+  }
+
+  Type *t;
+  if (!arr_size(ps) && (t = mtype__get(generics, type_id(this)))) {
+    return t;
+  }
+
+  return type_new_data(type_id(this), ps);
 }
