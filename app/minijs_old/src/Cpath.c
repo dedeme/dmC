@@ -2,7 +2,10 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Cpath.h"
-#include "global.h"
+#include "lexer/Tx.h"
+#include "DEFS.h"
+
+static Achar *_roots = NULL;
 
 /*.
 -struct: @Cpath
@@ -76,22 +79,31 @@ char *cpath_js(Cpath *this) {
 }
 /*.-.*/
 
+inline
+void cpath_init(Achar *roots) {
+  _roots = roots;
+}
+
 Cpath *cpath_new(char *path) {
+  if (!_roots)
+    THROW exc_null_pointer("_roots") _THROW
+
+  Pos *pos = pos_new(0, 0);
   if (*path == '/')
-    THROW "'%s' is an absolute path", path _THROW
+    TH1(path, pos) "'%s' is an absolute path", path _TH
   if (path[strlen(path) - 1] == '/')
-    THROW "'%s' ends with '/'", path _THROW
+    TH1(path, pos) "'%s' ends with '/'", path _TH
   if (str_index(path, "__") != -1)
-    THROW "'%s' has '//'", path _THROW
+    TH1(path, pos) "'%s' has '//'", path _TH
 
 
   Cpath *this = _cpath_new(path);
   char *fpath = str_printf("%s.mini", path);
 
-  Arr/*char*/ *roots = arr_new();
-  EACH(global_roots(), char, p) {
+  Achar *roots = achar_new();
+  EACH((Arr *)_roots, char, p) {
     if (file_exists(path_cat(p, fpath, NULL))) {
-      arr_add(roots, p);
+      achar_add(roots, p);
       this->id = str_creplace(path, '/', '_');
       char *f = *p == '/'
         ? path_cat(p, path, NULL)
@@ -104,16 +116,16 @@ Cpath *cpath_new(char *path) {
     }
   }_EACH
 
-  if (!arr_size(roots))
-    THROW "'%s' not found", path _THROW
+  if (!achar_size(roots))
+    TH1(path, pos) "'%s' not found", path _TH
 
-  if (arr_size(roots) > 1) {
+  if (achar_size(roots) > 1) {
     Buf *bf = buf_new();
-    EACH(roots, char, r) {
+    EACH((Arr *)roots, char, r) {
       buf_add(bf, r);
       buf_cadd(bf, '\n');
     }_EACH
-    THROW "'%s' is duplicate in:\n%s", path, buf_str(bf) _THROW
+    TH1(path, pos) "'%s' is duplicate in:\n%s", path, buf_str(bf) _TH
   }
 
   return this;
@@ -130,12 +142,42 @@ bool cpath_eq(Cpath *this, Cpath *other) {
 }
 
 inline
-Json *cpath_serialize(Cpath *this) {
-  return json_wstring(this->path);
+Arr/*Json*/ *cpath_serialize(Cpath *this) {
+  Arr/*Json*/ *r = arr_new();
+  arr_add(r, json_wstring(this->path));
+  return r;
 }
 
 inline
-Cpath *cpath_restore(Json *s) {
-  return cpath_new(json_rstring(s));
+Cpath *cpath_restore(Arr/*Json*/ *s) {
+  return cpath_new(json_rstring(arr_get(s, 0)));
 }
 
+Arr/*Cpath*/ *cpath_dirs(char *dir) {
+  if (!_roots)
+    THROW exc_null_pointer("_roots") _THROW
+
+  Achar *dirs = _roots;
+  if (*dir) {
+    dirs = achar_new();
+    EACH((Arr *)_roots, char, r) {
+      char *d = path_cat(r, dir, NULL);
+      if (file_is_directory(d)) {
+        achar_add(dirs, d);
+      }
+    }_EACH
+  }
+
+  Arr/*Cpath*/ *r = arr_new();
+  EACH((Arr *)dirs, char, d) {
+    EACH(file_dir(d), char, f) {
+      if (str_ends(f, ".mini")) {
+        arr_add(r, cpath_new(str_printf(
+          *dir ? "%s/%s" : "%s%s", dir, path_only_name(f)
+        )));
+      }
+    }_EACH
+  }_EACH
+
+  return r;
+}

@@ -22,9 +22,9 @@
 ///                   and restore with jarr_gdouble()
 ///   'fn'         -> Serialize with 'fn_serialize()' and restore with
 ///                   'fn_restore()'
-///   '_array fn'  -> Serialize wint jarr_aarray() using 'fn_serialize()' as
+///   '_array fn'  -> Serialize with jarr_aarray() using 'fn_serialize()' as
 ///                   function 'to()' and 'fn_restore()' as function 'from()'
-///   '_object fn' -> Serialize wint jarr_aobject() using 'fn_serialize' as
+///   '_object fn' -> Serialize with jarr_aobject() using 'fn_serialize' as
 ///                   function 'to()' and 'fn_restore()' as function 'from()'
 
 

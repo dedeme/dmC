@@ -1,14 +1,34 @@
-// Copyright 25-Mar-2018 ºDeme
+// Copyright 29-Apr-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Ast statement model
+/// Statement
 
 #ifndef AST_STAT_H
-  #define AST_STAT_H
+  # define AST_STAT_H
 
-#include <dmc/all.h>
-#include "DEFS.h"
-#include "ast/Dvalue.h"
+#include "Pos.h"
+#include "Value.h"
+
+/// Statement types
+enum Stat_t {
+  SVAL,
+  SVAR,
+  SASSIGN,
+  SFN,
+  SRETURN,
+  SBREAK,
+  SCONTINUE,
+  SBLOCK,
+  SWHILE,
+  SFOR,
+  SIF,
+  STRY,
+  STHROW,
+  SNATIVE
+};
+
+typedef Arr Avalue;
+typedef Arr Aastat;
 
 /*.-.*/
 
@@ -16,48 +36,52 @@
 typedef struct stat_Stat Stat;
 
 ///
+Stat *stat_new(
+  enum Stat_t type,
+  Pos *pos,
+  char *id,
+  Avalue *values,
+  Aastat *blocks
+);
+
+///
+enum Stat_t stat_type(Stat *this);
+
+///
 Pos *stat_pos(Stat *this);
 
 ///
-enum Stat_t stat_stype(Stat *this);
+char *stat_id(Stat *this);
 
 ///
-Arr *stat_ids(Stat *this);
+Avalue *stat_values(Stat *this);
 
 ///
-Arr *stat_values(Stat *this);
+Aastat *stat_blocks(Stat *this);
 
 ///
-Arr *stat_dvalues(Stat *this);
+Arr/*Json*/ *stat_serialize(Stat *this);
 
 ///
-Arr *stat_blocks(Stat *this);
-
-///
-Json *stat_serialize(Stat *this);
-
-///
-Stat *stat_restore(Json *s);
+Stat *stat_restore(Arr/*Json*/ *s);
 
 /*.-.*/
 
-/// [SVAL] Value is saved in 'stat_dvalues()'
-Stat *stat_new_val(Pos *pos, Dvalue *value);
+#endif
 
-/// [SVAL] Value is saved in 'stat_dvalues()'
-Stat *stat_new_var(Pos *pos, Dvalue *value);
+/// [SVAL]
+Stat *stat_new_val(Pos *pos, char *id, Value *value);
 
-/// [SFN] Value is a function call. It is saved in 'stat_values()'
-Stat *stat_new_fn(Pos *pos, Value *value);
+/// [SVAR]
+Stat *stat_new_var(Pos *pos, char *id, Value *value);
 
-/// [SINC] Value is a increment o decrement.
-Stat *stat_new_inc(Pos *pos, Value *value);
-
-/// [SASSIGN] left_value and right_value are saved in 'stat_values()', in
-/// [0] 'left' and in [1] 'right'
+/// [SASSIGN] 'op' is saved in stat_id
 Stat *stat_new_assign(
   Pos *pos, char *op, Value *left_value, Value *right_value
 );
+
+/// [SFN]
+Stat *stat_new_fn(Pos *pos, Value *value);
 
 /// [SBREAK]
 Stat *stat_new_break(Pos *pos);
@@ -73,36 +97,24 @@ Stat *stat_new_throw(Pos *pos, Value *value);
 Stat *stat_new_return(Pos *pos, Value *value);
 
 /// [SBLOCK]
-Stat *stat_new_block(Pos *pos, Arr/*Stat*/ *block);
+Stat *stat_new_block(Pos *pos, Astat *block);
 
 /// [SWHILE]
-Stat *stat_new_while(Pos *pos, Value *condition, Arr/*Stat*/ *block);
+Stat *stat_new_while(Pos *pos, Value *condition, Astat *block);
 
-/// [SDO]
-Stat *stat_new_do(Pos *pos, Value *condition, Arr/*Stat*/ *block);
-
-/// [SFOR0]
-Stat *stat_new_for0(
-  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
-);
-
-/// [SFOR]
-Stat *stat_new_for(
-  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
-);
-
-/// [SFOR_EACH]
-Stat *stat_new_for_each(
-  Pos *pos, char *var, Value *value, Arr/*Stat*/ *block
-);
+/// [SFOR] for has four parts:
+///   1: Astat(0):
+///       Initial assignements. Statemments of type SVAR, SAVAL or SASSIGN
+///   2: Avalue: Loop conditions.
+///   3: Astat (1): Final conditions
+///   4: Astat (2): Block
+Stat *stat_new_for(Pos *pos, Avalue *values, Aastat *blocks);
 
 /// [SIF] If 'if' has clause 'else' arr_size(blocks) == arr_size(values) + 1
-Stat *stat_new_if(Pos *pos, Arr/*Value*/ *values, Arr/*Arr[Stat]*/ *blocks);
+Stat *stat_new_if(Pos *pos, Avalue *values, Aastat *blocks);
 
 /// [STRY] If 'blocks' has three elements, there is a 'finally' block.
-Stat *stat_new_try(Pos *pos, char *var, Arr/*Arr[Stat]*/ *blocks);
+Stat *stat_new_try(Pos *pos, char *var, Aastat *blocks);
 
 /// [SNATIVE]
 Stat *stat_new_native(Pos *pos, char *text);
-
-#endif

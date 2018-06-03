@@ -1,4 +1,4 @@
-// Copyright 29-Apr-2018 ºDeme
+// Copyright 03-Jun-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Constants
@@ -7,7 +7,7 @@
   # define DEFS_H
 
 ///
-#define VERSION "201803"
+#define VERSION "201806"
 
 ///
 #define TH(tx) {tx_printf((tx),

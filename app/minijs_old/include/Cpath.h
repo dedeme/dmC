@@ -16,7 +16,7 @@
 #ifndef CPATH_H
   #define CPATH_H
 
-#include <dmc/all.h>
+#include <Achar.h>
 
 /*.-.*/
 
@@ -47,10 +47,11 @@ char *cpath_js(Cpath *this);
 /*.-.*/
 
 /// Must be called only once and before cpath_new()
-void cpath_init(Arr/*char*/ *paths);
+void cpath_init(Achar *roots);
 
 /// Throws an exception if the corresponding file path is duplicate or does
 /// not exist. Also throws an expception if 'path' is absolute.
+///    path: Does not take extension.
 Cpath *cpath_new(char *path);
 
 /// Creates a Cpath from its cpath_id. It calls cpath_new
@@ -60,9 +61,12 @@ Cpath *cpath_from_id(char *id);
 bool cpath_eq(Cpath *this, Cpath *other);
 
 ///
-Json *cpath_serialize(Cpath *this);
+Arr/*Json*/ *cpath_serialize(Cpath *this);
 
 ///
-Cpath *cpath_restore(Json *s);
+Cpath *cpath_restore(Arr/*Json*/ *s);
+
+/// Returns every cpath in relative directory 'dir'.
+Arr/*Cpath*/ *cpath_dirs(char *dir);
 
 #endif

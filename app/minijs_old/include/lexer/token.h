@@ -1,4 +1,4 @@
-// Copyright 23-Mar-2018 ºDeme
+// Copyright 1-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Reader for little text chuncks
@@ -7,74 +7,88 @@
   #define LEXER_TOKEN_H
 
 #include <dmc/all.h>
-#include "lexer/Txpos.h"
-#include "Cpath.h"
+#include "lexer/Tx.h"
 
 ///
-Txpos *token_blanks(Txpos *tx);
+Tx *token_blanks(Tx *tx);
 
-/// token_skip_stat jumps until ofter the next end of statement (';') or until
+/// token_skip_block jumps until ofter the next end of block ('}') or until
 /// the end of text.
-Txpos *token_skip_stat(Txpos *tx);
+Tx *token_skip_bock(Tx *tx);
+
+/// Reads one character. It does not fail. Only advance one character.<br>
+/// tx does not change if next character is '0'
+Tx *token_char(char *ch, Tx *tx);
 
 /// Values must not be '\n'. It does not fail. Only advances a character.
-Txpos *token_cconst0(Txpos *tx, char value);
+Tx *token_cconst0(Tx *tx, char value);
 
 /// Values must not be '\n'. It does not fail.
-Txpos *token_cconst(Txpos *tx, char value);
+Tx *token_cconst(Tx *tx, char value);
 
 /// Values must not contain '\n'. It does not fail.
-Txpos *token_const(Txpos *tx, char *value);
+Tx *token_const(Tx *tx, char *value);
 
 /// Looks if next character is one in 'values'.<br>values does not contains '\n'
 /// <br>Only advances one character.
-Txpos *token_csplit0(char *r, Txpos *tx, char *values);
+Tx *token_csplit0(char *r, Tx *tx, char *values);
 
 /// Looks if next character is one in 'values'.<br>values does not contains '\n'
-Txpos *token_csplit(char *r, Txpos *tx, char *values);
+Tx *token_csplit(char *r, Tx *tx, char *values);
 
 /// Looks if next chars are one in 'values'. Values are group of characters
 /// separated by one blank.<br>values does not contains '\n'
-Txpos *token_split(char **r, Txpos *tx, char *values);
+Tx *token_split(char **r, Tx *tx, char *values);
 
-/// Creates and reads a list. If fails it throws a tx_exception.
-Txpos *token_list(
-  Arr **list, Txpos *tx, char close, Txpos *(*read)(void **, Txpos *)
-);
+/// Creates and reads a list. If fails it throws a tx_exception.<p>
+/// Throws tx_exception.
+Tx *token_list(Arr **list, Tx *tx, char close, Tx *(*read)(void **, Tx *));
 
-/// Creates and reads a function definition parameter list. It does not fail.
-/// Also 'read' must not fail.
-Txpos *token_fn_list(Arr **list, Txpos *tx, Txpos *(*read)(void **, Txpos *));
+/// Creates and reads a function definition parameter list. It can fail if
+/// 'read' fails.
+Tx *token_fn_list(Achar **list, Tx *tx, Tx *(*read)(char **, Tx *));
 
 /// Creates and reads an identifier. It does not fail.
-Txpos *token_id(char **id, Txpos *tx);
+Tx *token_id(char **id, Tx *tx);
 
 /// Creates and reads a directive. It does not fail.
-Txpos *token_directive(Txpos *tx, char *value);
+Tx *token_directive(Tx *tx, char *value);
 
 /// Creates and reads a cpath. It does not fail.
-Txpos *token_path(char **path, Txpos *tx);
+Tx *token_path(char **path, Tx *tx);
 
 ///
-Txpos *token_bool(char **value, Txpos *tx);
+Tx *token_bool(char **value, Tx *tx);
 
 ///
-Txpos *token_lunary(char **op, Txpos *tx);
+Tx *token_lunary(char **op, Tx *tx);
 
 ///
-Txpos *token_runary(char **op, Txpos *tx);
+Tx *token_runary(char **op, Tx *tx);
 
 ///
-Txpos *token_binary(char **op, Txpos *tx);
+Tx *token_binary(char **op, Tx *tx);
+
+///
+Tx *token_assign(char **op, Tx *tx);
 
 ///
 bool token_is_reserved(char *id);
 
-/// Read an id. It fails when id is a reserved word and throws a tx_exception;
-/// but if there is not one id to read does not fail and return 'tx'
-Txpos *token_valid_id(char **id, Txpos *tx);
+/// Read an id.<p
+/// It fails when id is a reserved word and throws a tx_exception;
+/// but if there is not one id to read does not fail and return 'tx'.<p>
+/// Throws tx_exception.
+Tx *token_valid_id(char **id, Tx *tx);
 
-/// Read text until mark
-Txpos *token_native(char **text, Txpos *tx, char *mark);
+/// Read an id with o without generics. If there are not generics '*generics'
+/// is initialized to an empty array.<p>
+/// If generics is empty ('<>'), it throws a tx_exception.<p>
+/// Throws tx_exception.
+Tx *token_generic_id(char **id, Achar **generics, Tx *tx);
+
+/// Read text until mark. Tx moves after mark.<p>
+/// Throws tx_exception if mark is missing.
+Tx *token_native(char **text, Tx *tx, char *mark);
 
 #endif

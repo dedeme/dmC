@@ -1,12 +1,10 @@
-// Copyright 29-Apr-2018 ºDeme
+// Copyright 03-Jun-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Application entry
 
 #ifndef MINIJS_H
   # define MINIJS_H
-
-#include <dmc/all.h>
 
 ///
 int main (int argc, char **argv);

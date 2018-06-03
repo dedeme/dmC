@@ -1,57 +1,47 @@
-// Copyright 25-Mar-2018 ºDeme
+// Copyright 29-Apr-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "ast/Stat.h"
-
-static Json *statbl_serialize(Arr/*Stat*/ *stats) {
-  if (!stats) return json_wnull();
-  Arr/*Json*/ *serial = arr_new();
-  jarr_aarray(serial, stats, (Json *(*)(void *))stat_serialize);
-  return json_warray(serial);
-}
-
-static Arr/*Stat*/ *statbl_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
-  return jarr_garray(serial, 0, (void *(*)(Json *))stat_restore);
-}
+#include "ast/Aastat.h"
+#include "ast/Avalue.h"
 
 /*.
-struct: @Stat
+struct: Stat
+  type: enum Stat_t : _uint
   pos: Pos *: pos
-  stype: enum Stat_t: _uint
-  ids: Arr *: _sarray
-  values: Arr *: _array value
-  dvalues: Arr *: _array dvalue
-  blocks: Arr *: _array statbl
+  id: char *: _string
+  values: Avalue *: avalue
+  blocks: Aastat *: aastat
 */
 
 /*.-.*/
 struct stat_Stat {
+  enum Stat_t type;
   Pos *pos;
-  enum Stat_t stype;
-  Arr *ids;
-  Arr *values;
-  Arr *dvalues;
-  Arr *blocks;
+  char *id;
+  Avalue *values;
+  Aastat *blocks;
 };
 
-Stat *_stat_new(
+Stat *stat_new(
+  enum Stat_t type,
   Pos *pos,
-  enum Stat_t stype,
-  Arr *ids,
-  Arr *values,
-  Arr *dvalues,
-  Arr *blocks
+  char *id,
+  Avalue *values,
+  Aastat *blocks
 ) {
   Stat *this = MALLOC(Stat);
+  this->type = type;
   this->pos = pos;
-  this->stype = stype;
-  this->ids = ids;
+  this->id = id;
   this->values = values;
-  this->dvalues = dvalues;
   this->blocks = blocks;
   return this;
+}
+
+inline
+enum Stat_t stat_type(Stat *this) {
+  return this->type;
 }
 
 inline
@@ -60,184 +50,124 @@ Pos *stat_pos(Stat *this) {
 }
 
 inline
-enum Stat_t stat_stype(Stat *this) {
-  return this->stype;
+char *stat_id(Stat *this) {
+  return this->id;
 }
 
 inline
-Arr *stat_ids(Stat *this) {
-  return this->ids;
-}
-
-inline
-Arr *stat_values(Stat *this) {
+Avalue *stat_values(Stat *this) {
   return this->values;
 }
 
 inline
-Arr *stat_dvalues(Stat *this) {
-  return this->dvalues;
-}
-
-inline
-Arr *stat_blocks(Stat *this) {
+Aastat *stat_blocks(Stat *this) {
   return this->blocks;
 }
 
-Json *stat_serialize(Stat *this) {
-  if (!this) return json_wnull();
+Arr/*Json*/ *stat_serialize(Stat *this) {
   Arr/*Json*/ *serial = arr_new();
-  arr_add(serial, pos_serialize(this->pos));
-  jarr_auint(serial, this->stype);
-  jarr_aarray(serial, this->ids, (Json*(*)(void*))json_wstring);
-  jarr_aarray(serial, this->values, (Json*(*)(void*)) value_serialize);
-  jarr_aarray(serial, this->dvalues, (Json*(*)(void*)) dvalue_serialize);
-  jarr_aarray(serial, this->blocks, (Json*(*)(void*)) statbl_serialize);
-  return json_warray(serial);
+  if (!this) return serial;
+  jarr_auint(serial, this->type);
+  arr_add(serial, json_warray(pos_serialize(this->pos)));
+  jarr_astring(serial, this->id);
+  arr_add(serial, json_warray(avalue_serialize(this->values)));
+  arr_add(serial, json_warray(aastat_serialize(this->blocks)));
+  return serial;
 }
 
-Stat *stat_restore(Json *s) {
-  if (json_rnull(s)) return NULL;
-  Arr/*Json*/ *serial = json_rarray(s);
+Stat *stat_restore(Arr/*Json*/ *serial) {
+  if (!arr_size(serial)) return NULL;
   Stat *this = MALLOC(Stat);
   size_t i = 0;
-  this->pos = pos_restore(arr_get(serial, i++));
-  this->stype = jarr_guint(serial, i++);
-  this->ids = jarr_garray(serial, i++, (void*(*)(Json*))json_rstring);
-  this->values = jarr_garray(serial, i++, (void*(*)(Json*)) value_restore);
-  this->dvalues = jarr_garray(serial, i++, (void*(*)(Json*)) dvalue_restore);
-  this->blocks = jarr_garray(serial, i++, (void*(*)(Json*)) statbl_restore);
+  this->type = jarr_guint(serial, i++);
+  this->pos = pos_restore(json_rarray(arr_get(serial, i++)));
+  this->id = jarr_gstring(serial, i++);
+  this->values = avalue_restore(json_rarray(arr_get(serial, i++)));
+  this->blocks = aastat_restore(json_rarray(arr_get(serial, i++)));
   return this;
 }
 /*.-.*/
 
-Stat *_new(Pos *pos, enum Stat_t stype) {
-  return _stat_new(pos, stype, arr_new(), arr_new(), arr_new(), arr_new());
-}
-
-Stat *stat_new_val(Pos *pos, Dvalue *value) {
-  Stat *this = _new(pos, SVAL);
-  arr_add(this->dvalues, value);
+Stat *stat_new_val(Pos *pos, char *id, Value *value) {
+  Stat *this = stat_new(SVAL, pos, id, avalue_new(), aastat_new());
+  avalue_add(this->values, value);
   return this;
 }
 
-Stat *stat_new_var(Pos *pos, Dvalue *value) {
-  Stat *this = _new(pos, SVAR);
-  arr_add(this->dvalues, value);
-  return this;
-}
-
-Stat *stat_new_fn(Pos *pos, Value *value) {
-  Stat *this = _new(pos, SFN);
-  arr_add(this->values, value);
-  return this;
-}
-
-Stat *stat_new_inc(Pos *pos, Value *value) {
-  Stat *this = _new(pos, SINC);
-  arr_add(this->values, value);
+Stat *stat_new_var(Pos *pos, char *id, Value *value) {
+  Stat *this = stat_new(SVAR, pos, id, avalue_new(), aastat_new());
+  avalue_add(this->values, value);
   return this;
 }
 
 Stat *stat_new_assign(
   Pos *pos, char *op, Value *left_value, Value *right_value
 ) {
-  Stat *this = _new(pos, SASSIGN);
-  arr_add(this->ids, op);
-  arr_add(this->values, left_value);
-  arr_add(this->values, right_value);
+  Stat *this = stat_new(SASSIGN, pos, op, avalue_new(), aastat_new());
+  avalue_add(this->values, left_value);
+  avalue_add(this->values, right_value);
+  return this;
+}
+
+Stat *stat_new_fn(Pos *pos, Value *value) {
+  Stat *this = stat_new(SFN, pos, "", avalue_new(), aastat_new());
+  avalue_add(this->values, value);
   return this;
 }
 
 inline
 Stat *stat_new_break(Pos *pos) {
-  return _new(pos, SBREAK);
+  return stat_new(SBREAK, pos, "", avalue_new(), aastat_new());
 }
 
+inline
 Stat *stat_new_continue(Pos *pos) {
-  return _new(pos, SCONTINUE);
+  return stat_new(SCONTINUE, pos, "", avalue_new(), aastat_new());
 }
 
 Stat *stat_new_throw(Pos *pos, Value *value) {
-  Stat *this = _new(pos, STHROW);
-  arr_add(this->values, value);
+  Stat *this = stat_new(STHROW, pos, "", avalue_new(), aastat_new());
+  avalue_add(this->values, value);
   return this;
 }
 
 Stat *stat_new_return(Pos *pos, Value *value) {
-  Stat *this = _new(pos, SRETURN);
-  if (value){
-    arr_add(this->values, value);
+  Stat *this = stat_new(SRETURN, pos, "", avalue_new(), aastat_new());
+  if (value) {
+    avalue_add(this->values, value);
   }
   return this;
 }
 
-Stat *stat_new_block(Pos *pos, Arr/*Stat*/ *block) {
-  Stat *this = _new(pos, SBLOCK);
-  arr_add(this->blocks, block);
+Stat *stat_new_block(Pos *pos, Astat *block) {
+  Stat *this = stat_new(SBLOCK, pos, "", avalue_new(), aastat_new());
+  aastat_add(this->blocks, block);
   return this;
 }
 
-Stat *stat_new_while(Pos *pos, Value *condition, Arr/*Stat*/ *block) {
-  Stat *this = _new(pos, SWHILE);
-  arr_add(this->values, condition);
-  arr_add(this->blocks, block);
+Stat *stat_new_while(Pos *pos, Value *condition, Astat *block) {
+  Stat *this = stat_new(SWHILE, pos, "", avalue_new(), aastat_new());
+  avalue_add(this->values, condition);
+  aastat_add(this->blocks, block);
   return this;
 }
 
-Stat *stat_new_do(Pos *pos, Value *condition, Arr/*Stat*/ *block) {
-  Stat *this = _new(pos, SDO);
-  arr_add(this->values, condition);
-  arr_add(this->blocks, block);
-  return this;
+inline
+Stat *stat_new_for(Pos *pos, Avalue *values, Aastat *blocks) {
+  return stat_new(SFOR, pos, "", values, blocks);
 }
 
-Stat *stat_new_for0(
-  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
-) {
-  Stat *this = _new(pos, SFOR0);
-  arr_add(this->ids, var);
-  this->values = values;
-  arr_add(this->blocks, block);
-  return this;
+inline
+Stat *stat_new_if(Pos *pos, Avalue *values, Aastat *blocks) {
+  return stat_new(SIF, pos, "", values, blocks);
 }
 
-Stat *stat_new_for(
-  Pos *pos, char *var, Arr/*Value*/ *values, Arr/*Stat*/ *block
-) {
-  Stat *this = _new(pos, SFOR);
-  arr_add(this->ids, var);
-  this->values = values;
-  arr_add(this->blocks, block);
-  return this;
+inline
+Stat *stat_new_try(Pos *pos, char *var, Aastat *blocks) {
+  return stat_new(STRY, pos, var, avalue_new(), blocks);
 }
 
-Stat *stat_new_for_each(
-  Pos *pos, char *var, Value *value, Arr/*Stat*/ *block
-) {
-  Stat *this = _new(pos, SFOR_EACH);
-  arr_add(this->ids, var);
-  arr_add(this->values, value);
-  arr_add(this->blocks, block);
-  return this;
-}
-
-Stat *stat_new_if(Pos *pos, Arr/*Value*/ *values, Arr/*Arr[Stat]*/ *blocks) {
-  Stat *this = _new(pos, SIF);
-  this->values = values;
-  this->blocks = blocks;
-  return this;
-}
-
-Stat *stat_new_try(Pos *pos, char *var, Arr/*Arr[Stat]*/ *blocks) {
-  Stat *this = _new(pos, STRY);
-  arr_add(this->ids, var);
-  this->blocks = blocks;
-  return this;
-}
-
+inline
 Stat *stat_new_native(Pos *pos, char *text) {
-  Stat *this = _new(pos, SNATIVE);
-  arr_add(this->ids, text);
-  return this;
+  return stat_new( SNATIVE, pos, "", avalue_new(), aastat_new());
 }
