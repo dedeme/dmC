@@ -2,7 +2,6 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/structure.h"
-#include "dmc/all.h"
 #include "writers/struct.h"
 #include "writers/typedef.h"
 #include "writers/new.h"

@@ -2,13 +2,14 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/funcs.h"
-#include "dmc/all.h"
+#include "dmc/Arr.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
 
 void funcs_write(RW *rw, Structure *st) {
   EACH(st->body->ps, Param, p) {
     if (p->mod != PARAM_PRIVATE) {
       rw_writeln(rw, "");
-      rw_writeln(rw, "inline");
       if (p->func) {
         rw_write(rw, str_replace(
           p->type, "(*)",
@@ -22,12 +23,12 @@ void funcs_write(RW *rw, Structure *st) {
           "%s%s%s(%s *this) {", p->type, st->head->prefix, p->id, st->head->id
         ));
       }
+      rw_writeln(rw, "  XNULL(this)");
       rw_writeln(rw, str_printf("  return this->%s;", p->id));
       rw_writeln(rw, "}");
     }
     if (p->mod == PARAM_SET) {
       rw_writeln(rw, "");
-      rw_writeln(rw, "inline");
       char *value = str_printf("%svalue", p->type);
       if (p->func) {
         value = str_replace(p->type, "(*)", "(*value)");
@@ -36,6 +37,10 @@ void funcs_write(RW *rw, Structure *st) {
         "void %sset_%s(%s *this, %s) {",
         st->head->prefix, p->id, st->head->id, value
       ));
+      rw_writeln(rw, "  XNULL(this)");
+      if (str_ends(p->type, "*")) {
+        rw_write(rw, str_printf("  XNULL(%s)", p->id));
+      }
       rw_writeln(rw, str_printf("  this->%s = value;", p->id));
       rw_writeln(rw, "}");
     }
@@ -44,20 +49,23 @@ void funcs_write(RW *rw, Structure *st) {
   EACH(st->body->vs, Var, v) {
     if (v->mod != VAR_PRIVATE) {
       rw_writeln(rw, "");
-      rw_writeln(rw, "inline");
       rw_writeln(rw, str_printf(
         "%s%s%s(%s *this) {", v->type, st->head->prefix, v->id, st->head->id
       ));
+      rw_writeln(rw, "  XNULL(this)");
       rw_writeln(rw, str_printf("  return this->%s;", v->id));
       rw_writeln(rw, "}");
     }
     if (v->mod == VAR_SET) {
       rw_writeln(rw, "");
-      rw_writeln(rw, "inline");
       rw_writeln(rw, str_printf(
         "void %sset_%s(%s *this, %s) {",
         st->head->prefix, v->id, st->head->id, str_printf("%svalue", v->type)
       ));
+      rw_writeln(rw, "  XNULL(this)");
+      if (str_ends(v->type, "*")) {
+        rw_write(rw, str_printf("  XNULL(%s)", v->id));
+      }
       rw_writeln(rw, str_printf("  this->%s = value;", v->id));
       rw_writeln(rw, "}");
     }

@@ -1,6 +1,7 @@
+
 <A>
 
-_import generics/F3 < Gf3
+_import generics/F3 < Gf3 extend/F4
 
 _extends
   Gf3<A, A, A>

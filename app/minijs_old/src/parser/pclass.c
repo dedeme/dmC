@@ -1,154 +1,168 @@
-// Copyright 16-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 03-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <stddef.h>
+#include "dmc/ct/Ichar.h"
+#include "dmc/ct/Ochar.h"
+#include "dmc/ct/Hchar.h"
+#include "dmc/Buf.h"
+#include "dmc/exc.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
 #include "parser/pclass.h"
-#include "ast/Program.h"
-#include "lexer/Tx.h"
 #include "lexer/rclass.h"
+#include "lexer/Tx.h"
+#include "ast/Fclass.h"
+#include "ast/Class.h"
+#include "ast/Type.h"
+#include "ct/Fclasses.h"
+#include "ct/Classes.h"
+#include "ct/Oclass.h"
+#include "ct/Ofclass.h"
+#include "ct/Otype.h"
+#include "ct/Itype.h"
+#include "ct/Ltype.h"
+#include "ct/Lfclass.h"
+#include "ct/Ifclass.h"
+#include "io/Cpath.h"
 #include "DEFS.h"
 
-static void generics_check(Class *c, Atype *generics) {
-  if (achar_size(class_generics(c)) != arr_size(generics))
-    TH2(c, pos_new(0, 0))
-      "'%s' is called with %d generics, but it has '%d'",
-      class_id(c), arr_size(generics), achar_size(class_generics(c))
-    _TH
-}
-
-static char *mk_chain(Achar *children, char *super) {
-  Buf *bf = buf_new();
-  EACH((Arr *)children, char, child) {
-    buf_add(bf, child);
-    buf_add(bf, " -> ");
-  }_EACH
-  buf_add(bf, super);
-  return buf_to_str(bf);
-}
-
-static void super_check2(Class *c, Achar *children, Type *super) {
-  char *super_id = type_id(super);
-  EACH((Arr *)children, char, child) {
-    if (!strcmp(child, super_id))
-      TH2(c, pos_new(0,0))
-        "Cyclic inheritance: %s", mk_chain(children, super_id)
-      _TH
-  }_EACH
-
-  Class *csuper = program__class(program_get(), super_id);
-  if (!csuper)
-    TH2(c, pos_new(0,0))
-      "Unknown class '%s' in inheritance chain: %s",
-      super_id, mk_chain(children, super_id)
-    _TH
-
-  if (achar_size(class_generics(csuper)) != arr_size(type_params(super))) {
-    char *child = achar_get(children, achar_size(children) - 1);
-    TH2(c, pos_new(0,0))
-      "'%s' is extended from '%s' using %d generics, when '%s' needs %d",
-      child, super_id, arr_size(type_params(super)),
-      child, achar_size(class_generics(csuper))
-    _TH
+static void test_extends(Lfclass *l, Fclass *c) {
+  l = lfclass_cons(l, c);
+  Otype *ot = fclass_extends(c);
+  if (otype_is_null(ot)) {
+    return;
   }
+  char *tmp = "";
+  Tx *tx = tx_new(str_creplace(fclass_id(c), '_', '/'), tmp, tmp, 0, 0);
+  Ochar *oid = hchar_get(fclass_imports(c), type_id(otype_value(ot)));
+  if (ochar_is_null(oid))
+    THROW(exc_illegal_state_t) exc_illegal_state("'oid' is null") _THROW
+  char *id = ochar_value(oid);
 
-  Type *super2 = class_super(csuper);
-  if (type_type(super2) != VOID) {
-    achar_add(children, super_id);
-    super_check2(c, children, super2);
-  }
-}
-
-static void super_check(Class *c) {
-  Type *super = class_super(c);
-
-  if (type_type(super) != VOID) {
-    Achar *children = achar_new();
-    achar_add(children, class_id(c));
-    super_check2(c, children, super);
-  }
-}
-
-static void atts_check(Class *c) {
-  Aatt *atts = class_statics(c);
-  EACH((Arr *)atts, Att, a) {
-    Value *v = att_value(a);
-    aatt_set(atts, _i, att_new(
-      att_is_public(a), att_id(a),
-      class_actual_type(c, att_type(a), value_pos(v)),
-      att_is_val(a), v
-    ));
-  }_EACH
-
-  atts = class_instance(c);
-  EACH((Arr *)atts, Att, a) {
-    Value *v = att_value(a);
-    aatt_set(atts, _i, att_new(
-      att_is_public(a), att_id(a),
-      class_actual_type(c, att_type(a), value_pos(v)),
-      att_is_val(a), v
-    ));
-  }_EACH
-
-}
-
-void pclass2(Class *c, Atype *generics) {
-  generics_check(c, generics);
-  super_check(c);
-  atts_check(c);   // modify attributes type
-
-}
-
-void pclass_main(Class *c, Atype *generics) {
-  if (class_local(c))
-    TH2(c, pos_new(0,0)) "Main class can not be _local" _TH
-  pclass2(c, generics);
-}
-
-void pclass(Class *caller, Class *c, Atype *generics) {
-  if (class_local(c)) {
-    Cpath *callerp = cpath_from_id(class_id(caller));
-    Cpath *cp = cpath_from_id(class_id(c));
-    if (strcmp(cpath_parent(callerp), cpath_parent(cp)))
-      TH2(c, pos_new(0, 0))
-        "'%s' is a _local class and can not be called from '%s'",
-        class_id(c), class_id(caller)
-      _TH
-  }
-  pclass2(c, generics);
-}
-
-void pclass_implementation(Class *c, Atype *generics) {
-  Aatt *this_atts = class_instance_all(c, generics);
-
-  EACH(class_implements(c), Type, tp) {
-    Type *atp = class_actual_type(c, tp, pos_new(0,0));
-    Class *i = program__class(program_get(), type_id(atp));
-    if (!i) {
-      i = rclass(cpath_from_id(type_id(atp)));
-      pclass(c, i, generics);
-      program_add(program_get(), i);
-      pclass_implementation(i, generics);
-    }
-
-    EACH((Arr *)class_instance_all(i, type_params(atp)), Att, a) {
-      bool is_in = false;
-      EACH((Arr *)this_atts, Att, this_a) {
-        if (!strcmp(att_id(this_a), att_id(a))) {
-          if (!type_eq(att_type(this_a), att_type(a)))
-            TH2(c, pos_new(0,0))
-              "%s.%s does not implement %s.%s because their type is different",
-              class_id(c), att_id(a), type_id(atp), att_id(a)
-            _TH
-          is_in = true;
-          break;
-        }
-      }_EACH
-
-      if (!is_in)
-        TH2(c, pos_new(0,0))
-          "%s does not implement %s because it does not have the attribute %s",
-          class_id(c), type_id(atp), att_id(a)
-        _TH
+  /**/bool contains(Fclass *fc) { return str_eq(fclass_id(fc), id); }
+  if (ifclass_containsf(lfclass_to_it(l), contains)) {
+    Buf *cycle = buf_new();
+    buf_add(cycle, id);
+    EACHL(l, Fclass, fc) {
+      buf_add(cycle, " -> ");
+      buf_add(cycle, fclass_id(fc));
     }_EACH
+    Tx *tx = tx_new(str_creplace(id, '_', '/'), tmp, tmp, 0, 0);
+    TH(tx) "Extends cycle:\n%s", buf_str(cycle) _TH
+  }
+  Cpath *path = cpath_from_id(tx, id);
+  pclass(path);
+  Ofclass *ofc = fclasses_get(path);
+  if (ofclass_is_null(ofc))
+    THROW(exc_illegal_state_t) exc_illegal_state("'ofc' is null") _THROW
+  test_extends(l, ofclass_value(ofc));
+}
 
+static void test_implements(Fclass *c) {
+  THROW("") "Unimplemented" _THROW
+}
+
+static void test_class(Fclass *c) {
+  char *tmp = "";
+  Tx *tx = tx_new(str_creplace(fclass_id(c), '_', '/'), tmp, tmp, 0, 0);
+  Cpath *cmain_path = cpath_from_id(tx, fclass_id(c));
+
+  /**/void test_id(char *id) {
+  /**/  Cpath *p = cpath_from_id(tx, id);
+  /**/  pclass(p);
+  /**/  Fclass *fc = ofclass_value(fclasses_get(p));
+  /**/  if (
+  /**/    fclass_local(fc) &&
+  /**/    str_cmp(cpath_parent(cmain_path), cpath_parent(p))
+  /**/  )
+  /**/    TH(tx)
+  /**/      "Local class '%s' can not be imported from '%s'", id, fclass_id(c)
+  /**/    _TH
+  /**/}
+
+  Ltype *generics = fclass_generics(c);
+  Hchar *imports = fclass_imports(c);
+  ichar_each(hchar_values(imports), test_id);
+
+  /**/void test_type(char *source, Type *t) {
+  /**/  enum Type_t t_t = type_t(t);
+  /**/  if (t_t == type_UNKNOWN)
+  /**/    THROW(exc_illegal_state_t)
+  /**/      exc_illegal_state("t_t is type_UNKNOWN")
+  /**/    _THROW
+  /**/  if (t_t == type_ANY || t_t == type_VOID) {
+  /**/    return;
+  /**/  }
+  /**/  if (t_t == type_FN) {
+  /**/    EACHL(type_params(t), Type, sub_t) {
+  /**/      test_type(source, sub_t);
+  /**/    }_EACH
+  /**/    return;
+  /**/  }
+  /**/  char *tid = type_id(t);
+  /**/  /**/bool test_gen(Type *gt) { return str_eq(type_id(t), type_id(gt)); }
+  /**/  if (itype_containsf(ltype_to_it(generics), test_gen)) {
+  /**/    if (!ltype_empty(type_params(t)))
+  /**/      TH(tx) "In %s: Generic '%s' with params", source, type_id(t) _TH
+  /**/    return;
+  /**/  }
+  /**/  Ochar *oid = hchar_get(imports, tid);
+  /**/  if (ochar_is_null(oid))
+  /**/    TH(tx) "In %s: Unknown class '%s'", source, tid _TH
+  /**/  char *id = ochar_value(oid);
+  /**/  Ofclass *ofc = fclasses_get(cpath_from_id(tx, id));
+  /**/  if (ofclass_is_null(ofc))
+  /**/    THROW(exc_illegal_state_t) exc_illegal_state("'ofc' is null") _THROW
+  /**/  Fclass *fc = ofclass_value(ofc);
+  /**/  int ntparams = ltype_count(type_params(t));
+  /**/  int ngenerics = ltype_count(fclass_generics(fc));
+  /**/  if (ntparams != ngenerics)
+  /**/    TH(tx)
+  /**/      "In %s: '%s' called with %d parameters when it needs %d",
+  /**/      source, tid, ntparams, ngenerics
+  /**/    _TH
+  /**/  EACHL(type_params(t), Type, sub_t) {
+  /**/    test_type(source, sub_t);
+  /**/  }_EACH
+  /**/}
+
+  Otype *ot = fclass_extends(c);
+  if (!otype_is_null(ot)) {
+    test_type("_extends", otype_value(ot));
+  }
+
+  EACHL(fclass_implements(c), Type, t) {
+    test_type("_implements", t);
   }_EACH
+
+  test_extends(lfclass_new(), c);
+
+  test_implements(c);
+
+}
+
+void pclass(Cpath *path) {
+  if (!fclasses_contains(path)) {
+    Oclass *oc = classes_get(path);
+    if (oclass_is_null(oc)) {
+      rclass(path);
+      oc = classes_get(path);
+      if (oclass_is_null(oc))
+        THROW(exc_illegal_state_t) exc_illegal_state("'oc' is null") _THROW
+    }
+    Class *c = oclass_value(oc);
+
+    Fclass *fc = fclass_new(
+      class_id(c),
+      class_local(c),
+      class_generics(c),
+      class_imports(c),
+      class_extends(c),
+      class_implements(c)
+    );
+    fclasses_add(fc);
+
+    test_class(fc);
+  }
 }

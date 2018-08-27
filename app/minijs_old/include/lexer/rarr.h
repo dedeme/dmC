@@ -1,5 +1,5 @@
-// Copyright 12-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Array reader.<p>
 ///
@@ -13,9 +13,8 @@
 #ifndef LEXER_RARR_H
   #define LEXER_RARR_H
 
-#include "dmc/all.h"
-#include "ast/Value.h"
-#include "Tx.h"
+typedef struct value_Value Value;
+typedef struct tx_Tx Tx;
 
 /// rarr read an array<p>
 /// Throws tx_excepton.<p>

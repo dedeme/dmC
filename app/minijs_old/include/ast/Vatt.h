@@ -1,17 +1,18 @@
-// Copyright 30-Apr-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 10-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Value attatchment
+/// Cvalue attribute
 
 #ifndef AST_VATT_H
   # define AST_VATT_H
 
-#include <dmc/all.h>
-#include "Pos.h"
-
-typedef Arr Avalue;
+typedef struct pos_Pos Pos;
+typedef struct lvalue_Lvalue Lvalue;
 
 /*.-.*/
+
+#include "dmc/Json.h"
+#include "dmc/ct/Ajson.h"
 
 ///
 typedef struct vatt_Vatt Vatt;
@@ -26,13 +27,13 @@ Pos *vatt_pos(Vatt *this);
 char *vatt_id(Vatt *this);
 
 ///
-Avalue *vatt_params(Vatt *this);
+Lvalue *vatt_params(Vatt *this);
 
 ///
-Json *vatt_serialize(Vatt *this);
+Ajson *vatt_to_json(Vatt *this);
 
 ///
-Vatt *vatt_restore(Json *s);
+Vatt *vatt_from_json(Ajson *s);
 
 /*.-.*/
 
@@ -40,7 +41,6 @@ Vatt *vatt_restore(Json *s);
 Vatt *vatt_new_id(Pos *pos, char *id);
 
 ///
-Vatt *vatt_new_fn(Pos *pos, Avalue *vs);
+Vatt *vatt_new_fn(Pos *pos, Lvalue *vs);
 
 #endif
-

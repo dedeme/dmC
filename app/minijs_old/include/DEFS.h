@@ -1,4 +1,4 @@
-// Copyright 29-Apr-2018 ºDeme
+// Copyright 03-Jun-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Constants
@@ -7,7 +7,19 @@
   # define DEFS_H
 
 ///
-#define VERSION "201803"
+#define INSTALL_SCRIPT "minijs_install"
+
+///
+#define VERSION "201806"
+
+///
+#define PATHS_DIR "paths"
+
+///
+#define BUILT_DIR "built"
+
+///
+#define exc_tx_t "tx"
 
 ///
 #define TH(tx) {tx_printf((tx),
@@ -20,6 +32,6 @@
 #define TH2(class, pos) TH1(cpath_fpath(cpath_from_id(class_id(class))), pos)
 
 ///
-#define _TH ); THROW "\1" _THROW}
+#define _TH ); THROW("tx") "" _THROW}
 
 #endif

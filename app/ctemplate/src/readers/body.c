@@ -1,8 +1,11 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "readers/body.h"
-#include "dmc/all.h"
+#include <gc.h>
+#include <assert.h>
+#include "dmc/Arr.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
 #include "readers/param.h"
 #include "readers/var.h"
 #include "readers/func.h"
@@ -18,7 +21,7 @@ Body *body_read(RW *rw, Head *head) {
   Rcode *rc = rw_rc(rw);
   for(;;) {
     if (!rc->indent) return b;
-    if (!strcmp(rc->l, MARK)) {
+    if (str_eq(rc->l, MARK)) {
       rw_read(rw);
       rc = rw_rc(rw);
       break;
@@ -29,7 +32,7 @@ Body *body_read(RW *rw, Head *head) {
 
   for(;;) {
     if (!rc->indent) return b;
-    if (!strcmp(rc->l, MARK)) {
+    if (str_eq(rc->l, MARK)) {
       rw_read(rw);
       rc = rw_rc(rw);
       break;

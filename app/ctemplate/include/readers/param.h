@@ -20,12 +20,12 @@
 ///                   function 'to()' and 'json_rstring()' as function 'from()'
 ///   '_double n'  -> Serialize with jarr_adouble() using 'n' decimals number
 ///                   and restore with jarr_gdouble()
-///   'fn'         -> Serialize with 'fn_serialize()' and restore with
-///                   'fn_restore()'
-///   '_array fn'  -> Serialize with jarr_aarray() using 'fn_serialize()' as
-///                   function 'to()' and 'fn_restore()' as function 'from()'
-///   '_object fn' -> Serialize with jarr_aobject() using 'fn_serialize' as
-///                   function 'to()' and 'fn_restore()' as function 'from()'
+///   'fn'         -> Serialize with 'fn_to_json()' and restore with
+///                   'fn_from_json()'
+///   '_array fn'  -> Serialize with jarr_aarray() using 'fn_to_json()' as
+///                   function 'to()' and 'fn_form_json()' as function 'from()'
+///   '_object fn' -> Serialize with jarr_aobject() using 'fn_to_json' as
+///                   function 'to()' and 'fn_from_json()' as function 'from()'
 
 
 #ifndef READERS_PARAM_H

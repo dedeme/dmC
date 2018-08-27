@@ -7,7 +7,8 @@
 #ifndef DATA_H
   #define DATA_H
 
-#include "dmc/all.h"
+#include <stdbool.h>
+typedef struct arr_Arr Arr;
 
 /// Definitions
 ///   - : PRIVATE

@@ -1,5 +1,5 @@
-// Copyright 6-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// lunary opertors reader.<p>
 ///
@@ -22,9 +22,8 @@
 #ifndef LEXER_RLUNARY_H
   #define LEXER_RLUNARY_H
 
-#include "dmc/all.h"
-#include "ast/Value.h"
-#include "Tx.h"
+typedef struct value_Value Value;
+typedef struct tx_Tx Tx;
 
 /// rlunary read a lunary operator. It reads its next value.<p>
 /// Throws tx_excepton.<p>

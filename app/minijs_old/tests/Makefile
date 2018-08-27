@@ -2,23 +2,20 @@ PRG = tests_minijs
 LIB = dmc
 
 C_FILES = $(wildcard src/*.c) \
-					../src/Achar.c \
-					../src/Mchar.c \
-					../src/Pos.c \
-					../src/Cpath.c \
-					$(wildcard ../src/builtin/*.c) \
+					$(wildcard ../src/ast/*.c) \
+					$(wildcard ../src/ct/*.c) \
+					$(wildcard ../src/io/*.c) \
 					$(wildcard ../src/lexer/*.c) \
 					$(wildcard ../src/parser/*.c) \
-					$(wildcard ../src/ast/*.c)
+					$(wildcard ../src/writer/*.c)
+
 H_FILES = $(wildcard include/*.h) \
-					../include/Achar.h \
-					../include/Mchar.h \
-					../include/Pos.h \
-					../include/Cpath.h \
-					$(wildcard ../include/builtin/*.h) \
+					$(wildcard ../include/ast/*.h) \
+					$(wildcard ../include/ct/*.h) \
+					$(wildcard ../include/io/*.h) \
 					$(wildcard ../include/lexer/*.h) \
 					$(wildcard ../include/parser/*.h) \
-					$(wildcard ../include/ast/*.h)
+					$(wildcard ../include/writer/*.h)
 
 LIB_PATH = ../lib/lib$(LIB)
 LIB_INCLUDE = ../lib/lib$(LIB)/include

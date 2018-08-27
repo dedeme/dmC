@@ -50,9 +50,8 @@
 #ifndef LEXER_RSTAT_H
   #define LEXER_RSTAT_H
 
-#include "dmc/all.h"
-#include "ast/Stat.h"
-#include "Tx.h"
+typedef struct tx_Tx Tx;
+typedef struct stat_Stat Stat;
 
 /// rstat read a statement<p>
 /// Throws tx_excepton.

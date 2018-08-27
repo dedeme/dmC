@@ -1,0 +1,7 @@
+site_name: Minjs doc
+
+pages:
+  - Home: index.md
+  - Transpilation: transpilation.md
+  - Entry reading: rentry.md
+  - Class transpilation: classTranspilation.md

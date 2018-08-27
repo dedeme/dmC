@@ -1,11 +1,14 @@
-// Copyright 6-May-2018 ºDeme
+// Copyright 14-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "lexer/rlunary.h"
-#include "lexer/token.h"
+#include "lexer/lex.h"
+#include "lexer/Pos.h"
+#include "lexer/Tx.h"
 #include "lexer/rvalue.h"
 #include "ast/ops.h"
-#include "ast/Avalue.h"
+#include "ast/Value.h"
+#include "ct/Avalue.h"
 #include "DEFS.h"
 
 Tx *rlunary(Value **v, char *op, Tx *tx) {

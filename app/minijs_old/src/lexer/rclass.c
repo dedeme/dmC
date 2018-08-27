@@ -1,210 +1,225 @@
-// Copyright 1-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 03-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "lexer/rclass.h"
-#include <sys/stat.h>
-#include "ast/Imported.h"
-#include "Cpath.h"
-#include "DEFS.h"
+#include <stddef.h>
+#include "dmc/ct/Ochar.h"
+#include "dmc/ct/Achar.h"
+#include "dmc/ct/Lchar.h"
+#include "dmc/ct/Ichar.h"
+#include "dmc/ct/Hchar.h"
+#include "dmc/exc.h"
+#include "dmc/str.h"
+#include "dmc/Json.h"
+#include "dmc/Tuples.h"
+#include "dmc/DEFS.h"
+#include "io/Cpath.h"
+#include "io/io.h"
+#include "ct/Classes.h"
+#include "ct/Ltype.h"
+#include "ct/Otype.h"
+#include "ct/Lcatt.h"
+#include "ct/Asym.h"
+#include "ast/Class.h"
+#include "ast/Type.h"
 #include "lexer/Tx.h"
-#include "lexer/token.h"
-#include "lexer/rimport.h"
+#include "lexer/lex.h"
+#include "lexer/rclass.h"
+#include "lexer/rimports.h"
+#include "lexer/rcatts.h"
 #include "lexer/rtype.h"
-#include "lexer/rattribute.h"
+#include "DEFS.h"
 
-static Tx *rgenerics(Tx *tx, Class *c) {
-  Achar *generics = class_generics(c);
-
-  // -------------------------------------------------------
-  Tx *valid_id(void **id, Tx *tx) {
-    Tx *r;
-    char *i;
-    if (tx_eq(tx, r = token_valid_id(&i, tx))) {
-      return tx;
-    }
-    if (type_reserved_id(i))
-      TH(tx) "Identifier '%s' is a reserved type name", i _TH
-    if (class_contains_id(c, i))
-      TH(tx) "Identifier '%s' is duplicated", i _TH
-
-    *id = i;
-    achar_add(generics, i);
-    return r;
-  }
-  // -------------------------------------------------------
-
+static Tx *rlocal(bool *rt, Tx *tx) {
   Tx *r;
 
-  if (tx_eq(tx, r = token_cconst(tx, '<'))) {
-    return tx;
-  }
-  tx = r;
-
-  Achar *ids;
-  tx = token_list((Arr **)&ids, tx, '>', valid_id);
-
-  return tx;
-}
-
-static Tx *rlocal(Tx *tx, Class *c) {
-  Tx *r;
-  if (tx_neq(tx, r = token_directive(tx, "_local"))) {
-    class_set_local(c, true);
-    return r;
-  }
-  return tx;
-}
-
-static Tx *rimports(Tx *tx, Class *c) {
-  Tx *r;
-  if (tx_eq(tx, r = token_directive(tx, "_import"))) {
-    return tx;
-  }
-  tx = r;
-
-  while (tx_neq(tx, r = rimport(tx, c))) {
+  if (tx_neq(tx, r = lex_const(tx, "_local"))) {
     tx = r;
+    *rt = true;
   }
   return tx;
 }
 
-static Tx *rextend(Tx *tx, Class *c) {
-  Tx *r;
-  if (tx_eq(tx, r = token_directive(tx, "_extends"))) {
-    return tx;
+static Tx *rgenerics(Ltype **rt, Tx *tx, Asym *symbols) {
+  Tx *rgen(Type **id, Tx *tx) {
+    Type *t;
+    Tx *r = rtype(&t, tx);
+    if (type_t(t) != type_DATA)
+      TH(tx) "Generics must be identifiers" _TH
+    if (!ltype_empty(type_params(t)))
+      TH(tx) "Generic %s is not a identifier", type_id(t) _TH
+    char *i = type_id(t);
+    lex_test_reserved(tx, i);
+    asym_add_test(symbols, tx, i);
+    *id = t;
+    return r;
   }
-  tx = r;
 
-  Type *tp;
-  r = rtype2(&tp, tx);
-  if (type_type(tp) != DATA)
-    TH(tx) "Expected a class id" _TH
-  char *id = type_id(tp);
-  if (token_is_reserved(id))
-    TH(tx) "'%s' is a reserved word", id _TH
-  if (!class_contains_type(c, id) && !type_reserved_id(id))
-    TH(r) "Unknown symbol '%s'", id _TH
-  EACH(type_params(tp), Type, t) {
-    char *id = type_id(t);
-    if (!class_contains_type(c, id) && !type_reserved_id(id))
-      TH(r) "Unknown symbol '%s'", id _TH
-  }_EACH
-  tx = r;
+  Tx *r;
+  if (tx_neq(tx, r = lex_cconst(tx, '<'))) {
+    tx = lex_blanks(r);
 
-  class_set_super(c, tp);
-
+    Ltype *params = ltype_new();
+    tx = lex_list((List **)&params, tx, '>', (Tx *(*)(void **, Tx *))rgen);
+    if (ltype_empty(params))
+      TH(tx) "Expected at least one parameter" _TH
+    *rt = params;
+  }
   return tx;
 }
 
-static Tx *rimplements(Tx *tx, Class *c) {
+static Tx *rextends(Otype **rt, Tx *tx, Asym *symbols) {
   Tx *r;
-  if (tx_eq(tx, r = token_directive(tx, "_implements"))) {
+
+  if (tx_eq(tx, r = lex_const(tx, "_extends"))) {
+    *rt = otype_null();
     return tx;
   }
+  tx = lex_blanks(r);
+
+  Type *t;
+  if (tx_eq(tx, r = rtype(&t, tx)))
+    TH(tx) "Expected a type definition" _TH
   tx = r;
 
-  if (tx_eq(tx, r = token_cconst(tx, '(')))
+  if (type_t(t) != type_DATA)
+    TH(tx) "Type function and type Any can not be extended" _TH
+  char *test = type_test_symbols(t, symbols);
+  if (*test)
+    TH(tx) "Unknown type '%s'", test _TH
+
+  *rt = otype_new(t);
+  return tx;
+}
+
+static Tx *rimplements(Ltype **rt, Tx *tx, Asym *symbols) {
+  Tx *rentry(Tp/*Tx, Type*/ **value, Tx *tx) {
+    Type *t;
+    Tx *r = rtype(&t, tx);
+    *value = tp_new(tx, t);
+    return r;
+  }
+
+  Tx *r;
+
+  if (tx_eq(tx, r = lex_const(tx, "_implements"))) {
+    return tx;
+  }
+  tx = lex_blanks(r);
+
+  if (tx_eq(tx, r = lex_cconst(tx, '(')))
     TH(tx) "Expected '('" _TH
-  tx = r;
+  tx = lex_blanks(r);
 
-  Atype *imps;
-  r = token_list(&imps, tx, ')', (Tx *(*)(void **, Tx *))rtype2);
+  List/*Tp[Tx, Type]*/ *entries;
+  tx = lex_list((List **)&entries, tx, ')', (Tx *(*)(void **, Tx *))rentry);
 
-  Atype *is = class_implements(c);
-  EACH(imps, Type, tp) {
-    if (type_type(tp) != DATA)
-      TH(tx) "Expected class ids" _TH
-    char *id = type_id(tp);
-    if (token_is_reserved(id))
-      TH(tx) "'%s' is a reserved word", id _TH
-    if (!class_contains_type(c, id) && !type_reserved_id(id))
-      TH(r) "Unknown symbol '%s'", id _TH
-    EACH(type_params(tp), Type, t) {
-      char *id = type_id(t);
-      if (!class_contains_type(c, id) && !type_reserved_id(id))
-        TH(r) "Unknown symbol '%s'", id _TH
-    }_EACH
+  if (list_empty(entries))
+    TH(tx) "Expected at least one type definition" _TH
 
-    atype_add(is, tp);
+  Ltype *ts = ltype_new();
+  EACHL(entries, Tp, tp) {
+    Tx *tx = tp_e1(tp);
+    Type *t = tp_e2(tp);
+
+    if (type_t(t) != type_DATA)
+      TH(tx) "Type function and type Any can not be implemented" _TH
+    char *test = type_test_symbols(t, symbols);
+    if (*test)
+      TH(tx) "Unknown type '%s'", test _TH
+
+    ts = ltype_cons(ts, t);
   }_EACH
 
-  return r;
-}
-
-static Tx *rattributes(Tx *tx, Class *c) {
-  Tx *r;
-
-  for(;;) {
-    if (tx_eq(tx, r = rattribute(tx, c, true))) {
-      break;
-    }
-    tx = r;
-  }
-
-  if (tx_eq(tx, r = token_directive(tx, "_private"))) {
-    return tx;
-  }
-  tx = r;
-
-  for(;;) {
-    if (tx_eq(tx, r = rattribute(tx, c, false))) {
-      break;
-    }
-    tx = r;
-  }
-
-  if (tx_neq(tx, r = token_directive(tx, "_private")))
-    TH(tx) "Duplicate directive '_private'" _TH
-
+  *rt = ts;
   return tx;
 }
 
-static Class *read(Cpath *path, char *text) {
-  Class *c = class_new(cpath_id(path));
+static Class *read(Cpath *path, Tx *tx) {
+  Tx *r;
 
-  Tx *tx = tx_new(cpath_fpath(path), text, text, 1, 0);
-  tx = token_blanks(tx);
+  char *id = cpath_id(path);
+  bool local = false;
+  Ltype *generics = ltype_new();
+  Hchar *imports = hchar_new();
+  Otype *extends = otype_null();
+  Ltype *implements = ltype_new();
+  Lcatt *atts = lcatt_new();
 
-  tx = rgenerics(tx, c);
-  tx = rlocal(tx, c);
-  tx = rimports(tx, c);
-  tx = rextend(tx, c);
-  tx = rimplements(tx, c);
-  tx = rattributes(tx, c);
+  Asym *symbols = asym_new();
 
-  if (!tx_at_end(tx))
-    TH(tx) "Unexpected declaration" _TH
+  tx = lex_blanks(tx);
 
-  return c;
+  if (tx_neq(tx, r = rlocal(&local, tx))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rgenerics(&generics, tx, symbols))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rimports(&imports, tx, symbols, path))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rextends(&extends, tx, symbols))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rimplements(&implements, tx, symbols))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rcatts(&atts, tx, true, true, symbols))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (tx_neq(tx, r = rcatts(&atts, tx, false, true, symbols))) {
+    tx = r;
+  }
+
+  tx = lex_blanks(tx);
+
+  if (!lex_end(tx)) {
+    TH(tx) "Unexpected characters at end of file" _TH
+  }
+
+  return class_new(
+    id,
+    local,
+    generics,
+    imports,
+    extends,
+    implements,
+    atts
+  );
 }
 
-Class *rclass(Cpath *path) {
-  Imported *im = imported_get();
-  Class *c = imported__class(im, cpath_id(path));
-
-  if (c) {
-    return c;
-  }
-
-  char *cache = cpath_lib(path);
-  char *mini = cpath_file(path);
-  time_t tcache = 0;
-  if (file_exists(cache)) {
-    tcache = file_info(cache)->st_mtime;
-  }
-  time_t tmini = file_info(mini)->st_mtime;
-  if (tcache > tmini) {
-    c = class_restore(json_rarray(file_read(cache)));
-  } else {
-    char *tx = file_read(mini);
-    c = read(path, tx);
-    if (!file_exists(path_parent(cache))) {
-      file_mkdir(path_parent(cache));
+void rclass(Cpath *path) {
+  XNULL(path)
+  if (!classes_contains(path)) {
+    Ochar *serial = io_rclass_serial(path);
+    if (ochar_is_null(serial)) {
+      char *code = io_rclass_code(path);
+      Tx *tx = tx_new(cpath_path(path), code, code, 1, 0);
+      Class *c = read(path, tx);
+      io_wclass(path, (char *)json_warray(class_to_json(c)));
+      classes_add(c);
+    } else {
+      classes_add(class_from_json(
+        json_rarray((Json *)ochar_value(serial))
+      ));
     }
-    file_write(cache, json_warray(class_serialize(c)));
   }
-
-  imported_add(im, c);
-
-  return c;
 }

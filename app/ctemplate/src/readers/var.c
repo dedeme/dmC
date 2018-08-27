@@ -1,8 +1,10 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <gc.h>
 #include "readers/var.h"
-#include "dmc/all.h"
+#include "dmc/DEFS.h"
+#include "dmc/str.h"
 
 Var *var_read(RW *rw) {
   Rcode *rc = rw_rc(rw);
@@ -22,12 +24,12 @@ Var *var_read(RW *rw) {
   Tp/*char, char*/ *tp = rw_split(rw, l, ':');
   Var *v = MALLOC(Var);
   v->mod = mod;
-  v->id = tp->e1;
-  tp = rw_split(rw, tp->e2, '=');
-  v->type = tp->e1;
-  v->value = tp->e2;
+  v->id = tp_e1(tp);
+  tp = rw_split(rw, tp_e2(tp), '=');
+  v->type = tp_e1(tp);
+  v->value = tp_e2(tp);
 
-  if (v->type[strlen(v->type) - 1] != '*') {
+  if (v->type[str_len(v->type) - 1] != '*') {
     v->type = str_printf("%s ", v->type);
   }
 

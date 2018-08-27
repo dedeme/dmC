@@ -1,8 +1,11 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <stdbool.h>
 #include "writers/new.h"
-#include "dmc/all.h"
+#include "dmc/Arr.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
 
 void new_write(RW *rw, Structure *st) {
   rw_writeln(rw, "");
@@ -54,6 +57,9 @@ void new_write(RW *rw, Structure *st) {
     "  %s *this = MALLOC(%s);", st->head->id, st->head->id
   ));
   EACH(st->body->ps, Param, p) {
+    if (str_ends(p->type, "*")) {
+      rw_writeln(rw, str_printf("  XNULL(%s)", p->id));
+    }
     rw_writeln(rw, str_printf(
       "  this->%s = %s;", p->id, p->id
     ));

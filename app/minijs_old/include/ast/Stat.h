@@ -1,51 +1,44 @@
-// Copyright 29-Apr-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 11-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Statement
 
 #ifndef AST_STAT_H
   # define AST_STAT_H
 
-#include "Pos.h"
-#include "Value.h"
-
 /// Statement types
 enum Stat_t {
-  SVAL,
-  SVAR,
-  SASSIGN,
-  SFN,
-  SRETURN,
-  SBREAK,
-  SCONTINUE,
-  SBLOCK,
-  SWHILE,
-  SFOR,
-  SIF,
-  STRY,
-  STHROW,
-  SNATIVE
+  stat_VAL,
+  stat_VAR,
+  stat_ASSIGN,
+  stat_FN,
+  stat_RETURN,
+  stat_BREAK,
+  stat_CONTINUE,
+  stat_BLOCK,
+  stat_WHILE,
+  stat_FOR,
+  stat_IF,
+  stat_TRY,
+  stat_THROW,
+  stat_NATIVE
 };
 
-typedef Arr Avalue;
-typedef Arr Aastat;
+typedef struct pos_Pos Pos;
+typedef struct value_Value Value;
+typedef struct aastat_Aastat Aastat;
+typedef struct avalue_Avalue Avalue;
 
 /*.-.*/
+
+#include "dmc/Json.h"
+#include "dmc/ct/Ajson.h"
 
 ///
 typedef struct stat_Stat Stat;
 
 ///
-Stat *stat_new(
-  enum Stat_t type,
-  Pos *pos,
-  char *id,
-  Avalue *values,
-  Aastat *blocks
-);
-
-///
-enum Stat_t stat_type(Stat *this);
+enum Stat_t stat_t(Stat *this);
 
 ///
 Pos *stat_pos(Stat *this);
@@ -60,14 +53,12 @@ Avalue *stat_values(Stat *this);
 Aastat *stat_blocks(Stat *this);
 
 ///
-Arr/*Json*/ *stat_serialize(Stat *this);
+Ajson *stat_to_json(Stat *this);
 
 ///
-Stat *stat_restore(Arr/*Json*/ *s);
+Stat *stat_from_json(Ajson *s);
 
 /*.-.*/
-
-#endif
 
 /// [SVAL]
 Stat *stat_new_val(Pos *pos, char *id, Value *value);
@@ -118,3 +109,5 @@ Stat *stat_new_try(Pos *pos, char *var, Aastat *blocks);
 
 /// [SNATIVE]
 Stat *stat_new_native(Pos *pos, char *text);
+
+#endif

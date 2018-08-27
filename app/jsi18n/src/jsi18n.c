@@ -1,9 +1,37 @@
 // Copyright 13-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dmc/all.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <gc.h>
+#include "dmc/DEFS.h"
+#include "dmc/str.h"
+#include "dmc/exc.h"
+#include "dmc/path.h"
+#include "dmc/Map.h"
+#include "dmc/Buf.h"
+#include "dmc/file.h"
+#include "dmc/Arr.h"
+#include "dmc/Opt.h"
+#include "dmc/Map.h"
+#include "dmc/Tuples.h"
+#include "dmc/ct/Achar.h"
+#include "dmc/ct/Ochar.h"
+#include "dmc/ct/Mchar.h"
+#include "jsi18n.h"
 
-typedef struct pos_Pos Pos;
+#define TY Pos
+#define FN pos
+#include "dmc/tpl/tarr.c"
+#undef TY
+#undef FN
+
+#define TY Apos
+#define FN apos
+#include "dmc/tpl/topt.c"
+#include "dmc/tpl/tmap.c"
+#undef TY
+#undef FN
 
 struct pos_Pos {
   char *file;
@@ -35,7 +63,7 @@ static char *rdoc(char *tx) {
   return str_replace(str_replace(str_trim(tx), "\\\"", "\""), "\"", "\\\"");
 }
 
-static void extract_file(Map/*Arr[Pos]*/ *keys, char *file) {
+static void extract_file(Mapos *keys, char *file) {
   enum Status {
     CODE,
     PRECOMMENT,
@@ -147,13 +175,13 @@ static void extract_file(Map/*Arr[Pos]*/ *keys, char *file) {
             char *key = buf_str(bf);
             if (str_cindex(key, '=') == -1) {
               Pos *pos = pos_new(file, nl);
-              Arr/*Pos*/ *value = map_get(keys, key);
-              if (value) {
-                arr_add(value, pos);
+              Oapos *value = mapos_get(keys, key);
+              if (oapos_is_null(value)) {
+                Apos *val = apos_new();
+                apos_add(val, pos);
+                mapos_put(keys, key, val);
               } else {
-                value = arr_new();
-                arr_add(value, pos);
-                map_put(keys, key, value);
+                apos_add(oapos_value(value), pos);
               }
             }
           }
@@ -184,10 +212,10 @@ static void extract_file(Map/*Arr[Pos]*/ *keys, char *file) {
   file_close(lck);
 }
 
-static void extract(Map/*Arr[Pos]*/ *keys, char *source) {
+static void extract(Mapos *keys, char *source) {
   puts(source);
   if (file_is_directory(source)) {
-    Arr/*char*/ *files = file_dir(source);
+    Achar *files = file_dir(source);
     EACH(files, char, f) {
       extract(keys, f);
     }_EACH
@@ -196,18 +224,18 @@ static void extract(Map/*Arr[Pos]*/ *keys, char *source) {
       extract_file(keys, source);
     }
   } else {
-    THROW "'%s' does not exist\n", source _THROW
+    THROW("") "'%s' does not exist\n", source _THROW
   }
 }
 
-static char *make_dic(Map/*Arr[Pos]*/ *keys, char *lang, char *target) {
+static char *make_dic(Mapos *keys, char *lang, char *target) {
   char *tdir = path_cat(target, "i18n", NULL);
   if (!file_exists(tdir)) {
     file_mkdir(tdir);
   }
 
   if (!file_is_directory(tdir)) {
-    THROW "'%s' is not a directory\n", tdir _THROW
+    THROW("") "'%s' is not a directory\n", tdir _THROW
   }
 
   char *dic_path = path_cat(tdir, str_printf("%s.txt", lang), NULL);
@@ -215,9 +243,9 @@ static char *make_dic(Map/*Arr[Pos]*/ *keys, char *lang, char *target) {
     file_write(dic_path, "");
   }
 
-  Map/*char*/ *old_dic = map_new();
+  Mchar *old_dic = mchar_new();
   char *text = file_read(dic_path);
-  Arr/*char*/ *entries = str_csplit(text, '\n');
+  Achar *entries = str_csplit(text, '\n');
   EACH(entries, char, e) {
     char *trim = str_trim(e);
     if (!*trim || *trim == '#') {
@@ -230,7 +258,7 @@ static char *make_dic(Map/*Arr[Pos]*/ *keys, char *lang, char *target) {
     char *key = rdoc(str_sub(trim, 0, ix));
     char *value = rdoc(str_sub_end(trim, ix + 1));
     if (*key && *value) {
-      map_put(old_dic, key, value);
+      mchar_put(old_dic, key, value);
     }
   }_EACH
 
@@ -242,36 +270,37 @@ static char *make_dic(Map/*Arr[Pos]*/ *keys, char *lang, char *target) {
   bool sort(void *e1, void *e2) {
     Kv *kv1 = e1;
     Kv *kv2 = e2;
-    return strcmp(kv1->key, kv2->key) > 0;
+    return str_cmp(kv_key(kv1), kv_key(kv2)) > 0;
   }
   arr_sort((Arr *)keys, sort);
   arr_sort((Arr *)old_dic, sort);
 
-  EACH((Arr *)keys, Kv, kv) {
-    char *k = kv ->key;
-    Arr/*Pos*/ *poss = kv->value;
-    char *v = map_get(old_dic, k);
-    if (v) {
-      EACH(poss, Pos, p) {
-        buf_add(trans, str_printf("# %s: %d\n", p->file, p->line));
-      }_EACH
-      buf_add(trans, str_printf("%s = %s\n\n", k, v));
-      buf_add(dic, str_printf("    \"%s\": \"%s\",\n", k, v));
-
-      map_remove(old_dic, k);
-    } else {
+  EACH(keys, Kv, kv) {
+    char *k = kv_key(kv);
+    Apos *poss = kv_value(kv);
+    Ochar *ov = mchar_get(old_dic, k);
+    if (ochar_is_null(ov)) {
       buf_add(todo, "# TO DO\n");
       EACH(poss, Pos, p) {
         buf_add(todo, str_printf("# %s: %d\n", p->file, p->line));
       }_EACH
       buf_add(todo, k);
       buf_add(todo, " = \n\n");
+    } else {
+      char *v = ochar_value(ov);
+      EACH(poss, Pos, p) {
+        buf_add(trans, str_printf("# %s: %d\n", p->file, p->line));
+      }_EACH
+      buf_add(trans, str_printf("%s = %s\n\n", k, v));
+      buf_add(dic, str_printf("    \"%s\": \"%s\",\n", k, v));
+
+      mchar_remove(old_dic, k);
     }
   }_EACH
 
-  EACH((Arr *)old_dic, Kv, kv) {
+  EACH(old_dic, Kv, kv) {
     buf_add(orphan, str_printf(
-      "# ORPHAN\n%s = %s\n\n", kv->key, (char *)kv->value
+      "# ORPHAN\n%s = %s\n\n", kv_key(kv), (char *)kv_value(kv)
     ));
   }_EACH
 
@@ -296,22 +325,22 @@ int main (int argc, char **argv) {
     return 0;
   }
 
-  Arr/*char*/ *langs = str_csplit(argv[1], ':');
-  Arr/*char*/ *sources = str_csplit(argv[2], ':');
+  Achar *langs = str_csplit(argv[1], ':');
+  Achar *sources = str_csplit(argv[2], ':');
   char *target = argv[3];
 
   if (!file_is_directory(target)) {
-    THROW "'%s' is not a directory\n", target _THROW
+    THROW("") "'%s' is not a directory\n", target _THROW
   }
 
-  Map/*Arr[Pos]*/ *current_keys = map_new();
+  Mapos *current_keys = mapos_new();
   EACH(sources, char, source) {
     extract(current_keys, source);
   }_EACH
 
   char *jstarget_dir = path_cat(target, "src", NULL);
   if (!file_is_directory(jstarget_dir)) {
-    THROW "'%s' is not a directory\n", jstarget_dir _THROW
+    THROW("") "'%s' is not a directory\n", jstarget_dir _THROW
   }
 
   char *jstarget = path_cat(target, "src", "i18n.js", NULL);

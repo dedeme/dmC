@@ -1,20 +1,22 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "dmc/str.h"
+#include "dmc/Arr.h"
+#include "dmc/DEFS.h"
 #include "writers/tmph.h"
-#include "dmc/all.h"
 
 static char *MARK = "/*.-.*/";
 
 static void wrestore(RW *rw, Structure *st) {
-  if (st->head->mod != HEAD_SERIAL) {
+  if (st->head->mod == HEAD_NO_SERIAL) {
     return;
   }
 
   rw_writeln(rw, "");
   rw_writeln(rw, "///");
   rw_writeln(rw, str_printf(
-    "%s *%srestore(Arr/*Json*/ *s);", st->head->id, st->head->prefix
+    "%s *%sfrom_json(Json *s);", st->head->id, st->head->prefix
   ));
 }
 
@@ -26,7 +28,7 @@ static void wserial(RW *rw, Structure *st) {
   rw_writeln(rw, "");
   rw_writeln(rw, "///");
   rw_writeln(rw, str_printf(
-    "Arr/*Json*/ *%sserialize(%s *this);", st->head->prefix, st->head->id
+    "Json *%sto_json(%s *this);", st->head->prefix, st->head->id
   ));
 }
 
@@ -155,6 +157,11 @@ static void wnew(RW *rw, Structure *st) {
 }
 
 static void wtypedef(RW *rw, Structure *st) {
+  if (st->head->mod == HEAD_SERIAL) {
+    rw_writeln(rw, "");
+    rw_writeln(rw, "#include \"dmc/Json.h\"");
+    rw_writeln(rw, "#include \"dmc/ct/Ajson.h\"");
+  }
   if (st->head->id_mod != HEAD_ID_PRIVATE) {
     rw_writeln(rw, "");
     rw_writeln(rw, "///");

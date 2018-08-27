@@ -2,7 +2,11 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/restore.h"
-#include "dmc/all.h"
+#include "dmc/str.h"
+#include "dmc/Arr.h"
+#include "dmc/ct/Achar.h"
+#include "dmc/exc.h"
+#include "dmc/DEFS.h"
 
 void restore_write(RW *rw, Structure *st) {
   if (st->head->mod != HEAD_SERIAL) {
@@ -11,9 +15,10 @@ void restore_write(RW *rw, Structure *st) {
 
   rw_writeln(rw, "");
   rw_writeln(rw, str_printf(
-    "%s *%srestore(Arr/*Json*/ *serial) {", st->head->id, st->head->prefix
+    "%s *%sfrom_json(Json *js) {", st->head->id, st->head->prefix
   ));
-  rw_writeln(rw, "  if (!arr_size(serial)) return NULL;");
+  rw_writeln(rw, "  XNULL(js)");
+  rw_writeln(rw, "  Ajson *serial = json_rarray(js);");
   rw_writeln(rw, str_printf(
     "  %s *this = MALLOC(%s);", st->head->id, st->head->id
   ));
@@ -23,42 +28,54 @@ void restore_write(RW *rw, Structure *st) {
     char *s = p->serial;
     char *j = "";
     if (str_starts(s, "_array")) j = str_printf("a%s", s + 6);
-    else if (!strcmp(s, "_sarray")) j = "A";
-    else if (!strcmp(s, "_bool")) j = "jarr_gbool";
+    else if (str_eq(s, "_sarray")) j = "A";
+    else if (str_eq(s, "_bool")) j = "jarr_gbool";
     else if (str_starts(s, "_double")) j = "jarr_gdouble";
-    else if (!strcmp(s, "_int")) j = "jarr_gint";
+    else if (str_eq(s, "_int")) j = "jarr_gint";
     else if (str_starts(s, "_object")) j = str_printf("o%s", s + 7);
-    else if (!strcmp(s, "_sobject")) j = "O";
-    else if (!strcmp(s, "_string")) j = "jarr_gstring";
-    else if (!strcmp(s, "_uint")) j = "jarr_guint";
+    else if (str_eq(s, "_sobject")) j = "O";
+    else if (str_eq(s, "_string")) j = "jarr_gstring";
+    else if (str_eq(s, "_uint")) j = "jarr_guint";
 
     if (!*j) {
-      rw_writeln(rw, str_printf(
-        "  this->%s = %s_restore(json_rarray(arr_get(serial, i++)));", p->id, s
-      ));
+     if (str_starts(s, "__")) {
+        Achar *ps = str_csplit_trim(s, '-');
+        if (achar_size(ps) != 2)
+          THROW(exc_range_t) exc_range(2, 3, achar_size(ps)) _THROW
+        rw_writeln(rw, str_printf(
+          "  this->%s = "
+            "%s_from_json(ajson_get(serial, i++), %s_from_json);",
+          p->id, str_sub_end(achar_get(ps, 0), 2), achar_get(ps, 1)
+        ));
+      } else {
+        rw_writeln(rw, str_printf(
+          "  this->%s = %s_from_json(ajson_get(serial, i++));",
+          p->id, s
+        ));
+      }
     } else if (*j == 'A') {
       rw_writeln(rw, str_printf(
-        "  this->%s = jarr_garray"
+        "  this->%s = (Achar *)jarr_garray"
         "(serial, i++, (void*(*)(Json*))json_rstring);",
         p->id
       ));
     } else if (*j == 'O') {
       rw_writeln(rw, str_printf(
-        "  this->%s = jarr_gobject"
+        "  this->%s = (Mchar *)jarr_gobject"
         "(serial, i++, (void*(*)(Json*))json_rstring);",
         p->id
       ));
     } else if (*j == 'a') {
       rw_writeln(rw, str_printf(
-        "  this->%s = jarr_garray"
-        "(serial, i++, (void*(*)(Json*))%s_restore);",
-        p->id, j + 1
+        "  this->%s = (%s)jarr_garray"
+        "(serial, i++, (void*(*)(Json*))%s_from_json);",
+        p->id, p->type, j + 1
       ));
     } else if (*j == 'o') {
       rw_writeln(rw, str_printf(
-        "  this->%s = jarr_gobject"
-        "(serial, i++, (void*(*)(Json*))%s_restore);",
-        p->id, j + 1
+        "  this->%s = (%s)jarr_gobject"
+        "(serial, i++, (void*(*)(Json*))%s_from_json);",
+        p->id, p->type, j + 1
       ));
     } else {
       rw_writeln(rw, str_printf("  this->%s = %s(serial, i++);", p->id, j ));

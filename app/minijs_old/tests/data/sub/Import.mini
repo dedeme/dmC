@@ -1,6 +1,5 @@
 // Is local
 
-_local // Is local
 
 _import
 
@@ -10,7 +9,7 @@ sub /**/ * (Import)
 xxxxxx
 
 */
-Empty < Emp
-local/Local
+sub/Empty < Emp
+//local/Local
 
 //

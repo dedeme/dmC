@@ -1,4 +1,4 @@
-// Copyright 14-May-2018 ºDeme
+// Copyright 16-Jun-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// case statement reader.<p>
@@ -26,9 +26,9 @@
 #ifndef LEXER_RCASE_H
   #define LEXER_RCASE_H
 
-#include "dmc/all.h"
-#include "ast/Stat.h"
-#include "Tx.h"
+typedef struct tx_Tx Tx;
+typedef struct stat_Stat Stat;
+typedef struct pos_Pos Pos;
 
 /// rcase read a case statement<p>
 /// Throws tx_excepton.<p>

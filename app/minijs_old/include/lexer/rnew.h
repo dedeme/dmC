@@ -1,29 +1,17 @@
-// Copyright 13-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Constructor (function new) reader.<p>
-///
-/// <b>Template</b>
-///   new_id,* -> block
-/// where
-///   new_id :: mark? id
-///   mark :: + | @ | @+ | >
-/// <b>Examples</b>
-///   -> { ... }
-///   a, b -> { ... }
-///   +a -> { ... }
-///   > a, @ c, @+ d, e, +f-> { ... }
+/// Reads a constructor (new)
 
 #ifndef LEXER_RNEW_H
   #define LEXER_RNEW_H
 
-#include "dmc/all.h"
-#include "ast/Value.h"
-#include "ast/Class.h"
-#include "Tx.h"
+typedef struct lcatt_Lcatt Lcatt;
+typedef struct catt_Catt Catt;
+typedef struct asym_Asym Asym;
+typedef struct tx_Tx Tx;
 
-/// rnew read a class constructor.<p>
-/// Throws tx_excepton.
-Tx *rnew(Value **value, Tx *tx, Class *c, Type *tp, bool is_public);
+/// 'att' is Catt 'new' with a null value.
+Tx *rnew(Lcatt **instances, Catt **att, Tx *tx, Asym *symbols);
 
 #endif

@@ -1,8 +1,9 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "readers/structure.h"
-#include "dmc/all.h"
+#include <gc.h>
+#include "dmc/Arr.h"
+#include "dmc/DEFS.h"
 #include "readers/head.h"
 #include "readers/body.h"
 

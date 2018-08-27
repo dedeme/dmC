@@ -1,5 +1,5 @@
-// Copyright 6-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// String reader.<p>
 ///
@@ -24,9 +24,8 @@
 #ifndef LEXER_RSTRING_H
   #define LEXER_RSTRING_H
 
-#include "dmc/all.h"
-#include "ast/Value.h"
-#include "Tx.h"
+typedef struct value_Value Value;
+typedef struct tx_Tx Tx;
 
 /// rstring read a string in 'v'.<p>
 /// Throws tx_excepton.<p>

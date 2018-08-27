@@ -1,59 +1,49 @@
-// Copyright 30-Apr-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 10-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Right value
+/// Value in top declarations (static)
 
 #ifndef AST_VALUE_H
   # define AST_VALUE_H
 
-#include <dmc/all.h>
-#include "ast/Type.h"
-#include "Pos.h"
-#include "Achar.h"
-#include "Avatt.h"
+typedef struct pos_Pos Pos;
+typedef struct type_Type Type;
+typedef struct avatt_Avatt Avatt;
+typedef struct avalue_Avalue Avalue;
+typedef struct astat_Astat Astat;
 
 /// Value types
 enum Value_t {
-  VNULL,
-  VBOOL,
-  VBYTE,
-  VINT,
-  VFLOAT,
-  VCHAR,
-  VSTR,
-  VSTR2,
-  VARR,
-  VMAP,
-  VFN,
-  VID,
-  VGROUP,
-  VCAST,
-  VLUNARY,
-  VRUNARY,
-  VBINARY,
-  VTERNARY
+  value_VNULL,
+  value_VBOOL,
+  value_VBYTE,
+  value_VINT,
+  value_VFLOAT,
+  value_VCHAR,
+  value_VSTR,
+  value_VSTR2,
+  value_VARR,
+  value_VMAP,
+  value_VFN,
+  value_VID,
+  value_VGROUP,
+  value_VCAST,
+  value_VLUNARY,
+  value_VRUNARY,
+  value_VBINARY,
+  value_VTERNARY
 };
 
-typedef Arr Avalue;
-
-typedef Arr Astat;
-
 /*.-.*/
+
+#include "dmc/Json.h"
+#include "dmc/ct/Ajson.h"
 
 ///
 typedef struct value_Value Value;
 
 ///
-Value *value_new(
-  enum Value_t vtype,
-  Pos *pos,
-  Type *type,
-  Avatt *attachs,
-  Achar *data
-);
-
-///
-enum Value_t value_vtype(Value *this);
+enum Value_t value_t(Value *this);
 
 ///
 Pos *value_pos(Value *this);
@@ -62,19 +52,16 @@ Pos *value_pos(Value *this);
 Type *value_type(Value *this);
 
 ///
-void value_set_type(Value *this, Type *value);
-
-///
 Avatt *value_attachs(Value *this);
 
 ///
 Achar *value_data(Value *this);
 
 ///
-Arr/*Json*/ *value_serialize(Value *this);
+Ajson *value_to_json(Value *this);
 
 ///
-Value *value_restore(Arr/*Json*/ *s);
+Value *value_from_json(Ajson *s);
 
 /*.-.*/
 
@@ -106,7 +93,7 @@ Value *value_new_str2(Pos *pos, Avatt *atts, char *value);
 Value *value_new_arr(Pos *pos, Avatt *atts, Avalue *values);
 
 /// 'values' contains successive key-value pairs
-Value *value_new_map(Pos *pos, Avatt *atts, Arr/*Value*/ *m);
+Value *value_new_map(Pos *pos, Avatt *atts, Avalue *values);
 
 /// stats are serialized in value_data()
 Value *value_new_fn(Pos *pos, Achar *params, Astat *stats);
@@ -130,7 +117,11 @@ Value *value_new_runary(Pos *pos, char *op, Value *v);
 Value *value_new_binary(Pos *pos, Type *tp, char *op, Value *v1, Value *v2);
 
 ///
-Value *value_new_ternary(Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3);
+Value *value_new_ternary(
+  Pos *pos, Type *tp, Value *v1, Value *v2, Value *v3
+);
+
+///
+Value *value_set_type(Value *this, Type *t);
 
 #endif
-

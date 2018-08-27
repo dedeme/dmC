@@ -1,40 +1,36 @@
-// Copyright 1-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 03-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Class reader.<p>
-///
-/// Classes have the following orderded parts, all of them optional:<p>
-///
-/// <b>Generics declaration</b>
-///   &lt;[id1[, id2, ...]]>
-/// <b>Local declaration</b>
-///   _local
-/// <b>Imports declarations</b>
-///   _import
-///   <a href="?*minijs@lexer/rimport">imports</a>
-/// <b>Extends declaration</b>
-///   _extends id
-/// <b>Implements declaration</b>
-///   _implements (id,*)
-/// <b>Public declarations</b>
-///   val and var declarations
-/// <b>Private declaration</b>
-///   _private + val and var declarations
+/// Reads a Class in Classes
+///   Class ::= BL _local?
+///     BL <i>Generics</i>?
+///     BL <i>Import</i>?
+///     BL <i>Extends</i>?
+///     BL <i>Implements</i>?
+///     BL <i>Public</i>?
+///     BL <i>Private</i>?
+///     BL END
+///   Generics ::= < BL <i>Id</i>,+ BL >
+///   Imports ::= <a href='?*minijs@lexer/rimports'>rimports</a>
+///   Extends ::= '_extends' BL <i>Tdata</i> | <i>Tarray</i> | <i>Tmap</i>
+///   Implements ::= '_implements' BL
+///     (<i>Tdata</i> | <i>Tarray</i> | <i>Tmap</i>)+
+///   Public := <a href='?*minijs@lexer/rcatts'>rcatts</a>
+///   Private := <a href='?*minijs@lexer/rcatts'>rcatts</a>
+///   Tdata := <i>Id</i> BL ('<' BL <i>Type</i>,+ BL '>' )?
+///   Tarray ::= '[' BL <i>Type</i> BL ']'
+///   Tmap ::= '{' BL <i>Type</i> BL '}'
+///   Type := <a href='?*minijs@lexer/rtype'>rtype</a>
+///   Id ::= [$a-zA-z] [$a-zA-z0-9]
+///   BL >>= (blanks & comments)+
+///   END >>= End of text
 
 #ifndef LEXER_RCLASS_H
   #define LEXER_RCLASS_H
 
-#include "dmc/all.h"
-#include "Cpath.h"
-#include "ast/Class.h"
+typedef struct cpath_Cpath Cpath;
 
-/// rclass reads a class, following the next schema:
-///   * if    imported_get() has the class, returns it
-///   * else  *if !exists cache or cache date is previous to file .mini date,
-///                 reads file .mini, write cache, adds class to imported.get()
-///                 and returns it.
-///           *else read cache, adds class to imported.get() and returns it
-/// Throws tx_exception.
-Class *rclass(Cpath *path);
+///
+void rclass(Cpath *path);
 
 #endif

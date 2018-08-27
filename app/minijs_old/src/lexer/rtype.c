@@ -1,78 +1,81 @@
-// Copyright 3-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 06-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <stdio.h>
+#include "dmc/exc.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
+#include "ct/Ltype.h"
+#include "ast/Type.h"
 #include "lexer/rtype.h"
-#include "lexer/token.h"
-#include "ast/Atype.h"
+#include "lexer/lex.h"
+#include "lexer/Tx.h"
 #include "DEFS.h"
 
-Tx *rtype2(Type **type, Tx *tx) {
+Tx *rtype(Type **t, Tx *tx) {
   Type *tp;
   Tx *r;
   char *id;
+  if (tx_neq(tx, r = lex_cconst(tx, '('))) {
+    tx = lex_blanks(r);
+    Ltype *params = ltype_new();
+    tx = lex_list((List **)&params, tx, ':', (Tx *(*)(void **, Tx *))rtype);
+    tx = lex_blanks(tx);
 
-  if (tx_neq(tx, r = token_cconst(tx, '('))) {
-    Atype *params;
-    r = token_list(&params, r, ':', (Tx *(*)(void **, Tx *))rtype2);
-    tx = r;
+    Ltype *ret = ltype_new();
+    tx = lex_list((List **)&ret, tx, ')', (Tx *(*)(void **, Tx *))rtype);
 
-    if (tx_neq(tx, r = token_cconst(tx, ')'))) {
-      atype_add(params, type_new_void());
-    } else {
-      tx = rtype2(&tp, tx);
-      atype_add(params, tp);
-      if (tx_eq(tx, r = token_cconst(tx, ')')))
-        TH(tx) "Expected ')'" _TH
+    if (ltype_empty(ret)) {
+      ret = ltype_cons(ret, type_new_void());
+    } else if (!ltype_empty(ret) && !ltype_empty(ltype_tail(ret))) {
+      TH(tx) "More than 2 return types" _TH
     }
 
-    tp = type_new_fn(params);
-  } else if (tx_neq(tx, r = token_cconst(tx, '['))) {
-    tx = r;
+    tp = type_new_fn(ltype_cat(params, ret));
+  } else if (tx_neq(tx, r = lex_cconst(tx, '['))) {
+    tx = lex_blanks(r);
 
-    tx = rtype2(&tp, tx);
-    if (tx_eq(tx, r = token_cconst(tx, ']')))
+    tx = lex_blanks(rtype(&tp, tx));
+    if (tx_eq(tx, r = lex_cconst(tx, ']')))
       TH(tx) "Expected ']'" _TH
-
-    tp = type_new_arr(tp);
-  } else if (tx_neq(tx, r = token_cconst(tx, '{'))) {
     tx = r;
 
-    tx = rtype2(&tp, tx);
-    if (tx_eq(tx, r = token_cconst(tx, '}')))
+    Ltype *gs = ltype_new();
+    gs = ltype_cons(gs, tp);
+    tp = type_new_data("Arr", gs);
+  } else if (tx_neq(tx, r = lex_cconst(tx, '{'))) {
+    tx = lex_blanks(r);
+
+    tx = lex_blanks(rtype(&tp, tx));
+    if (tx_eq(tx, r = lex_cconst(tx, '}')))
       TH(tx) "Expected '}'" _TH
-
-    tp = type_new_map(tp);
-  } else if (tx_neq(tx, r = token_cconst(tx, '*'))) {
-    tp = type_new_any();
-  } else if (tx_neq(tx, r = token_valid_id(&id, tx))) {
     tx = r;
 
-    if (tx_neq(tx, r = token_cconst(tx, '<'))) {
-      tx = r;
+    Ltype *gs = ltype_new();
+    gs = ltype_cons(gs, tp);
+    tp = type_new_data("Map", gs);
+  } else if (tx_neq(tx, r = lex_cconst(tx, '*'))) {
+    tx = r;
+    tp = type_new_any();
+  } else if (tx_neq(tx, r = lex_id(&id, tx))) {
+    tx = lex_blanks(r);
 
-      Atype *params;
-      r = token_list(&params, r, '>', (Tx *(*)(void **, Tx *))rtype2);
-      if (arr_size(params) == 0)
+    if (tx_neq(tx, r = lex_cconst(tx, '<'))) {
+      tx = lex_blanks(r);
+
+      Ltype *params = ltype_new();
+      tx = lex_list((List **)&params, tx, '>', (Tx *(*)(void **, Tx *))rtype);
+      if (ltype_empty(params))
         TH(tx) "Expected at least one parameter" _TH
 
       tp = type_new_data(id, params);
     } else {
-      tp = type_new_data(id, atype_new());
+      tp = type_new_data(id, ltype_new());
     }
   } else {
     TH(tx) "Wrong type definition" _TH
   }
 
-  *type = tp;
-  return r;
-}
-
-Tx *rtype(Type **type, Tx *tx) {
-  Tx *r;
-  if (tx_eq(tx, r = token_cconst(tx, ':'))) {
-    *type = NULL;
-    return tx;
-  }
-
-  return rtype2(type, r);
+  *t = tp;
+  return tx;
 }

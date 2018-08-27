@@ -1,1 +1,31 @@
 
+< A >
+
+_import
+
+. *
+extend/F1
+extend/F1 < Z1
+extend * (F1, F4)
+extend (F1 < Z2, F2 < Z3, F3 < F3b)
+
+_extends
+  F1
+
+_implements (
+  [Str],
+  {Int},
+  F1,
+  F2<[*]>,
+  F2<(:)>
+)
+
+_public
+
+: Int
+nat length
+
+: Int
+var a
+
+val b = true

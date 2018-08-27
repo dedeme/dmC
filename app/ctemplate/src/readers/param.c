@@ -1,8 +1,11 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <gc.h>
+#include "dmc/str.h"
+#include "dmc/exc.h"
+#include "dmc/DEFS.h"
 #include "readers/param.h"
-#include "dmc/all.h"
 
 
 Param *param_read(RW *rw, Head *head) {
@@ -25,8 +28,8 @@ Param *param_read(RW *rw, Head *head) {
   Param *pr = MALLOC(Param);
   pr->mod = mod;
   pr->func = false;
-  pr->id = tp->e1;
-  pr->type = tp->e2;
+  pr->id = tp_e1(tp);
+  pr->type = tp_e2(tp);
   pr->serial = "";
 
   if (str_index(pr->type, "(*)") != -1) {
@@ -35,15 +38,15 @@ Param *param_read(RW *rw, Head *head) {
 
   if (head->mod == HEAD_SERIAL) {
     if (pr->func)
-      THROW
+      THROW(exc_illegal_state_t)
         rw_msg(rw, "There can not be functions in a serializable structure")
       _THROW
-    tp = rw_split(rw, tp->e2, ':');
-    pr->type = tp->e1;
-    pr->serial = tp->e2;
+    tp = rw_split(rw, tp_e2(tp), ':');
+    pr->type = tp_e1(tp);
+    pr->serial = tp_e2(tp);
   }
 
-  if (!pr->func && pr->type[strlen(pr->type) - 1] != '*') {
+  if (!pr->func && pr->type[str_len(pr->type) - 1] != '*') {
     pr->type = str_printf("%s ", pr->type);
   }
 

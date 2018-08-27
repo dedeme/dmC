@@ -1,14 +1,16 @@
-// Copyright 1-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 03-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Class to encapsulate a position in a text
+
 
 #ifndef LEXER_TX_H
   #define LEXER_TX_H
 
-#include "dmc/all.h"
-#include "Cpath.h"
-#include "Pos.h"
+#include <stddef.h>
+#include <stdbool.h>
+
+typedef struct pos_Pos Pos;
 
 /*.-.*/
 
@@ -40,7 +42,6 @@ size_t tx_nline(Tx *this);
 size_t tx_nchar(Tx *this);
 
 /*.-.*/
-
 /// tx_move returns a new Tx changing the position of 'this'.
 Tx *tx_move(Tx *this, char *pos, size_t nline, size_t nchar);
 

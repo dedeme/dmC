@@ -1,18 +1,27 @@
-// Copyright 3-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "lexer/rvalue.h"
-#include "lexer/token.h"
+#include "dmc/ct/Achar.h"
+#include "dmc/exc.h"
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
+#include "ast/Vatt.h"
+#include "ast/Value.h"
+#include "ct/Avatt.h"
+#include "ct/Lvalue.h"
+#include "ct/Astat.h"
+#include "lexer/Tx.h"
+#include "lexer/lex.h"
+#include "lexer/rblock.h"
+#include "lexer/rtype.h"
+#include "lexer/rnary.h"
+#include "lexer/rlunary.h"
 #include "lexer/rnumber.h"
 #include "lexer/rstring.h"
 #include "lexer/rarr.h"
 #include "lexer/rmap.h"
 #include "lexer/rwith.h"
-#include "lexer/rlunary.h"
-#include "lexer/rnary.h"
-#include "lexer/rblock.h"
-#include "lexer/rtype.h"
-#include "ast/Avalue.h"
+#include "lexer/rvalue.h"
 #include "DEFS.h"
 
 static Tx* add_attachs(Tx *tx, Avatt *avatt);
@@ -20,12 +29,13 @@ static Tx* add_attachs(Tx *tx, Avatt *avatt);
 static Tx* add_pattach(Tx *tx, Avatt *avatt) {
   Tx *r;
 
-  if (tx_neq(tx, r = token_cconst(tx, '.'))) {
-    tx = r;
+  if (tx_neq(tx, r = lex_cconst(tx, '.'))) {
+    tx = lex_blanks(r);
     char *id;
-    if (tx_eq(tx, r = token_valid_id(&id, tx)))
+    if (tx_eq(tx, r = lex_id(&id, tx)))
       TH(tx) "Expected an identifier" _TH
-    tx = r;
+    tx = lex_blanks(r);
+    lex_test_reserved(tx, id);
     avatt_add(avatt, vatt_new_id(tx_pos(tx), id));
     return add_attachs(tx, avatt);
   }
@@ -39,31 +49,31 @@ static Tx* add_attachs(Tx *tx, Avatt *avatt) {
     return r;
   }
 
-  if (tx_neq(tx, r = token_cconst(tx, '('))) {
+  if (tx_neq(tx, r = lex_cconst(tx, '('))) {
     Pos *pos = tx_pos(tx);
-    tx = r;
+    tx = lex_blanks(r);
 
-    Avalue *vs;
-    tx = token_list(&vs, tx, ')', (Tx *(*)(void **, Tx *))rvalue);
+    Lvalue *vs;
+    tx = lex_list((List **)&vs, tx, ')', (Tx *(*)(void **, Tx *))rvalue);
     avatt_add(avatt, vatt_new_fn(pos, vs));
-    return add_attachs(tx, avatt);
+    return add_attachs(lex_blanks(tx), avatt);
   }
 
-  if (tx_neq(tx, r = token_cconst(tx, '['))) {
+  if (tx_neq(tx, r = lex_cconst(tx, '['))) {
     Pos *pos = tx_pos(tx);
-    tx = r;
+    tx = lex_blanks(r);
 
     Value *v;
     if (tx_eq(tx, r = rvalue(&v, tx)))
       TH(tx) "Expected a value" _TH
-    tx = r;
+    tx = lex_blanks(r);
 
-    if (tx_eq(tx, r = token_cconst(tx, ']')))
+    if (tx_eq(tx, r = lex_cconst(tx, ']')))
       TH(tx) "Expected ']'" _TH
-    tx = r;
+    tx = lex_blanks(r);
 
-    Avalue *vs = avalue_new();
-    avalue_add(vs, v);
+    Lvalue *vs = lvalue_new();
+    lvalue_cons(vs, v);
 
     avatt_add(avatt, vatt_new_id(pos, "get"));
     avatt_add(avatt, vatt_new_fn(pos, vs));
@@ -77,25 +87,26 @@ Tx *rvalue(Value **v, Tx *tx) {
   Tx *r;
   Pos *pos = tx_pos(tx);
 
-  if (tx_neq(tx, r = token_const(tx, "->"))) { // Function
-    tx = r;
+  if (tx_neq(tx, r = lex_const(tx, "->"))) { // Function
+    tx = lex_blanks(r);
     Astat *sts;
     tx = rblock(&sts, tx);
     *v = value_new_fn(pos, achar_new(), sts);
     return tx;
   }
 
-  if (tx_neq(tx, r = token_cconst0(tx, '('))) { // (value) (:cast)
+  if (tx_neq(tx, r = lex_cconst(tx, '('))) { // (value) (:cast)
     tx = r;
 
-    if (tx_neq(tx, r = token_cconst(tx, ':'))) {
-      // tx does not advance because rtype must start with ':'
-      Type *tp;
-      tx = rtype(&tp, tx);
+    if (tx_neq(tx, r = lex_cconst(tx, ':'))) {
+      tx = lex_blanks(tx);
 
-      if (tx_eq(tx, r = token_cconst(tx, ')')))
+      Type *tp;
+      tx = lex_blanks(rtype(&tp, tx));
+
+      if (tx_eq(tx, r = lex_cconst(tx, ')')))
         TH(tx) "Expected ')'" _TH
-      tx = r;
+      tx = lex_blanks(r);
 
       Value *v0;
       if (tx_eq(tx, r = rvalue(&v0, tx)))
@@ -107,14 +118,14 @@ Tx *rvalue(Value **v, Tx *tx) {
       return tx;
     }
 
-    tx = token_blanks(tx);
+    tx = lex_blanks(tx);
 
     Value *v0;
     if (tx_eq(tx, r = rvalue(&v0, tx)))
       TH(tx) "Expected a value" _TH
-    tx = r;
+    tx = lex_blanks(r);
 
-    if (tx_eq(tx, r = token_cconst(tx, ')')))
+    if (tx_eq(tx, r = lex_cconst(tx, ')')))
       TH(tx) "Expected ')'" _TH
     tx = r;
 
@@ -126,65 +137,64 @@ Tx *rvalue(Value **v, Tx *tx) {
   }
 
   char *id;
-  if (tx_neq(tx, r = token_lunary(&id, tx))) { // lunary
-    tx = r;
+  if (tx_neq(tx, r = lex_lunary(&id, tx))) { // lunary
+    tx = lex_blanks(r);
 
     return rlunary(v, id, tx);
   }
 
   Achar *generics;
-  if (tx_eq(tx, r = token_generic_id(&id, &generics, tx))) { // literal
+  if (tx_eq(tx, r = lex_generic_id(&id, &generics, tx))) { // literal
     Value *v0;
     if (tx_neq(tx, r = rnumber(&v0, tx))) {
       return rnary(v, r, v0);
     } else if (tx_neq(tx, r = rstring(&v0, tx))) {
-      tx = add_attachs(r, value_attachs(v0));
+      tx = add_attachs(lex_blanks(r), value_attachs(v0));
       return rnary(v, tx, v0);
     } else if (tx_neq(tx, r = rarr(&v0, tx))) {
-      tx = add_attachs(r, value_attachs(v0));
+      tx = add_attachs(lex_blanks(r), value_attachs(v0));
       return rnary(v, tx, v0);
     } else if (tx_neq(tx, r = rmap(&v0, tx))) {
-      tx = add_attachs(r, value_attachs(v0));
+      tx = add_attachs(lex_blanks(r), value_attachs(v0));
       return rnary(v, tx, v0);
     }
     TH(tx) "Expected a value" _TH
   }
-  tx = r;
+  tx = lex_blanks(r);
 
   if (achar_size(generics) == 0) {
-    if (!strcmp(id, "null")) { // Null
+    if (str_eq(id, "null")) { // Null
       *v = value_new_null(pos);
       return tx;
     }
 
-    if (!strcmp(id, "true") || !strcmp(id, "false")) { // Bool
+    if (str_eq(id, "true") || str_eq(id, "false")) { // Bool
       Value *v0 = value_new_bool(pos, avatt_new(), id);
       tx = add_pattach(tx, value_attachs(v0));
       return rnary(v, tx, v0);
     }
 
-    if (!strcmp(id, "with")) { // with
+    if (str_eq(id, "with")) { // with
       return rwith(v, tx);
     }
 
-    if (token_is_reserved(id))
-      TH(tx) "'%s' is a reserved word", id _TH
+    lex_test_reserved(tx, id);
 
-    if (tx_neq(tx, r = token_cconst(tx, ','))) { // Function
-      tx = r;
+    if (tx_neq(tx, r = lex_cconst(tx, ','))) { // Function
+      tx = lex_blanks(r);
       Achar *params;
-      tx = token_fn_list(&params, tx, token_valid_id);
+      tx = lex_fn_list(&params, tx, lex_valid_id);
       achar_insert(params, 0, id);
 
       Astat *sts;
-      tx = rblock(&sts, tx);
+      tx = rblock(&sts, lex_blanks(tx));
 
       *v = value_new_fn(pos, params, sts);
       return tx;
     }
 
-    if (tx_neq(tx, r = token_const(tx, "->"))) { // Function
-      tx = r;
+    if (tx_neq(tx, r = lex_const(tx, "->"))) { // Function
+      tx = lex_blanks(r);
       Achar *params = achar_new();
       achar_add(params, id);
 
@@ -196,16 +206,15 @@ Tx *rvalue(Value **v, Tx *tx) {
     }
   }
 
-  if (token_is_reserved(id))
-    TH(tx) "'%s' is a reserved word", id _TH
+  lex_test_reserved(tx, id);
 
   Value *v0 = value_new_id(pos, avatt_new(), id, generics);
   char *op;
-  if (tx_neq(tx, r = token_runary(&op, tx))) {
+  if (tx_neq(tx, r = lex_runary(&op, tx))) {
     tx = r;
     v0 = value_new_runary(tx_pos(tx), op, v0);
   } else {
-    tx = add_attachs(tx, value_attachs(v0));
+    tx = add_attachs(lex_blanks(tx), value_attachs(v0));
   }
   return rnary(v, tx, v0);
 }

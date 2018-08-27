@@ -1,9 +1,17 @@
 // Copyright 23-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "ctemplate.h"
-#include <dmc/all.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <gc.h>
+#include "dmc/path.h"
+#include "dmc/sys.h"
+#include "dmc/exc.h"
+#include "dmc/str.h"
+#include "dmc/file.h"
+#include "dmc/Arr.h"
+#include "dmc/DEFS.h"
+
 #include "data.h"
 #include "RW.h"
 #include "readers/template.h"
@@ -26,7 +34,7 @@ static void process_file(char *fh, char *fc) {
     tp =  template_read(rw);
   } CATCH (e) {
     rw_close(rw);
-    THROW e _THROW
+    THROW(exc_io_t) e _THROW
   }_TRY
 
   if (!tp) {
@@ -38,7 +46,7 @@ static void process_file(char *fh, char *fc) {
     tmpc_write(tp, rw);
   } CATCH (e) {
     rw_close(rw);
-    THROW e _THROW
+    THROW(exc_io_t) e _THROW
   } _TRY
   rw_close(rw);
 
@@ -49,7 +57,7 @@ static void process_file(char *fh, char *fc) {
     tmph_write(tp, rw);
   } CATCH (e) {
     rw_close(rw);
-    THROW e _THROW
+    THROW(exc_io_t) e _THROW
   } _TRY
   rw_close(rw);
 
@@ -62,14 +70,14 @@ static void process_dir(char *include, char *src) {
     char *fh = path_cat(include, path_name(f), NULL);
     if (file_is_directory(f)) {
       if (!file_is_directory(fh))
-        THROW "'%s' is not a directory", fh _THROW
+        THROW(exc_io_t) "'%s' is not a directory", fh _THROW
       process_dir(fh, f);
     } else  {
-      fh = str_printf("%s.h", str_sub(fh, 0, strlen(fh) - 2));
+      fh = str_printf("%s.h", str_sub(fh, 0, str_len(fh) - 2));
 
       TRY {
         if (!file_exists(fh))
-          THROW "'%s' not found", fh _THROW
+          THROW(exc_io_t) "'%s' not found", fh _THROW
         process_file(fh, f);
       } CATCH (e) {
         puts(e);
@@ -89,15 +97,15 @@ int main (int argc, char **argv) {
   char *path = argv[1];
 
   if (!file_is_directory(path))
-    THROW "'%s' is not a directory", path _THROW
+    THROW(exc_io_t) "'%s' is not a directory", path _THROW
 
   char *include = path_cat(path, "include", NULL);
   if (!file_is_directory(include))
-    THROW "'%s' is not a directory", include _THROW
+    THROW (exc_io_t)"'%s' is not a directory", include _THROW
 
   char *src = path_cat(path, "src", NULL);
   if (!file_is_directory(src))
-    THROW "'%s' is not a directory", src _THROW
+    THROW(exc_io_t) "'%s' is not a directory", src _THROW
 
   process_dir(include, src);
 

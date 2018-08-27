@@ -1,8 +1,11 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <stdbool.h>
+#include "dmc/str.h"
+#include "dmc/Arr.h"
+#include "dmc/DEFS.h"
 #include "writers/structure.h"
-#include "dmc/all.h"
 
 void struct_write(RW *rw, Structure *st) {
   rw_writeln(rw, str_printf("struct %s%s {", st->head->prefix, st->head->id));

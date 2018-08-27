@@ -1,9 +1,15 @@
-// Copyright 6-May-2018 ºDeme
+// Copyright 14-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "dmc/Buf.h"
+#include "dmc/str.h"
+#include "dmc/exc.h"
+#include "dmc/DEFS.h"
 #include "lexer/rstring.h"
-#include "lexer/token.h"
-#include "ast/Avatt.h"
+#include "lexer/lex.h"
+#include "lexer/Tx.h"
+#include "ast/Value.h"
+#include "ct/Avatt.h"
 #include "DEFS.h"
 
 static void end_control(Tx *tx, Tx *start) {
@@ -14,11 +20,11 @@ static void end_control(Tx *tx, Tx *start) {
 static Tx *triple_quoted(Value **v, Tx *tx,Tx *start) {
   char null;
   REPEAT(4) {
-    tx = token_char(&null, tx);
+    tx = lex_char(&null, tx);
   }_REPEAT
 
   char *r;
-  tx = token_native(&r, tx, "\n\"\"\"");
+  tx = lex_native(&r, tx, "\n\"\"\"");
   char *p = r;
   while (*p == ' ') {
     ++p;
@@ -59,10 +65,10 @@ static Tx *quotes(Value **v, Tx *tx,Tx *start, char quote) {
   for (;;) {
     end_control(tx, start);
 
-    if (tx_neq(tx, r = token_cconst0(tx, '\\'))) {
+    if (tx_neq(tx, r = lex_cconst(tx, '\\'))) {
       tx = r;
       end_control(tx, start);
-      tx = token_char(&ch, tx);
+      tx = lex_char(&ch, tx);
       if (ch != quote && ch != '\\') {
         buf_cadd(bf, '\\');
       }
@@ -70,9 +76,8 @@ static Tx *quotes(Value **v, Tx *tx,Tx *start, char quote) {
       continue;
     }
 
-    tx = token_char(&ch, tx);
+    tx = lex_char(&ch, tx);
     if (ch == quote) {
-      tx = token_blanks(tx);
       break;
     }
 
@@ -82,7 +87,7 @@ static Tx *quotes(Value **v, Tx *tx,Tx *start, char quote) {
   if (quote == '\'') {
     char *c = buf_to_str(bf);
     if (!*c)
-      TH(token_char(&ch, start)) "Expected a character" _TH
+      TH(lex_char(&ch, start)) "Expected a character" _TH
     *v = value_new_char(tx_pos(start), avatt_new(), c);
   } else if (quote == '`') {
     *v = value_new_str2(tx_pos(start), avatt_new(), buf_to_str(bf));
@@ -96,12 +101,12 @@ Tx *rstring(Value **v, Tx *tx) {
   Tx *r;
   Tx *start = tx;
 
-  if (tx_neq(tx, r = token_const(tx, "\"\"\"\n"))) {
+  if (tx_neq(tx, r = lex_const(tx, "\"\"\"\n"))) {
     return triple_quoted(v, tx, start);
   }
 
   char quote;
-  if (tx_eq(tx, r = token_csplit0(&quote, tx, "\"`'"))) {
+  if (tx_eq(tx, r = lex_csplit(&quote, tx, "\"`'"))) {
     return tx;
   }
 

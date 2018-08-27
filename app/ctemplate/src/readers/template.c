@@ -1,8 +1,11 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <gc.h>
+#include "dmc/DEFS.h"
+#include "dmc/str.h"
+#include "dmc/Arr.h"
 #include "readers/template.h"
-#include "dmc/all.h"
 #include "readers/structure.h"
 
 static char *MARK_OPEN = "/*.+.";
@@ -16,7 +19,7 @@ Template *template_read(RW *rw) {
     rw_read(rw);
     for(;;) {
       arr_add(tp->sts, structure_read(rw));
-      if (!strcmp(rw_rc(rw)->l, MARK_CLOSE)) break;
+      if (str_eq(rw_rc(rw)->l, MARK_CLOSE)) break;
     }
 
     return tp;

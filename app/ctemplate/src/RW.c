@@ -1,8 +1,13 @@
 // Copyright 24-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <stddef.h>
+#include <gc.h>
+#include "dmc/path.h"
+#include "dmc/str.h"
+#include "dmc/exc.h"
+#include "dmc/DEFS.h"
 #include "RW.h"
-#include "dmc/all.h"
 
 struct RW {
   char *fmain;
@@ -50,7 +55,7 @@ void rw_read_end(RW *this) {
 
 bool rw_read_until(RW *this, char *end) {
   char *l = next(this);
-  while (strcmp(str_trim(l), end)) {
+  while (str_cmp(str_trim(l), end)) {
     if (!*l)
       return false;
     file_write_text(this->tmp, l);
@@ -62,7 +67,7 @@ bool rw_read_until(RW *this, char *end) {
 
 bool rw_read_blank(RW *this, char *end) {
   char *l = next(this);
-  while (strcmp(str_trim(l), end)) {
+  while (str_cmp(str_trim(l), end)) {
     if (!*l)
       return false;
     l = next(this);
@@ -77,7 +82,7 @@ void rw_read(RW *this) {
   for (;;) {
     l = next(this);
     if (!*l)
-      THROW "Reached end of file" _THROW
+      THROW(exc_io_t) "Reached end of file" _THROW
     file_write_text(this->tmp, l);
     lt = str_trim(l);
     if (*lt) break;
@@ -122,7 +127,7 @@ char *rw_msg(RW *this, char *m) {
 Tp/*char, char*/ *rw_split(RW *this, char *l, char separator) {
   int ix = str_cindex(l, separator);
   if (ix == -1)
-    THROW rw_msg(
+    THROW(exc_illegal_state_t) rw_msg(
       this, str_printf("'%c' is missing", separator)
     ) _THROW
 
@@ -130,12 +135,12 @@ Tp/*char, char*/ *rw_split(RW *this, char *l, char separator) {
     str_trim(str_sub(l, 0, ix)),
     str_trim(str_sub_end(l, ix + 1))
   );
-  if (!*((char *)tp->e1))
-    THROW rw_msg(
+  if (!*((char *)tp_e1(tp)))
+    THROW(exc_illegal_state_t) rw_msg(
       this, str_printf("Left side of '%c' is empty", separator)
     ) _THROW
-  if (!*((char *)tp->e2))
-    THROW rw_msg(
+  if (!*((char *)tp_e2(tp)))
+    THROW(exc_illegal_state_t) rw_msg(
       this, str_printf("Right side of '%c' is empty", separator)
     )_THROW
 

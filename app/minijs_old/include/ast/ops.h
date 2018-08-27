@@ -1,4 +1,4 @@
-// Copyright 28-Ap-2018 ºDeme
+// Copyright 14-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Operators.<p<

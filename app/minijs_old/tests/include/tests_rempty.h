@@ -4,8 +4,6 @@
 #ifndef TESTS_REMPTY_H
   # define TESTS_REMPTY_H
 
-#include <dmc/all.h>
-
 void tests_rempty(void);
 
 #endif

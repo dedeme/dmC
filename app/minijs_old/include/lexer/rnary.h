@@ -1,5 +1,5 @@
-// Copyright 6-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 13-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Binary and ternary operators reader.<p>
 ///
@@ -36,9 +36,8 @@
 #ifndef LEXER_RNARY_H
   #define LEXER_RNARY_H
 
-#include "dmc/all.h"
-#include "ast/Value.h"
-#include "Tx.h"
+typedef struct value_Value Value;
+typedef struct tx_Tx Tx;
 
 /// rnary read a binary or ternary operator<p>
 /// Throws tx_excepton.<p>

@@ -1,17 +1,12 @@
 PRG = minijs
 
 C_FILES = $(wildcard src/*.c) \
-          $(wildcard src/ast/*.c) \
-          $(wildcard src/builtin/*.c) \
-          $(wildcard src/lexer/*.c) \
-          $(wildcard src/parser/*.c) \
-          $(wildcard src/js/*.c)
+					$(wildcard src/types/*.c) \
+					$(wildcard src/scan/*.c)
+
 H_FILES = $(wildcard include/*.h) \
-          $(wildcard include/ast/*.h) \
-          $(wildcard include/builtin/*.h) \
-          $(wildcard include/lexer/*.h) \
-          $(wildcard include/parser/*.h) \
-          $(wildcard include/js/*.h)
+					$(wildcard include/types/*.c) \
+					$(wildcard include/scan/*.c)
 
 CFLAGS = -Wall -rdynamic
 FILES = $(C_FILES) $(H_FILES)

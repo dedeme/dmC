@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "writers/typedef.h"
-#include "dmc/all.h"
+#include "dmc/str.h"
 
 void typedef_write(RW *rw, Structure *st) {
   if (st->head->id_mod == HEAD_ID_PRIVATE) {

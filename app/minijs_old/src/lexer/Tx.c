@@ -1,7 +1,12 @@
-// Copyright 1-May-2018 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+// Copyright 03-Jun-2018 ºDeme
+// GNU Selleral Public License - V3 <http://www.gnu.org/licenses/>
 
+#include <gc.h>
+#include <stdio.h>
+#include "dmc/str.h"
+#include "dmc/DEFS.h"
 #include "lexer/Tx.h"
+#include "lexer/Pos.h"
 
 /*.
 -struct: Tx
