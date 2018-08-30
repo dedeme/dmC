@@ -1,0 +1,11 @@
+site_name: Minjs doc
+
+nav:
+  - Home: index.md
+
+
+extra_css: [extra.css]
+
+#theme: "mkdocs"
+
+

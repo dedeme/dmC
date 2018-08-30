@@ -5,6 +5,7 @@
 #include "types/Cpath.h"
 #include "dmc/str.h"
 #include "dmc/exc.h"
+#include "dmc/path.h"
 #include "dmc/DEFS.h"
 
 /*.
@@ -65,4 +66,9 @@ bool cpath_eq(Cpath *this, Cpath *other) {
   XNULL(this)
   XNULL(other)
   return str_eq(this->relative, other->relative);
+}
+
+char *cpath_name(Cpath *this) {
+  XNULL(this);
+  return path_only_name(this->relative);
 }

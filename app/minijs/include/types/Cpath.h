@@ -42,5 +42,9 @@ char *cpath_complete(Cpath *this);
 /// Equality
 bool cpath_eq(Cpath *this, Cpath *other);
 
+/// Returns the name of class
+char *cpath_name(Cpath *this);
+
+
 #endif
 

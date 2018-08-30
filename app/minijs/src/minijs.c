@@ -10,7 +10,7 @@
 #include "dmc/DEFS.h"
 #include "types/UserData.h"
 #include "types/Dep.h"
-#include "types/Errors.h"
+#include "types/Fails.h"
 #include "arguments_reading.h"
 #include "scan/transpilation.h"
 
@@ -24,21 +24,21 @@ int main (int argc, char **argv) {
   }
 
   UserData *udata = opt_value(oudata);
-  Errors *errors = transpilation_run(udata);
+  Fails *fails = transpilation_run(udata);
 
-  if (lerror_empty(errors_errors(errors))) {
-    if (lerror_empty(errors_warnings(errors))) {
+  if (afail_size(fails_errors(fails)) == 0) {
+    if (afail_size(fails_warnings(fails))) {
       puts ("Transpilation Ok.");
     } else {
       puts ("Warnings:");
-      EACHL(lerror_reverse(errors_warnings(errors)), Error, e) {
-        puts (error_fmsg(e));
+      EACH(fails_warnings(fails), Fail, w) {
+        puts (fail_fmsg(w));
       }_EACH
     }
   } else {
     puts ("Errors:");
-    EACHL(lerror_reverse(errors_errors(errors)), Error, e) {
-      puts (error_fmsg(e));
+    EACH(fails_errors(fails), Fail, e) {
+      puts (fail_fmsg(e));
     }_EACH
   }
 

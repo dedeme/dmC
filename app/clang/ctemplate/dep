@@ -1,0 +1,68 @@
+#!/bin/bash
+
+LIBS="libdmc https://github.com/dedeme/libdmc.git -"
+
+# Do not change --------------------------------------------
+
+# Work from lib
+# Variables: LIB, GIT, VAR
+clone() {
+  if [ -e tmp ]
+  then
+    rm -fR tmp
+  fi
+  mkdir tmp
+  cd tmp
+
+  if [ $VER == "-" ]
+  then
+    git clone $GIT
+  else
+    git clone --branch $VER $GIT
+  fi
+
+  cp -R ../lib $LIB
+  cd $LIB
+  mkdir obj
+  make
+  cd ../..
+  if [ -e lib/$LIB ]
+  then
+    rm -fR lib/$LIB
+  fi
+  mkdir lib/$LIB
+  mv tmp/$LIB/include lib/$LIB
+  mv tmp/$LIB/lib/$LIB.a lib/$LIB
+  rm -fR tmp
+}
+
+if [ ! -e bin ]
+then
+  mkdir bin
+fi
+
+if [ ! -e lib ]
+then
+  mkdir lib
+fi
+
+LIB=""
+GIT=""
+VER=""
+IX="0"
+for GIT_LIB in $LIBS
+do
+  if [ $IX == "0" ]
+  then
+    LIB=$GIT_LIB
+    IX="1"
+  elif [ $IX == "1" ]
+  then
+    GIT=$GIT_LIB
+    IX="2"
+  else
+    VER=$GIT_LIB
+    clone
+    IX="0"
+  fi
+done

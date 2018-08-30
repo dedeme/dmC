@@ -13,6 +13,8 @@
 #include "io.h"
 #include "types/Cpath.h"
 #include "types/UserData.h"
+#include "types/ScanResult.h"
+#include "scan/token.h"
 
 void print_error(char *msg) {
   puts(msg);
@@ -61,6 +63,18 @@ Either/*Cpath*/ *source_control(Lchar *roots, char *source) {
     return ecpath;
   }
   Cpath *source_path = either_value(ecpath);
+  char *className = cpath_name(source_path);
+  Scanner *sc = scanner_new_text(className);
+  ScanResult *scr = token_id(opt_null(), sc);
+
+  if (
+    scanResult_is_error(scr) ||
+    !str_eq(className, (char *) scanResult_result(scr))
+  ) {
+    return either_fail(str_printf(
+      "Source '%s' is not a valid class name.", className
+    ));
+  }
   char *source_com = cpath_complete(source_path);
   if (file_is_directory(source_com)) {
     return either_fail(str_printf("Source '%s' is a directory.", source_com));

@@ -15,7 +15,10 @@
 /// found or is found duplicate.
 Either/*Cpath*/ *io_cpath(Lchar *roots, char *relative_path);
 
-/// Reads a class from cache
+/// Read a .mini file. 'path' is a valid Cpath.
+char *io_read_mini(Cpath *path);
+
+/// Reads a class from cache. 'path' is a valid Cpath.
 Ojson *io_read_class(Cpath *path);
 
 #endif

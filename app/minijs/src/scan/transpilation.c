@@ -12,28 +12,28 @@
 #include "js_writing.h"
 
 
-Errors *transpilation_run (UserData *userData) {
+Fails *transpilation_run (UserData *userData) {
+  Lchar *roots = userData_roots(userData);
   Dep *mainFunction = dep_new(userData_source(userData), "main");
-  Errors *errors = errors_new(lerror_new(), lerror_new());
-  JsEntryResult *r = entry_reading_run(userData, errors, mainFunction); // IN CURSE
+  JsEntryResult *r = entry_reading_run(roots, mainFunction); // IN CURSE
 
-  errors = jsEntryResult_errors(r);
-  JsEntry *entry = jsEntryResult_entry(r);
-
-  if (!lerror_empty(errors_errors(errors))) {
-    return errors;
+  Fails *fails = jsEntryResult_fails(r);
+  if (afail_size(fails_errors(fails))) {
+    return fails;
   }
+  JsEntry *entry = jsEntryResult_entry(r);
 
   Type *mainType = type_new(true, "", atype_new());
   if (!type_eq(mainType, jsEntry_type(entry))) {
     char *file = cpath_relative(userData_source(userData));
     char *msg = str_printf("Entry '%s'.main is not of type '()'", file);
-    Error *e = error_new(msg, file, 0, 0);
-    Lerror *les = lerror_cons(lerror_new(), e);
-    return errors_new(les, lerror_new());
+    Fail *e = fail_new(msg, file, 0, 0);
+    Afail *afs = afail_new();
+    afail_add(afs, e);
+    return fails_new(afs, afail_new());
   }
 
-  js_writing_run(userData, entry);  // TO DO
+  js_writing_run(userData, entry);
 
-  return jsEntryResult_errors(r);
+  return jsEntryResult_fails(r);
 }

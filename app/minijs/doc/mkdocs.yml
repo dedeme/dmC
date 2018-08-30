@@ -5,3 +5,13 @@ pages:
   - Transpilation: transpilation.md
   - Entry reading: rentry.md
   - Class transpilation: classTranspilation.md
+  - Class skeleton reading: skeletonReading.md
+  - Class reading: classReading.md
+  - Logic functions: logicFunctions.md
+  - Skeleton Syntax functions: skSyntaxFunctions.md
+  - Token functions: tokenFunctions.md
+  - Types: types.md
+  - AST types: astTypes.md
+  - Draft: draft.md
+
+theme: readthedocs

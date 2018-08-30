@@ -9,15 +9,12 @@
 #ifndef SCAN_CLASS_TRANSPILATION_H
   # define SCAN_CLASS_TRANSPILATION_H
 
-#include "types/UserData.h"
-#include "types/Errors.h"
+#include "dmc/ct/Lchar.h"
 #include "types/Cpath.h"
 #include "types/JsClassResult.h"
 
 /// Makes a class transpilation: Write cache and returns the class.
-JsClassResult *class_transpilation_run (
-  UserData *userData, Errors *errors, Cpath *class
-);
+JsClassResult *class_transpilation_run (Lchar *roots, Cpath *class);
 
 #endif
 

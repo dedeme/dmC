@@ -73,15 +73,16 @@ Scanner *scanner_new(Cpath *file, char *text) {
   return _scanner_new(file, text, 0, 1, 0);
 }
 
-///
+Scanner *scanner_new_text(char *text) {
+  return _scanner_new(cpath_new("", "Text"), text, 0, 1, 0);
+}
+
 bool scanner_eq(Scanner *this, Scanner *other) {
   XNULL(this)
   XNULL(other)
   return this->tx == other->tx && this->ix == other->ix;
 }
 
-/// Returns a new Scanner advanced one character. At end of text, it returns
-/// this.
 Scanner *scanner_next(Scanner *this) {
   char ch = this->tx[this->ix];
   if (ch) {
@@ -104,6 +105,6 @@ bool scanner_is_end(Scanner *this) {
   return !this->tx[this->ix];
 }
 
-Error *scanner_mk_error(Scanner *this, char *msg) {
-  return error_new(msg, cpath_relative(this->file), this->nline, this->nchar);
+Fail *scanner_mk_fail(Scanner *this, char *msg) {
+  return fail_new(msg, cpath_relative(this->file), this->nline, this->nchar);
 }

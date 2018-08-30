@@ -8,6 +8,8 @@
 #include "writers/structure.h"
 
 void struct_write(RW *rw, Structure *st) {
+  rw_writeln(rw, "#include \"dmc/ct/Ajson.h\"");
+  rw_writeln(rw, "");
   rw_writeln(rw, str_printf("struct %s%s {", st->head->prefix, st->head->id));
 
   bool first = true;

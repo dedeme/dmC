@@ -8,16 +8,16 @@
 ///   file -> File with error
 ///   nline -> line number of error (1 based)
 ///   nchar -> char number of error (0 based)
-#ifndef TYPES_ERROR_H
-  # define TYPES_ERROR_H
+#ifndef TYPES_FAIL_H
+  # define TYPES_FAIL_H
 
 /*.-.*/
 
 ///
-typedef struct error_Error Error;
+typedef struct fail_Fail Fail;
 
 ///
-Error *error_new(
+Fail *fail_new(
   char *msg,
   char *file,
   int nline,
@@ -25,21 +25,21 @@ Error *error_new(
 );
 
 ///
-char *error_msg(Error *this);
+char *fail_msg(Fail *this);
 
 ///
-char *error_file(Error *this);
+char *fail_file(Fail *this);
 
 ///
-int error_nline(Error *this);
+int fail_nline(Fail *this);
 
 ///
-int error_nchar(Error *this);
+int fail_nchar(Fail *this);
 
 /*.-.*/
 
 /// Returns a message kind of "Main.mini[1, 32]: A message".
-char *error_fmsg(Error *this);
+char *fail_fmsg(Fail *this);
 
 
 #endif

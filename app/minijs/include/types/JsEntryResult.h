@@ -9,7 +9,7 @@
 #ifndef TYPES_JSENTRYRESULT_H
   # define TYPES_JSENTRYRESULT_H
 
-#include "Errors.h"
+#include "Fails.h"
 #include "JsEntry.h"
 
 /*.-.*/
@@ -18,15 +18,15 @@
 typedef struct jsEntryResult_JsEntryResult JsEntryResult;
 
 ///
-JsEntryResult *jsEntryResult_new(Errors *errors, JsEntry *entry);
+JsEntryResult *jsEntryResult_new(Fails *fails, JsEntry *entry);
 
 ///
-Errors *jsEntryResult_errors(JsEntryResult *this);
+Fails *jsEntryResult_fails(JsEntryResult *this);
 
 /*.-.*/
 
-/// Constructor of errors is known to have fails.
-JsEntryResult *jsEntryResult_fail(Errors *errors);
+/// Constructor of errors is known to have errors.
+JsEntryResult *jsEntryResult_error(Fails *fails);
 
 
 /// Returns an entry if there is no error, otherwise throws an illegal_state

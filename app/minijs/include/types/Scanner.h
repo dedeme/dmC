@@ -3,16 +3,14 @@
 
 /// Text scanner
 /// <p>
-/// Fields:
-///   root: Parent directory.
-///   relative: path relative to root.
+/// Fields: Opaque.<p>
 /// Scanner reads a text character by character.<p>
 /// Every new character scanned returns a new scanner.
 #ifndef TYPES_SCANNER_H
   # define TYPES_SCANNER_H
 
 #include "Cpath.h"
-#include "Error.h"
+#include "Fail.h"
 #include "stdbool.h"
 
 /*.-.*/
@@ -40,6 +38,9 @@ int scanner_nchar(Scanner *this);
 /// Creates a new Scanner.
 Scanner *scanner_new(Cpath *file, char *text);
 
+/// Creates a new scanner from a text with a dummy Cpath.
+Scanner *scanner_new_text(char *text);
+
 ///
 bool scanner_eq(Scanner *this, Scanner *other);
 
@@ -54,7 +55,7 @@ char scanner_char(Scanner *this);
 bool scanner_is_end(Scanner *this);
 
 /// Make a message in the position of 'this'.
-Error *scanner_mk_error(Scanner *this, char *msg);
+Fail *scanner_mk_fail(Scanner *this, char *msg);
 
 #endif
 

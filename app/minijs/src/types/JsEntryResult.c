@@ -9,42 +9,44 @@
 
 /*.
 -struct: JsEntryResult
-  errors: Errors *
+  fails: Fails *
   -entry: JsEntry *
 */
 
 /*.-.*/
+#include "dmc/ct/Ajson.h"
+
 struct jsEntryResult_JsEntryResult {
-  Errors *errors;
+  Fails *fails;
   JsEntry *entry;
 };
 
-JsEntryResult *jsEntryResult_new(Errors *errors, JsEntry *entry) {
+JsEntryResult *jsEntryResult_new(Fails *fails, JsEntry *entry) {
   JsEntryResult *this = MALLOC(JsEntryResult);
-  XNULL(errors)
-  this->errors = errors;
+  XNULL(fails)
+  this->fails = fails;
   XNULL(entry)
   this->entry = entry;
   return this;
 }
 
-Errors *jsEntryResult_errors(JsEntryResult *this) {
+Fails *jsEntryResult_fails(JsEntryResult *this) {
   XNULL(this)
-  return this->errors;
+  return this->fails;
 }
 /*.-.*/
 
-JsEntryResult *jsEntryResult_fail(Errors *errors) {
+JsEntryResult *jsEntryResult_error(Fails *fails) {
+  XNULL(fails)
   JsEntryResult *this = MALLOC(JsEntryResult);
-  XNULL(errors)
-  this->errors = errors;
+  this->fails = fails;
   this->entry = NULL;
   return this;
 }
 
 JsEntry *jsEntryResult_entry(JsEntryResult *this) {
   XNULL(this);
-  if (lerror_empty(errors_errors(this->errors))) {
+  if (!afail_size(fails_errors(this->fails))) {
     return this->entry;
   }
   THROW(exc_illegal_state_t) "The JsEntryResult contains errors" _THROW

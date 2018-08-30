@@ -9,42 +9,44 @@
 
 /*.
 -struct: JsClassResult
-  errors: Errors *
+  fails: Fails *
   -class: JsClass *
 */
 
 /*.-.*/
+#include "dmc/ct/Ajson.h"
+
 struct jsClassResult_JsClassResult {
-  Errors *errors;
+  Fails *fails;
   JsClass *class;
 };
 
-JsClassResult *jsClassResult_new(Errors *errors, JsClass *class) {
+JsClassResult *jsClassResult_new(Fails *fails, JsClass *class) {
   JsClassResult *this = MALLOC(JsClassResult);
-  XNULL(errors)
-  this->errors = errors;
+  XNULL(fails)
+  this->fails = fails;
   XNULL(class)
   this->class = class;
   return this;
 }
 
-Errors *jsClassResult_errors(JsClassResult *this) {
+Fails *jsClassResult_fails(JsClassResult *this) {
   XNULL(this)
-  return this->errors;
+  return this->fails;
 }
 /*.-.*/
 
-JsClassResult *jsClassResult_fail(Errors *errors) {
+JsClassResult *jsClassResult_error(Fails *fails) {
+  XNULL(fails)
   JsClassResult *this = MALLOC(JsClassResult);
-  XNULL(errors)
-  this->errors = errors;
+  this->fails = fails;
   this->class = NULL;
   return this;
 }
 
 JsClass *jsClassResult_class(JsClassResult *this) {
   XNULL(this);
-  if (lerror_empty(errors_errors(this->errors))) {
+  if (!afail_size(fails_errors(this->fails))) {
     return this->class;
   }
   THROW(exc_illegal_state_t) "The JsClassResult contains errors" _THROW

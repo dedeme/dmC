@@ -2,13 +2,13 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include <gc.h>
-#include "types/Error.h"
+#include "types/Fail.h"
 #include "dmc/str.h"
 #include "dmc/exc.h"
 #include "dmc/DEFS.h"
 
 /*.
--struct: Error
+-struct: Fail
   msg: char *
   file: char *
   nline: int
@@ -16,20 +16,22 @@
 */
 
 /*.-.*/
-struct error_Error {
+#include "dmc/ct/Ajson.h"
+
+struct fail_Fail {
   char *msg;
   char *file;
   int nline;
   int nchar;
 };
 
-Error *error_new(
+Fail *fail_new(
   char *msg,
   char *file,
   int nline,
   int nchar
 ) {
-  Error *this = MALLOC(Error);
+  Fail *this = MALLOC(Fail);
   XNULL(msg)
   this->msg = msg;
   XNULL(file)
@@ -39,28 +41,28 @@ Error *error_new(
   return this;
 }
 
-char *error_msg(Error *this) {
+char *fail_msg(Fail *this) {
   XNULL(this)
   return this->msg;
 }
 
-char *error_file(Error *this) {
+char *fail_file(Fail *this) {
   XNULL(this)
   return this->file;
 }
 
-int error_nline(Error *this) {
+int fail_nline(Fail *this) {
   XNULL(this)
   return this->nline;
 }
 
-int error_nchar(Error *this) {
+int fail_nchar(Fail *this) {
   XNULL(this)
   return this->nchar;
 }
 /*.-.*/
 
-char *error_fmsg(Error *this) {
+char *fail_fmsg(Fail *this) {
   return str_printf("%s[%d, %d]: %s",
     this->file, this->nline, this->nchar, this->msg
   );

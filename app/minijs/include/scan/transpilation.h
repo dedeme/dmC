@@ -10,10 +10,10 @@
   # define SCAN_TRANSPILATION_H
 
 #include "types/UserData.h"
-#include "types/Errors.h"
+#include "types/Fails.h"
 
 /// Makes transpilation.
-Errors *transpilation_run (UserData *userData);
+Fails *transpilation_run (UserData *userData);
 
 #endif
 

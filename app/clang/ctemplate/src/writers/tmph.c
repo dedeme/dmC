@@ -160,7 +160,6 @@ static void wtypedef(RW *rw, Structure *st) {
   if (st->head->mod == HEAD_SERIAL) {
     rw_writeln(rw, "");
     rw_writeln(rw, "#include \"dmc/Json.h\"");
-    rw_writeln(rw, "#include \"dmc/ct/Ajson.h\"");
   }
   if (st->head->id_mod != HEAD_ID_PRIVATE) {
     rw_writeln(rw, "");

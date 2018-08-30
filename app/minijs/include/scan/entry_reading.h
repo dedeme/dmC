@@ -9,14 +9,11 @@
 #ifndef SCAN_ENTRY_READING_H
   # define SCAN_ENTRY_READING_H
 
-#include "types/UserData.h"
-#include "types/Errors.h"
+#include "dmc/ct/Lchar.h"
 #include "types/Dep.h"
 #include "types/JsEntryResult.h"
 
-/// Makes transpilation.
-JsEntryResult *entry_reading_run (
-  UserData *userData, Errors *errors, Dep *function
-);
+/// Read a class entry.
+JsEntryResult *entry_reading_run (Lchar *roots, Dep *function);
 
 #endif
