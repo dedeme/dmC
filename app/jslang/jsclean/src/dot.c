@@ -17,7 +17,7 @@ static bool is_prop_start(char ch) {
   return
     (ch >= 'a' && ch <= 'z') ||
     (ch >= 'A' && ch <= 'Z') ||
-    ch == '_' || ch == '$' || ch == '('
+    ch == '_' || ch == '$'
   ;
 }
 
@@ -42,6 +42,10 @@ static char *get_id(char *s) {
       buf_cadd(bf, ch);
       ch = s[ix++];
     } else {
+      if (ch == '(') {
+        buf_cadd(bf, '(');
+        buf_cadd(bf, ')');
+      }
       break;
     }
   }
