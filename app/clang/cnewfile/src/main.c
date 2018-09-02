@@ -43,7 +43,7 @@ static void mkh(char *hfile, char *path) {
   ;
 
   char *cname = str_to_upper(path);
-  cname = str_creplace(cname, '/', '.');
+  cname = str_creplace(cname, '/', '_');
   char *tx = str_replace(template, "$DATE$", date());
   tx = str_replace(tx, "$CNAME$", cname);
   file_write(hfile, tx);
@@ -56,9 +56,8 @@ static void mkc(char *cfile, char *path) {
     "#include \"$CNAME$.h\"\n\n"
   ;
 
-  char *cname = str_creplace(path, '/', '.');
   char *tx = str_replace(template, "$DATE$", date());
-  tx = str_replace(tx, "$CNAME$", cname);
+  tx = str_replace(tx, "$CNAME$", path);
   file_write(cfile, tx);
 }
 
