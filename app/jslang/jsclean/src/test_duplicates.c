@@ -18,7 +18,7 @@ bool test_duplicates_run(Achar *roots) {
         void fn(char *f) {
           char *relative = str_sub_end(f, len);
           char *ftest = path_cat(r2, relative, NULL);
-          if (file_exists(ftest)) {
+          if (file_exists(ftest) && !file_is_directory(ftest)) {
             printf(
               "File '%s' is duplicate:\n%s\n%s\n",
               path_name(f), f, ftest

@@ -292,7 +292,7 @@ static char *make_dic(Mapos *keys, char *lang, char *target) {
         buf_add(trans, str_printf("# %s: %d\n", p->file, p->line));
       }_EACH
       buf_add(trans, str_printf("%s = %s\n\n", k, v));
-      buf_add(dic, str_printf("    \"%s\": \"%s\",\n", k, v));
+      buf_add(dic, str_printf("  \"%s\": \"%s\",\n", k, v));
 
       mchar_remove(old_dic, k);
     }
@@ -343,30 +343,27 @@ int main (int argc, char **argv) {
     THROW("") "'%s' is not a directory\n", jstarget_dir _THROW
   }
 
-  char *jstarget = path_cat(target, "src", "i18n.js", NULL);
+  char *jstarget = path_cat(target, "src", "I18n.js", NULL);
   LckFile *lck = file_wopen (jstarget);
 
   file_write_text(lck,
     "// Generate by jsi18n. Don't modify\n"
     "\n"
-    "goog.provide(\"I18n\");\n"
-    "\n"
-    "{\n"
-    "  let lang = {};\n\n"
+    "let lang = {};\n\n"
   );
 
   EACH(langs, char, lang) {
     char *dic = make_dic(current_keys, lang, target);
     char *tx = str_printf(
-      "  const %s = {\n"
+      "const %s = {\n"
 			"%s"
-			"  };\n\n",
+			"};\n\n",
       lang, dic);
 		file_write_text(lck, tx);
   }_EACH
 
   file_write_text(lck,
-    "  I18n = class {\n"
+    "export class I18n {\n"
     "  /** @return {void} */\n"
     "  static en () {\n"
     "    lang = en;\n"
@@ -379,47 +376,55 @@ int main (int argc, char **argv) {
     "\n"
     "  /**\n"
     "   * @private\n"
-    "   * @return {!Object<string, string>}\n"
+    "   * @return {!Object<string, string>} Dictionary\n"
     "   */\n"
     "  static lang () {\n"
     "    return lang;\n"
     "  }\n"
-    "}}\n"
+    "}\n"
     "\n"
-    "function _(key) {\n"
-    "  let v = I18n.lang()[key];\n"
+    "\n"
+    "/**\n"
+    " * @param {string} key Value\n"
+    " * @return {string} Translation\n"
+    " */\n"
+    "export function _ (key) {\n"
+    "  const v = I18n.lang()[key];\n"
     "  if (v !== undefined) {\n"
     "    return v;\n"
     "  }\n"
     "  return key;\n"
     "}\n"
     "\n"
-    "function _args(key, ...args) {\n"
+    "/**\n"
+    " * @param {string} key Template\n"
+    " * @param {...string} args Values\n"
+    " * @return {string} Translation\n"
+    " */\n"
+    "export function _args (key, ...args) {\n"
     "  let bf = \"\";\n"
-    "  let v = _(key);\n"
+    "  const v = _(key);\n"
     "  let isCode = false;\n"
     "  for (let i = 0; i < v.length; ++i) {\n"
-    "    let ch = v.charAt(i);\n"
+    "    const ch = v.charAt(i);\n"
     "    if (isCode) {\n"
     "      bf += ch === \"0\" ? args[0]\n"
     "        : ch === \"1\" ? args[1]\n"
-    "        : ch === \"2\" ? args[2]\n"
-    "        : ch === \"3\" ? args[3]\n"
-    "        : ch === \"4\" ? args[4]\n"
-    "        : ch === \"5\" ? args[5]\n"
-    "        : ch === \"6\" ? args[6]\n"
-    "        : ch === \"7\" ? args[7]\n"
-    "        : ch === \"8\" ? args[8]\n"
-    "        : ch === \"9\" ? args[9]\n"
-    "        : ch === \"%\" ? \"%\"\n"
-    "        : \"%\" + ch;\n"
+    "          : ch === \"2\" ? args[2]\n"
+    "            : ch === \"3\" ? args[3]\n"
+    "              : ch === \"4\" ? args[4]\n"
+    "                : ch === \"5\" ? args[5]\n"
+    "                  : ch === \"6\" ? args[6]\n"
+    "                    : ch === \"7\" ? args[7]\n"
+    "                      : ch === \"8\" ? args[8]\n"
+    "                        : ch === \"9\" ? args[9]\n"
+    "                          : ch === \"%\" ? \"%\"\n"
+    "                            : \"%\" + ch;\n"
     "      isCode = false;\n"
+    "    } else if (ch === \"%\") {\n"
+    "      isCode = true;\n"
     "    } else {\n"
-    "      if (ch === \"%\") {\n"
-    "        isCode = true;\n"
-    "      } else {\n"
-    "        bf += ch\n"
-    "      }\n"
+    "      bf += ch;\n"
     "    }\n"
     "  }\n"
     "  return bf;\n"
