@@ -349,6 +349,8 @@ int main (int argc, char **argv) {
   file_write_text(lck,
     "// Generate by jsi18n. Don't modify\n"
     "\n"
+    "/** I18n management. */\n"
+    "\n"
     "let lang = {};\n\n"
   );
 

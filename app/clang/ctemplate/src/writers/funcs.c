@@ -39,7 +39,7 @@ void funcs_write(RW *rw, Structure *st) {
       ));
       rw_writeln(rw, "  XNULL(this)");
       if (str_ends(p->type, "*")) {
-        rw_write(rw, str_printf("  XNULL(%s)", p->id));
+        rw_writeln(rw, "  XNULL(value)");
       }
       rw_writeln(rw, str_printf("  this->%s = value;", p->id));
       rw_writeln(rw, "}");
@@ -64,7 +64,7 @@ void funcs_write(RW *rw, Structure *st) {
       ));
       rw_writeln(rw, "  XNULL(this)");
       if (str_ends(v->type, "*")) {
-        rw_write(rw, str_printf("  XNULL(%s)", v->id));
+        rw_writeln(rw, "  XNULL(value)");
       }
       rw_writeln(rw, str_printf("  this->%s = value;", v->id));
       rw_writeln(rw, "}");

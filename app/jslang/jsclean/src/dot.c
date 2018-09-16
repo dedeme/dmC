@@ -6,11 +6,11 @@
 static char *db = ".jsclean_dots.db";
 
 static Json *to_json(void *a) {
-  return achar_to_json(a, json_wstring);
+  return achar_to_json(a);
 }
 
 static void *from_json(Json *js) {
-  return achar_from_json(js, json_rstring);
+  return achar_from_json(js);
 }
 
 static bool is_prop_start(char ch) {
