@@ -1,11 +1,11 @@
-// Copyright 25-Sept-2018 ºDeme
+// Copyright 27-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#ifndef ALL_H
-  #define ALL_H
+#ifndef TESTGEN_H
+  #define TESTGEN_H
 
 #include "dmc/std.h"
 
-int main (int argc, char **argv);
+void testGen_run(void);
 
 #endif

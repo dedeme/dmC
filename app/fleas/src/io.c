@@ -1,342 +1,314 @@
-// Copyright 15-Feb-2018 ºDeme
+// Copyright 26-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <dmc/all.h>
-#include "market/Quote.h"
 #include "io.h"
-#include "Options.h"
-#include "Quotes.h"
 #include "DEFS.h"
 #include "Flea.h"
+#include "data/HistoricEntry.h"
+#include "dmc/Json.h"
+#include "dmc/ct/Ajson.h"
+#include "dmc/ct/Mjson.h"
 
-static char *home = NULL;
-static char *data_dir_base = NULL;
-static char *data_dir_opt = NULL;
-static char *tmp_dir = NULL;
-static char *bolsa_data_dir = NULL;
-static char *fversion = NULL;
+static char *cat(char *base, char *dir) {
+  return path_cat(base, dir, NULL);
+}
 
 void io_init(void) {
-  home = sys_home();
+  char *home = sys_home();
+  file_mkdir(home);
 
-  data_dir_base = path_cat(home, "data", NULL);
-  if (!file_exists(data_dir_base)) {
-    file_mkdir(data_dir_base);
-    file_mkdir(path_cat(data_dir_base, "all", NULL));
-    file_mkdir(path_cat(data_dir_base, "best", NULL));
-    file_mkdir(path_cat(data_dir_base, "sel", NULL));
-    file_mkdir(path_cat(data_dir_base, "selBest", NULL));
-  }
+  Group **groups;
+  int groups_number;
+  io_groups_list(&groups, &groups_number);
+  RANGE0(i, groups_number) {
+    char *sel_type = io_group_to_str(groups[i]);
 
-  fversion = path_cat(data_dir_base, "version.txt", NULL);
-  if (!file_exists(fversion)) {
-    file_write(fversion, DATA_VERSION);
-  } else {
-    char *v = file_read(fversion);
-    if (strcmp(v, DATA_VERSION)) {
-      THROW exc_illegal_argument("v", DATA_VERSION, v) _THROW
-    }
-  }
+    char *sel_dir = cat(home, sel_type);
+    file_mkdir(sel_dir);
 
-  Options *opts = options_get();
-  data_dir_opt = options_sel(opts)
-    ? options_best(opts)
-      ? path_cat(data_dir_base, "selBest", NULL)
-      : path_cat(data_dir_base, "sel", NULL)
-    : options_best(opts)
-      ? path_cat(data_dir_base, "best", NULL)
-      : path_cat(data_dir_base, "all", NULL)
-    ;
-
-  tmp_dir = path_cat(home, "tmp", NULL);
-  if (file_exists(tmp_dir)) {
-    file_del(tmp_dir);
-  }
-  file_mkdir(tmp_dir);
-
-  bolsa_data_dir = path_cat(home, "bolsa_data", NULL);
-  if (!file_exists(bolsa_data_dir)) {
-    THROW "Symbolic link to 'bolsa_data' is missing" _THROW
-  }
-}
-
-Nicks *io_nicks(void) {
-  char *data_db = path_cat(bolsa_data_dir, "data.db", NULL);
-  Map/*Json*/ *data = json_robject(file_read(data_db));
-
-  Map/*Json*/ *companies = json_robject(map_get(data, "companies"));
-
-  if (arr_size((Arr *)companies) != NICKS_NUMBER)
-    THROW
-      "arr_size(status) is %d, but ought to be %d",
-      arr_size((Arr *)companies), NICKS_NUMBER
-    _THROW
-
-  Nicks *nks = nicks_new(NICKS_NUMBER);
-  RANGE0(i, NICKS_NUMBER) {
-    Kv *kv = (Kv *)arr_get((Arr *)companies, i);
-    Arr/*Json*/ *av = json_rarray(kv->value);
-    if (*json_rstring(arr_get(av, C_STATUS))) {
-      THROW exc_illegal_argument(
-        kv->key, "blank", json_rstring(arr_get(av, C_STATUS))
-      )_THROW
-    }
-    Nick *nick = nick_new(kv->key);
-    if (json_rbool(arr_get(av, C_SELECTED))) {
-      nick_set_sel(nick);
-    }
-    if (json_rbool(arr_get(av, C_IBEX))) {
-      nick_set_in_ibex(nick);
-    }
-    nicks_set(nks, i, nick);
+    char *historic = cat(sel_dir, "historic");
+    file_mkdir(historic);
   }_RANGE
-
-  return nks;
 }
 
-static Quote *quote_from_str(char *quote) {
-  Arr/*char*/ *qparts = str_csplit(quote, ':');
+void io_clean(void) {
+  Group **groups;
+  int groups_number;
+  io_groups_list(&groups, &groups_number);
+  RANGE0(i, groups_number) {
+    char *sel_type = io_group_to_str(groups[i]);
 
-  return quote_new(
-    atof(arr_get(qparts, 1)),
-    atof(arr_get(qparts, 2)),
-    atof(arr_get(qparts, 3)),
-    atof(arr_get(qparts, 4)),
-    atoi(arr_get(qparts, 5))
-  );
+    char *sel_dir = cat(sys_home(), sel_type);
+    file_del(sel_dir);
+    file_mkdir(sel_dir);
+
+    char *historic = cat(sel_dir, "historic");
+    file_mkdir(historic);
+  }_RANGE
 }
 
-Arr/*char*/ *io_quotes(Nicks *nicks) {
-  Arr/*char*/ *qdates = arr_new();
-  Quote **quotes = quotes_get();
+bool io_lock(void) {
+  char *lock = path_cat(sys_home(), "lock", NULL);
+  if (file_exists(lock)) {
+    puts("Fleas already is running.\nOtherwise type:\nfleas unlock\n");
+    return false;
+  }
+  file_write(lock, "");
+  return true;
+}
 
-  char *path = path_cat(
-    bolsa_data_dir,
-    str_printf("%s.db", nick_id(nicks_get(nicks, 0))),
-    NULL
-  );
-  Arr/*char*/ *lines = str_csplit(file_read(path), '\n');
-  arr_reverse(lines);
+void io_unlock(void) {
+  char *lock = path_cat(sys_home(), "lock", NULL);
+  file_del(lock);
+}
 
-  EACH(lines, char, line) {
-    int ix = str_cindex(line, ':');
-    arr_add(qdates, str_sub(line, 0, ix));
+void io_send_stop(void) {
+  char *stop = path_cat(sys_home(), "stop", NULL);
+  file_write(stop, "");
+}
+
+void io_remove_stop(void) {
+  char *stop = path_cat(sys_home(), "stop", NULL);
+  file_del(stop);
+}
+
+bool io_stoped(void) {
+  char *stop = path_cat(sys_home(), "stop", NULL);
+  return file_exists(stop);
+}
+
+static char *gs[3] = {"sel", "ibex", "all"};
+void io_groups_list(Group ***groups, int *groups_number) {
+  *groups = (Group **)gs;
+  *groups_number = 3;
+}
+
+char *io_group_to_str(Group *group) {
+  return (char *)group;
+}
+
+// If date does not match with q.date, returns NULL.
+static Quote *quote_from_str(char *date, char *q) {
+  Achar *parts = str_csplit(q, ':');
+  if (str_eq(achar_get(parts, 0), date)) {
+    return quote_new(
+      atof(achar_get(parts, 1)),
+      atof(achar_get(parts, 2)),
+      atof(achar_get(parts, 3)),
+      atof(achar_get(parts, 4)),
+      atoi(achar_get(parts, 5))
+    );
+  }
+  return NULL;
+}
+
+static Achar *read_dates(char *model_path) {
+  Achar *r = achar_new();
+  char *qs = str_trim(file_read(model_path));
+  EACH(str_csplit(qs, '\n'), char, q) {
+    Achar *parts = str_csplit(q, ':');
+    achar_add(r, achar_get(parts, 0));
   }_EACH
-
-  if (arr_size(qdates) != QUOTES_NUMBER)
-    THROW
-      "arr_size(qdates) is %d, but ought to be %d",
-      arr_size(qdates), QUOTES_NUMBER
-    _THROW
-
-  RANGE0(nix, NICKS_NUMBER) {
-    char *nick = nick_id(nicks_get(nicks, nix));
-    char *path = path_cat(bolsa_data_dir, str_printf("%s.db", nick), NULL);
-    Arr/*char*/ *lines = str_csplit(file_read(path), '\n');
-    arr_reverse(lines);
-
-    RANGE0(i, QUOTES_NUMBER) {
-      char *line = arr_get(lines, i);
-      int ix = str_cindex(line, ':');
-      char *date = str_sub(line, 0, ix);
-      if (strcmp(date, arr_get(qdates, i))) {
-        THROW
-          "io_quotes: Date does not match at index %d between %s and %s "
-          "(%s : %s)",
-          i, nick, nick_id(nicks_get(nicks, 0)),
-          date, (char *)arr_get(qdates, i)
-        _THROW
-      }
-
-      quotes[i * NICKS_NUMBER + nix] = quote_from_str(line);
-    }_RANGE
-  }_RANGE
-  return qdates;
+  achar_reverse(r);
+  return r;
 }
 
-static Fleas *read_fleas() {
-  Fleas *fleas = fleas_new(FLEAS_NUMBER);
-  RANGE0(i, FLEAS_NUMBER / 1000) {
-    char *path = path_cat(data_dir_opt, str_printf("fleas%d.db", i), NULL);
-    Arr/*Json*/ *jsa = json_rarray(file_read(path));
-    size_t ifl = i * 1000;
-    EACH(jsa, Json, a) {
-      fleas_set(fleas, ifl++, flea_restore(a));
-    }_EACH
-  }_RANGE
-  return fleas;
-}
-
-void io_get_fleas(size_t *fleaId, size_t *cycle, Fleas **fleas) {
-  char *path = path_cat(data_dir_opt, "conf.db", NULL);
-  if (!file_exists(path)) {
-    *fleas = fleas_new(FLEAS_NUMBER);
-    RANGE0(i, FLEAS_NUMBER) {
-      Flea *f = flea_new(i + 1, 0);
-      fleas_set(*fleas, i, f);
-    }_RANGE
-
-    *fleaId = FLEAS_NUMBER + 1;
-    *cycle = 0;
-
-    io_set_fleas(FLEAS_NUMBER + 1, 0, *fleas);
-    return;
-  }
-
-  Map/*Json*/ *jsm = json_robject(file_read(path));
-  *fleaId = (size_t)jmap_guint(jsm, "fleaId");
-  *cycle = (size_t)jmap_guint(jsm, "cycle");
-
-  *fleas = read_fleas();
-}
-
-void io_set_fleas(size_t fleaId, size_t cycle, Fleas *fleas) {
-  char *path = path_cat(data_dir_opt, "conf.db", NULL);
-
-  Map/*Json*/ *jsm = map_new();
-  jmap_puint(jsm, "fleaId", fleaId);
-  jmap_puint(jsm, "cycle", cycle);
-  file_write(path, json_wobject(jsm));
-
-  size_t i = 0;
-  size_t size = fleas_size(fleas);
-  while (i < size) {
-    size_t end = i + 1000;
-    if (end > size) {
-      end = size;
-    }
-
-    path = path_cat(data_dir_opt, str_printf("fleas%d.db", i / 1000), NULL);
-
-    Arr/*Json*/ *jsa = arr_new();
-    RANGE(ifl, i, end) {
-      arr_add(jsa, flea_serialize(fleas_get(fleas, ifl)));
-    }_RANGE
-
-    file_write(path, json_warray(jsa));
-    i += 1000;
-  }
-}
-
-static void save_bests (
-  size_t cycle, Json *data, uint level, uint level10
+void io_read_nicks(
+  int *model,
+  Achar **nicks,
+  char *data_dir,
+  Group *sel
 ) {
-  if (cycle % level10) {
-    return;
+  char *version = file_read(path_cat(data_dir, "version.txt", NULL));
+  if (!str_eq(version, DATA_VERSION)) {
+    exc_illegal_state(str_printf(
+      "Data base version '%s' is expected, but '%s' was found",
+      DATA_VERSION, version
+    ));
   }
-  char *path = path_cat(data_dir_opt, str_printf("bests%d.db", level), NULL);
+  Json *js = (Json *)file_read(path_cat(data_dir, "nicks.db", NULL));
+  Ajson *data = json_rarray(js);
+  char *model_id = json_rstring(ajson_get(data, 1));
+  Ajson *nicks_js = json_rarray(ajson_get(data, 2));
+  Achar *nks = achar_new();
+  char *model_nick = "";
+  EACH(nicks_js, Json, js) {
+    Ajson *nk_js = json_rarray(js);
+    if (
+      str_eq(io_group_to_str(sel), "ibex") &&
+      !json_rbool(ajson_get(nk_js, 2))
+    ) {
+      continue;
+    }
+    if (
+      str_eq(io_group_to_str(sel), "sel") &&
+      !json_rbool(ajson_get(nk_js, 3))
+    ) {
+      continue;
+    }
+    char *nk = json_rstring(ajson_get(nk_js, 1));
+    if (str_eq(json_rstring(ajson_get(nk_js, 0)), model_id)) {
+      model_nick = nk;
+    }
+    achar_add(nks, nk);
+  }_EACH
+  achar_sort(nks);
 
-  Arr/*Json*/ *entry = arr_new();
-  jarr_auint(entry, cycle);
-  arr_add(entry, data);
-
-  Json *entryjs = json_warray(entry);
-
-  if (!file_exists(path)) {
-    Arr/*Json*/ *datajs = arr_new();
-    arr_add(datajs, entryjs);
-    file_write(path, json_warray(datajs));
-    return;
+  int md = -1;
+  EACH(nks, char, nk) {
+    if (str_eq(nk, model_nick)) {
+      md = _i;
+      break;
+    }
+  }_EACH
+  if (md == -1) {
+    md = 0;
   }
 
-  Json *file_data = file_read(path);
-
-  Arr/*Json*/ *datajs = json_rarray(file_data);
-  arr_insert(datajs, 0, entryjs);
-
-  while (arr_size(datajs) > 10) {
-    Json *extrajs = arr_get(datajs, 10);
-    Arr/*Json*/ *extra_entryjs = json_rarray(extrajs);
-
-    size_t c = json_ruint(arr_get(extra_entryjs, 0));
-    save_bests(c, arr_get(extra_entryjs, 1), level + 1, level10 * 10);
-
-    arr_remove(datajs, 10);
-  }
-
-  file_write(path, json_warray(datajs));
+  *model = md;
+  *nicks = nks;
 }
 
-void io_save_bests(size_t cycle, Json *data) {
-  save_bests(cycle, data, 1, 1);
-}
+void io_read_quotes(
+  Achar **nicks,
+  Achar **dates,
+  Quote ****quotes,
+  char *data_dir,
+  Group *sel
+) {
+  int model;
+  Achar *nks;
+  io_read_nicks(&model, &nks, data_dir, sel);
 
-void io_save_traces(Json *data) {
-  char *path = path_cat(data_dir_opt, "traces.db", NULL);
-  file_write(path, data);
-}
+  char *q_dir = path_cat(data_dir, "quotes", NULL);
 
-void io_backup(char *dir) {
-  if (!file_is_directory(dir)) {
-    THROW "'%s' is not a directory", dir _THROW
-  }
+  Achar *dts = read_dates(str_printf("%s/%s.db", q_dir, achar_get(nks, model)));
+  int dates_size = achar_size(dts);
 
-  char *path = dir;
-  if (*dir != '/') {
-    path = path_cat(file_cwd(), dir, NULL);
-  }
+  Achar *rnicks = achar_new();
+  Aaquote *qs = aaquote_new();
+  REPEAT(dates_size) {
+    aaquote_add(qs, aquote_new());
+  }_REPEAT
 
-  char *date = date_to_str(date_now());
-  char *file = path_cat(path, str_printf("Fleas%s.zip", date), NULL);
+  EACH(nks, char, nk) {
+    char *n_path = str_printf("%s/%s.db", q_dir, nk);
+    char *data = str_trim(file_read(n_path));
+    Achar *qs_str = str_csplit(data, '\n');
+    if (achar_size(qs_str) != dates_size) {
+      continue;
+    }
+    achar_reverse(qs_str);
 
-  file_del(file);
-  ext_zip(data_dir_base, file);
-}
-
-void io_restore(char *file) {
-  ext_unzip(file, tmp_dir);
-
-  char *new_fversion = path_cat(home, "tmp", "data", "version.txt", NULL);
-  if (!file_exists(fversion)) {
-    THROW
-      "'%s' is not a Fleas backup:\n"
-      "It does not contains the file 'data/version.txt'",
-      file
-    _THROW
-  }
-
-  char *version_data = file_read(new_fversion);
-  if (strcmp(version_data, DATA_VERSION)) {
-    Arr/*char*/ *parts_must = str_csplit_trim(DATA_VERSION, ':');
-    Arr/*char*/ *parts_actual = str_csplit_trim(version_data, ':');
-    THROW
-      "'%s' is no a valid Fleas version backup:\n"
-      "It has version '%s', but it ought to be '%s'",
-      file, (char *)arr_get(parts_actual, 1), (char *)arr_get(parts_must, 1)
-    _THROW
-  }
-
-  char *data_tmp = path_cat(home, "data2", NULL);
-  char *data_new = path_cat(tmp_dir, "data", NULL);
-  file_rename(data_dir_base, data_tmp);
-  file_rename(data_new, data_dir_base);
-  file_del(data_tmp);
-}
-
-void io_duplicates(void) {
-  size_t fleaId;
-  size_t cycle;
-  Fleas *fleas;
-  io_get_fleas(&fleaId, &cycle, &fleas);
-
-  size_t n = 0;
-  RANGE0(i, fleas_size(fleas) - 1) {
-    Flea *f1 = fleas_get(fleas, i);
-    RANGE(j, i + 1, fleas_size(fleas)) {
-      if (flea_gen_eq(f1, fleas_get(fleas, j))) {
-        fleas_set(fleas, j, flea_mutate(f1, fleaId++, cycle));
-        ++n;
+    Aquote *qs_nick = aquote_new();
+    EACH(qs_str, char, q_str) {
+      Quote *q = quote_from_str(achar_get(dts, _i), q_str);
+      if (q) {
+        aquote_add(qs_nick, q);
+      } else {
         break;
       }
+    }_EACH
+    if (aquote_size(qs_nick) != dates_size) {
+      continue;
+    }
+
+    RANGE0(i, dates_size) {
+      aquote_add(aaquote_get(qs, i), aquote_get(qs_nick, i));
+    }_RANGE
+    achar_add(rnicks, nk);
+  }_EACH
+
+  if (achar_size(nks) - achar_size(rnicks) > 20) {
+    THROW("fleas")
+      exc_illegal_state("Reading has been fail in more than 20 companies")
+    _THROW
+  }
+
+  int nicks_size = achar_size(rnicks);
+  Quote ***rquotes = GC_MALLOC(dates_size * sizeof(Quote **));
+  RANGE0(row, dates_size) {
+    Quote **day = GC_MALLOC(nicks_size * sizeof(Quote *));
+    rquotes[row] = day;
+    Aquote *dayq = aaquote_get(qs, row);
+    RANGE0(col, nicks_size) {
+      Quote *r = aquote_get(dayq, col);
+      day[col] = r;
     }_RANGE
   }_RANGE
 
-  io_set_fleas(fleaId, cycle, fleas);
-  printf("Removed %zu fleas\n", n);
+  *nicks = rnicks;
+  *dates = dts;
+  *quotes = rquotes;
 }
 
-/*
-void io_start(void) {
-  file_write(path_cat(dataDir(), "start.lock", NULL), "");
+void io_write_family(Group *gr, Family *fm, int cycle, Aflea *fleas) {
+  Mjson *mjs = mjson_new();
+  jmap_pint(mjs, "cycle", cycle);
+  jmap_parray(mjs, "fleas", (Arr *)fleas, (Json *(*)(void *))flea_to_json);
+
+  char *path = str_printf(
+    "%s/%s/%s.db", sys_home(), io_group_to_str(gr), flea_family_to_str(fm)
+  );
+  file_write(path, (char *)json_wobject(mjs));
 }
-*/
+
+void io_read_family(int *cycle, Aflea **fleas, Group *gr, Family *fm) {
+  *cycle = 0;
+  *fleas = aflea_new();
+
+  char *path = str_printf(
+    "%s/%s/%s.db", sys_home(), io_group_to_str(gr), flea_family_to_str(fm)
+  );
+
+  if (file_exists(path)) {
+    Json *js = (Json *)file_read(path);
+    Mjson *mjs = json_robject(js);
+    *cycle = jmap_gint(mjs, "cycle");
+    *fleas =
+      (Aflea *)jmap_garray(mjs, "fleas", (void *(*)(Json *))flea_from_json);
+  }
+}
+
+void io_write_historic(Group *gr, int cycle, Arr/*HistoricEntry*/ *historic) {
+  char *dir = path_cat(sys_home(), io_group_to_str(gr), "historic", NULL);
+  char *path = str_printf("%s/h%d", dir, cycle);
+
+  Ajson *ajs = ajson_new();
+  EACH(historic, HistoricEntry, e) {
+    ajson_add(ajs, historicEntry_to_json(e));
+  }_EACH
+  file_write(path, (char *)json_warray(ajs));
+
+  // Clean
+  EACH(file_dir(dir), char, f) {
+    char *fname = path_name(f);
+    int fcycle = atoi(str_sub_end(fname, 1));
+    int cut = 10000;
+    while (cut > 9) {
+      if (cycle - fcycle > cut && fcycle % cut) {
+        file_del(f);
+      }
+      cut /= 10;
+    }
+  }_EACH
+}
+
+///
+Map/*Arr[HistoricEntry]*/ *io_read_historic(Group *gr) {
+  char *dir = path_cat(sys_home(), io_group_to_str(gr), "historic", NULL);
+  Map/*Arr[HistoricEntry]*/ *r = map_new();
+  EACH(file_dir(dir), char, f) {
+    char *fname = path_name(f);
+    char *fcycle = str_sub_end(fname, 1);
+
+    Ajson *js = json_rarray((Json *)file_read(f));
+    Arr/*HistoricEntry*/ *a = arr_new();
+    EACH(js, Json, j) {
+      arr_add(a, historicEntry_from_json(j));
+    }_EACH
+
+    map_put(r, fcycle, a);
+  }_EACH
+  return r;
+}

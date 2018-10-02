@@ -1,41 +1,32 @@
-// Copyright 16-Feb-2018 ºDeme
+// Copyright 27-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Mutable data.<p>
-/// A Gen has two values of type uint:
-///   actual : It is the value of Gen.
-///   max : Maximun value for 'actual', exclusive.
-/// The constructor 'gen_new' assigns randomly an actual value to the new Gen.
+/// Unit of mutation
 
 #ifndef GEN_H
-  # define GEN_H
+  #define GEN_H
 
-#include <stdlib.h>
-#include <dmc/Json.h>
+#include "dmc/std.h"
+#include "dmc/Json.h"
 
 ///
 typedef struct gen_Gen Gen;
 
-/// gen_new creates a new Gen with a randomly actual value.
-Gen *gen_new(uint maxOptions);
+/// 'gens' is a double[size]
+Gen *gen_new(int size, double *gens);
 
-///
-Gen *gen_copy(Gen *this);
-
-/// gen_mutate returns a new Gen mutated from 'this'.
+/// Mutation is +- 10%
 Gen *gen_mutate(Gen *this);
 
 ///
-uint gen_max(Gen *this);
+Json *gen_to_json(Gen *this);
 
 ///
-uint gen_actual(Gen *this);
+Gen *gen_from_json(Json *s);
 
-///
-Json *gen_serialize(Gen *this);
+/// There are not range test.
+double gen_get(Gen *this, int ix);
 
-///
-Gen *gen_restore(Json *serial);
-
+/// Mesure of proximity of two gens
+double gen_proximity(Gen *this, Gen *other);
 #endif
-

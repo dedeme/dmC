@@ -1,8 +1,12 @@
 PRG = fleas
 
 C_FILES = $(wildcard src/*.c) \
-          $(wildcard src/families/*.c)
+          $(wildcard src/families/*.c) \
+          $(wildcard src/utils/*.c) \
+          $(wildcard src/data/*.c)
 H_FILES = $(wildcard include/*.h) \
+          $(wildcard include/data/*.h) \
+          $(wildcard include/utils/*.h) \
           $(wildcard include/families/*.h)
 
 CFLAGS = -Wall -rdynamic

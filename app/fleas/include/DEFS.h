@@ -1,71 +1,27 @@
-// Copyright 15-Feb-2018 ºDeme
+// Copyright 27-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Constants
+/// Gloabal constants.
 
 #ifndef DEFS_H
-  # define DEFS_H
+  #define DEFS_H
 
-///
-#define DATA_VERSION "fleas\nData version: 201712\n"
+#include "dmc/std.h"
 
-///
-#define QUOTES_NUMBER 550
+/// Path of directory with quotes data.
+#define QUOTES_DATA "/dm/wwwcgi/dmcgi/Quotes/data"
+/// Data version of quotes data.
+#define DATA_VERSION "Quotes\nData version: 201809\n"
 
-///
-#define NICKS_NUMBER 70
-
-/// Speed to weight moving average of incomes, buys and sells
-#define STAT_INTERVAL 10
-
-/// Minimal cycles to be in bests
-#define TEST_INTERVAL 10
-
+/// Number of fleas per family
+#define FLEA_NUMBER_PER_FAMILY 5000
+/// Multiplier to flea mutation
+#define MUTATION_MULTIPLIER (.7 + rnd_d() * .6)
+/// Fleas initial capital for each cycle
+#define INITIAL_CAPITAL 120000
+/// Number of fleas in ranking
+#define RANKING_NUMBER 100
 /// Mininal operations to survive
 #define MIN_SELLS 45
-
-///
-#define INITIAL_CASH 125000
-
-///
-#define FLEAS_NUMBER 5000
-
-///
-enum Company_property {
-  C_STATUS,
-  C_SELECTED,
-  C_IBEX,
-  C_INVERTIA,
-  C_INFOMERCADOS
-};
-
-///
-enum Family_option {
-  FAMILIES_ALL,
-  FAMILY_BEST,
-  FAMILY_SEL_BEST
-};
-
-///
-enum Family_type {
-  BUY_AND_HOLD,
-  UP_DOWN,
-  MOVING_AVERAGE,
-  WMOVING_AVERAGE,
-  RSI,
-  FOLLOW,
-  FOLLOW_MA,
-  FOLLOW_WMA,
-  FAMILIES_END
-};
-
-///
-#define BESTS_NUMBER 100
-
-///
-#define BESTS_FAMILIES_NUMBER 10
-
-/// WORSTS_NUMBER must be greater or equals as BESTS_NUMBER
-#define WORSTS_NUMBER (200 + FAMILIES_END * BESTS_FAMILIES_NUMBER)
 
 #endif

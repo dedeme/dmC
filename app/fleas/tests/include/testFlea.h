@@ -1,11 +1,11 @@
-// Copyright 25-Sept-2018 ºDeme
+// Copyright 27-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#ifndef ALL_H
-  #define ALL_H
+#ifndef TESTFLEA_H
+  #define TESTFLEA_H
 
 #include "dmc/std.h"
 
-int main (int argc, char **argv);
+void testFlea_run(void);
 
 #endif

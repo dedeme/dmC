@@ -1,133 +1,84 @@
-// Copyright 15-Feb-2018 ºDeme
+// Copyright 27-Sept-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Conspicuous investor
+/// Market inverstor
 
 #ifndef FLEA_H
-  # define FLEA_H
+  #define FLEA_H
 
-#include <stdlib.h>
-#include "DEFS.h"
-#include "dmc/Arr.h"
+#include "dmc/std.h"
 #include "market/Quote.h"
-#include "Stat.h"
-#include "Family.h"
-#include "market/Buy.h"
-#include "market/Sell.h"
-#include "market/Pf.h"
+#include "Gen.h"
 
-typedef struct db_Db Db;
+///
+enum flea_BuySellStatus {BUY_SELL_BUY, BUY_SELL_SELL, BUY_SELL_NONE};
+
+///
+typedef struct flea_Family Family;
+
+/*.-.*/
+
+#include "dmc/Json.h"
 
 ///
 typedef struct flea_Flea Flea;
 
 ///
-Flea *flea_new(size_t id, size_t cycle);
-
-/// Returns true if 'this' and 'other' have the same gens.
-bool flea_gen_eq(Flea *this, Flea *other);
+Gen *flea_gens(Flea *this);
 
 ///
-Flea *flea_mutate(Flea *this, size_t id, size_t cycle);
+int flea_buys(Flea *this);
 
-/// Returns this modified with family parameters
-Flea *flea_fextra(
+///
+int flea_sells(Flea *this);
+
+///
+double flea_assets(Flea *this);
+
+///
+double flea_ponderation(Flea *this);
+
+///
+void flea_set_ponderation(Flea *this, double value);
+
+///
+Json *flea_to_json(Flea *this);
+
+///
+Flea *flea_from_json(Json *s);
+
+/*.-.*/
+
+/// Creates a flea.
+///   Family: one of 'flea_family_list()'
+Flea *flea_prototype(Family *family);
+
+/// Mutates a flea:
+///   this: The flea
+///   cycle: Cycle of creation.
+///   id: Order number within the cycle.
+Flea *flea_mutate(Flea *this, int cycle, int id);
+
+/// Make a operations cycle.
+///   this: The flea.
+///   money: Initial amount to operate.
+///   quotes: Quotes with days in rows and nicks in columns.
+///   days_number: Number of days (rows)
+///   companies_number: Number of companies (columns)
+void flea_operate(
   Flea *this,
-  void *data,
-  bool (*gen_eq)(void *, void *),
-  void (*prepare)(void *),
-  void (*reset)(void *),
-  void (*process)(void *, Flea *, size_t, Quote *),
-  Json *(*trace_data)(void *, size_t),
-  void *(*mutate)(void *),
-  Json *(*serialize)(void *)
+  double money,
+  Quote ***quotes,
+  int days_number,
+  int companies_number
 );
 
-/// flea_prepare prepares 'this' to work
-void flea_prepare(Flea *this, size_t cycle);
-
-/// fles_reset set memory used by 'flea_prepare' to NULL
-void flea_reset(Flea *this);
-
-///
-size_t flea_id(Flea *this);
-
-/// flea_cycle is the cycle when 'this' was created
-size_t flea_cycle(Flea *this);
+/// Returns a list of current families.
+///   familes: Array with all the families
+///   families_number: The families number
+void flea_families_list(Family ***families, int *families_number);
 
 ///
-Family *flea_family(Flea *this);
-
-///
-double flea_bet(Flea *this);
-
-/// Values are 0 -> Not in Ibex, 1 -> Yes in Ibex, 2 -> Indifferent
-size_t flea_ibex(Flea *this);
-
-///
-Stat *flea_stats(Flea *this);
-
-///
-Arr/*Buy*/ *flea_buys(Flea *this);
-
-///
-Arr/*Sell*/ *flea_sells(Flea *this);
-
-///
-double flea_cash(Flea *this);
-
-///
-Pf *flea_portfolio(Flea *this);
-
-///
-size_t flea_nbuys(Flea *this);
-
-///
-size_t flea_nsells(Flea *this);
-
-///
-void flea_process(
-  Flea *this,
-  Db *db,
-  char *date,
-  Quote **day,
-  int traced,
-  Arr/*Trace*/ *traces
-);
-
-///
-Json *flea_serialize(Flea *this);
-
-///
-Flea *flea_restore(Json *serial);
-
-
-// ---------------------------------------------------------
-
-typedef struct fleas_Fleas Fleas;
-
-///
-Fleas *fleas_new(size_t size);
-
-/// fleas_kill set the flea at position 'ix' to NULL. There is no control of
-/// range.
-void fleas_kill(Fleas *this, size_t ix);
-
-///
-size_t fleas_size(Fleas *this);
-
-/// fleas_get returns the flea at position 'ix'. There is no control of range.
-Flea *fleas_get(Fleas *this, size_t ix);
-
-///
-void fleas_set(Fleas *this, size_t ix, Flea *f);
-
-///
-void fleas_sort(Fleas *this);
-
-///
-Json *fleas_serialize(Fleas *this);
+char *flea_family_to_str(Family *family);
 
 #endif
-
-
