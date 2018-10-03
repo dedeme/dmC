@@ -17,6 +17,10 @@
 #define FLEA_NUMBER_PER_FAMILY 5000
 /// Multiplier to flea mutation
 #define MUTATION_MULTIPLIER (.7 + rnd_d() * .6)
+/// Number to take in count proximity
+#define PROXIMITY_NUMBER (FLEA_NUMBER_PER_FAMILY * \
+                          FLEA_NUMBER_PER_FAMILY + \
+                          FLEA_NUMBER_PER_FAMILY) / 100
 /// Fleas initial capital for each cycle
 #define INITIAL_CAPITAL 120000
 /// Number of fleas in ranking

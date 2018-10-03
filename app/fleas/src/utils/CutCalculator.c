@@ -6,48 +6,34 @@
 #include "data/HistoricEntry.h"
 
 // Ordered from less to greater
-static double *ponds = NULL;
-static HistoricEntry **entries = NULL;
+static double *values = NULL;
 static int size = 0;
 
 void cutCalculator_init(int cut_number) {
   size = cut_number;
-  ponds = ATOMIC(size * sizeof(double));
-  entries = GC_MALLOC(size * sizeof(HistoricEntry *));
+  values = ATOMIC(size * sizeof(double));
   RANGE0(i, size) {
-    ponds[i] = 0;
-    entries[i] = NULL;
+    values[i] = 0;
   }_RANGE
 }
 
-void cutCalculator_add(Flea *f) {
-  double p = flea_ponderation(f);
-  HistoricEntry *h = historicEntry_new(
-    f, p, flea_assets(f), flea_buys(f), flea_sells(f)
-  );
+void cutCalculator_add(double value) {
   int ix = size - 1;
-  if (ponds[ix] >= p) {
+  if (values[ix] >= value) {
     return;
   }
   --ix;
   while (ix >= 0) {
-    if (ponds[ix] >= p) {
-      ponds[ix + 1] = p;
-      entries[ix + 1] = h;
+    if (values[ix] >= value) {
+      values[ix + 1] = value;
       return;
     }
-    ponds[ix + 1] = ponds[ix];
-    entries[ix + 1] = entries[ix];
+    values[ix + 1] = values[ix];
     --ix;
   }
-  ponds[0] = p;
-  entries[0] = h;
+  values[0] = value;
 }
 
-Arr/*HistoricEntry*/ *cutCalculator_fleas(void) {
-  Arr *r = arr_new_buf(size + 1);
-  RANGE0(i, size) {
-    arr_add(r, entries[i]);
-  }_RANGE
-  return r;
+double cutCalculator_cut_value(void) {
+  return values[size - 1];
 }

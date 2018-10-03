@@ -83,10 +83,24 @@ void io_read_quotes(
 );
 
 /// Writes family data
-void io_write_family(Group *gr, Family *fm, int cycle, Aflea *fleas);
+void io_write_family(
+  Group *gr,
+  Family *fm,
+  int cycle,
+  double cut_proximity,
+  double inc_proximity,
+  Aflea *fleas
+);
 
 /// Read family data
-void io_read_family(int *cycle, Aflea **fleas, Group *gr, Family *fm);
+void io_read_family(
+  int *cycle,
+  double *cut_proximity,
+  double *inc_proximity,
+  Aflea **fleas,
+  Group *gr,
+  Family *fm
+);
 
 ///
 void io_write_historic(Group *gr, int cycle, Arr/*HistoricEntry*/ *historic);

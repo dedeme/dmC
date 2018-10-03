@@ -68,7 +68,9 @@ int main (int argc, char **argv) {
             break;
           }
           int df = (int)difftime(time(NULL), t);
+          puts  ("_______");
           printf("Elapsed %d of %d minutes\n", df / 60, arg2);
+          puts  ("TTTTTTT");
           if (df > dead_line){
             break;
           }

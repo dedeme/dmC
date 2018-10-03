@@ -242,9 +242,18 @@ void io_read_quotes(
   *quotes = rquotes;
 }
 
-void io_write_family(Group *gr, Family *fm, int cycle, Aflea *fleas) {
+void io_write_family(
+  Group *gr,
+  Family *fm,
+  int cycle,
+  double cut_proximity,
+  double inc_proximity,
+  Aflea *fleas
+){
   Mjson *mjs = mjson_new();
   jmap_pint(mjs, "cycle", cycle);
+  jmap_pdouble(mjs, "cut_proximity", cut_proximity, 8);
+  jmap_pdouble(mjs, "inc_proximity", inc_proximity, 8);
   jmap_parray(mjs, "fleas", (Arr *)fleas, (Json *(*)(void *))flea_to_json);
 
   char *path = str_printf(
@@ -253,8 +262,17 @@ void io_write_family(Group *gr, Family *fm, int cycle, Aflea *fleas) {
   file_write(path, (char *)json_wobject(mjs));
 }
 
-void io_read_family(int *cycle, Aflea **fleas, Group *gr, Family *fm) {
+void io_read_family(
+  int *cycle,
+  double *cut_proximity,
+  double *inc_proximity,
+  Aflea **fleas,
+  Group *gr,
+  Family *fm
+) {
   *cycle = 0;
+  *cut_proximity = 0.5;
+  *inc_proximity = 0.5;
   *fleas = aflea_new();
 
   char *path = str_printf(
@@ -265,6 +283,8 @@ void io_read_family(int *cycle, Aflea **fleas, Group *gr, Family *fm) {
     Json *js = (Json *)file_read(path);
     Mjson *mjs = json_robject(js);
     *cycle = jmap_gint(mjs, "cycle");
+    *cut_proximity = jmap_gdouble(mjs, "cut_proximity");
+    *inc_proximity = jmap_gdouble(mjs, "inc_proximity");
     *fleas =
       (Aflea *)jmap_garray(mjs, "fleas", (void *(*)(Json *))flea_from_json);
   }
