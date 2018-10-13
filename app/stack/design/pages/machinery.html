@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Stack: Machinery</title>
+  <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+  <meta http-equiv="Cache-Control"
+    content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name='lang' content='en' />
+  <meta name='author' content='ºDeme.' />
+  <link rel='icon' type='image/png' href='img/favicon.png' />
+  <link rel='stylesheet' href='http://localhost/notes.css' type='text/css' />
+  </head>
+<body>
+
+<!--_________-->
+<h1>Machinery</h1>
+<!--TTTTTTTTT-->
+
+<hr>
+<!--____________-->
+<h2>Program flux</h2>
+<!--TTTTTTTTTTTT-->
+
+<p>We have:</p>
+
+<h3>Static elements</h3>
+<dl>
+  <dt>MS: Main stack</dt>
+    <dd>
+    Stack used for operations.<br>
+    Contains Expresions.
+    </dd>
+  <dt>CS: Code stack</dt>
+    <dd>
+    Contains code to execute.<br>
+    Code is an array of Expresons.<br>
+    So, each entry in the stack is an array.
+    </dd>
+  <dt>MM: Memory hash</dt>
+    <dd>
+    Contains variables.<br>
+    Keys are strings with Keys.<br>
+    Values are Expresions
+    </dd>
+</dl>
+
+<h3>Dynamics elements</h3>
+<dl>
+  <dt>Main program</dt><dd>Function which start the application</dd>
+  <dt>Controler</dt><dd>Function which execute code.</dd>
+</dl>
+
+<h3>Starting</h3>
+
+<p>
+<tt>Main program</tt> read intial code, translating it to Code (Array of expresions)
+and placing it in CS.
+</p>
+
+<p>
+After that control is passed to <tt>Controler</tt>. This does:
+<pre>
+While has code in CS
+  Read expresion
+  Execute action</pre>
+</p>
+
+<hr>
+<!--_______-->
+<h2>Actions</h2>
+<!--TTTTTTT-->
+
+<h3>Read empty CS</h3>
+<p>End the program.</p>
+
+<h3>Read literal expresion</h3>
+<ol>
+  <li>Move expresion from CS to MS.</li>
+  <li>Continue.</li>
+</ol>
+
+<h3>Read symbol expresion</h3>
+<ul>
+  <li>
+    Without SIGIL:
+    <ul>
+      <li>
+        If is user-defined function (Code expresion):
+        <ol>
+          <li>Move code from MM to CS</li>
+          <li>Continue.</li>
+        </ol>
+      </li>
+      <li>
+        If is user-defined expresion:
+        <ol>
+          <li>Move expresion MM to MS</li>
+          <li>Continue.</li>
+        <ol>
+      </li>
+      <li>
+        If is system-defined function:
+        <ol>
+          <li>Execute function</li>
+          <li>Continue</li>
+        </ol>
+        If is system-defined expresion:
+        <ol>
+          <li>Put it on MS</li>
+          <li>Continue</li>
+        </ol>
+      </li>
+    </ul>
+    <i>NOTE: The symbol is first searched in user-defined symbols.</i>
+  </li>
+  <li>
+    With <tt>=</tt> (e.g. <tt>=such</tt>)
+    <ol>
+      <li>Move expresion from MS to MM</li>
+      <li>Continue.</li>
+    </ol>
+    Within <tt>()</tt> (e.g. <tt>(such)</tt>)
+    <ol>
+      <li>Move code from MM to MS</li>
+      <li>Continue.</li>
+    </ol>
+    <i>NOTE: Is a error if <tt>such</tt> is not code.</i>
+  </li>
+</ul>
+
+
+</body>
+</html>
+

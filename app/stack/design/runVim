@@ -1,0 +1,4 @@
+#!/bin/bash
+
+gvim -geometry 85x65+0+0 -S Session.vim
+

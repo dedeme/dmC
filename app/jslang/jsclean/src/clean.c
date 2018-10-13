@@ -2,7 +2,6 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "clean.h"
-#include "dot.h"
 #include "tp/Rs.h"
 
 int min(int n, int values[]) {
@@ -98,9 +97,6 @@ static Rs *process_line(char *line, enum St st) {
 void clean_run(P *file, char *target) {
   enum St st = CODE;
 
-  Achar *old_props = dot_read(file);
-  Achar *new_props = achar_new();
-
   int nline = 0;
   void *map(char *line) {
     ++nline;
@@ -108,9 +104,6 @@ void clean_run(P *file, char *target) {
     while(true) {
       Rs *rs = process_line(line, st);
       char *read = rs_read(rs);
-      if (st == CODE) {
-        dot_print_and_update(file, old_props, new_props, read, nline);
-      }
       buf_add(bf, read);
       st = rs_state(rs);
       line = rs_rest(rs);
@@ -142,6 +135,4 @@ void clean_run(P *file, char *target) {
   }
   file_from_it(ftarget, lines);
   file_close(lck);
-
-  dot_write(file, new_props);
 }

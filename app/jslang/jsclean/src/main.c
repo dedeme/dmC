@@ -7,12 +7,10 @@
 #include "filter.h"
 #include "lint.h"
 #include "clean.h"
-#include "dot.h"
 #include "tp/P.h"
 
 int main (int argc, char **argv) {
   sys_init("jsclean");
-  dot_init();
 
   Oparams *ops = params_reading_run(argc, argv);
   if (oparams_is_null(ops)) {

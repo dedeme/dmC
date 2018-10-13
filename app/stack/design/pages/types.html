@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Stack: Types</title>
+  <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+  <meta http-equiv="Cache-Control"
+    content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name='lang' content='en' />
+  <meta name='author' content='ºDeme.' />
+  <link rel='icon' type='image/png' href='img/favicon.png' />
+  <link rel='stylesheet' href='http://localhost/notes.css' type='text/css' />
+  </head>
+<body>
+<!--_____-->
+<h1>Types</h1>
+<!--TTTTT-->
+
+<hr>
+<!--___________-->
+<h2>Description</h2>
+<!--TTTTTTTTTTT-->
+
+<h3>bool</h3>
+<table class='frame'><tr><td>
+Values: 'true' or 'false'
+</table>
+
+<h3>number-int</h3>
+<table class='frame'><tr><td>
+Values: C int. Literal without point
+</table>
+
+<h3>number-float</h3>
+<table class='frame'><tr><td>
+Values: C double. Literal with point
+</table>
+
+<h3>string</h3>
+<table class='frame'><tr><td>
+Values: C char * (Bitween quotes). Its elements can be accesed by commands
+        <tt>rune</tt> and <tt>char</tt>.
+</table>
+
+<h3>seq</h3>
+<table class='frame'><tr><td>
+Values: List of types.
+</table>
+
+<hr>
+<!--________________-->
+<h2>Type conversions</h2>
+<!--TTTTTTTTTTTTTTTTT-->
+
+<dl>
+  <dt><tt>int</tt>:</dt>
+    <dd>bool -> int<br>
+        double -> int (Automatic)<br>
+        string -> int</dd>
+  <dt><tt>double</tt></dt>
+    <dd>int -> double (Automatic)</br>
+        string -> double</dd>
+  <dt><tt>string</tt></dt>
+    <dd>bool -> string</br>
+        int -> string</br>
+        double -> string</dd>
+</dl>
+
+
+</body>
+</html>
+
