@@ -1,9 +1,11 @@
-// Copyright 25-Oct-2018 ºDeme
+// Copyright 22-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#ifndef MAIN_H
-  #define MAIN_H
+#ifndef ARG_TESTS_H
+  #define ARG_TESTS_H
 
 #include "dmc/std.h"
+
+void arg_tests(void);
 
 #endif

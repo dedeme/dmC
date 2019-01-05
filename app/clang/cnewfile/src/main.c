@@ -3,18 +3,19 @@
 
 #include "main.h"
 #include "dmc/std.h"
-#include "dmc/Date.h"
+#include "dmc/date.h"
 
 static char *months[] = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sept", "Oct", "Nov","Dec"
   };
 
-static char *date(void) {
-  Date date = date_now();
-  char *r = date_format(date, "%d-M-%Y");
+static char *mk_date_new(void) {
+  time_t date = date_now();
+  char *r = date_f_new(date, "%d-M-%Y");
   int month = date_month(date) - 1;
-  return str_replace(r, "M", months[month]);
+  str_replace(&r, "M", months[month]);
+  return r;
 }
 
 static void help () {
@@ -42,11 +43,17 @@ static void mkh(char *hfile, char *path) {
     "#endif\n"
   ;
 
-  char *cname = str_to_upper(path);
-  cname = str_creplace(cname, '/', '_');
-  char *tx = str_replace(template, "$DATE$", date());
-  tx = str_replace(tx, "$CNAME$", cname);
+  char *d = mk_date_new();
+  char *cname = str_new(path);
+  str_to_upper(&cname);
+  str_creplace(&cname, '/', '_');
+  char *tx = str_new(template);
+  str_replace(&tx, "$DATE$", d);
+  str_replace(&tx, "$CNAME$", cname);
   file_write(hfile, tx);
+  free(d);
+  free(cname);
+  free(tx);
 }
 
 static void mkc(char *cfile, char *path) {
@@ -56,9 +63,13 @@ static void mkc(char *cfile, char *path) {
     "#include \"$CNAME$.h\"\n\n"
   ;
 
-  char *tx = str_replace(template, "$DATE$", date());
-  tx = str_replace(tx, "$CNAME$", path);
+  char *d = mk_date_new();
+  char *tx = str_new(template);
+  str_replace(&tx, "$DATE$", d);
+  str_replace(&tx, "$CNAME$", path);
   file_write(cfile, tx);
+  free(d);
+  free(tx);
 }
 
 int main (int argc, char **argv) {
@@ -72,30 +83,37 @@ int main (int argc, char **argv) {
   char *path = argv[1];
 
   if (!file_is_directory(path))
-    THROW(exc_io_t) "'%s' is not a directory", path _THROW
+    FAIL(str_f_new("'%s' is not a directory", path))
 
-  char *include = path_cat(path, "include", NULL);
+  char *include = path_cat_new(path, "include", NULL);
   if (!file_is_directory(include))
-    THROW (exc_io_t)"'%s' is not a directory", include _THROW
+    FAIL(str_f_new("'%s' is not a directory", include))
 
-  char *src = path_cat(path, "src", NULL);
+  char *src = path_cat_new(path, "src", NULL);
   if (!file_is_directory(src))
-    THROW(exc_io_t) "'%s' is not a directory", src _THROW
+    FAIL(str_f_new("'%s' is not a directory", src))
 
   char *file_name = argv[2];
 
-  char *hfile = str_printf("%s/%s.h", include, file_name);
+  char *hfile = str_f_new("%s/%s.h", include, file_name);
   if (file_exists(hfile)) {
-    THROW(exc_io_t) "'%s' already exists", hfile _THROW
+    FAIL(str_f_new("'%s' already exists", hfile))
   }
+  free(include);
 
-  char *cfile = str_printf("%s/%s.c", src, file_name);
+  char *cfile = str_f_new("%s/%s.c", src, file_name);
   if (file_exists(cfile)) {
-    THROW(exc_io_t) "'%s' already exists", cfile _THROW
+    FAIL(str_f_new("'%s' already exists", cfile))
   }
+  free(src);
 
   mkh(hfile, file_name);
   mkc(cfile, file_name);
+
+  free(hfile);
+  free(cfile);
+
+  sys_end();
 
   return 0;
 }

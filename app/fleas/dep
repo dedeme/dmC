@@ -1,6 +1,7 @@
 #!/bin/bash
 
-LIBS="libdmc https://github.com/dedeme/libdmc.git -"
+LIBS="libdmc https://github.com/dedeme/libdmc.git - \
+      libmarket https://github.com/dedeme/libmarket.git -"
 
 # Do not change --------------------------------------------
 

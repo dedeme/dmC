@@ -1,9 +1,11 @@
-// Copyright 25-Oct-2018 ºDeme
+// Copyright 23-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#ifndef MAIN_H
-  #define MAIN_H
+#ifndef VAR_TESTS_H
+  #define VAR_TESTS_H
 
 #include "dmc/std.h"
+
+void var_tests(void);
 
 #endif

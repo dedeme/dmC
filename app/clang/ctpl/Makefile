@@ -1,4 +1,4 @@
-PRG = cnewfile
+PRG = ctpl
 LIB = dmc
 
 C_FILES = $(wildcard src/*.c)
