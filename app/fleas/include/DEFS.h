@@ -30,7 +30,7 @@
 #define MAX_STRIP 0.2
 
 ///
-#define DAYS_FIRST_GROUP 550
+#define DAYS_FIRST_GROUP 600
 
 ///
 #define DAYS_NEXT_GROUP 100
