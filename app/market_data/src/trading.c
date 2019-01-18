@@ -208,12 +208,13 @@ static double sup_res(Darr *closes, Params *ps) {
   ;
 }
 
-Darr *trading_read_new() {
+void trading_read_new(Darr **last_qs_new, Darr **signals_new) {
   Params *def = params_read_default_new();
   // Map[params]
   Map *ps = params_read_new();
 
-  Darr *r = darr_new();
+  Darr *qs = darr_new();
+  Darr *ss = darr_new();
 
   char *nicks[] = NICKS;
   char **p = nicks;
@@ -223,11 +224,14 @@ Darr *trading_read_new() {
     Params *p = map_get_null(ps, nick);
     if (!p) p = def;
 
-    darr_push(r, sup_res(cls, p));
+    darr_push(qs, darr_get(cls, darr_size(cls) - 1));
+    darr_push(ss, sup_res(cls, p));
     darr_free(cls);
   }
 
   map_free(ps);
   params_free(def);
-  return r;
+
+  *last_qs_new = qs;
+  *signals_new = ss;
 }

@@ -95,35 +95,37 @@ Server *server_from_js_new(Js *js) {
 
 /*--*/
 
-static void read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
+// Returns if reading is wrong
+static int read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
   if (str_eq(id, bolsamania_name()))
-    bolsamania_read(nicks_new, qs_new);
+    return bolsamania_read(nicks_new, qs_new);
   else if (str_eq(id, eleconomista_name()))
-    eleconomista_read(nicks_new, qs_new);
+    return eleconomista_read(nicks_new, qs_new);
   else if (str_eq(id, estrategias_name()))
-    estrategias_read(nicks_new, qs_new);
+    return estrategias_read(nicks_new, qs_new);
   else if (str_eq(id, expansion_name()))
-    expansion_read(nicks_new, qs_new);
+    return expansion_read(nicks_new, qs_new);
   else if (str_eq(id, finanzas_name()))
-    finanzas_read(nicks_new, qs_new);
+    return finanzas_read(nicks_new, qs_new);
   else if (str_eq(id, infobolsa_name()))
-    infobolsa_read(nicks_new, qs_new);
+    return infobolsa_read(nicks_new, qs_new);
   else if (str_eq(id, invertia_name()))
-    invertia_read(nicks_new, qs_new);
+    return invertia_read(nicks_new, qs_new);
   else if (str_eq(id, libremercado_name()))
-    libremercado_read(nicks_new, qs_new);
+    return libremercado_read(nicks_new, qs_new);
   else
     FAIL(str_f_new("Server '%s' not found", id));
+  return 1;
 }
 
-static Server *new(char *id) {
+static Server *new_null(char *id) {
   char *js = io_server_read_new(id);
   Server *r;
   if (!*js) {
     // Varr[char]
     Varr *vnicks;
     Darr *qs;
-    read_quotes(&vnicks, &qs, id);
+    if (read_quotes(&vnicks, &qs, id)) return NULL;
     // Arr[char]
     Arr *nicks = arr_new(free);
     EACH(vnicks, char, n)
@@ -131,7 +133,7 @@ static Server *new(char *id) {
     _EACH
     varr_free(vnicks);
 
-    r = _server_new(id, 0, nicks, qs);
+    r = _server_new(str_new(id), 0, nicks, qs);
     Js *js2 = server_to_js_new(r);
     io_server_write(id, (char *)js2);
     free(js2);
@@ -217,7 +219,8 @@ Arr *server_servers_new(void) {
 
   Arr *names = all_names_new();
   EACH(names, char, n)
-    arr_push(r, new(n));
+    Server *sv = new_null(n);
+    if (sv) arr_push(r, sv);
   _EACH
 
   return r;
@@ -225,10 +228,11 @@ Arr *server_servers_new(void) {
 
 Server *server_current_new() {
   char *server_name = io_server_current_read_new();
-  Server *r;
+  Server *r = NULL;
   if (*server_name) {
-    r = new(server_name);
-  } else {
+    r = new_null(server_name);
+  }
+  if (!r) {
     r = server_next_new();
   }
   free(server_name);
@@ -245,9 +249,9 @@ Server *server_next_new() {
   }
   char *server_name = arr_get(box, 0);
   io_server_current_write(server_name);
-  Server *r = new(server_name);
+  Server *r = new_null(server_name);
   arr_remove(box, 0);
   io_servers_write(box);
   arr_free(box);
-  return r;
+  return r ? r : server_next_new();
 }

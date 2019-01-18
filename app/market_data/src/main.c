@@ -54,13 +54,19 @@ puts("toActive 2");
       if (actives > n / 2) {
         // Map[PfValue]
         Map *pf = pf_read_new();
-        Darr *signals = trading_read_new();
+        Darr *last_qs;
+        Darr *signals;
+        trading_read_new(&last_qs, &signals);
         char *nicks[] = NICKS;
         char **p = nicks;
         int c = 0;
         while (*p) {
           char *nick = *p++;
-          nick_new(nick, map_get_null(pf, nick), darr_get(signals, c++));
+          nick_new(
+            nick, map_get_null(pf, nick),
+            darr_get(last_qs, c), darr_get(signals, c)
+          );
+          ++c;
         }
         state = ST_ACTIVE;
         io_state_write(state);

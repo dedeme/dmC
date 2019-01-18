@@ -64,10 +64,11 @@ HourQuote *hourQuote_from_js_new(Js *js);
 /// Sets data for a new day
 ///   nick: Nick to set.
 ///   pfv_null: Portfolio data or NULL if nick is not bought.
+///   lastq: Last historic close.
 ///   signal: (> 0) -> Suport (buying).
 ///           (< 0) -> Resitence (selling).
 ///           (= 0) -> Not operation.
-void nick_new(char *nick, PfValue *pfv_null, double signal);
+void nick_new(char *nick, PfValue *pfv, double lastq, double signal);
 
 /// Update nick quote
 void nick_update(char *nick, double quote);

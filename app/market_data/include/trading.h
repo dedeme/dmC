@@ -9,10 +9,12 @@
 #include "dmc/std.h"
 #include "dmc/Darr.h"
 
-/// Returns the current trading position (with strip) of each nick. Values are
-/// in the same order as NICKS (defined in DEFS.h)<br>
-/// Values less than 0 are supports, greater than 0 are resistences and 0 are
-/// not operation.
-Darr *trading_read_new();
+/// Returns:
+///   last_qs_new: The last close of each nick.
+///   signals_new: The current trading position (with strip) of each nick.
+///                Values less than 0 are supports, greater than 0 are
+///                resistences and 0 are not operation.
+/// Values are in the same order as NICKS (defined in DEFS.h).
+void trading_read_new(Darr **last_qs_new, Darr **signals_new);
 
 #endif

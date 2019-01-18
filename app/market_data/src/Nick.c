@@ -147,7 +147,7 @@ HourQuote *hourQuote_from_js_new(Js *js) {
 
 /*--*/
 
-void nick_new(char *nick, PfValue *pfv, double signal) {
+void nick_new(char *nick, PfValue *pfv, double lastq, double signal) {
   Nick *nk = _nick_new(
     str_new(nick),
     arr_new((FPROC)hourQuote_free),
@@ -155,6 +155,9 @@ void nick_new(char *nick, PfValue *pfv, double signal) {
     pfv ? pfValue_price(pfv) : 0.0,
     signal
   );
+  if (lastq > 0) {
+    arr_push(nk->hqs, _hourQuote_new(date_f_new(date_now(), "%H"), lastq));
+  }
   char *js = (char *)nick_to_js_new(nk);
   io_nick_write(nick, js);
   free(js);
