@@ -18,51 +18,46 @@
 #define ST_TO_ACTIVE "toActive"
 
 /// Program state
-#define ST_TO_SLEEPING "toSleeping"
+#define ST_TO_SLEEPING1 "toSleeping1"
 
-/// Delay time in ST_ACTIVE state
-#define ST_TIME_ACTIVE 5
-
-/// Delay time in ST_SLEEPING state
-#define ST_TIME_SLEEPING 5
+/// Program state
+#define ST_TO_SLEEPING2 "toSleeping2"
 
 /// Nicks list
 #define NICKS {\
     "A3M",\
     "ACS",\
     "ACX",\
+    "ADX",\
     "AENA",\
     "ALM",\
     "AMS",\
     "ANA",\
+    "APPS",\
     "BBVA",\
     "BKIA",\
     "BKT",\
     "CABK",\
-    "CAF",\
     "CIE",\
     "CLNX",\
     "COL",\
     "DIA",\
-    "ECR",\
-    "EKT",\
     "ELE",\
     "ENC",\
     "ENG",\
-    "FAE",\
-    "FCC",\
     "FER",\
     "GEST",\
     "GRF",\
+    "GSJ",\
     "IAG",\
     "IBE",\
     "IDR",\
     "ITX",\
     "MAP",\
+    "MAS",\
     "MEL",\
     "MRL",\
     "MTS",\
-    "NHH",\
     "NTGY",\
     "OHL",\
     "PHM",\
@@ -72,13 +67,12 @@
     "SAB",\
     "SAN",\
     "SCYR",\
-    "SGREN",\
+    "SGRE",\
     "SLR",\
     "TEF",\
     "TL5",\
-    "TLGO",\
     "TRE",\
-    "TUB",\
+    "UNI",\
     "VIS",\
     "ZOT",\
     NULL \

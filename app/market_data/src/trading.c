@@ -25,72 +25,18 @@ static void params_free(Params *this) {
 };
 
 static Params *params_read_default_new(void) {
-  char *conf = path_cat_new(FLEAS, "conf.db", NULL);
-  Js *js = (Js *)file_read_new(conf);
-  free(conf);
-
-  // Map[Js]
-  Map *m = js_ro_new(js);
-  free(js);
-
-  Js *max_days = map_get_null(m, "max_days");
-  if (!max_days) FAIL("max_days not found");
-  Js *min_days = map_get_null(m, "min_days");
-  if (!min_days) FAIL("min_days not found");
-  Js *max_strip = map_get_null(m, "max_strip");
-  if (!max_strip) FAIL("max_strip not found");
-
-  int max = js_ri(max_days);
-  int min = js_ri(min_days);
-  double strip = js_rd(max_strip);
-
-  map_free(m);
-
-  char *bests_dir = path_cat_new(FLEAS, "bests", NULL);
-  // Arr[char]
-  Arr *fs = file_dir_new(bests_dir);
-  int size = arr_size(fs);
-  if (!size) FAIL("fs is empty");
-  free(bests_dir);
-
-  arr_sort(fs, (FGREATER)str_greater);
-  char *fps = path_cat_new(FLEAS, "bests", arr_get(fs, size - 1), NULL);
-  arr_free(fs);
-
-  Js *ps_js = (Js *)file_read_new(fps);
-  free(fps);
-
+  char *path = path_cat_new(MARKET, "baseParams.db", NULL);
+  Js *js = (Js *)file_read_new(path);
+  free(path);
   // Arr[Js]
-  Arr *a0 = js_ra_new(ps_js);
-  free(ps_js);
-  size = arr_size(a0);
-  if (!size) {
-    return params_new(50, 0.05, 0.05);
-  }
-
-  // Arr[Js]
-  Arr *a1 = js_ra_new(arr_get(a0, size - 1));
-  arr_free(a0);
-
-  // Arr[Js]
-  Arr *a2 = js_ra_new(arr_get(a1, 1));
-  arr_free(a1);
-
-  // Arr[Js]
-  Arr *a3 = js_ra_new(arr_get(a2, 0));
-  arr_free(a2);
-
-  // Arr[Js]
-  Arr *a4 = js_ra_new(arr_get(a3, 1));
-  arr_free(a3);
-
+  Arr *values = js_ra_new(js);
   Params *r = params_new(
-    min + (int)((max - min) * js_rd(arr_get(a4, 0))),
-    strip * js_rd(arr_get(a4, 1)),
-    strip * js_rd(arr_get(a4, 2))
+    js_ri(arr_get(values, 0)),
+    js_rd(arr_get(values, 1)),
+    js_rd(arr_get(values, 2))
   );
-  arr_free(a4);
-
+  free(js);
+  free(values);
   return r;
 }
 
@@ -154,7 +100,7 @@ static double sup_res(Darr *closes, Params *ps) {
   double bs = ps->bs;
   double ss = ps->ss;
   int before = 0;
-  int after = ps->days - 1;
+  int after = ps->days;
   double ref = -1;
   int isBuying = 0;
   int size = darr_size(closes);
@@ -181,7 +127,7 @@ static double sup_res(Darr *closes, Params *ps) {
 
     ++before;
     ++after;
-    if (after >= size - 1) {
+    if (after >= size) {
       break;
     }
 

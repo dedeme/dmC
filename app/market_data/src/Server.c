@@ -4,7 +4,6 @@
 #include "Server.h"
 #include "dmc/Darr.h"
 #include "io.h"
-#include "servers/bolsamania.h"
 #include "servers/eleconomista.h"
 #include "servers/estrategias.h"
 #include "servers/expansion.h"
@@ -97,9 +96,7 @@ Server *server_from_js_new(Js *js) {
 
 // Returns if reading is wrong
 static int read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
-  if (str_eq(id, bolsamania_name()))
-    return bolsamania_read(nicks_new, qs_new);
-  else if (str_eq(id, eleconomista_name()))
+  if (str_eq(id, eleconomista_name()))
     return eleconomista_read(nicks_new, qs_new);
   else if (str_eq(id, estrategias_name()))
     return estrategias_read(nicks_new, qs_new);
@@ -196,9 +193,9 @@ int server_number(void) {
 // Returns Arr[char]
 static Arr *all_names_new(void) {
   char *names[] = {
-    bolsamania_name(), eleconomista_name(), estrategias_name(),
+    eleconomista_name(), estrategias_name(),
     expansion_name(), finanzas_name(), infobolsa_name(),
-    invertia_name(), libremercado_name(),
+    /*invertia_name(),*/ libremercado_name(),
     NULL
   };
 
@@ -249,7 +246,7 @@ Server *server_next_new() {
   }
   char *server_name = arr_get(box, 0);
   io_server_current_write(server_name);
-  Server *r = new_null(server_name);
+  Server *r = new_null(str_new(server_name));
   arr_remove(box, 0);
   io_servers_write(box);
   arr_free(box);

@@ -10,7 +10,9 @@ void trading_tests() {
   puts("Trading tests:");
 
   // Map[Double]
-  Darr *sup_res = trading_read_new();
+  Darr *sup_res;
+  Darr *signals;
+  trading_read_new(&sup_res, &signals);
 
   char *nicks[] = NICKS;
   char **p = nicks;
@@ -20,6 +22,7 @@ void trading_tests() {
   }
 
   darr_free(sup_res);
+  darr_free(signals);
 
   puts("    Finished");
 }

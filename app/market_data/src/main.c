@@ -5,6 +5,7 @@
 #include "unistd.h"
 #include "dmc/cryp.h"
 #include "dmc/date.h"
+#include "dmc/rnd.h"
 #include "io.h"
 #include "DEFS.h"
 #include "Server.h"
@@ -13,6 +14,7 @@
 #include "trading.h"
 
 static void start (char *key) {
+  int sleeping_count = 0;
   char *state;
   io_state_read(&state);
   Server *sv = server_current_new();
@@ -84,37 +86,64 @@ puts("active");
         EACH_IX(server_nicks(sv), char, nk, ix)
           nick_update(nk, darr_get(qs, ix));       // Update nicks data
         _EACH
-        sleep(420);
+        sleep(120 + rnd_i(60));
       } else {
-        state = ST_TO_SLEEPING;
+        state = ST_TO_SLEEPING1;
         io_state_write(state);
       }
-    } else if (str_eq(state, ST_TO_SLEEPING)) {
-puts("toSleeping");
+    } else if (str_eq(state, ST_TO_SLEEPING1)) {
+puts("toSleeping1");
       // Arr[Server]
       Arr *all = server_servers_new();
-      int n = server_number();
       EACH(all, Server, sv)
         server_update(sv);
       _EACH
-      sleep(420);
+      sleeping_count = 0;
+      state = ST_TO_SLEEPING2;
+      io_state_write(state);
+      sleep(60);
+    } else if (str_eq(state, ST_TO_SLEEPING2)) {
 puts("toSleeping2");
-      int actives = 0;
-      EACH(all, Server, sv)
+      if (sleeping_count < 7) {
+        ++sleeping_count;
         server_update(sv);
-        if (server_active(sv)) ++actives;
-      _EACH
-
-      if (actives < n / 4) {
-        server_free(sv);
-        sv = server_next_new();
-        state = ST_SLEEPING;
-        io_state_write(state);
+        if (server_active(sv)) {
+          Darr *qs = server_qs(sv);
+          EACH_IX(server_nicks(sv), char, nk, ix)
+            nick_update(nk, darr_get(qs, ix));       // Update nicks data
+          _EACH
+          server_set_active(sv, 1);
+          state = ST_ACTIVE;
+          io_state_write(state);
+          sleep(180);
+        } else {
+          sleep(60);
+        }
       } else {
-        server_set_active(sv, 1);
-        state = ST_ACTIVE;
-        io_state_write(state);
-        sleep(420);
+        // Arr[Server]
+        Arr *all = server_servers_new();
+        int actives = 0;
+        EACH(all, Server, sv)
+          server_update(sv);
+          if (server_active(sv)) ++actives;
+        _EACH
+
+        int n = server_number();
+        if (actives < n / 4) {
+          server_free(sv);
+          sv = server_next_new();
+          state = ST_SLEEPING;
+          io_state_write(state);
+        } else {
+          Darr *qs = server_qs(sv);
+          EACH_IX(server_nicks(sv), char, nk, ix)
+            nick_update(nk, darr_get(qs, ix));       // Update nicks data
+          _EACH
+          server_set_active(sv, 1);
+          state = ST_ACTIVE;
+          io_state_write(state);
+          sleep(210);
+        }
       }
     } else {
       FAIL(str_f_new("Unknown state '%s'", state));
