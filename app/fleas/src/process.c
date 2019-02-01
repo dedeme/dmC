@@ -17,8 +17,10 @@ void process_run(void) {
   int days;
   for (days = DAYS_FIRST_GROUP; days < qdays; days += DAYS_NEXT_GROUP) {
     char *sdays = str_f_new("%d", days);
-    int min_sells = (days - DAYS_STAND_BY) / MIN_SELLS;
-    int max_sells = (days - DAYS_STAND_BY) / MAX_SELLS;
+    double min_sells = (days - DAYS_STAND_BY) / MIN_SELLS;
+    double max_sells = (days - DAYS_STAND_BY) / MAX_SELLS;
+    double max_sells_sum = max_sells / 2;
+    double max_sells_mul = max_sells / (INITIAL_CAPITAL + INITIAL_CAPITAL);
 
     // Arr[Fresults]
     Arr *fleas = arr_new((FPROC)fresults_free);
@@ -37,6 +39,7 @@ void process_run(void) {
       _EACH
       int oldc = 0;
       int n = fleas_start_size;
+
       REPEAT(FLEAS_PER_GROUP - fleas_start_size)
         Flea *oldFlea = fresults_flea(arr_get(fleas, oldc++));
         if (oldc == fleas_start_size) {
@@ -50,12 +53,14 @@ void process_run(void) {
         Fresults *rs = flea_process_new(
           fl, quotes, days_end - days * qnicks, days_end
         );
+        double assets = fresults_assets(rs);
+
         if (
           fresults_sells(rs) >= min_sells &&
-          fresults_sells(rs) <= max_sells
+          fresults_sells(rs) <= max_sells_sum + assets * max_sells_mul
         ) {
           arr_push(fleas, rs);
-          sum += fresults_assets(rs);
+          sum += assets;
           ++n;
         } else {
           fresults_free(rs);

@@ -186,15 +186,11 @@ double server_quote(Server *this, char *nick) {
   return r;
 }
 
-int server_number(void) {
-  return 8;
-}
-
 // Returns Arr[char]
 static Arr *all_names_new(void) {
   char *names[] = {
-    eleconomista_name(), estrategias_name(),
-    expansion_name(), finanzas_name(), infobolsa_name(),
+    /*eleconomista_name(),*/ estrategias_name(),
+    expansion_name(), /*finanzas_name(),*/ infobolsa_name(),
     /*invertia_name(),*/ libremercado_name(),
     NULL
   };
@@ -206,6 +202,14 @@ static Arr *all_names_new(void) {
   while (*p) {
     arr_push(r, str_new(*p++));
   }
+  return r;
+}
+
+int server_number(void) {
+  // Arr[char]
+  Arr *names = all_names_new();
+  int r = arr_size(names);
+  arr_free(names);
   return r;
 }
 

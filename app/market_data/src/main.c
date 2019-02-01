@@ -86,7 +86,7 @@ puts("active");
         EACH_IX(server_nicks(sv), char, nk, ix)
           nick_update(nk, darr_get(qs, ix));       // Update nicks data
         _EACH
-        sleep(120 + rnd_i(60));
+        sleep(120);// + rnd_i(60));
       } else {
         state = ST_TO_SLEEPING1;
         io_state_write(state);

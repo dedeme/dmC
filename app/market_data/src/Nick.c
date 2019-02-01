@@ -80,8 +80,8 @@ Js *nick_to_js_new(Nick *this) {
   arr_push(a, js_ws_new(this->id));
   arr_push(a, arr_to_js_new(this->hqs, (FTO)hourQuote_to_js_new));
   arr_push(a, js_wi_new(this->stocks));
-  arr_push(a, js_wd_new(this->price, 4));
-  arr_push(a, js_wd_new(this->signal, 4));
+  arr_push(a, js_wd_new(this->price, 6));
+  arr_push(a, js_wd_new(this->signal, 6));
   Js *r = js_wa_new(a);
   arr_free(a);
   return r;
