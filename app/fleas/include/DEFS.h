@@ -12,7 +12,7 @@
 #define QUOTES_DATA_PATH "/dm/wwwcgi/dmcgi/Quotes/data"
 
 /// Number of cycle to finish a process
-#define CYCLES 150
+#define CYCLES 20
 
 /// Number of fleas per days group
 #define FLEAS_PER_GROUP 2000

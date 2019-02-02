@@ -29,6 +29,12 @@ Gen *gen_copy_new(Gen *this) {
   return (Gen *) r;
 }
 
+int gen_eq(Gen *this, Gen *other) {
+  return  ((double *)this)[0] == ((double *)other)[0] &&
+          ((double *)this)[1] == ((double *)other)[1] &&
+          ((double *)this)[2] == ((double *)other)[2];
+}
+
 double gen_get(Gen *this, enum gen_Ix ix) {
   return ((double *)this)[ix];
 }

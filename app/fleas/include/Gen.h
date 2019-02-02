@@ -24,6 +24,9 @@ Gen *gen_values_new(double days, double buy_strip, double sell_strip);
 Gen *gen_copy_new(Gen *this);
 
 ///
+int gen_eq(Gen *this, Gen *other);
+
+///
 double gen_get(Gen *this, enum gen_Ix ix);
 
 ///

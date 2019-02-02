@@ -50,7 +50,7 @@ void io_write_results(char *group, Arr *results);
 /// Reads data from start bprocess.
 ///   bests: Previous bests or [] of date is ""
 ///   date: Date to calculate or "" if there are no new date to calculate.
-///   results: Results of process or [] if date is ""
+///   results: Group results of process or [] if date is ""
 ///   days: Group to process
 void io_best_start(
   // Arr[Fbest]

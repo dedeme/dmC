@@ -36,6 +36,9 @@ double flea_buy_strip(Flea *this);
 double flea_sell_strip(Flea *this);
 
 ///
+int flea_eq_gen(Flea *this, Flea *other);
+
+///
 Js *flea_to_js_new(Flea *this);
 
 ///

@@ -14,6 +14,50 @@ static Quote **quotes = NULL;
 static int qdays = 0;
 static int qnicks = 0;
 
+struct io_Flea_n {
+  Fbest *f;
+  int n;
+};
+
+static struct io_Flea_n *flea_n_new(Fbest *f, int n) {
+  struct io_Flea_n *this = malloc(sizeof(struct io_Flea_n));
+  this->f = f;
+  this->n = n;
+  return this;
+}
+
+static void flea_n_free(struct io_Flea_n *this) {
+  free(this);
+}
+
+// fs is Arr[struct io_Flea_n]
+void fleas_n_add(Arr *fs, Fbest *new_f) {
+  int n = 1;
+  EACH(fs, struct io_Flea_n, f)
+    if (flea_eq_gen(
+      fresults_flea(fbest_fresults(f->f)),
+      fresults_flea(fbest_fresults(new_f))
+    )) {
+      n = f->n + 1;
+    }
+  _EACH
+  arr_push(fs, flea_n_new(new_f, n));
+}
+
+// fs is Arr[struct io_Flea_n]
+Fbest *fleas_n_select_new(Arr *fs) {
+  if (!arr_size(fs))
+    FAIL ("fs is empty");
+
+  struct io_Flea_n *r = arr_get(fs, 0);
+  EACH(fs, struct io_Flea_n, f)
+    if (f->n >= r->n) {
+      r = f;
+    }
+  _EACH
+  return fbest_copy_new(r->f);
+}
+
 void io_init(void) {
   char *qdir = QUOTES_DATA_PATH;
 
@@ -238,48 +282,10 @@ void io_write_results(char *group, Arr *results) {
   Js *js = arr_to_js_new(results, (FTO)fresults_to_js_new);
   file_write(f, (char *)js);
 
-  // Clean -----------------------------
-
-  // Arr[char]
-  Arr *fs = file_dir_new(dir);
-  arr_sort(fs, (FGREATER)str_greater);
-  arr_reverse(fs);
-  char *previous = NULL;
-  EACH_IX(fs, char, f, i)
-    if (i < 5) {
-      previous = f;
-      continue;
-    } else {
-      int df = date_df(tm, date_from_str(f));
-      if (df < 365) {
-        if (previous[4] != f[4] || previous[5] != f[5]) {
-          previous = f;
-        } else {
-          char *delf = path_cat_new(dir, f, NULL);
-          file_del(delf);
-          free(delf);
-        }
-      } else {
-        int eq = 1;
-        RANGE0(i, 4)
-          if (previous[i] != f[i]) eq = 0;
-        _RANGE
-        if (!eq) {
-          previous = f;
-        } else {
-          char *delf = path_cat_new(dir, f, NULL);
-          file_del(delf);
-          free(delf);
-        }
-      }
-    }
-  _EACH
-
   free(dir);
   free(date);
   free(f);
   free(js);
-  arr_free(fs);
 }
 
 // Best process ------------------------------------------------------
@@ -332,15 +338,16 @@ void io_best_start(
   }
   arr_filter(bests, filter);
 
-  Js *js = arr_to_js_new(bests, (FTO)fbest_to_js_new);
-  file_write(bpath, (char *)js);
-  free(js);
-  free (bpath);
+  // Remove historic -----------------------------
 
-  // set last_best && date -----------------------
+  // set date, remove hitoric, and set last results -
 
   *date = str_new(arr_get(dates, arr_size(dates) - 1));
 
+  // set and write bests
+
+  // Arr[Fbest]
+  Arr *new_bests = arr_new((FPROC)fbest_free);
   int bsize = arr_size(bests);
   if (bsize == 0) {
     Fbest *b = fbest_new(
@@ -348,9 +355,79 @@ void io_best_start(
       fresults_new(flea_new(str_new("0")), 0, 0, 0),
       0, 1000000
     );
-    arr_push(bests, b);
+    arr_push(new_bests, b);
+  } else {
+    char *current_month = str_new(*date);
+    str_left(&current_month, 6);
+    char *last_month = str_new("");
+    // Arr [struct io_Flea_n]
+    Arr *fleas = arr_new((FPROC)flea_n_free);
+    EACH(bests, Fbest, b)
+      char *month = str_new(fbest_date(b));
+      str_left(&month, 6);
+
+      if (str_eq(month, last_month)) {
+        if (str_eq(month, current_month)) {
+          arr_push(new_bests, fbest_copy_new(b));
+        } else {
+          fleas_n_add(fleas, b);
+        }
+      } else if (str_eq(month, current_month)) {
+        if (*last_month) {
+          arr_push(new_bests, fleas_n_select_new(fleas));
+          arr_free(fleas);
+          fleas = arr_new((FPROC)flea_n_free);
+        }
+        free(last_month);
+        last_month = str_new(month);
+
+        arr_push(new_bests, fbest_copy_new(b));
+      } else {
+        if (*last_month) {
+          arr_push(new_bests, fleas_n_select_new(fleas));
+          arr_free(fleas);
+          fleas = arr_new((FPROC)flea_n_free);
+        }
+        free(last_month);
+        last_month = str_new(month);
+
+        fleas_n_add(fleas, b);
+      }
+      free(month);
+    _EACH
+
+    if (arr_size(fleas)) {
+      arr_push(new_bests, fleas_n_select_new(fleas));
+    }
+
+    free(current_month);
+    free(last_month);
+    arr_free(fleas);
   }
-  *rbests = bests;
+  arr_free(bests);
+
+  *rbests = new_bests;
+
+  Js *js = arr_to_js_new(new_bests, (FTO)fbest_to_js_new);
+  file_write(bpath, (char *)js);
+  free(js);
+  free (bpath);
+
+  // setup group ---------------------------------
+
+  EACH(dates, char, date)
+    int del = 1;
+    EACH(new_bests, Fbest, b)
+      if (str_eq(date, fbest_date(b))) {
+        del = 0;
+      }
+    _EACH
+    if (del) {
+      char *path = path_cat_new(sys_home(), group, date, NULL);
+      file_del(path);
+      free(path);
+    }
+  _EACH
 
   arr_free(dates);
 

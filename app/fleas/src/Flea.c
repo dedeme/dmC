@@ -77,6 +77,10 @@ double flea_sell_strip(Flea *this) {
   return this->sell_strip;
 }
 
+int flea_eq_gen(Flea *this, Flea *other) {
+  return gen_eq(this->gen, other->gen);
+}
+
 Js *flea_to_js_new(Flea *this) {
   // Arr[Js]
   Arr *a = arr_new(free);
