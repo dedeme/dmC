@@ -415,7 +415,17 @@ void io_best_start(
 
   // setup group ---------------------------------
 
+  char *month = date_to_str_new(date_now());
+  str_left(&month, 6);
+
   EACH(dates, char, date)
+    char *dmonth = str_new(date);
+    str_left(&dmonth, 6);
+    if (str_eq(dmonth, month)) {
+      free(dmonth);
+      continue;
+    }
+    free(dmonth);
     int del = 1;
     EACH(new_bests, Fbest, b)
       if (str_eq(date, fbest_date(b))) {
@@ -428,6 +438,8 @@ void io_best_start(
       free(path);
     }
   _EACH
+
+  free(month);
 
   arr_free(dates);
 

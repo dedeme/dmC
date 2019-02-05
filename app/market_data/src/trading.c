@@ -100,7 +100,7 @@ static double sup_res(Darr *closes, Params *ps) {
   double bs = ps->bs;
   double ss = ps->ss;
   int before = 0;
-  int after = ps->days;
+  int after = ps->days - 1;
   double ref = -1;
   int isBuying = 0;
   int size = darr_size(closes);
@@ -132,17 +132,16 @@ static double sup_res(Darr *closes, Params *ps) {
     }
 
     double cl = darr_get(closes, after);
-    double bf = darr_get(closes, before);
     if (cl > 0) {
       if (isBuying) {
         if ((cl - ref) / ref > bs) {
           isBuying = 0;
-          ref = bf;
+          ref = darr_get(closes, before);
         }
       } else {
         if ((ref - cl) / ref > ss) {
           isBuying = 1;
-          ref = bf;
+          ref = darr_get(closes, before);
         }
       }
     }

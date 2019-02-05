@@ -15,8 +15,9 @@
 
 static void start (char *key) {
   int sleeping_count = 0;
-  char *state;
-  io_state_read(&state);
+  char *state_new;
+  io_state_read(&state_new);
+  char *state = state_new;
   Server *sv = server_current_new();
   for(;;) {
     if (!io_lock_check(key)) {
@@ -150,7 +151,7 @@ puts("toSleeping2");
     }
   }
   server_free(sv);
-  free(state);
+  free(state_new);
 }
 
 int main(int argc, char* args[]) {
