@@ -8,7 +8,7 @@
 
 static char *get_code(char *nick) {
   return
-    str_eq(nick, "A3M") ? "ATRESMEDIA"
+      str_eq(nick, "A3M") ? "ATRESMEDIA"
     : str_eq(nick, "ACS") ? "ACS"
     : str_eq(nick, "ACX") ? "ACERINOX"
     : str_eq(nick, "ADX") ? "AUDAX"

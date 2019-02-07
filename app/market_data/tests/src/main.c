@@ -16,7 +16,7 @@
 int main(int argc, char* args[]) {
   sys_init("market_data");
 
-  expansion_tests();
+/*  expansion_tests();
   finanzas_tests();
   invertia_tests();
   estrategias_tests();
@@ -24,7 +24,7 @@ int main(int argc, char* args[]) {
   eleconomista_tests();
   libremercado_tests();
   pf_tests();
-  trading_tests();
+*/  trading_tests();
 
   sys_end();
   return 0;

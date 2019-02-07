@@ -147,6 +147,21 @@ static double sup_res(Darr *closes, Params *ps) {
     }
   }
 
+  double begin = darr_get(closes, before);
+  if (ref <= 0) {
+    if (begin > 0) {
+      ref = begin;
+    }
+  } else {
+    if (begin > 0) {
+      if (isBuying) {
+        if (begin < ref) ref = begin;
+      } else {
+        if (begin > ref) ref = begin;
+      }
+    }
+  }
+
   return ref
     ? isBuying ? ref * (1 + bs) : -(ref * (1 - ss))
     : 0

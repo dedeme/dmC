@@ -94,7 +94,7 @@ Server *server_from_js_new(Js *js) {
 
 /*--*/
 
-// Returns if reading is wrong
+// Returns 1 if reading is wrong
 static int read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
   if (str_eq(id, eleconomista_name()))
     return eleconomista_read(nicks_new, qs_new);
