@@ -5,69 +5,13 @@
 #include "servers/reader.h"
 #include "DEFS.h"
 #include "io.h"
-
-static char *get_code(char *nick) {
-  return
-    str_eq(nick, "A3M") ? "Atresmedia"
-    : str_eq(nick, "ACS") ? "ACS"
-    : str_eq(nick, "ACX") ? "ACERINOX"
-    : str_eq(nick, "ADX") ? "AUDAX RENOVABLES"
-    : str_eq(nick, "AENA") ? "AENA"
-    : str_eq(nick, "ALM") ? "ALMIRALL"
-    : str_eq(nick, "AMS") ? "AMADEUS"
-    : str_eq(nick, "ANA") ? "ACCIONA"
-    : str_eq(nick, "APPS") ? "APPLUS SERVICES"
-    : str_eq(nick, "BBVA") ? "BBVA"
-    : str_eq(nick, "BKIA") ? "BANKIA"
-    : str_eq(nick, "BKT") ? "BANKINTER"
-    : str_eq(nick, "CABK") ? "CAIXABANK"
-    : str_eq(nick, "CIE") ? "CIE AUTOMOTIVE"
-    : str_eq(nick, "CLNX") ? "CELLNEX TELECOM"
-    : str_eq(nick, "COL") ? "INM. COLONIAL"
-    : str_eq(nick, "DIA") ? "DIA"
-    : str_eq(nick, "ELE") ? "ENDESA"
-    : str_eq(nick, "ENC") ? "ENCE"
-    : str_eq(nick, "ENG") ? "ENAGAS"
-    : str_eq(nick, "FER") ? "FERROVIAL"
-    : str_eq(nick, "GEST") ? "GESTAMP AUTOM"
-    : str_eq(nick, "GRF") ? "GRIFOLS"
-    : str_eq(nick, "GSJ") ? "GR.EMPRES.SAN JOSE"
-    : str_eq(nick, "IAG") ? "IAG (IBERIA)"
-    : str_eq(nick, "IBE") ? "IBERDROLA"
-    : str_eq(nick, "IDR") ? "INDRA"
-    : str_eq(nick, "ITX") ? "INDITEX"
-    : str_eq(nick, "MAP") ? "MAPFRE"
-    : str_eq(nick, "MAS") ? "MASMOVIL IBERCOM"
-    : str_eq(nick, "MEL") ? "MELIA HOTELS INTL"
-    : str_eq(nick, "MRL") ? "MERLIN PROP."
-    : str_eq(nick, "MTS") ? "ARCELORMITTAL"
-    : str_eq(nick, "NTGY") ? "NATURGY"
-    : str_eq(nick, "OHL") ? "OHL"
-    : str_eq(nick, "PHM") ? "PHARMA MAR R"
-    : str_eq(nick, "PSG") ? "PROSEGUR"
-    : str_eq(nick, "REE") ? "REE"
-    : str_eq(nick, "REP") ? "REPSOL"
-    : str_eq(nick, "SAB") ? "SABADELL"
-    : str_eq(nick, "SAN") ? "SANTANDER"
-    : str_eq(nick, "SCYR") ? "SACYR"
-    : str_eq(nick, "SGRE") ? "SIEMENS GAMESA"
-    : str_eq(nick, "SLR") ? "SOLARIA ENERGIA"
-    : str_eq(nick, "TEF") ? "TELEFONICA"
-    : str_eq(nick, "TL5") ? "MEDIASET"
-    : str_eq(nick, "TRE") ? "TECNICAS REUNIDAS"
-    : str_eq(nick, "UNI") ? "UNICAJA BANCO"
-    : str_eq(nick, "VIS") ? "VISCOFAN"
-    : str_eq(nick, "ZOT") ? "ZARDOYA OTIS"
-    : ""
-  ;
-}
+#include "servers.h"
 
 char *eleconomista_name(void) {
   return "eleconomista";
 }
 
-int eleconomista_read_raw(Arr **codes_new, Darr **qs_new) {
-  char *path =  "https://www.eleconomista.es/mercados/mercado-continuo";
+int eleconomista_read_raw(Arr **codes_new, Darr **qs_new, char *path) {
   // Varr[char]
   Varr *tstart = varr_new();
   // Varr[char]
@@ -129,27 +73,33 @@ int eleconomista_read_raw(Arr **codes_new, Darr **qs_new) {
 // Not modify -----------------------------------------------------------------
 // ▼▼▼▼▼▼▼▼▼▼ -----------------------------------------------------------------
 int eleconomista_read(Varr **nicks_new, Darr **qs_new) {
-  char *nks[] = NICKS;
+  char *svname = eleconomista_name();                     //-------------------
   Varr *nicks = varr_new();
   Darr *qs = darr_new();
   *nicks_new = nicks;
   *qs_new = qs;
 
+  char *url_new;
+  // Map[char]
+  Map *codes_new;
+  servers_data(&url_new, &codes_new, svname);
+
+
   Arr *codes;
   Darr *qcs;
-
-  int e = eleconomista_read_raw(&codes, &qcs);
+  int e = eleconomista_read_raw(&codes, &qcs, url_new);   //-------------------
+  free(url_new);
   if (e) {
+    map_free(codes_new);
     return e;
   }
 
-  char **pnks = nks;
-  while (*pnks) {
-    char *nk = *pnks++;
-    char *code = get_code(nk);
+  EACH(codes_new, Kv, kv)
+    char *nk = map_key(kv);
+    char *code = map_value(kv);
 
     if (!*code) {
-      io_loge("Nick '%s' not found in %s", nk, eleconomista_name());
+      io_loge("Nick '%s' no encontrado en %s", nk, svname);
       return 1;
     }
 
@@ -163,10 +113,10 @@ int eleconomista_read(Varr **nicks_new, Darr **qs_new) {
       }
     _EACH
     if (q == -1) {
-      io_loge("Quote of '%s' not fund in %s", nk, eleconomista_name());
+      io_loge("Quote of '%s' not fund in %s", nk, svname);
       return 1;
     }
-  }
+  _EACH
 
   return 0;
 }

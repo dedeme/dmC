@@ -4,6 +4,7 @@
 #include "Server.h"
 #include "dmc/Darr.h"
 #include "io.h"
+#include "servers.h"
 #include "servers/eleconomista.h"
 #include "servers/estrategias.h"
 #include "servers/expansion.h"
@@ -94,27 +95,6 @@ Server *server_from_js_new(Js *js) {
 
 /*--*/
 
-// Returns 1 if reading is wrong
-static int read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
-  if (str_eq(id, eleconomista_name()))
-    return eleconomista_read(nicks_new, qs_new);
-  else if (str_eq(id, estrategias_name()))
-    return estrategias_read(nicks_new, qs_new);
-  else if (str_eq(id, expansion_name()))
-    return expansion_read(nicks_new, qs_new);
-  else if (str_eq(id, finanzas_name()))
-    return finanzas_read(nicks_new, qs_new);
-  else if (str_eq(id, infobolsa_name()))
-    return infobolsa_read(nicks_new, qs_new);
-  else if (str_eq(id, invertia_name()))
-    return invertia_read(nicks_new, qs_new);
-  else if (str_eq(id, libremercado_name()))
-    return libremercado_read(nicks_new, qs_new);
-  else
-    FAIL(str_f_new("Server '%s' not found", id));
-  return 1;
-}
-
 static Server *new_null(char *id) {
   char *js = io_server_read_new(id);
   Server *r;
@@ -122,7 +102,7 @@ static Server *new_null(char *id) {
     // Varr[char]
     Varr *vnicks;
     Darr *qs;
-    if (read_quotes(&vnicks, &qs, id)) return NULL;
+    if (servers_read_quotes(&vnicks, &qs, id)) return NULL;
     // Arr[char]
     Arr *nicks = arr_new(free);
     EACH(vnicks, char, n)
@@ -152,7 +132,10 @@ void server_update(Server *this) {
   // Varr[char]
   Varr *vnicks;
   Darr *qs;
-  read_quotes(&vnicks, &qs, this->id);
+  if (servers_read_quotes(&vnicks, &qs, this->id)) {
+    io_loge("Fallo leyendo quotes de %s", this->id);
+    return;
+  };
   // Arr[char]
   Arr *nicks = arr_new(free);
   int active = 0;
@@ -188,21 +171,7 @@ double server_quote(Server *this, char *nick) {
 
 // Returns Arr[char]
 static Arr *all_names_new(void) {
-  char *names[] = {
-    /*eleconomista_name(),*/ estrategias_name(),
-    expansion_name(), /*finanzas_name(),*/ infobolsa_name(),
-    /*invertia_name(),*/ libremercado_name(),
-    NULL
-  };
-
-  char **p = names;
-
-  // Varr[const_char]
-  Arr *r = arr_new(free);
-  while (*p) {
-    arr_push(r, str_new(*p++));
-  }
-  return r;
+  return servers_all_selected_names_new();
 }
 
 int server_number(void) {

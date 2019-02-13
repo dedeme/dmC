@@ -118,7 +118,7 @@ void io_servers_write (Arr *box) {
   free(path);
 }
 
-// box_new is Arr[char]
+// io_servers_read_new is Arr[char]
 Arr *io_servers_read_new (void) {
   char *path = path_cat_new(sys_home(), "servers.db", NULL);
   Js *js = (Js *)file_read_new(path);
@@ -175,5 +175,34 @@ char *io_nick_read_new(char *nick) {
   char *path = path_cat_new(sys_home(), "nicks", nick, NULL);
   char *r = file_read_new(path);
   free(path);
+  return r;
+}
+
+Arr *io_nicks_new(void) {
+  char *path = path_cat_new(QUOTES, "nicks.db", NULL);
+  Js *js = (Js *)file_read_new(path);
+  free(path);
+
+  // Arr[Js]
+  Arr *data = js_ra_new(js);
+
+  // Arr[Js]
+  Arr *nicks = js_ra_new(arr_get(data, 2));
+
+  // Arr[char]
+  Arr *r = arr_new(free);
+  EACH(nicks, Js, js)
+    //Arr[Js]
+    Arr *nk = js_ra_new(js);
+    if (js_rb(arr_get(nk, 3))) {
+      arr_push(r, js_rs_new(arr_get(nk, 1)));
+    }
+    arr_free(nk);
+  _EACH
+
+  arr_free(nicks);
+  arr_free(data);
+  free(js);
+
   return r;
 }

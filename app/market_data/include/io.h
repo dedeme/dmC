@@ -59,4 +59,7 @@ void io_nick_write(char *nick, char *data);
 /// Reads nick data 'jsonized'
 char *io_nick_read_new(char *nick);
 
+/// Returns the selected nicks (Arr[char] -> ["ANA, BBVA, ..."])
+Arr *io_nicks_new(void);
+
 #endif

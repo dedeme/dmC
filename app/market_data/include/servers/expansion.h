@@ -14,7 +14,7 @@ char *expansion_name(void);
 // expansion_read_raw works the same as 'read' but returning server codes
 // instead nicks.
 // Returns 1 if reading is wrong, otherwise returns 0
-int expansion_read_raw(Arr **codes_new, Darr **qs_new);
+int expansion_read_raw(Arr **codes_new, Darr **qs_new, char *path);
 
 /// 'expansion_read' reads current quotes in new pairs Varr[char] - Darr.<p>
 /// Each nick of nicks_new match with the quote of 'qs_new' with the same

@@ -5,70 +5,13 @@
 #include "servers/reader.h"
 #include "DEFS.h"
 #include "io.h"
-
-static char *get_code(char *nick) {
-  return
-    str_eq(nick, "A3M") ? "A3M"
-    : str_eq(nick, "ACS") ? "ACS"
-    : str_eq(nick, "ACX") ? "ACX"
-    : str_eq(nick, "ADX") ? "ADXR"
-    : str_eq(nick, "AENA") ? "AENA"
-    : str_eq(nick, "ALM") ? "ALM"
-    : str_eq(nick, "AMS") ? "AMA"
-    : str_eq(nick, "ANA") ? "ANA"
-    : str_eq(nick, "APPS") ? "APPS"
-    : str_eq(nick, "BBVA") ? "BBVA"
-    : str_eq(nick, "BKIA") ? "BKIA"
-    : str_eq(nick, "BKT") ? "BKT"
-    : str_eq(nick, "CABK") ? "CABK"
-    : str_eq(nick, "CIE") ? "CIE"
-    : str_eq(nick, "CLNX") ? "CLNX"
-    : str_eq(nick, "COL") ? "COL"
-    : str_eq(nick, "DIA") ? "DIA"
-    : str_eq(nick, "ELE") ? "ELE"
-    : str_eq(nick, "ENC") ? "ENC"
-    : str_eq(nick, "ENG") ? "ENG"
-    : str_eq(nick, "FER") ? "FER"
-    : str_eq(nick, "GEST") ? "GEST"
-    : str_eq(nick, "GRF") ? "GRF"
-    : str_eq(nick, "GSJ") ? "GSJ"
-    : str_eq(nick, "IAG") ? "IAG"
-    : str_eq(nick, "IBE") ? "IBE"
-    : str_eq(nick, "IDR") ? "IDR"
-    : str_eq(nick, "ITX") ? "ITX"
-    : str_eq(nick, "MAP") ? "MAP"
-    : str_eq(nick, "MAS") ? "MAS"
-    : str_eq(nick, "MEL") ? "MEL"
-    : str_eq(nick, "MRL") ? "MRL"
-    : str_eq(nick, "MTS") ? "MTS"
-    : str_eq(nick, "NTGY") ? "NTGY"
-    : str_eq(nick, "OHL") ? "OHL"
-    : str_eq(nick, "PHM") ? "PHM"
-    : str_eq(nick, "PSG") ? "PSG"
-    : str_eq(nick, "REE") ? "REE"
-    : str_eq(nick, "REP") ? "REP"
-    : str_eq(nick, "SAB") ? "SAB"
-    : str_eq(nick, "SAN") ? "SAN"
-    : str_eq(nick, "SCYR") ? "SCYR"
-    : str_eq(nick, "SGRE") ? "SGREN"
-    : str_eq(nick, "SLR") ? "SLR"
-    : str_eq(nick, "TEF") ? "TEF"
-    : str_eq(nick, "TL5") ? "TL5"
-    : str_eq(nick, "TRE") ? "TRE"
-    : str_eq(nick, "UNI") ? "UNI"
-    : str_eq(nick, "VIS") ? "VIS"
-    : str_eq(nick, "ZOT") ? "ZOT"
-    : ""
-  ;
-}
+#include "servers.h"
 
 char *invertia_name(void) {
   return "invertia";
 }
 
-int invertia_read_raw(Arr **codes_new, Darr **qs_new) {
-  char *path =  "https://www.invertia.com/es/mercados/bolsa/indices/acciones/"
-                "-/indice/mdo-continuo/IB011CONTINU";
+int invertia_read_raw(Arr **codes_new, Darr **qs_new, char *path) {
   // Varr[char]
   Varr *tstart = varr_new();
   // Varr[char]
@@ -128,27 +71,33 @@ int invertia_read_raw(Arr **codes_new, Darr **qs_new) {
 }
 
 int invertia_read(Varr **nicks_new, Darr **qs_new) {
-  char *nks[] = NICKS;
+  char *svname = invertia_name();                     //-------------------
   Varr *nicks = varr_new();
   Darr *qs = darr_new();
   *nicks_new = nicks;
   *qs_new = qs;
 
+  char *url_new;
+  // Map[char]
+  Map *codes_new;
+  servers_data(&url_new, &codes_new, svname);
+
+
   Arr *codes;
   Darr *qcs;
-
-  int e = invertia_read_raw(&codes, &qcs);
+  int e = invertia_read_raw(&codes, &qcs, url_new);   //-------------------
+  free(url_new);
   if (e) {
+    map_free(codes_new);
     return e;
   }
 
-  char **pnks = nks;
-  while (*pnks) {
-    char *nk = *pnks++;
-    char *code = get_code(nk);
+  EACH(codes_new, Kv, kv)
+    char *nk = map_key(kv);
+    char *code = map_value(kv);
 
     if (!*code) {
-      io_loge("Nick '%s' not found in %s", nk, invertia_name());
+      io_loge("Nick '%s' no encontrado en %s", nk, svname);
       return 1;
     }
 
@@ -162,10 +111,10 @@ int invertia_read(Varr **nicks_new, Darr **qs_new) {
       }
     _EACH
     if (q == -1) {
-      io_loge("Quote of '%s' not fund in %s", nk, invertia_name());
+      io_loge("Quote of '%s' not fund in %s", nk, svname);
       return 1;
     }
-  }
+  _EACH
 
   return 0;
 }

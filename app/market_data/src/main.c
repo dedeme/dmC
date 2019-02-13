@@ -12,6 +12,7 @@
 #include "Nick.h"
 #include "pf.h"
 #include "trading.h"
+#include "servers.h"
 
 static void start (char *key) {
   int sleeping_count = 0;
@@ -60,17 +61,18 @@ puts("toActive 2");
         Darr *last_qs;
         Darr *signals;
         trading_read_new(&last_qs, &signals);
-        char *nicks[] = NICKS;
-        char **p = nicks;
+        // Arr[char]
+        Arr *nicks = io_nicks_new();
         int c = 0;
-        while (*p) {
-          char *nick = *p++;
+        EACH(nicks, char, nick)
           nick_new(
             nick, map_get_null(pf, nick),
             darr_get(last_qs, c), darr_get(signals, c)
           );
           ++c;
-        }
+        _EACH
+        arr_free(nicks);
+
         state = ST_ACTIVE;
         io_state_write(state);
       } else {
@@ -168,6 +170,8 @@ int main(int argc, char* args[]) {
     free(k);
   } else if (argc == 2 && str_eq(args[1], "stop")) {
     io_lock_del();
+  } else if (argc == 2 && str_eq(args[1], "test")) {
+    servers_tests();
   } else {
     puts(
       "market_data. v201901\n"
@@ -177,6 +181,8 @@ int main(int argc, char* args[]) {
       "    Start daemon\n"
       "  market_data stop\n"
       "    Stop daemon\n"
+      "  market_data test\n"
+      "    Test daily servers\n"
     );
   }
 

@@ -23,61 +23,6 @@
 /// Program state
 #define ST_TO_SLEEPING2 "toSleeping2"
 
-/// Nicks list
-#define NICKS {\
-    "A3M",\
-    "ACS",\
-    "ACX",\
-    "ADX",\
-    "AENA",\
-    "ALM",\
-    "AMS",\
-    "ANA",\
-    "APPS",\
-    "BBVA",\
-    "BKIA",\
-    "BKT",\
-    "CABK",\
-    "CIE",\
-    "CLNX",\
-    "COL",\
-    "DIA",\
-    "ELE",\
-    "ENC",\
-    "ENG",\
-    "FER",\
-    "GEST",\
-    "GRF",\
-    "GSJ",\
-    "IAG",\
-    "IBE",\
-    "IDR",\
-    "ITX",\
-    "MAP",\
-    "MAS",\
-    "MEL",\
-    "MRL",\
-    "MTS",\
-    "NTGY",\
-    "OHL",\
-    "PHM",\
-    "PSG",\
-    "REE",\
-    "REP",\
-    "SAB",\
-    "SAN",\
-    "SCYR",\
-    "SGRE",\
-    "SLR",\
-    "TEF",\
-    "TL5",\
-    "TRE",\
-    "UNI",\
-    "VIS",\
-    "ZOT",\
-    NULL \
-  }
-
 /// Path of Market data directory
 #define MARKET "/dm/wwwcgi/dmcgi/Market/data"
 

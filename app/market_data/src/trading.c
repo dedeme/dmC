@@ -3,6 +3,7 @@
 
 #include "trading.h"
 #include "DEFS.h"
+#include "io.h"
 
 struct trading_Params {
   int days;
@@ -176,10 +177,9 @@ void trading_read_new(Darr **last_qs_new, Darr **signals_new) {
   Darr *qs = darr_new();
   Darr *ss = darr_new();
 
-  char *nicks[] = NICKS;
-  char **p = nicks;
-  while (*p) {
-    char *nick = *p++;
+  // Arr[char]
+  Arr *nicks = io_nicks_new();
+  EACH(nicks, char, nick)
     Darr *cls = closes_new(nick);
     Params *p = map_get_null(ps, nick);
     if (!p) p = def;
@@ -187,7 +187,8 @@ void trading_read_new(Darr **last_qs_new, Darr **signals_new) {
     darr_push(qs, darr_get(cls, darr_size(cls) - 1));
     darr_push(ss, sup_res(cls, p));
     darr_free(cls);
-  }
+  _EACH
+  arr_free(nicks);
 
   map_free(ps);
   params_free(def);

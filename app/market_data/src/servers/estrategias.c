@@ -5,70 +5,13 @@
 #include "servers/reader.h"
 #include "DEFS.h"
 #include "io.h"
-
-static char *get_code(char *nick) {
-  return
-    str_eq(nick, "A3M") ? "Atresmedia"
-    : str_eq(nick, "ACS") ? "ACS"
-    : str_eq(nick, "ACX") ? "Acerinox"
-    : str_eq(nick, "ADX") ? "Audax"
-    : str_eq(nick, "AENA") ? "Aena"
-    : str_eq(nick, "ALM") ? "Almirall"
-    : str_eq(nick, "AMS") ? "Amadeus"
-    : str_eq(nick, "ANA") ? "Acciona"
-    : str_eq(nick, "APPS") ? "Applus"
-    : str_eq(nick, "BBVA") ? "BBVA"
-    : str_eq(nick, "BKIA") ? "Bankia"
-    : str_eq(nick, "BKT") ? "Bankinter"
-    : str_eq(nick, "CABK") ? "Caixabank"
-    : str_eq(nick, "CIE") ? "CIE Automotive"
-    : str_eq(nick, "CLNX") ? "Cellnex"
-    : str_eq(nick, "COL") ? "Inmobiliaria Colonial"
-    : str_eq(nick, "DIA") ? "DIA"
-    : str_eq(nick, "ELE") ? "Endesa"
-    : str_eq(nick, "ENC") ? "ENCE"
-    : str_eq(nick, "ENG") ? "Enagas"
-    : str_eq(nick, "FER") ? "Ferrovial"
-    : str_eq(nick, "GEST") ? "Gestamp"
-    : str_eq(nick, "GRF") ? "Grifols A"
-    : str_eq(nick, "GSJ") ? "Grupo San Jose"
-    : str_eq(nick, "IAG") ? "IAG (Iberia)"
-    : str_eq(nick, "IBE") ? "Iberdrola"
-    : str_eq(nick, "IDR") ? "Indra"
-    : str_eq(nick, "ITX") ? "Inditex"
-    : str_eq(nick, "MAP") ? "Mapfre"
-    : str_eq(nick, "MAS") ? "Masmovil"
-    : str_eq(nick, "MEL") ? "Melia Hotels"
-    : str_eq(nick, "MRL") ? "MERLIN Properties"
-    : str_eq(nick, "MTS") ? "ArcelorMittal"
-    : str_eq(nick, "NTGY") ? "Naturgy (Gas Natural)"
-    : str_eq(nick, "OHL") ? "OHL"
-    : str_eq(nick, "PHM") ? "PHARMA MAR"
-    : str_eq(nick, "PSG") ? "Prosegur"
-    : str_eq(nick, "REE") ? "REE"
-    : str_eq(nick, "REP") ? "Repsol"
-    : str_eq(nick, "SAB") ? "Banco Sabadell"
-    : str_eq(nick, "SAN") ? "Banco Santander"
-    : str_eq(nick, "SCYR") ? "Sacyr"
-    : str_eq(nick, "SGRE") ? "Siemens-Gamesa"
-    : str_eq(nick, "SLR") ? "Solaria"
-    : str_eq(nick, "TEF") ? "Telefonica"
-    : str_eq(nick, "TL5") ? "Mediaset"
-    : str_eq(nick, "TRE") ? "Tecnicas Reunidas"
-    : str_eq(nick, "UNI") ? "UNICAJA"
-    : str_eq(nick, "VIS") ? "Viscofan"
-    : str_eq(nick, "ZOT") ? "Zardoya Otis"
-    : ""
-  ;
-}
+#include "servers.h"
 
 char *estrategias_name(void) {
   return "estrategias";
 }
 
-int estrategias_read_raw(Arr **codes_new, Darr **qs_new) {
-  char *path =  "https://www.estrategiasdeinversion.com/cotizaciones/indices/"
-                "mercado-continuo";
+int estrategias_read_raw(Arr **codes_new, Darr **qs_new, char *path) {
   // Varr[char]
   Varr *tstart = varr_new();
   // Varr[char]
@@ -128,27 +71,33 @@ int estrategias_read_raw(Arr **codes_new, Darr **qs_new) {
 }
 
 int estrategias_read(Varr **nicks_new, Darr **qs_new) {
-  char *nks[] = NICKS;
+  char *svname = estrategias_name();                     //-------------------
   Varr *nicks = varr_new();
   Darr *qs = darr_new();
   *nicks_new = nicks;
   *qs_new = qs;
 
+  char *url_new;
+  // Map[char]
+  Map *codes_new;
+  servers_data(&url_new, &codes_new, svname);
+
+
   Arr *codes;
   Darr *qcs;
-
-  int e = estrategias_read_raw(&codes, &qcs);
+  int e = estrategias_read_raw(&codes, &qcs, url_new);   //-------------------
+  free(url_new);
   if (e) {
+    map_free(codes_new);
     return e;
   }
 
-  char **pnks = nks;
-  while (*pnks) {
-    char *nk = *pnks++;
-    char *code = get_code(nk);
+  EACH(codes_new, Kv, kv)
+    char *nk = map_key(kv);
+    char *code = map_value(kv);
 
     if (!*code) {
-      io_loge("Nick '%s' not found in %s", nk, estrategias_name());
+      io_loge("Nick '%s' no encontrado en %s", nk, svname);
       return 1;
     }
 
@@ -162,10 +111,10 @@ int estrategias_read(Varr **nicks_new, Darr **qs_new) {
       }
     _EACH
     if (q == -1) {
-      io_loge("Quote of '%s' not fund in %s", nk, estrategias_name());
+      io_loge("Quote of '%s' not fund in %s", nk, svname);
       return 1;
     }
-  }
+  _EACH
 
   return 0;
 }
