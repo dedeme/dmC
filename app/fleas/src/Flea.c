@@ -253,7 +253,7 @@ Fresults *flea_process_new(Flea *this, Quote **quotes, int q_ix, int q_end) {
     double last_close = quote_close(quotes[last_day + nick]);
     if (last_close > 0) {
       cash += last_close * pf_stocks(pf, nick);
-    } if (last_close > -1.5) {
+    } else if (last_close > -1.5) {
       int stocks;
       double price;
       pf_get(&stocks, &price, pf, nick);

@@ -18,7 +18,7 @@
 #define FLEAS_PER_GROUP 2000
 
 /// Days waiting before operating
-#define DAYS_STAND_BY 125
+#define DAYS_STAND_BY 0
 
 ///
 #define MAX_DAYS 120
@@ -41,10 +41,10 @@
 /// Bet
 #define BET 15000.0
 
-// Minimum operations to survive (divisor: (days - MAX_DAYS) / MIN_SELLS)
+/// Minimum operations to survive (divisor: (days - DAYS_STAND_BY) / MIN_SELLS)
 #define MIN_SELLS 9
 
-//Maximun operations to survive (divisor: (days - MAX_DAYS) / MAX_SELLS)
+///  Maximun operations to survive (divisor: (days - DAYS_STAND_BY) / MAX_SELLS)
 #define MAX_SELLS 6
 
 /// Range of mutation
