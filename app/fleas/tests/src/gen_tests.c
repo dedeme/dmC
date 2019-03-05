@@ -1,42 +1,35 @@
-// Copyright 26-Oct-2018 ºDeme
+// Copyright 23-Feb-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "gen_tests.h"
+#include "assert.h"
 #include "Gen.h"
-#include <assert.h>
+void gen_tests(void) {
+  puts("Gen tests:");
 
-void gen_tests() {
-  puts("Gen tests");
-
-  Gen *g1 = gen_new();
-  Js *js = gen_to_js_new(g1);
-  assert(str_eq((char *)js, "[0.500000,0.500000,0.500000]"));
-  Gen *g2 = gen_from_js_new(js);
-  assert(gen_get(g1, gen_DAYS) == gen_get(g2, gen_DAYS));
-  assert(gen_get(g1, gen_BUY) == gen_get(g2, gen_BUY));
-  assert(gen_get(g1, gen_SELL) == gen_get(g2, gen_SELL));
-  assert(gen_proximity(g1, g2) == 1);
-  free(js);
-  free(g2);
-  free(g1);
+  // Arr*[Darr]
+  Arr *gens = arr_new((FPROC)gen_free);
 
   REPEAT(100)
-    g1 = gen_new();
-    g2 = gen_mutate_new(g1);
-    free(g1);
-    assert(gen_get(g2, gen_DAYS) >= 0 && gen_get(g2, gen_DAYS) < 1);
-    assert(gen_get(g2, gen_BUY) >= 0 && gen_get(g2, gen_BUY) < 1);
-    assert(gen_get(g2, gen_SELL) >= 0 && gen_get(g2, gen_SELL) < 1);
-    Js *js2 = gen_to_js_new(g2);
-    g1 = gen_from_js_new(js2);
-    Js *js1 = gen_to_js_new(g1);
-    assert(str_eq((char *)js1, (char *)js2));
-
-    free(js1);
-    free(js2);
-    free(g1);
-    free(g2);
+    Gen *g = gen_new(4);
+    arr_push(gens, gen_mutate_new(g));
+    gen_free(g);
   _REPEAT
 
-  puts("    Finished");
+  RANGE0(i, 100)
+    Gen *g = arr_get(gens, i);
+    Js *js = gen_to_js_new(g);
+    Gen *g2 = gen_from_js_new(js);
+    Js *js2 = gen_to_js_new(g2);
+    assert(gen_eq(g, g2));
+    assert(str_eq((char *)js, (char *)js2));
+    free(js);
+    gen_free(g2);
+    free(js2);
+    RANGE0(j, 100)
+      assert((i == j) == (gen_eq(g, arr_get(gens, j))));
+    _RANGE
+  _RANGE
+
+  puts("Finished");
 }

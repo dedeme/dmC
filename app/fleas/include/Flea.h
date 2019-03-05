@@ -1,16 +1,11 @@
-// Copyright 27-Oct-2018 ºDeme
+// Copyright 23-Feb-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Flea structure
 
 #ifndef FLEA_H
   #define FLEA_H
 
 #include "dmc/std.h"
 #include "Gen.h"
-#include "market/Quote.h"
-
-typedef struct fresults_Fresults Fresults;
 
 /*--*/
 
@@ -21,22 +16,16 @@ typedef struct flea_Flea Flea;
 void flea_free(Flea *this);
 
 ///
-char *flea_id(Flea *this);
+char *flea_date(Flea *this);
+
+///
+char *flea_cycle(Flea *this);
+
+///
+char *flea_idn(Flea *this);
 
 ///
 Gen *flea_gen(Flea *this);
-
-///
-int flea_ndays(Flea *this);
-
-///
-double flea_buy_strip(Flea *this);
-
-///
-double flea_sell_strip(Flea *this);
-
-///
-int flea_eq_gen(Flea *this, Flea *other);
 
 ///
 Js *flea_to_js_new(Flea *this);
@@ -46,22 +35,30 @@ Flea *flea_from_js_new(Js *js);
 
 /*--*/
 
-/// Makes a Flea with an intial mutation
-Flea *flea_new(char *id);
+/// Creates a new flea.
+///   date: Date of creation.
+///   cycle: Cycle of creation.
+///   idn: Identifier number in cycle.
+///    n: Number of elements of its gen.
+Flea *flea_new(
+  char *date,
+  char *cycle,
+  char *idn,
+  int n
+);
 
-/// Makes a Flea with a 'gen'
-Flea *flea_gen_new(char *id, Gen *gen);
+/// Returns a new Flea mutation of 'this', with a new identifier 'id'.
+///   this: Flea
+///   date: Date of creation.
+///   cycle: Cycle of creation.
+///   idn: Identifier number in cycle.
+Flea *flea_mutate_new(
+  Flea *this,
+  char *date,
+  char *cycle,
+  char *idn
+);
 
-/// Makes a new flea
-Flea *flea_copy_new(Flea *this);
-
-/// Makes a Flea mutating 'this'
-Flea *flea_mutate_new(Flea *this, char *new_id);
-
-/// Cycle initialization
-void flea_init(Flea *this, int companies_number);
-
-/// Cycle process
-Fresults *flea_process_new(Flea *this, Quote **quotes, int q_ix, int q_end);
+Flea *flea_copy_new(Flea *f);
 
 #endif

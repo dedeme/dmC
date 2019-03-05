@@ -1,14 +1,14 @@
-// Copyright 28-Oct-2018 ºDeme
+// Copyright 24-Feb-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// First part of process: Day mutations.
 
 #ifndef PROCESS_H
   #define PROCESS_H
 
 #include "dmc/std.h"
+#include "Model.h"
 
-///
-void process_run(void);
+/// Processes a flea model in a group and return 1 if more than one flea
+/// was selected.
+int process_run(Model *fmodel);
 
 #endif

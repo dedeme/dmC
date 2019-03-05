@@ -83,6 +83,10 @@ puts("toActive 2");
       }
     } else if (str_eq(state, ST_ACTIVE)) {
 puts("active");
+    Darr *last_qs;
+    Darr *signals;
+    trading_read_new(&last_qs, &signals);
+
       server_update(sv);
       if (server_active(sv)) {
         Darr *qs = server_qs(sv);

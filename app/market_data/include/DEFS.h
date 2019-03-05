@@ -29,7 +29,4 @@
 /// Path of Quotes data directory
 #define QUOTES "/dm/wwwcgi/dmcgi/Quotes/data"
 
-/// Path of fleas data directory
-#define FLEAS "/home/deme/.dmCApp/fleas"
-
 #endif

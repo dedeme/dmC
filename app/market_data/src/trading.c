@@ -6,18 +6,16 @@
 #include "io.h"
 
 struct trading_Params {
-  int days;
-  double bs;
-  double ss;
+  double start;
+  double step;
 };
 
 #define Params struct trading_Params
 
-static Params *params_new(int days, double bs, double ss) {
+static Params *params_new(double start, double step) {
   Params *this = malloc(sizeof(Params));
-  this->days = days;
-  this->bs = bs;
-  this->ss = ss;
+  this->start = start;
+  this->step = step;
   return this;
 }
 
@@ -25,53 +23,18 @@ static void params_free(Params *this) {
   free(this);
 };
 
-static Params *params_read_default_new(void) {
+static Params *params_read_new(void) {
   char *path = path_cat_new(MARKET, "baseParams.db", NULL);
   Js *js = (Js *)file_read_new(path);
   free(path);
   // Arr[Js]
   Arr *values = js_ra_new(js);
   Params *r = params_new(
-    js_ri(arr_get(values, 0)),
-    js_rd(arr_get(values, 1)),
-    js_rd(arr_get(values, 2))
+    js_rd(arr_get(values, 0)),
+    js_rd(arr_get(values, 1))
   );
   free(js);
   free(values);
-  return r;
-}
-
-// Returns Map[Params]
-static Map *params_read_new(void) {
-  char *path = path_cat_new(MARKET, "params.db", NULL);
-  Js *js = (Js *)file_read_new(path);
-  free(path);
-  // Arr[Js]
-  Arr *ps = js_ra_new(js);
-  free(js);
-
-  // Map[Params]
-  Map *r = map_new((FPROC)params_free);
-
-  EACH(ps, Js, js)
-    // Arr[Js]
-    Arr *a = js_ra_new(js);
-    char *nick = js_rs_new(arr_get(a, 0));
-    // Arr[js]
-    Arr *values = js_ra_new(arr_get(a, 1));
-
-    map_put(r, nick, params_new(
-      js_ri(arr_get(values, 0)),
-      js_rd(arr_get(values, 1)),
-      js_rd(arr_get(values, 2))
-    ));
-
-    arr_free(values);
-    free(nick);
-    arr_free(a);
-  _EACH
-
-  arr_free(ps);
   return r;
 }
 
@@ -88,7 +51,10 @@ static Darr *closes_new(char *nick) {
   EACH(rows, char, row)
     // Arr[char]
     Arr *fields = str_csplit_new(row, ':');
-    darr_push(r, atof(arr_get(fields, 2)));
+    double c = atof(arr_get(fields, 2));
+    if (c > 0) {
+      darr_push(r, c);
+    }
     arr_free(fields);
   _EACH
   arr_free(rows);
@@ -97,82 +63,44 @@ static Darr *closes_new(char *nick) {
   return r;
 }
 
-static double sup_res(Darr *closes, Params *ps) {
-  double bs = ps->bs;
-  double ss = ps->ss;
-  int before = 0;
-  int after = ps->days - 1;
-  double ref = -1;
-  int isBuying = 0;
-  int size = darr_size(closes);
-
-  for (;;) {
-    double begin = darr_get(closes, before);
-    if (ref <= 0) {
-      if (begin > 0) {
-        ref = begin;
-      } else {
-        ++before;
-        ++after;
-        if (after >= size) break; else continue;
-      }
-    } else {
-      if (begin > 0) {
-        if (isBuying) {
-          if (begin < ref) ref = begin;
-        } else {
-          if (begin > ref) ref = begin;
-        }
-      }
-    }
-
-    ++before;
-    ++after;
-    if (after >= size) {
-      break;
-    }
-
-    double cl = darr_get(closes, after);
-    if (cl > 0) {
-      if (isBuying) {
-        if ((cl - ref) / ref > bs) {
-          isBuying = 0;
-          ref = darr_get(closes, before);
-        }
-      } else {
-        if ((ref - cl) / ref > ss) {
-          isBuying = 1;
-          ref = darr_get(closes, before);
-        }
-      }
-    }
-  }
-
-  double begin = darr_get(closes, before);
-  if (ref <= 0) {
-    if (begin > 0) {
-      ref = begin;
-    }
-  } else {
-    if (begin > 0) {
-      if (isBuying) {
-        if (begin < ref) ref = begin;
-      } else {
-        if (begin > ref) ref = begin;
-      }
-    }
-  }
-
-  return ref
-    ? isBuying ? ref * (1 + bs) : -(ref * (1 - ss))
-    : 0
+static double force(char *nick) {
+  return str_eq(nick, "BBVA") ? 4.545
+    : str_eq(nick, "MAP") ? 2.295
+    : str_eq(nick, "MTS") ? 17.32
+    : str_eq(nick, "PSG") ? 4.208
+    : str_eq(nick, "REP") ? 13.735
+    : str_eq(nick, "SAN") ? 3.97
+    : -2
   ;
 }
 
+static double sup_res(Darr *closes, Params *ps, double force) {
+  double start = ps->start;
+  double step = ps->step;
+  int isToSell = 1;
+  double ref = darr_get(closes, 0) * (1 - start);
+
+  DEACH(closes, cl)
+    if (isToSell) {
+      ref = ref + (cl - ref) * step;
+      if (cl < ref) {
+        ref = cl * (1 + start);
+        isToSell = 0;
+      }
+    } else {
+      ref = ref - (ref - cl) * step;
+      if (cl > ref || cl == force) {
+        ref = cl * (1 - start);
+        isToSell = 1;
+      }
+    }
+  _EACH
+
+  return isToSell ? -ref : ref;
+}
+
 void trading_read_new(Darr **last_qs_new, Darr **signals_new) {
-  Params *def = params_read_default_new();
-  // Map[params]
-  Map *ps = params_read_new();
+  Params *ps = params_read_new();
 
   Darr *qs = darr_new();
   Darr *ss = darr_new();
@@ -181,17 +109,14 @@ void trading_read_new(Darr **last_qs_new, Darr **signals_new) {
   Arr *nicks = io_nicks_new();
   EACH(nicks, char, nick)
     Darr *cls = closes_new(nick);
-    Params *p = map_get_null(ps, nick);
-    if (!p) p = def;
 
     darr_push(qs, darr_get(cls, darr_size(cls) - 1));
-    darr_push(ss, sup_res(cls, p));
+    darr_push(ss, sup_res(cls, ps, force(nick)));
     darr_free(cls);
   _EACH
   arr_free(nicks);
 
-  map_free(ps);
-  params_free(def);
+  params_free(ps);
 
   *last_qs_new = qs;
   *signals_new = ss;

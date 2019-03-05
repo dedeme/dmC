@@ -1,84 +1,47 @@
-// Copyright 28-Oct-2018 ºDeme
+// Copyright 24-Feb-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// IO operations.
 
 #ifndef IO_H
   #define IO_H
 
 #include "dmc/std.h"
-#include "market/Quote.h"
-#include "Fbest.h"
 
-///
-void io_init(void);
+/// Initializes files
+///   fmodels: Arr[Model] Flea models.
+void io_init(Arr *fmodels);
 
-///
-void io_end(void);
+/// Free resources
+void io_free(void);
 
-/// Every column of the returned array is a nick and there are io_qnicks
-/// number of them.<p>
-/// Every row of the returned array is a date and there are io_qdays number
-/// of them.
-Quote **io_quotes(void);
-
-/// Days number of quotes.
-int io_qdays(void);
-
-/// Nicks number of quotes.
+/// Returns the nick number
 int io_qnicks(void);
 
-///
-void io_write_fleas(
-  char *days,
-  int cycle,
-  // Arr[Flea]
-  Arr *fleas
-);
+/// Returns the days number
+int io_qdays(void);
 
-///
-void io_read_fleas(
-  int *cycle,
-  // Arr[Flea]
-  Arr **fleas_new,
-  char *days
-);
+/// Returns a opens array
+double *io_opens(void);
 
-/// 'results' is Arr[Fresult]
-void io_write_results(char *group, Arr *results);
+/// Returns a closes array
+double *io_closes(void);
 
-/// Reads data from start bprocess.
-///   bests: Previous bests or [] of date is ""
-///   date: Date to calculate or "" if there are no new date to calculate.
-///   results: Group results of process or [] if date is ""
-///   days: Group to process
-void io_best_start(
-  // Arr[Fbest]
-  Arr **bests,
-  char **date,
-  // Arr[Fresults]
-  Arr **results,
-  int days
-);
+/// Returns an Arr[char]. Its indexes match with columns of opens and closes.
+Arr *io_nicks(void);
 
-void io_write_best(int days, Fbest *best);
+/// Returns an Arr[char]. Its indexes match with rows of opens and closes.
+Arr *io_dates(void);
 
-/// Returns 'true' if application was locked, otherwise blocks it.
-int io_lock(void);
+/// Reads bests results. Returns an Arr *rss
+///   model: It can be a 'model_name' or "" (for bests)
+Arr *io_rrss_new(char *model);
 
-/// Unlocks application.
-void io_unlock(void);
+/// Writes bests results.
+///   is_best: Its value is 1 if rs is a bests list.
+///   model: It can be a 'model_name' or "" (for bests)
+///   rs: Arr[BestsRs]
+void io_wrss(int is_bests, char *model, Arr *rss);
 
-/// Sends message to stop the application.
-void io_send_stop(void);
-
-/// Returns 'true' if 'io_send_stop' was called
-int io_stop(void);
-
-/// Removes stop mark
-void io_del_stop(void);
-
-/// Remove all files
-void io_clean(void);
+/// Writes data for charts
+void io_wcharts(char *model, char *data);
 
 #endif
