@@ -4,24 +4,24 @@
 #include "trading_tests.h"
 #include "trading.h"
 #include "pf.h"
+#include "io.h"
 #include <assert.h>
 #include "DEFS.h"
 
 void trading_tests() {
   puts("Trading tests:");
 
+  // Arr[char]
+  Arr *nicks = io_nicks_new();
+
   // Map[Double]
   Darr *last_qs;
   Darr *signals;
-  trading_read_new(&last_qs, &signals);
+  trading_read_new(&last_qs, &signals, nicks);
 
-  char *nicks[] = NICKS;
-  char **p = nicks;
-  int c = 0;
-  while (*p) {
-    printf("%s -> %f : %f\n", *p++, darr_get(last_qs, c), darr_get(signals, c));
-    ++c;
-  }
+  EACH_IX(nicks, char, nick, c)
+    printf("%s -> %f : %f\n", nick, darr_get(last_qs, c), darr_get(signals, c));
+  _EACH
 
   // Map[PfValue]
   Map *pf = pf_read_new();
@@ -30,12 +30,14 @@ void trading_tests() {
   Varr *keys = map_keys_new(pf);
   varr_sort(keys, (FGREATER)str_greater);
   EACH(keys, char, k)
-    char **p = nicks;
-    int c = 0;
-    while (*p) {
-      if (str_eq(*p++, k)) break;
-      ++c;
+    if (str_eq(k, "PVA")) {
+      continue;
     }
+    int c = 0;
+    EACH(nicks, char, nick)
+      if (str_eq(nick, k)) break;
+      ++c;
+    _EACH
     double last_q = darr_get(last_qs, c);
     double signal = -darr_get(signals, c);
 

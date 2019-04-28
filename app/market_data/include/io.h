@@ -62,4 +62,7 @@ char *io_nick_read_new(char *nick);
 /// Returns the selected nicks (Arr[char] -> ["ANA, BBVA, ..."])
 Arr *io_nicks_new(void);
 
+/// Deletes data of nicks quotes
+void io_nicks_clear(void);
+
 #endif

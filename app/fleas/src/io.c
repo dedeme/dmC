@@ -39,8 +39,7 @@ static int nlines(char *nick) {
   Arr *lines = str_csplit_new(data, '\n');
   int c = 0;
   EACH(lines, char, l)
-    char *ltrim = str_new(l);
-    str_trim(&ltrim);
+    char *ltrim = str_trim_new(l);
     if (*ltrim) {
       ++c;
     }
@@ -114,8 +113,7 @@ void io_init(Arr *fmodels) {
     Arr *lines = str_csplit_new(data, '\n');
 
     EACH(lines, char, l)
-      char *ltrim = str_new(l);
-      str_trim(&ltrim);
+      char *ltrim = str_trim_new(l);
       if (*ltrim) {
         // Arr[char]
         Arr *qs = str_csplit_new(ltrim, ':');
@@ -227,11 +225,11 @@ Arr *io_nicks(void) {
   return nicks;
 }
 
-Arr *io_dates(void) {
+Arr *io_dates (void) {
   return dates;
 }
 
-Arr *io_rrss_new(char *model) {
+Arr *io_rrss_new (char *model) {
   char  *f = str_f_new("%s/_bests/%s.db", sys_home(), model);
   char *data = file_read_new(f);
   // Arr[Js]
@@ -247,7 +245,7 @@ Arr *io_rrss_new(char *model) {
   return r;
 }
 
-void io_wrss(int is_bests, char *model, Arr *rss) {
+void io_wrss (int is_bests, char *model, Arr *rss) {
   char *create_path_new() {
     if (is_bests) {
       return str_f_new("%s/_bests/%s.db", sys_home(), model);
@@ -257,7 +255,8 @@ void io_wrss(int is_bests, char *model, Arr *rss) {
     free(date);
     return r;
   }
-  char  *f = create_path_new();
+
+  char *f = create_path_new();
   // Arr[Js]
   Arr *jss = arr_new(free);
   EACH(rss, Rs, rs)
@@ -270,7 +269,35 @@ void io_wrss(int is_bests, char *model, Arr *rss) {
   free(data);
 }
 
-void io_wcharts(char *model, char *data) {
+void io_clean_rss (char *model) {
+  char *path = str_f_new("%s/_bests/%s.db", sys_home(), model);
+  Js *data = (Js *)file_read_new(path);
+  // Arr[Js]
+  Arr *a = js_ra_new(data);
+  while (arr_size(a) > MAXIMUM_HISTORIC_BESTS) {
+    free(arr_pop_new(a));
+  }
+  free(data);
+  data = js_wa_new(a);
+  arr_free(a);
+  file_write(path, (char *)data);
+  free(data);
+  free(path);
+
+  path = str_f_new("%s/%s", sys_home(), model);
+  // Arr[char]
+  Arr *fs = file_dir_new(path);
+  arr_sort(fs, (FGREATER)str_greater);
+  RANGE0(i, arr_size(fs) - MAXIMUM_HISTORIC_BESTS - 1)
+    char *f = str_f_new("%s/%s", path, arr_get(fs, i));
+    file_del(f);
+    free(f);
+  _RANGE
+  arr_free(fs);
+  free(path);
+}
+
+void io_wcharts (char *model, char *data) {
   char *f = str_f_new("%s/_charts/%s.db", sys_home(), model);
   file_write(f, data);
   free(f);

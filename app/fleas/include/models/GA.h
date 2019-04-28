@@ -7,5 +7,6 @@
 #include "dmc/std.h"
 #include "Model.h"
 
+///
 Model *gA_new();
 #endif

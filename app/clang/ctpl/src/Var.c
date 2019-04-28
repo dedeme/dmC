@@ -40,6 +40,7 @@ Var *var_copy_new(Var *this) {
 void var_from_str(char **error_new_null, Var **var_new_null, const char *s) {
   *error_new_null = NULL;
   *var_new_null = NULL;
+  char *tmp = NULL;
 
   // Arr[char]
   Arr *parts = str_csplit_trim_new(s, ':');
@@ -56,8 +57,12 @@ void var_from_str(char **error_new_null, Var **var_new_null, const char *s) {
   enum var_Type gstype = var_GETTER;
   if (*id == '-') {
     gstype = var_NONE;
-    str_right(&id, 1);
-    str_ltrim(&id);
+    tmp = id;
+    id = str_right_new(tmp, 1);
+    free(tmp);
+    tmp = id;
+    id = str_ltrim_new(tmp);
+    free(tmp);
   }
 
   char *type = str_new(arr_get(parts, 1));
@@ -87,8 +92,12 @@ void var_from_str(char **error_new_null, Var **var_new_null, const char *s) {
         ffree = str_new("_m");
       } else {
         ffree = str_new(type);
-        str_left(&ffree, strlen(ffree) - 1);
-        str_rtrim(&ffree);
+        tmp = ffree;
+        ffree = str_left_new(tmp, strlen(tmp) - 1);
+        free(tmp);
+        tmp = ffree;
+        ffree = str_rtrim_new(tmp);
+        free(tmp);
         *ffree = tolower(*ffree);
       }
     } else {
@@ -188,15 +197,15 @@ void var_w_destructor(Var *this, Buf *bf) {
     return;
   }
   if (str_eq(ffree, "_s")) {
-    s = str_f_new("  free(this->%s);\n", this->id);
+    s = str_f_new("    free(this->%s);\n", this->id);
   } else if (str_eq(ffree, "_a")) {
-    s = str_f_new("  arr_free(this->%s);\n", this->id);
+    s = str_f_new("    arr_free(this->%s);\n", this->id);
   } else if (str_eq(ffree, "_m")) {
-    s = str_f_new("  map_free(this->%s);\n", this->id);
+    s = str_f_new("    map_free(this->%s);\n", this->id);
   } else if (*ffree == '!') {
-    s = str_f_new("  %s(this->%s);\n", ffree + 1, this->id);
+    s = str_f_new("    %s(this->%s);\n", ffree + 1, this->id);
   } else {
-    s = str_f_new("  %s_free(this->%s);\n", this->ffree, this->id);
+    s = str_f_new("    %s_free(this->%s);\n", this->ffree, this->id);
   }
   buf_add(bf, s);
   free(s);

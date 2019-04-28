@@ -41,6 +41,10 @@ Arr *io_rrss_new(char *model);
 ///   rs: Arr[BestsRs]
 void io_wrss(int is_bests, char *model, Arr *rss);
 
+/// Removes extra bests using DEFS.MAXIMUM_HISTORIC_BESTS
+///   model: It can be a 'model_name' or "" (for bests)
+void io_clean_rss(char *model);
+
 /// Writes data for charts
 void io_wcharts(char *model, char *data);
 

@@ -206,3 +206,10 @@ Arr *io_nicks_new(void) {
 
   return r;
 }
+
+void io_nicks_clear(void) {
+  char *path = path_cat_new(sys_home(), "nicks", NULL);
+  file_del(path);
+  file_mkdir(path);
+  free(path);
+}

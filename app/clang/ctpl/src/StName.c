@@ -46,8 +46,12 @@ void stName_from_str(
   int public = 1;
   if (*id == '-') {
     public = 0;
-    str_right(&id, 1);
-    str_ltrim(&id);
+    char *tmp = id;
+    id = str_right_new(tmp, 1);
+    free(tmp);
+    tmp = id;
+    id = str_ltrim_new(tmp);
+    free(tmp);
   }
 
   int size = arr_size(parts);

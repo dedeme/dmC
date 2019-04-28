@@ -58,6 +58,8 @@ int reader_run(
   *codes_new = codes;
   *qs_new = qs;
 
+  int isEstrategias = str_starts(path, "https://www.estrategias");
+
   char *page = ext_wget_new(path);
   if (!*page) {
     io_loge("Fallo leyendo %s", path);
@@ -108,12 +110,19 @@ int reader_run(
     free(code);
     Buf *bf = buf_new();
     buf_add_buf(bf, page + c1s_ix, c1e_ix - c1s_ix);
-    code = buf_to_str_new(bf);
+    code = str_trim_new(buf_str(bf));
     free(bf);
-    str_trim(&code);
 
     int c2s_ix = start_ix(page, c1e_ix, c2start);
     if (c2s_ix == -1 || c2s_ix > re_ix) {
+      if (
+        isEstrategias &&
+        ( str_eq(code, "Cleop") ||
+          str_eq(code, "CAM") ||
+          str_eq(code, "Adveo"))
+      ) {
+        continue;
+      }
       io_logw("Comienzo del campo 'quote' no encontrado en '%s'", code);
       continue;
     }
@@ -124,9 +133,8 @@ int reader_run(
     }
     bf = buf_new();
     buf_add_buf(bf, page + c2s_ix, c2e_ix - c2s_ix);
-    char *q = buf_to_str_new(bf);
+    char *q = str_trim_new(buf_str(bf));
     free(bf);
-    str_trim(&q);
     dec_regularize_iso(&q);
     if (!dec_number(q)) {
       io_logw("Número no válido '%s' en '%s'", q, code);

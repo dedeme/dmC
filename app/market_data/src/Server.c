@@ -5,13 +5,6 @@
 #include "dmc/Darr.h"
 #include "io.h"
 #include "servers.h"
-#include "servers/eleconomista.h"
-#include "servers/estrategias.h"
-#include "servers/expansion.h"
-#include "servers/finanzas.h"
-#include "servers/infobolsa.h"
-#include "servers/invertia.h"
-#include "servers/libremercado.h"
 
 /* .
 -Server: serial

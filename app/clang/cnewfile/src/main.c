@@ -14,7 +14,9 @@ static char *mk_date_new(void) {
   time_t date = date_now();
   char *r = date_f_new(date, "%d-M-%Y");
   int month = date_month(date) - 1;
-  str_replace(&r, "M", months[month]);
+  char *tmp = r;
+  r = str_replace_new(tmp, "M", months[month]);
+  free(tmp);
   return r;
 }
 
@@ -44,15 +46,14 @@ static void mkh(char *hfile, char *path) {
   ;
 
   char *d = mk_date_new();
-  char *cname = str_new(path);
-  str_to_upper(&cname);
+  char *cname = str_to_upper_new(path);
   str_creplace(&cname, '/', '_');
-  char *tx = str_new(template);
-  str_replace(&tx, "$DATE$", d);
-  str_replace(&tx, "$CNAME$", cname);
+  char *tmp = str_replace_new(template, "$DATE$", d);
+  char *tx = str_replace_new(tmp, "$CNAME$", cname);
   file_write(hfile, tx);
   free(d);
   free(cname);
+  free(tmp);
   free(tx);
 }
 
@@ -64,11 +65,11 @@ static void mkc(char *cfile, char *path) {
   ;
 
   char *d = mk_date_new();
-  char *tx = str_new(template);
-  str_replace(&tx, "$DATE$", d);
-  str_replace(&tx, "$CNAME$", path);
+  char *tmp = str_replace_new(template, "$DATE$", d);
+  char *tx = str_replace_new(tmp, "$CNAME$", path);
   file_write(cfile, tx);
   free(d);
+  free(tmp);
   free(tx);
 }
 

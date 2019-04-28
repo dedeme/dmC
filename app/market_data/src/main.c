@@ -14,10 +14,48 @@
 #include "trading.h"
 #include "servers.h"
 
+static void update () {
+  char *state;
+  io_state_read(&state);
+  if (str_eq(state, ST_SLEEPING)) {
+    free(state);
+    return;
+  }
+  io_state_write(ST_SLEEPING);
+
+  // Arr[char]
+  Arr *nicks = io_nicks_new();
+
+  // Map[PfValue]
+  Map *pf = pf_read_new();
+  Darr *last_qs;
+  Darr *signals;
+  trading_read_new(&last_qs, &signals, nicks);
+
+  io_nicks_clear();
+  int c = 0;
+  EACH(nicks, char, nick)
+    nick_new(
+      nick, map_get_null(pf, nick),
+      darr_get(last_qs, c), darr_get(signals, c)
+    );
+    ++c;
+  _EACH
+  arr_free(nicks);
+
+  map_free(pf);
+  darr_free(last_qs);
+  darr_free(signals);
+
+  io_state_write(state);
+  free(state);
+}
+
 static void start (char *key) {
   int sleeping_count = 0;
   char *state_new;
   io_state_read(&state_new);
+
   char *state = state_new;
   Server *sv = server_current_new();
   for(;;) {
@@ -56,13 +94,16 @@ puts("toActive 2");
       _EACH
 
       if (actives > n / 2) {
+        // Arr[char]
+        Arr *nicks = io_nicks_new();
+
         // Map[PfValue]
         Map *pf = pf_read_new();
         Darr *last_qs;
         Darr *signals;
-        trading_read_new(&last_qs, &signals);
-        // Arr[char]
-        Arr *nicks = io_nicks_new();
+        trading_read_new(&last_qs, &signals, nicks);
+
+        io_nicks_clear();
         int c = 0;
         EACH(nicks, char, nick)
           nick_new(
@@ -72,6 +113,10 @@ puts("toActive 2");
           ++c;
         _EACH
         arr_free(nicks);
+
+        map_free(pf);
+        darr_free(last_qs);
+        darr_free(signals);
 
         state = ST_ACTIVE;
         io_state_write(state);
@@ -83,10 +128,6 @@ puts("toActive 2");
       }
     } else if (str_eq(state, ST_ACTIVE)) {
 puts("active");
-    Darr *last_qs;
-    Darr *signals;
-    trading_read_new(&last_qs, &signals);
-
       server_update(sv);
       if (server_active(sv)) {
         Darr *qs = server_qs(sv);
@@ -149,7 +190,7 @@ puts("toSleeping2");
           server_set_active(sv, 1);
           state = ST_ACTIVE;
           io_state_write(state);
-          sleep(210);
+//          sleep(210);
         }
       }
     } else {
@@ -176,6 +217,8 @@ int main(int argc, char* args[]) {
     io_lock_del();
   } else if (argc == 2 && str_eq(args[1], "test")) {
     servers_tests();
+  } else if (argc == 2 && str_eq(args[1], "update")) {
+    update();
   } else {
     puts(
       "market_data. v201901\n"
@@ -187,6 +230,8 @@ int main(int argc, char* args[]) {
       "    Stop daemon\n"
       "  market_data test\n"
       "    Test daily servers\n"
+      "  market_data update\n"
+      "    Update server charts\n"
     );
   }
 

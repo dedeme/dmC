@@ -5,7 +5,7 @@
 #include "models.h"
 #include "io.h"
 #include "Model.h"
-#include "models/Approx2.h"
+#include "models/AppMM1B.h"
 #include "process.h"
 #include "util.h"
 #include "DEFS.h"
@@ -50,7 +50,7 @@ int main(int argc, char **args) {
   } else {
     // Arr[Model]
     Arr *models = arr_new((FPROC)model_free);
-    Model *m = approx2_new();
+    Model *m = appMM1B_new();
     arr_push(models, m);
 
     io_init(models);

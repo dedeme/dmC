@@ -36,6 +36,7 @@ Fun *fun_copy_new(Fun *this) {
 void fun_from_str(char **error_new_null, Fun **fun_new_null, const char *s) {
   *error_new_null = NULL;
   *fun_new_null = NULL;
+  char *tmp = NULL;
 
   // Arr[char]
   Arr *parts = str_csplit_trim_new(s, ':');
@@ -52,8 +53,12 @@ void fun_from_str(char **error_new_null, Fun **fun_new_null, const char *s) {
   enum fun_Type gstype = fun_GETTER;
   if (*template == '-') {
     gstype = fun_NONE;
-    str_right(&template, 1);
-    str_ltrim(&template);
+    tmp = template;
+    template = str_right_new(tmp, 1);
+    free(tmp);
+    tmp = template;
+    template = str_ltrim_new(tmp);
+    free(tmp);
   }
 
   int ix0 = str_cindex(template, '(');
@@ -79,14 +84,23 @@ void fun_from_str(char **error_new_null, Fun **fun_new_null, const char *s) {
   }
 
   char *id = str_new(template);
-  str_sub(&id, ix0 + 1, ix1);
-  str_trim(&id);
+  tmp = id;
+  id = str_sub_new(tmp, ix0 + 1, ix1);
+  free(tmp);
+  tmp = id;
+  id = str_trim_new(tmp);
+  free(tmp);
 
   char *tp = str_new(template);
-  str_left(&tp, ix0 + 1);
-  str_right(&template, ix1);
-  str_cat(&tp, "$");
-  str_cat(&tp, template);
+  tmp = tp;
+  tp = str_left_new(tmp, ix0 + 1);
+  free(tmp);
+  tmp = template;
+  template = str_right_new(tmp, ix1);
+  free(tmp);
+  tmp = tp;
+  tp = str_cat_new(tmp, "$", template, NULL);
+  free(tmp);
 
   char *value = str_new(arr_get(parts, 1));
 
@@ -131,20 +145,22 @@ void fun_set_doc(Fun *this, char *doc) {
 }
 
 void fun_w_struct(Fun *this, Buf *bf) {
-  char *s = str_f_new("  %s;\n", this->template);
-  str_replace(&s, "$", this->id);
+  char *tmp = str_f_new("  %s;\n", this->template);
+  char *s = str_replace_new(tmp, "$", this->id);
   buf_add(bf, s);
+  free(tmp);
   free(s);
 }
 
 void fun_w_constructor(Fun *this, Buf *bf) {
   char *rp = str_f_new("this->%s", this->id);
-  char *tp = str_new(this->template);
-  str_replace(&tp, "$", rp);
+  char *tmp = str_new(this->template);
+  char *tp = str_replace_new(tmp, "$", rp);
   char *s = str_f_new("  %s = %s;\n", tp, this->value);
   buf_add(bf, s);
   free(rp);
   free(tp);
+  free(tmp);
   free(s);
 }
 
@@ -153,13 +169,14 @@ void fun_w_get(Fun *this, Buf *bf, StName *name) {
   char *rp = str_f_new(
     "%s_%s(%s *this)", stName_prefix(name), this->id, stName_id(name)
   );
-  char *tp = str_new(this->template);
-  str_replace(&tp, "$", rp);
+  char *tmp = str_new(this->template);
+  char *tp = str_replace_new(tmp, "$", rp);
   char *s = str_f_new(
     "%s {\n  return this->%s;\n}\n", tp, this->id);
   buf_add(bf, s);
   free(rp);
   free(tp);
+  free(tmp);
   free(s);
 }
 
@@ -168,11 +185,12 @@ void fun_wh_get(Fun *this, Buf *bf, StName *name) {
   char *rp = str_f_new(
     "%s_%s(%s *this)", stName_prefix(name), this->id, stName_id(name)
   );
-  char *tp = str_new(this->template);
-  str_replace(&tp, "$", rp);
+  char *tmp = str_new(this->template);
+  char *tp = str_replace_new(tmp, "$", rp);
   char *s = str_f_new("%s;\n", tp);
   buf_add(bf, s);
   free(rp);
   free(tp);
+  free(tmp);
   free(s);
 }

@@ -14,7 +14,7 @@
 ///   signals_new: The current trading position (with strip) of each nick.
 ///                Values less than 0 are supports, greater than 0 are
 ///                resistences and 0 are not operation.
-/// Values are in the same order as NICKS (defined in DEFS.h).
-void trading_read_new(Darr **last_qs_new, Darr **signals_new);
+///   nicks:       Arr[char]. Nicks to read
+void trading_read_new(Darr **last_qs_new, Darr **signals_new, Arr *nicks);
 
 #endif

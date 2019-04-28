@@ -1,12 +1,8 @@
 PRG = ctemplate
 LIB = dmc
 
-C_FILES = $(wildcard src/*.c) \
-					$(wildcard src/readers/*.c) \
-					$(wildcard src/writers/*.c)
-H_FILES = $(wildcard include/*.h) \
-					$(wildcard include/readers/*.h) \
-					$(wildcard include/writers/*.h)
+C_FILES = $(wildcard src/*.c)
+H_FILES = $(wildcard include/*.h)
 
 LIB_PATH = lib/lib$(LIB)
 LIB_INCLUDE = lib/lib$(LIB)/include

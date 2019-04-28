@@ -19,6 +19,7 @@ void reader_run(
   FileLck *tlck
 ) {
   *error_null = NULL;
+  char *tmp = NULL;
 
   StName *stName_null = NULL;
   // Arr[Arg]
@@ -42,7 +43,9 @@ void reader_run(
 
     file_write_text(tlck, line);
 
-    str_trim(&line);
+    tmp = line;
+    line = str_trim_new(tmp);
+    free(tmp);
     if (str_eq(line, "*/")) {
       if (stName_null) {
         arr_push(defs, def_new(stName_null, args, vars, funs));
@@ -57,7 +60,9 @@ void reader_run(
     }
 
     if (*line == '#') {
-      str_right(&line, 1);
+      tmp = line;
+      line = str_right_new(tmp, 1);
+      free(tmp);
       char *doc = str_f_new("/// %s\n", line);
       buf_add(bf, doc);
       free(doc);

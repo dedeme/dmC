@@ -42,6 +42,7 @@ Arg *arg_copy_new(Arg *this) {
 void arg_from_str(char **error_new_null, Arg **arg_new_null, const char *s) {
   *error_new_null = NULL;
   *arg_new_null = NULL;
+  char *tmp = NULL;
 
   // Arr[char]
   Arr *parts = str_csplit_trim_new(s, ':');
@@ -58,12 +59,20 @@ void arg_from_str(char **error_new_null, Arg **arg_new_null, const char *s) {
   enum arg_Type gstype = arg_GETTER;
   if (*id == '-') {
     gstype = arg_NONE;
-    str_right(&id, 1);
-    str_ltrim(&id);
+    tmp = id;
+    id = str_right_new(tmp, 1);
+    free(tmp);
+    tmp = id;
+    id = str_ltrim_new(tmp);
+    free(tmp);
   } else if (*id == '@') {
     gstype = arg_SETTER;
-    str_right(&id, 1);
-    str_ltrim(&id);
+    tmp = id;
+    id = str_right_new(tmp, 1);
+    free(tmp);
+    tmp = id;
+    id = str_ltrim_new(tmp);
+    free(tmp);
   }
 
   char *type = str_new(arr_get(parts, 1));
@@ -91,8 +100,12 @@ void arg_from_str(char **error_new_null, Arg **arg_new_null, const char *s) {
         ffree = str_new("_m");
       } else {
         ffree = str_new(type);
-        str_left(&ffree, strlen(ffree) - 1);
-        str_rtrim(&ffree);
+        tmp = ffree;
+        ffree = str_left_new(tmp, strlen(ffree) - 1);
+        free(tmp);
+        tmp = ffree;
+        ffree = str_rtrim_new(tmp);
+        free(tmp);
         *ffree = tolower(*ffree);
       }
     } else {
@@ -140,8 +153,12 @@ void arg_from_str(char **error_new_null, Arg **arg_new_null, const char *s) {
         fserial = str_new("");
       } else {
         fserial = str_new(type);
-        str_left(&fserial, strlen(fserial) - 1);
-        str_rtrim(&fserial);
+        tmp = fserial;
+        fserial = str_left_new(tmp, strlen(fserial) - 1);
+        free(tmp);
+        tmp = fserial;
+        fserial = str_rtrim_new(tmp);
+        free(tmp);
         *fserial = tolower(*fserial);
       }
     } else {
@@ -264,15 +281,15 @@ void arg_w_destructor(Arg *this, Buf *bf) {
     return;
   }
   if (str_eq(ffree, "_s")) {
-    s = str_f_new("  free(this->%s);\n", this->id);
+    s = str_f_new("    free(this->%s);\n", this->id);
   } else if (str_eq(ffree, "_a")) {
-    s = str_f_new("  arr_free(this->%s);\n", this->id);
+    s = str_f_new("    arr_free(this->%s);\n", this->id);
   } else if (str_eq(ffree, "_m")) {
-    s = str_f_new("  map_free(this->%s);\n", this->id);
+    s = str_f_new("    map_free(this->%s);\n", this->id);
   } else if (*ffree == '!') {
-    s = str_f_new("  %s(this->%s);\n", ffree + 1, this->id);
+    s = str_f_new("    %s(this->%s);\n", ffree + 1, this->id);
   } else {
-    s = str_f_new("  %s_free(this->%s);\n", this->ffree, this->id);
+    s = str_f_new("    %s_free(this->%s);\n", this->ffree, this->id);
   }
   buf_add(bf, s);
   free(s);
@@ -331,8 +348,12 @@ void arg_w_to(Arg *this, Buf *bf) {
     );
   } else if (str_starts(fserial, "_a ")) {
     char *tmp = str_new(fserial);
-    str_right(&tmp, 3);
-    str_ltrim(&tmp);
+    char *tmp2 = tmp;
+    tmp = str_right_new(tmp2, 3);
+    free(tmp2);
+    tmp2 = tmp;
+    tmp = str_ltrim_new(tmp2);
+    free(tmp2);
     if (str_eq(tmp, "_s")) {
       s = str_f_new(
         "  arr_push(a, arr_to_js_new(this->%s, (FTO)js_ws_new));\n",
@@ -347,8 +368,12 @@ void arg_w_to(Arg *this, Buf *bf) {
     free(tmp);
   } else if (str_starts(fserial, "_m ")) {
     char *tmp = str_new(fserial);
-    str_right(&tmp, 3);
-    str_ltrim(&tmp);
+    char *tmp2 = tmp;
+    tmp = str_right_new(tmp2, 3);
+    free(tmp2);
+    tmp2 = tmp;
+    tmp = str_ltrim_new(tmp2);
+    free(tmp2);
     if (str_eq(tmp, "_s")) {
       s = str_f_new(
         "  arr_push(a, map_to_js_new(this->%s, (FTO)js_ws_new));\n",
@@ -388,8 +413,12 @@ void arg_w_from(Arg *this, Buf *bf) {
     s = str_f_new("  double %s = js_rd(arr_get(a, i++));\n", this->id);
   } else if (str_starts(fserial, "_a ")) {
     char *tmp = str_new(fserial);
-    str_right(&tmp, 3);
-    str_ltrim(&tmp);
+    char *tmp2 = tmp;
+    tmp = str_right_new(tmp2, 3);
+    free(tmp2);
+    tmp2 = tmp;
+    tmp = str_ltrim_new(tmp2);
+    free(tmp2);
     if (str_eq(tmp, "_s")) {
       s = str_f_new(
         "  Arr *%s = arr_from_js_new(arr_get(a, i++), "
@@ -406,8 +435,12 @@ void arg_w_from(Arg *this, Buf *bf) {
     free(tmp);
   } else if (str_starts(fserial, "_m ")) {
     char *tmp = str_new(fserial);
-    str_right(&tmp, 3);
-    str_ltrim(&tmp);
+    char *tmp2 = tmp;
+    tmp = str_right_new(tmp2, 3);
+    free(tmp2);
+    tmp2 = tmp;
+    tmp = str_ltrim_new(tmp2);
+    free(tmp2);
     if (str_eq(tmp, "_s")) {
       s = str_f_new(
         "  Map *%s = map_from_js_new(arr_get(a, i++), "

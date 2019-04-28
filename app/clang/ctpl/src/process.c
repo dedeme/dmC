@@ -15,7 +15,9 @@ static void find_end_code(char **error_null, Freader *lck) {
       freader_msg(error_null, lck, "End of file reached searching /*--*/");
       return;
     }
-    str_trim(&line);
+    char *tmp = line;
+    line = str_trim_new(tmp);
+    free(tmp);
     if (str_eq(line, "/*--*/")) {
       free(line);
       return;
@@ -32,6 +34,8 @@ static void process_c(
   const char *cpath
 ) {
   *error_null = NULL;
+  char *tmp = NULL;
+
   FileLck *tlck = file_wopen(ctmp);
   Freader *slck = freader_new(cpath);
   char *line = freader_line_new(slck);
@@ -42,7 +46,9 @@ static void process_c(
       // Nothing
     } else if (defs_read) {
       char *l = str_new(line);
-      str_trim(&l);
+      tmp = l;
+      l = str_trim_new(tmp);
+      free(tmp);
       if (str_eq(l, "/*--*/")) {
         finished = 1;
         file_write_text(tlck, "/*--*/\n\n");
@@ -58,7 +64,9 @@ static void process_c(
       free(l);
     } else {
       char *l = str_new(line);
-      str_trim(&l);
+      tmp = l;
+      l = str_trim_new(tmp);
+      free(tmp);
       if (str_eq(l, "/*.")) {
         defs_read = 1;
         file_write_text(tlck, "/* .\n");  //"/* .\n");
@@ -101,7 +109,9 @@ static void process_h(
   while (*line) {
     if (!finished) {
       char *l = str_new(line);
-      str_trim(&l);
+      char *tmp = l;
+      l = str_trim_new(tmp);
+      free(tmp);
       if (str_eq(l, "/*--*/")) {
         finished = 1;
         file_write_text(tlck, "/*--*/\n\n");
@@ -150,8 +160,12 @@ static void process_src(
         free(error_null);
       } else if (arr_size(defs)) {
         char *rhpath = str_new(rcpath);
-        str_left(&rhpath, strlen(rhpath) - 1);
-        str_cat(&rhpath, "h");
+        char *tmp = rhpath;
+        rhpath = str_left_new(tmp, strlen(tmp) - 1);
+        free(tmp);
+        tmp = rhpath;
+        rhpath = str_cat_new(tmp, "h", NULL);
+        free(tmp);
         char *hpath = path_cat_new(include, rhpath, NULL);
         process_h(&error_null, defs, htmp, hpath);
         if (error_null) {

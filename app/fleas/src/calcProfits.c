@@ -32,7 +32,7 @@ void calcProfits(Model *fmodel, Rs *rs) {
         if (price < 0) {
           price = closes[ixq - qnicks];
         }
-        cash += stocks * price;
+        cash += stocks * price * 0.997;
         stocks = 0;
       } else if (order_is_buy(order)) {
         BuyData *data = order_buy_data(order);
@@ -41,7 +41,7 @@ void calcProfits(Model *fmodel, Rs *rs) {
         if (price < 0) {
           price = closes[ixq - qnicks];
         }
-        cash -= stocks * price;
+        cash -= stocks * price * 1.003;
       }
       order_free(order);
       order = model_order_new(fmodel, params, co, closes[ixq]);

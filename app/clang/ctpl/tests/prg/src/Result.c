@@ -6,7 +6,7 @@
 static void buy (Map *p, double *d) {
 }
 
-/*.
+/* .
 # Result of person_deals
 Result:serial
   error: char *
@@ -42,9 +42,11 @@ Result *result_new(char *error, char *msg) {
 }
 
 void result_free(Result *this) {
-  free(error);
-  free(msg);
-  free(this);
+  if (this) {
+    free(this->error);
+    free(this->msg);
+    free(this);
+  }
 };
 
 char *result_error(Result *this) {
@@ -64,17 +66,19 @@ Js *result_to_js_new(Result *this) {
   Arr *a = arr_new(free);
   arr_push(a, js_ws_new(this->error));
   arr_push(a, js_ws_new(this->msg));
-  return js_wa_new(a);
+  Js *r = js_wa_new(a);
+  arr_free(a);
+  return r;
 }
 
 Result *result_from_js_new(Js *js) {
-  Result *this = malloc(sizeof(Result));
   // Arr[Js]
-  Arr *a = js_ra_new(a);
+  Arr *a = js_ra_new(js);
   int i = 0;
-  this->error = js_rs_new(arr_get(a, i++));
-  this->msg = js_rs_new(arr_get(a, i++));
-  return this;
+  char *error = js_rs_new(arr_get(a, i++));
+  char *msg = js_rs_new(arr_get(a, i++));
+  arr_free(a);
+  return result_new(error, msg);
 }
 
 struct person_Person {
@@ -106,11 +110,13 @@ Person *person_new(
 }
 
 void person_free(Person *this) {
-  free(name);
-  arr_free(children);
-  map_free(deals);
-  map_free(portfolio);
-  free(this);
+  if (this) {
+    const char_free(this->name);
+    arr_free(this->children);
+    map_free(this->deals);
+    map_free(this->portfolio);
+    free(this);
+  }
 };
 
 const char *person_name(Person *this) {
@@ -144,25 +150,27 @@ void person_set_assets(Person *this, double v) {
 Js *person_to_js_new(Person *this) {
   // Arr[Js]
   Arr *a = arr_new(free);
-  arr_push(a, js_ws_new(this->name));
+  arr_push(a, const char_to_js_new(this->name));
   arr_push(a, js_wi_new(this->age));
   arr_push(a, js_wd_new(this->assets, 2));
   arr_push(a, arr_to_js_new(this->children, (FTO)person_to_js_new));
   arr_push(a, map_to_js_new(this->deals, (FTO)result_to_js_new));
-  return js_wa_new(a);
+  Js *r = js_wa_new(a);
+  arr_free(a);
+  return r;
 }
 
 Person *person_from_js_new(Js *js) {
-  Person *this = malloc(sizeof(Person));
   // Arr[Js]
-  Arr *a = js_ra_new(a);
+  Arr *a = js_ra_new(js);
   int i = 0;
-  this->name = js_rs_new(arr_get(a, i++));
-  this->age = js_ri(arr_get(a, i++));
-  this->assets = js_rd(arr_get(a, i++));
-  this->children = arr_from_js_new(arr_get(a, i++), (FFROM)person_from_js_new, (FPROC)person_free);
-  this->deals = map_from_js_new(arr_get(a, i++), (FFROM)result_from_js_new, (FPROC)result_free);
-  return this;
+  const char *name = const char_from_js_new(arr_get(a, i++));
+  int age = js_ri(arr_get(a, i++));
+  double assets = js_rd(arr_get(a, i++));
+  Arr *children = arr_from_js_new(arr_get(a, i++), (FFROM)person_from_js_new, (FPROC)person_free);
+  Map *deals = map_from_js_new(arr_get(a, i++), (FFROM)result_from_js_new, (FPROC)result_free);
+  arr_free(a);
+  return person_new(name, age, assets, children, deals);
 }
 
 /*--*/

@@ -7,6 +7,7 @@
 #include "dmc/std.h"
 #include "Model.h"
 
+///
 Model *mA2_new();
 
 #endif

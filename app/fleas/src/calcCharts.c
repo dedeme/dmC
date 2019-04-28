@@ -148,7 +148,7 @@ char *calcCharts(Model *fmodel, Rs *rs) {
         }
         if (stocks > 0) {
           arr_push(historic, operation_new(1, stocks, price));
-          cash += stocks * (price - stocks_price);
+          cash += stocks * (price * 0.997 - stocks_price * 1.003);
         }
         stocks = 0;
       } else if (order_is_buy(order)) {

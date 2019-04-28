@@ -10,72 +10,18 @@
 #include "calcCharts.h"
 #include "DEFS.h"
 
-// source is freed!!!
-// source and target are Arr[Rs]
-static void add_rss(Arr *source, Arr *target) {
-  EACH(source, Rs, rs)
-    arr_push(target, rs);
+// rss is Arr[Rs]
+static void add_old_rss(Model *fmodel, Arr *rss) {
+  // Arr[Rs]
+  Arr *news = io_rrss_new(model_name(fmodel));
+  arr_reverse(news);
+
+  EACH(news, Rs, rs)
+    Flea *f = rs_flea(rs);
+    arr_insert(rss, 0, calcAssets_new(fmodel, f));
   _EACH
-  varr_free((Varr *)source);
-}
 
-// Returns a Varr[Rs]
-static Varr *select_rss_new(Arr *rss) {
-  // target is Varr[Rs]
-  void add_rs(Varr *target, Rs *rs) {
-    Flea *f1 = rs_flea(rs);
-    EACH(target, Rs, r)
-      Flea *f2 = rs_flea(r);
-      if (f1 == f2) {
-        return;
-      }
-    _EACH
-    varr_push(target, rs);
-  }
-
-  // target is Varr[Rs]. source is Arr[Rs]
-  void add_rss(Varr *target, Arr *source) {
-    int size = arr_size(source);
-    if (size >= 100) {
-      RANGE0(i, 100)
-        add_rs(target, arr_get(source, i));
-      _RANGE
-
-      RANGE(i, size - 100, size)
-        add_rs(target, arr_get(source, i));
-      _RANGE
-    }
-  }
-
-  int sort_by_assets(Rs *rs1, Rs *rs2) {
-    return rs_assets(rs1) < rs_assets(rs2);
-  }
-
-  int sort_by_avg(Rs *rs1, Rs *rs2) {
-    return rs_profits_avg(rs1) < rs_profits_avg(rs2);
-  }
-
-  int sort_by_mdv(Rs *rs1, Rs *rs2) {
-    return rs_profits_mdv(rs1) < rs_profits_mdv(rs2);
-  }
-
-  int sort_by_sel(Rs *rs1, Rs *rs2) {
-    return rs_profits_sel(rs1) < rs_profits_sel(rs2);
-  }
-
-  // Varr[Rs]
-  Varr *r = varr_new();
-
-  arr_sort(rss, (FGREATER)sort_by_assets);
-  add_rss(r, rss);
-  arr_sort(rss, (FGREATER)sort_by_avg);
-  add_rss(r, rss);
-  arr_sort(rss, (FGREATER)sort_by_mdv);
-  add_rss(r, rss);
-  arr_sort(rss, (FGREATER)sort_by_sel);
-  add_rss(r, rss);
-
-  return r;
+  arr_free(news);
 }
 
 int process_run(Model *fmodel) {
@@ -85,14 +31,7 @@ int process_run(Model *fmodel) {
   // Arr[Rs]
   Arr *rss = arr_new((FPROC)rs_free);
 
-  add_rss(io_rrss_new(mname), rss);
-
-  EACH_IX(rss, Rs, rs, ix)
-    Flea *f = rs_flea(rs);
-    arr_set(rss, ix, calcAssets_new(fmodel, f));
-  _EACH
-
-  REPEAT(FLEAS_PER_GROUP / 2 - arr_size(rss))
+  REPEAT(FLEAS_PER_GROUP / 2)
       Flea *fnew = flea_new(date, "0", "0", nparams);
       arr_push(rss, rs_new(
         str_new(date), fnew, model_params_new(fmodel, fnew), 0, 0, 0, 0, 0, 0
@@ -108,8 +47,13 @@ int process_run(Model *fmodel) {
 
   // Calculate Assets ---------------------------------------------------------
 
-  RANGE0(cy, CYCLES)
-    printf("Model: %s. Cycle: %d\n", mname, cy);
+  int max_cycles = INSERTION_CYCLE + CYCLES * nparams;
+  RANGE0(cy, max_cycles)
+    printf("Model: %s. Cycle: %d / %d\n", mname, cy + 1, max_cycles);
+
+    if (cy == INSERTION_CYCLE || cy == max_cycles - 1) {
+      add_old_rss(fmodel, rss);
+    }
 
     char *cyname = str_f_new("%d", cy);
     int nres = arr_size(rss);
@@ -178,15 +122,13 @@ int process_run(Model *fmodel) {
   _EACH
 
   double max_assets = 0;
-  double sum = 0;
   EACH(rss, Rs, rs)
     double assets = rs_assets(rs);
     if (assets > max_assets) {
       max_assets = assets;
     }
-    sum += assets;
   _EACH
-  double cut_assets = (max_assets + sum / arr_size(rss)) / 2 ;
+  double cut_assets = max_assets * CUT_PROFITS ;
   Rs *sel = arr_get(rss, 0);
   double sel_value = -1000;
   int size = arr_size(rss);
@@ -228,14 +170,12 @@ int process_run(Model *fmodel) {
   varr_free(bests);
   arr_free(bests_rss);
 
+  io_wrss(0, mname, (Arr *)rss);
 
-  // Varr[Rs]
-  Varr *rss_sel = select_rss_new(rss);
-  io_wrss(0, mname, (Arr *)rss_sel);
-  varr_free(rss_sel);
+  io_clean_rss(mname);
 
   free(date);
   arr_free(rss);
 
-  return sel_counter != 1;
+  return sel_counter > 1;
 }

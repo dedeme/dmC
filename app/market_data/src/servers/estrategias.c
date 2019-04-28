@@ -85,7 +85,9 @@ int estrategias_read(Varr **nicks_new, Darr **qs_new) {
 
   Arr *codes;
   Darr *qcs;
+
   int e = estrategias_read_raw(&codes, &qcs, url_new);   //-------------------
+
   free(url_new);
   if (e) {
     map_free(codes_new);

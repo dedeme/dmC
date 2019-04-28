@@ -56,9 +56,10 @@ void writer_c(Arr *defs, FileLck *lck) {
     // Write destructor ----------------------------------------------
 
     stName_w_destructor(stName, bf);
+    buf_add(bf, "  if (this) {\n");
     EACH(args, Arg, a) arg_w_destructor(a, bf); _EACH
     EACH(vars, Var, v) var_w_destructor(v, bf); _EACH
-    buf_add(bf, "  free(this);\n};\n\n");
+    buf_add(bf, "    free(this);\n  }\n};\n\n");
 
     // Write get -----------------------------------------------------
 

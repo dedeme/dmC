@@ -4,14 +4,12 @@
 #include "servers.h"
 #include "DEFS.h"
 #include "io.h"
-#include "servers/eleconomista.h"
 #include "servers/estrategias.h"
 #include "servers/expansion.h"
 #include "servers/finanzas.h"
 #include "servers/infobolsa.h"
 #include "servers/invertia.h"
 #include "servers/libremercado.h"
-
 
 static Js *read_data_new(void) {
   char *path = path_cat_new(QUOTES, "daily.db", NULL);
@@ -126,9 +124,7 @@ void servers_data(char **url_new, Map **codes_new, char *server) {
 }
 
 int servers_read_quotes(Varr **nicks_new, Darr **qs_new, char *id) {
-  if (str_eq(id, eleconomista_name()))
-    return eleconomista_read(nicks_new, qs_new);
-  else if (str_eq(id, estrategias_name()))
+  if (str_eq(id, estrategias_name()))
     return estrategias_read(nicks_new, qs_new);
   else if (str_eq(id, expansion_name()))
     return expansion_read(nicks_new, qs_new);
