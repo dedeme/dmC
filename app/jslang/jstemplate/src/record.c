@@ -12,19 +12,18 @@ static char *doc_null = NULL;
 static Arr *fields = NULL;
 
 
-static int is_simple_type (const char *tp) {
-  char *simple_types = " boolean boolean= number number= string string= ";
-  char *t = str_f_new(" %s ", tp);
+static int is_simple_type (char *tp) {
+  char *simple_types = " boolean ?boolean number ?number string ?string ";
+  char *t = str_f(" %s ", tp);
   int r = str_index(simple_types, t) != -1;
-  free(t);
   return r;
 }
 
-static int is_array (const char *tp) {
+static int is_array (char *tp) {
   return *tp == '!' ? str_eq(tp, "!Array") : str_eq(tp, "Array");
 }
 
-static int is_map (const char *tp) {
+static int is_map (char *tp) {
   return *tp == '!' ? str_eq(tp, "!Map") : str_eq(tp, "Map");
 }
 
@@ -39,15 +38,14 @@ struct Field {
 static struct Field *field_new(
   char *name, char *tp1, char *tp2_null
 ) {
-  struct Field *this = malloc(sizeof(struct Field));
+  struct Field *this = MALLOC(struct Field);
   this->doc_null = doc_null ? str_new(doc_null) : NULL;
   doc_null = NULL;
   this->writable = *name == '+';
   char *nm = str_new(name);
   if (this->writable) {
     char *tmp = nm;
-    nm = str_right_new(tmp, 1);
-    free(tmp);
+    nm = str_right(tmp, 1);
   }
   this->name = nm;
   this->tp1 = str_new(tp1);
@@ -55,66 +53,42 @@ static struct Field *field_new(
   return this;
 }
 
-static void field_free(struct Field *this) {
-  free(this->doc_null);
-  free(this->name);
-  free(this->tp1);
-  free(this->tp2_null);
-  free(this);
+static char *field_type(struct Field *this) {
+  Buf *bf = buf_new();
+  buf_cadd(bf, '{');
+  buf_add(bf, this->tp1);
+  if (this->tp2_null) {
+    buf_cadd(bf, '<');
+    if (is_map(this->tp1)) buf_add(bf, "string, ");
+    buf_add(bf, this->tp2_null);
+    buf_cadd(bf, '>');
+  }
+  buf_cadd(bf, '}');
+  return buf_to_str(bf);
 }
 
-static char *field_type_new(struct Field *this) {
-    char *tmp = NULL;
-    char *r = str_cat_new("{", this->tp1, NULL);
-    if (this->tp2_null) {
-      tmp = r;
-      r = str_cat_new(tmp, "<", NULL);
-      free(tmp);
-      if (is_map(this->tp1)) {
-        tmp = r;
-        r = str_cat_new(tmp, "string, ", NULL);
-        free(tmp);
-      }
-      tmp = r;
-      r = str_cat_new(tmp, this->tp2_null, ">", NULL);
-      free(tmp);
-    }
-    tmp = r;
-    r = str_cat_new(tmp, "}", NULL);
-    free(tmp);
-    return r;
-}
-
-char *record_init_new(char *line) {
-  char *l = str_right_new(line, 4);
+char *record_init(char *line) {
+  char *l = str_right(line, 4);
   // Arr[char]
-  Arr *ps = str_csplit_trim_new(l, ':');
+  Arr *ps = str_csplit_trim(l, ':');
   int pslen = arr_size(ps);
 
   if (pslen > 2) {
-    free(l);
-    arr_free(ps);
     return str_new("Unexpected second ':'");
   }
 
   if (pslen == 0 || !*((char *)arr_get(ps, 0))) {
-    free(l);
-    free(ps);
     return str_new("Class name is mising");
   }
 
   toJs = 0;
   fromJs = 0;
 
-  free(cname);
   cname = str_new(arr_get(ps, 0));
 
   if (pslen == 2) {
-    free(l);
     l = arr_get(ps, 1);
     if (!*l) {
-      free(l);
-      free(ps);
       return str_new("Expected 'to|from|serial'");
     } else if (str_eq(l, "to")) {
       toJs = 1;
@@ -124,236 +98,154 @@ char *record_init_new(char *line) {
       toJs = 1;
       fromJs = 1;
     } else {
-      char *r = str_f_new("Expected 'to|from|serial'. Found '%s'", l);
-      free (l);
-      free(ps);
+      char *r = str_f("Expected 'to|from|serial'. Found '%s'", l);
       return r;
     }
   }
 
-  free(doc_null);
   doc_null = NULL;
-  arr_free(fields);
-  fields = arr_new((FPROC)field_free);
+  fields = arr_new();
 
-  free(l);
-  free(ps);
   return str_new("");
 }
 
-char *record_read_end_new (void) {
+char *record_read_end (void) {
   if (arr_size(fields) == 0) {
     return str_new("Record without fields");
   }
   return str_new("");
 }
 
-char *record_field_new (char *line) {
+char *record_field (char *line) {
   if (str_starts(line, "##") && doc_null) {
-    char *tmp = str_right_new(line, 2);
-    char *l = str_trim_new(tmp);
-    free(tmp);
-    tmp = doc_null;
-    doc_null = str_cat_new(tmp, "\1", l, NULL);
-    free(tmp);
-    free(l);
+    char *l = str_trim(str_right(line, 2));
+    doc_null = str_cat(doc_null, "\1", l, NULL);
     return "";
   }
 
   if (*line == '#') {
-    char *l = str_new(line);
-    char *tmp = l;
-    l = str_right_new(tmp, 1);
-    free(tmp);
-    if (*l == '#') {
-      tmp = l;
-      l = str_right_new(tmp, 1);
-      free(tmp);
-    }
-    tmp = l;
-    l = str_trim_new(tmp);
-    free(tmp);
-    free(doc_null);
+    char *l = str_right(line, 1);
+    if (*l == '#') l = str_right(l, 1);
+    l = str_trim(l);
     doc_null = l;
     return "";
   }
 
   // Arr[char]
-  Arr *ps = str_csplit_trim_new(line, ':');
+  Arr *ps = str_csplit_trim(line, ':');
   int len = arr_size(ps);
 
   if (len < 2) {
-    arr_free(ps);
-    return str_new("Expected ':'");
+    return "Expected ':'";
   }
 
   if (len > 1 && !arr_get(ps, 0)) {
-    arr_free(ps);
-    return str_new("Field name is missing");
+    return "Field name is missing";
   }
 
   char *name = arr_get(ps, 0);
   if (len == 2) {
     char *tp = arr_get(ps, 1);
     if (!*tp) {
-      arr_free(ps);
-      return str_new("Field type is missing");
+      return "Field type is missing";
     }
 
     // Arr[char]
-    Arr *ps2 = str_csplit_trim_new(tp, '<');
+    Arr *ps2 = str_csplit_trim(tp, '<');
     int len2 = arr_size(ps2);
 
     if (len2 < 2) {
       arr_push(fields, field_new(name, tp, NULL));
-      arr_free(ps);
-      arr_free(ps2);
-      return str_new("");
+      return "";
     }
 
     char *base_tp = arr_get(ps2, 0);
     if (!base_tp) {
-      arr_free(ps);
-      arr_free(ps2);
-      return str_new("Type before '<' is missing");
+      return "Type before '<' is missing";
     }
 
     if (len2 > 2) {
-      arr_free(ps);
-      arr_free(ps2);
-      return str_new("More than one '<' found");
+      return "More than one '<' found";
     }
 
     if (!str_ends(tp, ">")) {
-      arr_free(ps);
-      arr_free(ps2);
-      return str_new("'>' is missing");
+      return "'>' is missing";
     }
 
-    char *generic = str_new(arr_get(ps2, 1));
-    char *tmp = generic;
-    generic = str_left_new(tmp, strlen(generic) - 1);
-    free(tmp);
-    tmp = generic;
-    generic = str_trim_new(tmp);
-    free(tmp);
+    char *generic = arr_get(ps2, 1);
+    generic = str_trim(str_left(generic, strlen(generic) - 1));
     if (!*generic) {
-      free(generic);
-      arr_free(ps);
-      arr_free(ps2);
-      return str_new("Empty '< >' found");
+      return "Empty '< >' found";
     }
 
     if (!is_map(base_tp) && !is_array(base_tp)) {
-      free(generic);
-      arr_free(ps);
-      arr_free(ps2);
-      return str_f_new("Type '%s' does not allow generic", base_tp);
+      return str_f("Type '%s' does not allow generic", base_tp);
     }
 
     arr_push(fields, field_new(name, base_tp, generic));
 
-    free(generic);
-    arr_free(ps);
-    arr_free(ps2);
-    return str_new("");
+    return "";
   }
 
-  arr_free(ps);
-  return str_new("More than one ':' found");
+  return "More than one ':' found";
 }
 
-char *record_code_new (void) {
+char *record_code (void) {
   int nfields = arr_size(fields);
-  // Varr[char]
-  Varr *fnames = varr_new();
-  char *r = str_new("");
-  char *tmp = NULL;
+  // Arr[char]
+  Arr *fnames = arr_new();
+  Buf *bf = buf_new();
 
   // -------------------------------------------------------------- CONSTRUCTOR
 
   // --------------------------------------------------- DOC
-  tmp = r;
-  r = str_cat_new(tmp, "  /**\n");
-  free(tmp);
+  buf_add(bf, "  /**\n");
   EACH(fields, struct Field, f)
-    varr_push(fnames, f->name);
+    arr_push(fnames, f->name);
 
-    char *nf = field_type_new(f);
-    tmp = r;
-    r = str_cat_new(tmp, "   * @param ", nf, " ", f->name, NULL);
-    free(tmp);
-    free(nf);
+    buf_add(bf, "   * @param ");
+    buf_add(bf, field_type(f));
+    buf_cadd(bf, ' ');
+    buf_add(bf, f->name);
     if (f->doc_null) {
-      char *d = str_replace_new(f->doc_null, "\1", "\n   *        ");
-      tmp = r;
-      r = str_cat_new(tmp, " ", d, NULL);
-      free(tmp);
-      free(d);
+      buf_cadd(bf, ' ');
+      buf_add(bf, str_replace(f->doc_null, "\1", "\n   *        "));
     }
-    tmp = r;
-    r = str_cat_new(tmp, "\n", NULL);
-    free(tmp);
+    buf_cadd(bf, '\n');
   _EACH
-  tmp = r;
-  r = str_cat_new(tmp, "   */\n", NULL);
-  free(tmp);
+  buf_add(bf, "   */\n");
   // -------------------------------------------------- HEAD
-  tmp = r;
-  r = str_cat_new(tmp, "  constructor (", NULL);
-  free(tmp);
+  buf_add(bf, "  constructor (");
   if (nfields > 4) {
-    tmp = r;
-    r = str_cat_new(tmp, "\n    ", NULL);
-    free(tmp);
+    buf_add(bf, "\n    ");
   }
-  tmp = r;
-  char *tmp2 = str_join_new(
-    (Arr*)fnames,
-    nfields < 5 ? ", " : ",\n    "
-  );
-  r = str_cat_new(tmp, tmp2, NULL);
-  free(tmp);
-  free(tmp2);
+  buf_add(bf, str_join(fnames, nfields < 5 ? ", " : ",\n    "));
   if (nfields > 4) {
-    tmp = r;
-    r = str_cat_new(tmp, "\n  ", NULL);
-    free(tmp);
+    buf_add(bf, "\n  ");
   }
-  tmp = r;
-  r = str_cat_new(tmp, ") {\n", NULL);
-  free(tmp);
+  buf_add(bf, ") {\n");
   // -------------------------------------------------- BODY
   EACH(fields, struct Field, f)
-    char *fn = field_type_new(f);
-    tmp = r;
-    r = str_cat_new(
-      tmp,
+    buf_add(bf, str_cat(
       "\n    /**\n",
       "     * @private\n",
       "     * @type ",
-      fn,
+      field_type(f),
       "\n     */\n    this._",
       f->name,
       " = ",
       f->name,
       ";\n",
       NULL
-    );
-    free(tmp);
-    free(fn);
+    ));
   _EACH
-  tmp = r;
-  r = str_cat_new(tmp, "\n  }\n");
-  free(tmp);
+  buf_add(bf, "\n  }\n");
 
   // ---------------------------------------------------------------- GET / SET
 
   EACH(fields, struct Field, f)
-    char *fn = field_type_new(f);
-    tmp = r;
-    r = str_cat_new(
-      tmp,
+    char *fn = field_type(f);
+    buf_add(bf, str_cat(
       "\n  /**  @return ",
       fn,
       " */\n  get ",
@@ -362,15 +254,12 @@ char *record_code_new (void) {
       f->name,
       ";\n  }\n",
       NULL
-    );
-    free(tmp);
+    ));
 
     if (f->writable) {
       char *name = str_new(f->name);
       *name = toupper(*name);
-      tmp = r;
-      str_cat_new(
-        tmp,
+      buf_add(bf, str_cat(
         "\n  /**\n",
         "   * @param ",
         fn,
@@ -380,11 +269,8 @@ char *record_code_new (void) {
         f->name,
         " = value;\n  }\n",
         NULL
-      );
-      free(name);
-      free(tmp);
+      ));
     }
-    free(fn);
   _EACH
 
   // --------------------------------------------------------------------- JSON
@@ -392,84 +278,61 @@ char *record_code_new (void) {
   // ---------------------------------------------------- TO
 
   if (toJs) {
-    tmp = r;
-    r = str_cat_new(
-      tmp,
-      "\n  /** @return {!Array<?>} */\n  toJs () {\n    return [",
-      NULL
-    );
-    free(tmp);
+    buf_add(bf, "\n  /** @return {!Array<?>} */\n  toJs () {\n    return [");
     // Arr[char]
-    Arr *fs = arr_new(free);
+    Arr *fs = arr_new();
     EACH(fields, struct Field, f)
-      char *fse = str_new("\n      ");
+      char *fse = "\n      ";
       if (is_simple_type(f->tp1)) {
-        tmp = fse;
-        fse = str_cat_new(tmp, "this._", f->name, NULL);
-        free(tmp);
+        fse = str_cat(fse, "this._", f->name, NULL);
       } else if (f->tp2_null) {
         if (*f->tp1 != '!') {
-          tmp = fse;
-          fse = str_cat_new(tmp, "this._", f->name, " ? ", NULL);
-          free(tmp);
+          fse = str_cat(fse, "this._", f->name, " ? ", NULL);
         }
 
         if (is_array(f->tp1)) {
-          tmp = fse;
-          fse = str_cat_new(tmp, "this._", f->name, NULL);
-          free(tmp);
+          fse = str_cat(fse, "this._", f->name, NULL);
           if (!is_simple_type(f->tp2_null)){
-            tmp = fse;
             if (*f->tp2_null == '!') {
-              fse = str_cat_new(tmp, ".map(e => e.toJs())", NULL);
+              fse = str_cat(fse, ".map(e => e.toJs())", NULL);
             } else {
-              fse = str_cat_new(tmp, ".map(e => e ? e.toJs() : null)", NULL);
+              fse = str_cat(fse, ".map(e => e ? e.toJs() : null)", NULL);
             }
-            free(tmp);
           }
         } else {
-          tmp = fse;
-          fse = str_cat_new(tmp, "this._", f->name, ".entries()", NULL);
-          free(tmp);
+          fse = str_cat(fse, "this._", f->name, ".entries()", NULL);
           if (!is_simple_type(f->tp2_null)){
-            tmp = fse;
             if (*f->tp2_null == '!') {
-              fse = str_cat_new(
-                tmp,
+              fse = str_cat(
+                fse,
                 ".map(kv =>\n"
                 "        [kv[0], kv[1].toJs()]\n"
                 "      )",
                 NULL
               );
             } else {
-              fse = str_cat_new(
-                tmp,
+              fse = str_cat(
+                fse,
                 ".map(kv =>\n"
                 "        [kv[0], kv[1] ? kv[1].toJs() : null]\n"
                 "      )",
                 NULL
               );
             }
-            free(tmp);
           }
         }
 
         if (*f->tp1 != '!') {
-          tmp = fse;
-          fse = str_cat_new(tmp, " : null", NULL);
-          free(tmp);
+          fse = str_cat(fse, " : null", NULL);
         }
 
       } else {
-        tmp = fse;
-        fse = str_cat_new(tmp, "this._", f->name, NULL);
-        free(tmp);
-        tmp = fse;
+        fse = str_cat(fse, "this._", f->name, NULL);
         if (*f->tp1 == '!') {
-          fse = str_cat_new(tmp, ".toJs()", NULL);
+          fse = str_cat(fse, ".toJs()", NULL);
         } else {
-          fse = str_cat_new(
-            tmp,
+          fse = str_cat(
+            fse,
             " ? ",
             "this._",
             f->name,
@@ -478,24 +341,17 @@ char *record_code_new (void) {
             NULL
           );
         }
-        free(tmp);
       }
       arr_push(fs, fse);
     _EACH
-    tmp = r;
-    char *tmp2 = str_cjoin_new(fs, ',');
-    r = str_cat_new(tmp, tmp2, "\n    ];\n  }\n", NULL);
-    free(tmp);
-    free(tmp2);
-    arr_free(fs);
+    buf_add(bf, str_cjoin(fs, ','));
+    buf_add(bf, "\n    ];\n  }\n");
   }
 
   // -------------------------------------------------- FROM
 
   if (fromJs) {
-    tmp = r;
-    r = str_cat_new(
-      tmp,
+    buf_add(bf, str_cat(
       "\n  /**\n"
       "   * @param {!Array<?>} serial\n"
       "   * @return {!",
@@ -507,137 +363,79 @@ char *record_code_new (void) {
       cname,
       "(",
       NULL
-    );
-    free(tmp);
+    ));
 
     // Arr[char]
-    Arr *fs = arr_new(free);
+    Arr *fs = arr_new();
     EACH_IX(fields, struct Field, f, i)
-      char *ix = str_f_new("%d", i);
-      char *fse = str_new("\n      ");
+      char *ix = str_f("%d", i);
+      char *fse = "\n      ";
       if (is_simple_type(f->tp1)) {
-        tmp = fse;
-        fse = str_cat_new(tmp, "serial[", ix, "]", NULL);
-        free(tmp);
+        fse = str_cat(fse, "serial[", ix, "]", NULL);
       } else {
-        char *tp = str_new(f->tp1);
+        char *tp = f->tp1;
         if (*tp != '!') {
-          tmp = fse;
-          fse = str_cat_new(tmp, "serial[", ix, "] ? ", NULL);
-          free(tmp);
+          fse = str_cat(fse, "serial[", ix, "] ? ", NULL);
         } else {
-          tmp = tp;
-          tp = str_right_new(tmp, 1);
-          free(tmp);
+          tp = str_right(tp, 1);
         }
 
         if (f->tp2_null) {
           if (is_array(f->tp1)) {
-            tmp = fse;
-            fse = str_cat_new(tmp, "serial[", ix, "]", NULL);
-            free(tmp);
+            fse = str_cat(fse, "serial[", ix, "]", NULL);
             if (!is_simple_type(f->tp2_null)) {
-              char *tp2 = str_new(f->tp2_null);
-              tmp = fse;
-              fse = str_cat_new(tmp, ".map(e =>\n        ", NULL);
-              free(tmp);
+              char *tp2 = f->tp2_null;
+              fse = str_cat(fse, ".map(e =>\n        ", NULL);
               if (*f->tp2_null != '!') {
-                tmp = fse;
-                fse = str_cat_new(tmp, "e ? ", NULL);
-                free(tmp);
+                fse = str_cat(fse, "e ? ", NULL);
               } else {
-                tmp = tp2;
-                tp2 = str_right_new(tmp, 1);
-                free(tmp);
+                tp2 = str_right(tp2, 1);
               }
 
-              tmp = fse;
-              fse = str_cat_new(tmp, tp2, ".fromJs(e)", NULL);
-              free(tmp);
+              fse = str_cat(fse, tp2, ".fromJs(e)", NULL);
 
               if (*f->tp2_null != '!') {
-                tmp = fse;
-                tmp = str_cat_new(tmp, " : null", NULL);
-                free(tmp);
+                fse = str_cat(fse, " : null", NULL);
               }
 
-              tmp = fse;
-              fse = str_cat_new(tmp, "\n      )", NULL);
-              free(tmp);
-              free(tp2);
+              fse = str_cat(fse, "\n      )", NULL);
             }
           } else if (is_map(f->tp1)) {
-            tmp = fse;
-            fse = str_cat_new(tmp, "new Map(serial[", ix, "]", NULL);
-            free(tmp);
+            fse = str_cat(fse, "new Map(serial[", ix, "]", NULL);
             if (!is_simple_type(f->tp2_null)) {
               char *tp2 = str_new(f->tp2_null);
-              tmp = fse;
-              fse = str_cat_new(tmp, ".map(kv =>\n        [kv[0], ", NULL);
-              free(tmp);
+              fse = str_cat(fse, ".map(kv =>\n        [kv[0], ", NULL);
               if (*f->tp2_null != '!') {
-                tmp = fse;
-                fse = str_cat_new(tmp, "kv[1] ? ", NULL);
-                free(tmp);
+                fse = str_cat(fse, "kv[1] ? ", NULL);
               } else {
-                tmp = tp2;
-                tp2 = str_right_new(tmp, 1);
-                free(tmp);
+                tp2 = str_right(tp2, 1);
               }
 
-              tmp = fse;
-              fse = str_cat_new(tmp, tp2, ".fromJs(kv[1])", NULL);
-              free(tmp);
+              fse = str_cat(fse, tp2, ".fromJs(kv[1])", NULL);
               if (*f->tp2_null != '!') {
-                tmp = fse;
-                fse = str_cat_new(tmp, " : null", NULL);
-                free(tmp);
+                fse = str_cat(fse, " : null", NULL);
               }
 
-              tmp = fse;
-              fse = str_cat_new(tmp, "]\n      )", NULL);
-              free(tmp);
-              free(tp2);
+              fse = str_cat(fse, "]\n      )", NULL);
             }
-            tmp = fse;
-            fse = str_cat_new(tmp, ")", NULL);
-            free(tmp);
+            fse = str_cat(fse, ")", NULL);
           } else {
-            tmp = fse;
-            fse = str_cat_new(tmp, "new Map(", "serial[", ix, "]", ")", NULL);
-            free(tmp);
+            fse = str_cat(fse, "new Map(", "serial[", ix, "]", ")", NULL);
           }
         } else {
-          tmp = fse;
-          fse = str_cat_new(tmp, tp, ".fromJs(serial[", ix, "])", NULL);
-          free(tmp);
+          fse = str_cat(fse, tp, ".fromJs(serial[", ix, "])", NULL);
         }
 
         if (*f->tp1 != '!') {
-          tmp = fse;
-          fse = str_cat_new(tmp, " : null", NULL);
-          free(tmp);
+          fse = str_cat(fse, " : null", NULL);
         }
-        free(tp);
       }
       arr_push(fs, fse);
-      free(ix);
     _EACH
-    tmp = r;
-    char *tmp2 = str_cjoin_new(fs, ',');
-    r = str_cat_new(tmp, tmp2, "\n    );\n  }\n", NULL);
-    free(tmp2);
-    free(tmp);
 
-    arr_free(fs);
+    buf_add(bf, str_cjoin(fs, ','));
+    buf_add(bf, "\n    );\n  }\n");
   }
 
-  varr_free(fnames);
-  return r;
-}
-
-void record_free (void) {
-  free(cname);
-  free(doc_null);
-  arr_free(fields);
+  return buf_to_str(bf);
 }

@@ -18,7 +18,7 @@ static void help () {
 }
 
 static int parse_to_tmp(char *file) {
-  char *ftmp = str_f_new("%s/tmp", sys_home());
+  char *ftmp = str_f("%s/tmp", sys_home());
   FileLck *target = file_wopen(ftmp);
   FileLck *source = file_ropen(file);
 
@@ -29,75 +29,63 @@ static int parse_to_tmp(char *file) {
   int nl = 0;
   int errnl = 0;
   for (;;) {
-    free(l);
-    l = file_read_line_new(source);
+    l = file_read_line(source);
     ++nl;
     if (!*l) {
       break;
     }
 
-    char *ltrim = str_trim_new(l);
+    char *ltrim = str_trim(l);
     if (!*ltrim && state != TEMPLATE_SECOND_WRITE_MARK) {
       file_write_text(target, l);
-      free(ltrim);
       continue;
     }
     if (state == CODE || state == CODE0) {
       if (str_eq(ltrim, "/*.")) {
-        free(errl);
         errl = str_new(l);
         errnl = nl;
 
         char *tmp = l;
-        l = str_replace_new(tmp, "/*.", "/* .");
-        free(tmp);
+        l = str_replace(tmp, "/*.", "/* .");
         state = TEMPLATE_BEGIN;
       }
     } else if (state == TEMPLATE_BEGIN) {
       if (str_starts(ltrim, "_rc_")) {
-        char *err = record_init_new(ltrim);
+        char *err = record_init(ltrim);
         if (!*err) {
           type_template = RECORD;
           state = TEMPLATE_PARAM;
-          free(err);
         } else {
           error_puts(file, nl, l, err);
           state = ERROR;
-          free(err);
           break;
         }
       }
     } else if (state == TEMPLATE_PARAM) {
       if (str_eq(ltrim, "*/")) {
-        char *err = record_read_end_new();
+        char *err = record_read_end();
         if (!*err) {
-          free(errl);
           errl = str_new(l);
           errnl = nl;
           state = TEMPLATE_FIRST_WRITE_MARK;
-          free(err);
         } else {
           error_puts(file, nl, l, err);
           state = ERROR;
-          free(err);
           break;
         }
       } else if (type_template == RECORD) {
-        char *err = record_field_new(ltrim);
+        char *err = record_field(ltrim);
         if (*err) {
           error_puts(file, nl, l, err);
           state = ERROR;
-          free(err);
           break;
         }
-        free(err);
       } else
-        FAIL (str_f_new("type_template wrong value: %d", type_template))
+        EXC_ILLEGAL_STATE(str_f("'type_template' is '%d'", type_template))
 
     } else if (state == TEMPLATE_FIRST_WRITE_MARK) {
       if (str_eq(ltrim, "/*--*/")) {
         file_write_text(target, l);
-        free(errl);
         errl = str_new(l);
         errnl = nl;
         state = TEMPLATE_SECOND_WRITE_MARK;
@@ -106,18 +94,16 @@ static int parse_to_tmp(char *file) {
       if (str_eq(ltrim, "/*--*/")) {
         char *code = NULL;
         if (type_template == RECORD) {
-          code = record_code_new();
+          code = record_code();
         } else
-          FAIL (str_f_new("type_template wrong value: %d", type_template))
+          EXC_ILLEGAL_STATE(str_f("'type_template' is '%d'", type_template))
 
 //        puts(code);
         file_write_text(target, code);
-        free(code);
         state = CODE;
       }
     } else
-      FAIL (str_f_new("Bad state '%d'", state))
-    free(ltrim);
+      EXC_ILLEGAL_STATE(str_f("Bad state '%d'", state))
 
     if (state != TEMPLATE_SECOND_WRITE_MARK) {
       file_write_text(target, l);
@@ -135,29 +121,22 @@ static int parse_to_tmp(char *file) {
     error_puts(file, errnl, errl, "Second '/*--*/' is missing");
   }
 
-  free(l);
-  free(errl);
-
   file_close(source);
   file_close(target);
-  free(ftmp);
   return state == CODE;
 }
 
-/*
+
 static void copy_from_tmp_test(char *file) {
-  char *file_test = str_f_new("%s_test.js", file);
-  char *ftmp = str_f_new("%s/tmp", sys_home());
+  char *file_test = str_f("%s_test.js", file);
+  char *ftmp = str_f("%s/tmp", sys_home());
   file_copy(ftmp, file_test);
-  free(ftmp);
-  free(file_test);
 }
-*/
+
 
 static void copy_from_tmp(char *file) {
-  char *ftmp = str_f_new("%s/tmp", sys_home());
+  char *ftmp = str_f("%s/tmp", sys_home());
   file_copy(ftmp, file);
-  free(ftmp);
 }
 
 int main (int argc, char* argv[]) {
@@ -177,11 +156,8 @@ int main (int argc, char* argv[]) {
 
   if (parse_to_tmp(argv[1])) {
     copy_from_tmp(argv[1]);
-//    copy_from_tmp_test(argv[1]);
+    copy_from_tmp_test(argv[1]);
   }
 
-  record_free();
-
-  sys_end();
   return 0;
 }

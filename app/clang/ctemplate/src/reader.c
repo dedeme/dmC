@@ -285,6 +285,8 @@ static RS *rstruct (Log *log, FileLck *f) {
     tpl_set_struct_type(tpl, PUBLIC);
   }
 
+  tpl_set_constructor_type(tpl, NORMAL);
+
   // Arr[char]
   Arr *parts = str_csplit_trim(l, ':');
   int parts_sz = arr_size(parts);
@@ -295,10 +297,16 @@ static RS *rstruct (Log *log, FileLck *f) {
       char *s = arr_get(parts, 1);
       if (str_eq(s, "serial")) {
         tpl_set_serial_type(tpl, SERIAL);
+      } else if (str_eq(s, "SERIAL")) {
+        tpl_set_serial_type(tpl, SERIAL);
+        tpl_set_constructor_type(tpl, ONLY_SERIAL);
       } else if (str_eq(s, "to")) {
         tpl_set_serial_type(tpl, TO);
       } else if (str_eq(s, "from")) {
         tpl_set_serial_type(tpl, FROM);
+      } else if (str_eq(s, "FROM")) {
+        tpl_set_serial_type(tpl, FROM);
+        tpl_set_constructor_type(tpl, ONLY_SERIAL);
       } else {
         log_msg(
           log, line, "Serialization type only can be: to | from | serial"

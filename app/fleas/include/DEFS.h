@@ -38,6 +38,6 @@
 #define MUTATION_MULTIPLIER 0.3
 
 /// Maximun number of fleas in "_best"
-#define MAXIMUM_HISTORIC_BESTS 200
+#define MAXIMUM_HISTORIC_BESTS 252
 
 #endif

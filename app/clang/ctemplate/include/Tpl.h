@@ -99,6 +99,12 @@ enum StructType tpl_struct_type (Tpl *this);
 void tpl_set_struct_type (Tpl *this, enum StructType type);
 
 ///
+enum ConstructorType tpl_constructor_type (Tpl *this);
+
+///
+void tpl_set_constructor_type (Tpl *this, enum ConstructorType type);
+
+///
 enum SerialType tpl_serial_type (Tpl *this);
 
 ///

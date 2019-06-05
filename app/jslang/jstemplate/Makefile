@@ -12,8 +12,5 @@ FILES = $(C_FILES) $(H_FILES)
 bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
 	gcc $(CFLAGS) $(C_FILES) -o bin/$(PRG) \
 	  -Iinclude -I$(LIB_INCLUDE) \
-		-L$(LIB_PATH) -l$(LIB)
-
-valgrind :
-	gcc $(CFLAGS) -O0 -g $(C_FILES) -o bin/v_$(PRG) -Iinclude  \
-	  -I$(LIB_INCLUDE) -L$(LIB_PATH) -l$(LIB)
+		-L$(LIB_PATH) -l$(LIB) \
+		-lgc

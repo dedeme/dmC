@@ -9,7 +9,7 @@ export default class Server {
   firstName: string
   # Is married?
   +married: boolean
-  age: number=
+  age: ?number
   #  Pets names
   ## Include all pets
   +pets: !Array<string>
@@ -27,7 +27,7 @@ export default class Server {
   /**
    * @param {string} firstName
    * @param {boolean} married Is married?
-   * @param {number=} age
+   * @param {?number} age
    * @param {!Array<string>} pets Pets names
    *        Include all pets
    * @param {Map<string, Person>} accs
@@ -60,7 +60,7 @@ export default class Server {
 
     /**
      * @private
-     * @type {number=}
+     * @type {?number}
      */
     this._age = age;
 
@@ -110,11 +110,11 @@ export default class Server {
    * @param {boolean} value
    * @return void
    */
-  set married (value) {
+  setMarried (value) {
     this._married = value;
   }
 
-  /**  @return {number=} */
+  /**  @return {?number} */
   get age () {
     return this._age;
   }
@@ -128,7 +128,7 @@ export default class Server {
    * @param {!Array<string>} value
    * @return void
    */
-  set pets (value) {
+  setPets (value) {
     this._pets = value;
   }
 
@@ -141,7 +141,7 @@ export default class Server {
    * @param {Map<string, Person>} value
    * @return void
    */
-  set accs (value) {
+  setAccs (value) {
     this._accs = value;
   }
 
@@ -197,45 +197,6 @@ export default class Server {
     );
   }
   /*--*/
-
-  /**
-   * @param {number} id Identifier
-   * @param {string} shortName
-   * @param {string} longName
-   * @param {Conf} companyConf
-   * @param {Conf} dailyConf
-   * @param {Conf} historicConf
-   * @param {Array<Code>} codes
-   */
-  constructor (
-    id,
-    shortName,
-    longName,
-    companyConf,
-    dailyConf,
-    historicConf,
-    codes
-  ) {
-    this.id = id;
-    this.shortName = shortName;
-    this.longName = longName;
-    this.companyConf = companyConf;
-    this.dailyConf = dailyConf;
-    this.historicConf = historicConf;
-    this.codes = codes;
-  }
-
-  // FUNCTIONS -----------------------------------
-  // TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-
-  /**
-   * @param {!Array<?>} serial
-   * @return {Server}
-   */
-  static fromJson (serial) {
-    return null;
-  }
-}
 
 export class Conf {
   /**

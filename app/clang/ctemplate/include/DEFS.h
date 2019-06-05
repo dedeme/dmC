@@ -11,6 +11,9 @@ enum StructType {PUBLIC, PRIVATE, HIDDEN};
 enum SerialType {TO, FROM, SERIAL, NONE};
 
 ///
+enum ConstructorType {NORMAL, ONLY_SERIAL};
+
+///
 enum AttType {GETTER, GETTER_SETTER, NO_ACCESS};
 
 #endif

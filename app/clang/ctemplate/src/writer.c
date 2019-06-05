@@ -30,6 +30,7 @@ static char *mk_type (char *type) {
   if (str_eq(type, "char*")) return "char *";
   if (str_eq(type, "Iarr")) return "Iarr *";
   if (str_eq(type, "Darr")) return "Darr *";
+  if (str_starts(type, "Opt-")) return "Opt *";
   if (str_starts(type, "Arr-")) return "Arr *";
   if (str_starts(type, "List-")) return "List *";
   if (str_starts(type, "Map-")) return "Map *";
@@ -90,7 +91,7 @@ static char *mk_to(char *type, char *name) {
     if (str_eq(coll, "Opt")) {
       s = str_f (
         "opt_is_empty(%s)\n    ? js_wn()\n    : %s\n  ",
-        name, mk_to_single(single, name)
+        name, mk_to_single(single, str_f("opt_get(%s)", name))
       );
     } else {
       char *lcoll = str_new(coll);
@@ -119,8 +120,11 @@ static char *mk_from_single(char *type) {
   if (str_eq(type, "char")) {
     return "(char)js_ri(*p++)";
   }
-  if (str_eq(type, "bool") || str_eq(type, "int")) {
-    return "(char)js_ri(*p++)";
+  if (str_eq(type, "bool")) {
+    return "js_rb(*p++)";
+  }
+  if (str_eq(type, "int")) {
+    return "js_ri(*p++)";
   }
   if (
     str_eq(type, "long") ||
@@ -159,7 +163,7 @@ static char *mk_from(char *type, char *name) {
       *lcoll = tolower(*lcoll);
       s = str_f(
         "%s_from_js(*p++, (FFROM)%s)",
-        lcoll, mk_to_fpointer(single)
+        lcoll, mk_from_fpointer(single)
       );
     }
   } else {
@@ -375,7 +379,7 @@ static int write_h (char *finclude, Arr *tps) {
         "typedef struct %s_%s %s;\n\n", fname, stname, stname
       ));
 
-      if (tpl_struct_type(t) == PUBLIC) {
+      if (tpl_struct_type(t) == PUBLIC && tpl_constructor_type(t) == NORMAL) {
         add_comment(bf, opt_empty());
         add_h_constructor(bf, 0, stname, stlname, tpl_arguments(t));
         buf_add(bf, ";\n\n");
@@ -532,13 +536,15 @@ static int write_c (char *fsrc, Arr *tps) {
 
       add_c_structure(bf, fname, stname, t);
 
-      buf_add(bf, tpl_struct_type(t) == PUBLIC ? "" : "static ");
-      add_h_constructor(
-        bf, tpl_struct_type(t) == PRIVATE, stname, stlname, tpl_arguments(t)
-      );
-      buf_add(bf, " {\n");
-      add_c_constructor(bf, stname, t);
-      buf_add(bf, "}\n\n");
+      if (tpl_constructor_type(t) == NORMAL) {
+        buf_add(bf, tpl_struct_type(t) == PUBLIC ? "" : "static ");
+        add_h_constructor(
+          bf, tpl_struct_type(t) == PRIVATE, stname, stlname, tpl_arguments(t)
+        );
+        buf_add(bf, " {\n");
+        add_c_constructor(bf, stname, t);
+        buf_add(bf, "}\n\n");
+      }
 
       // ------------------------------------------------------------- Arguments
 

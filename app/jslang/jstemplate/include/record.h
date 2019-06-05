@@ -7,17 +7,15 @@
 #include "dmc/std.h"
 
 /// Returns error
-char *record_init_new (char *line);
+char *record_init (char *line);
 
 /// Returns error
-char *record_read_end_new (void);
+char *record_read_end (void);
 
 /// Returns error
-char *record_field_new (char *line);
+char *record_field (char *line);
 
 /// Returns code to write
-char *record_code_new (void);
+char *record_code (void);
 
-/// Clear static variables
-void record_free (void);
 #endif

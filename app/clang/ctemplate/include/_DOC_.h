@@ -101,7 +101,7 @@ Example:
 <!-        TTTTTTTTTT ->
 
 <table><tr><td>
-  [ - | = ] <i>name</i> [: [<tt>serial</tt> | <tt>to</tt> | <tt>from</tt>]]
+  [ - | = ] <i>name</i> [: [<tt>serial</tt> | <tt>SERIAL</tt> | <tt>to</tt> | <tt>from</tt>] | <tt>FROM</tt>]]
 </td></tr></table>
 Examples:
 <table><tr><td>
@@ -120,8 +120,12 @@ serialized:<p>
 <dl>
 <dt><i>serial</i></dt><dd>Functions '*_to_js' and '*_from_js' will be
 created.</dd>
+<dt><i>SERIAL</i></dt><dd>Functions '*_to_js' and '*_from_js' will be
+created. Structure constructor will be skipped.</dd>
 <dt><i>to</i></dt><dd>Only the function '*_to_js' will be created.</dd>
 <dt><i>from</i></dt><dd>Only the function '*_from_js' will be created.</dd>
+<dt><i>FROM</i></dt><dd>Only the function '*_from_js' will be created.
+Structure constructor will be skipped.</dd>
 </dl>
 <b>Example 1</b><br>
 <table><tr><td>

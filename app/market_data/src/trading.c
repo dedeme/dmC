@@ -61,10 +61,9 @@ static Darr *closes_new(char *nick) {
 }
 
 static double force(char *nick) {
-  return str_eq(nick, "BME") ? 25.88
-    : str_eq(nick, "SAN") ? 4.4855
-    : -2
-  ;
+  //return str_eq(nick, "SAN") ? 4.4855
+  //  : -2
+  return -2;
 }
 
 static double sup_res(Darr *closes, Params *ps, double force) {

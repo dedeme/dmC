@@ -9,7 +9,7 @@ export default class Server {
   firstName: string
   # Is married?
   +married: boolean
-  age: number=
+  age: ?number
   #  Pets names
   ## Include all pets
   +pets: !Array<string>
@@ -27,7 +27,7 @@ export default class Server {
   /**
    * @param {string} firstName
    * @param {boolean} married Is married?
-   * @param {number=} age
+   * @param {?number} age
    * @param {!Array<string>} pets Pets names
    *        Include all pets
    * @param {Map<string, Person>} accs
@@ -60,7 +60,7 @@ export default class Server {
 
     /**
      * @private
-     * @type {number=}
+     * @type {?number}
      */
     this._age = age;
 
@@ -114,7 +114,7 @@ export default class Server {
     this._married = value;
   }
 
-  /**  @return {number=} */
+  /**  @return {?number} */
   get age () {
     return this._age;
   }

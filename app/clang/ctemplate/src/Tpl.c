@@ -246,6 +246,7 @@ struct tpl_Tpl {
   // Opt[char]
   Opt *struct_comment;
   enum StructType struct_type;
+  enum ConstructorType constructor_type;
   enum SerialType serial_type;
   char *struct_name;
   // Arr[TplArgument]
@@ -261,6 +262,7 @@ Tpl *tpl_new (void) {
   Tpl *this = MALLOC(Tpl);
   this->struct_comment = opt_empty();
   this->struct_type = PUBLIC;
+  this->constructor_type = NORMAL;
   this->serial_type = NONE;
   this->struct_name = "";
   this->arguments = arr_new();
@@ -284,6 +286,14 @@ enum StructType tpl_struct_type (Tpl *this) {
 
 void tpl_set_struct_type (Tpl *this, enum StructType type) {
   this->struct_type = type;
+}
+
+enum ConstructorType tpl_constructor_type (Tpl *this) {
+  return this->constructor_type;
+}
+
+void tpl_set_constructor_type (Tpl *this, enum ConstructorType type) {
+  this->constructor_type = type;
 }
 
 enum SerialType tpl_serial_type (Tpl *this) {

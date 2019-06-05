@@ -30,10 +30,9 @@ int estrategias_read_raw(Arr **codes_new, Darr **qs_new, char *path) {
   Varr *c2end = varr_new();
 
   // Table -------------------------------------------------
-  varr_push(tstart, "<div class=\"md-table-economic-agenda\">");
-  varr_push(tstart, "<tboody>");
+  varr_push(tstart, "<tbody>");
 
-  varr_push(tend, "</tboody>");
+  varr_push(tend, "</tbody>");
 
   // Row ---------------------------------------------------
   varr_push(rstart, "<tr>");
@@ -47,7 +46,7 @@ int estrategias_read_raw(Arr **codes_new, Darr **qs_new, char *path) {
   varr_push(c1end, "<");
 
   // Cell 2 ------------------------------------------------
-  varr_push(c2start, "<div ");
+  varr_push(c2start, "<td ");
   varr_push(c2start, ">");
 
   varr_push(c2end, "<");
