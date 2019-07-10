@@ -126,13 +126,13 @@ static int parse_to_tmp(char *file) {
   return state == CODE;
 }
 
-
+/*
 static void copy_from_tmp_test(char *file) {
   char *file_test = str_f("%s_test.js", file);
   char *ftmp = str_f("%s/tmp", sys_home());
   file_copy(ftmp, file_test);
 }
-
+*/
 
 static void copy_from_tmp(char *file) {
   char *ftmp = str_f("%s/tmp", sys_home());
@@ -156,7 +156,7 @@ int main (int argc, char* argv[]) {
 
   if (parse_to_tmp(argv[1])) {
     copy_from_tmp(argv[1]);
-    copy_from_tmp_test(argv[1]);
+//    copy_from_tmp_test(argv[1]);
   }
 
   return 0;

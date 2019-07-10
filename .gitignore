@@ -3,5 +3,6 @@ obj
 bin
 _test
 .directory
+.mkdir
 gitk
 *.geany

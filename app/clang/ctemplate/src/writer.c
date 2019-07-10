@@ -198,7 +198,7 @@ static void add_h_constructor (
   }
 
   buf_add(bf, str_f(
-    "%s *%s%s_new(%s)", stname, is_private ? "_" : "", stlname, as
+    "%s *%s%s_new (%s)", stname, is_private ? "_" : "", stlname, as
   ));
 }
 
@@ -206,7 +206,7 @@ static void add_h_getter(
   Buf *bf, char *stname, char *stlname, TplArgument *a
 ) {
   buf_add(bf, str_f(
-    "%s_%s(%s *this)",
+    "%s_%s (%s *this)",
     mk_type_name(tplArgument_type(a), stlname), tplArgument_name(a), stname
   ));
 }
@@ -215,7 +215,7 @@ static void add_h_setter (
   Buf *bf, char *stname, char *stlname, TplArgument *a
 ) {
   buf_add(bf, str_f(
-    "void %s_set_%s(%s *this, %s)",
+    "void %s_set_%s (%s *this, %s)",
     stlname, tplArgument_name(a), stname,
     mk_type_name(tplArgument_type(a), "value")
   ));
@@ -225,7 +225,7 @@ static void add_h_fgetter(
   Buf *bf, char *stname, char *stlname, TplVariable *f
 ) {
   buf_add(bf, str_replace(tplVariable_type(f), "#",
-    str_f("%s_%s(%s *this)", stlname, tplVariable_name(f), stname)
+    str_f("%s_%s (%s *this)", stlname, tplVariable_name(f), stname)
   ));
 }
 
@@ -233,18 +233,18 @@ static void add_h_fsetter (
   Buf *bf, char *stname, char *stlname, TplVariable *f
 ) {
   buf_add(bf, str_f(
-    "void %s_set_%s(%s *this, %s)",
+    "void %s_set_%s (%s *this, %s)",
     stlname, tplVariable_name(f), stname,
     str_replace(tplVariable_type(f), "#", "value")
   ));
 }
 
 static void add_h_to (Buf *bf, char *stname, char *stlname) {
-  buf_add(bf, str_f("Js *%s_to_js(%s *this)", stlname, stname));
+  buf_add(bf, str_f("Js *%s_to_js (%s *this)", stlname, stname));
 }
 
 static void add_h_from (Buf *bf, char *stname, char *stlname) {
-  buf_add(bf, str_f("%s *%s_from_js(Js *js)", stname, stlname));
+  buf_add(bf, str_f("%s *%s_from_js (Js *js)", stname, stlname));
 }
 
 // --------------------------------------------------------------------- ▲▲▲▲▲▲▲
@@ -252,7 +252,7 @@ static void add_h_from (Buf *bf, char *stname, char *stlname) {
 // --------------------------------------------------------------------- ▼▼▼▼▼▼▼
 
 static void add_c_structure (Buf *bf, char *fname, char *stname, Tpl *t) {
-  buf_add(bf, str_f("struct %s_%s{\n", fname, stname));
+  buf_add(bf, str_f("struct %s_%s {\n", fname, stname));
   EACH(tpl_arguments(t), TplArgument, a)
     buf_add(bf, str_f("  %s;\n", mk_type_name(
       tplArgument_type(a), tplArgument_name(a)
@@ -374,7 +374,31 @@ static int write_h (char *finclude, Arr *tps) {
 
       // ----------------------------------------------------------- Constructor
 
-      add_comment (bf, tpl_struct_comment(t));
+      add_comment(bf, tpl_struct_comment(t));
+      if (arr_size(tpl_arguments(t))) {
+        buf_add(bf, "///   Arguments:\n");
+        EACH(tpl_arguments(t), TplArgument, e)
+          buf_add(bf, str_f(
+            "///     %s: %s\n", tplArgument_name(e), tplArgument_type(e)
+          ));
+        _EACH
+      }
+      if (arr_size(tpl_variables(t))) {
+        buf_add(bf, "///   Variables:\n");
+        EACH(tpl_variables(t), TplVariable, e)
+          buf_add(bf, str_f(
+            "///     %s: %s\n", tplVariable_name(e), tplVariable_type(e)
+          ));
+        _EACH
+      }
+      if (arr_size(tpl_functions(t))) {
+        buf_add(bf, "///   Functions:\n");
+        EACH(tpl_variables(t), TplVariable, e)
+          buf_add(bf, str_f(
+            "///     %s: %s\n", tplVariable_name(e), tplVariable_type(e)
+          ));
+        _EACH
+      }
       buf_add(bf, str_f(
         "typedef struct %s_%s %s;\n\n", fname, stname, stname
       ));

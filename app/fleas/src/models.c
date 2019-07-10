@@ -3,26 +3,26 @@
 
 #include "models.h"
 #include "Model.h"
-#include "models/AppMM.h"
-#include "models/AppMMa.h"
-#include "models/AppMMb.h"
-#include "models/AppMM1.h"
-#include "models/AppMM1B.h"
-#include "models/AppMM2B.h"
-#include "models/AppMM2Ba.h"
-#include "models/AppMM2Bb.h"
-#include "models/AppMMB.h"
-#include "models/AppMMB2.h"
-#include "models/AppMMS.h"
-#include "models/AppMMS1.h"
-#include "models/AppMMSa.h"
-#include "models/AppMMSb.h"
+#include "models/MM2A.h"
+#include "models/MM2Aa.h"
+#include "models/MM2Ab.h"
+#include "models/MM1.h"
+#include "models/MMBack1.h"
+#include "models/MMBack2.h"
+#include "models/MMBack2a.h"
+#include "models/MMBack2b.h"
+#include "models/MM4.h"
+#include "models/MM2B.h"
+#include "models/MMWin2.h"
+#include "models/MMWin1.h"
+#include "models/MMWin2a.h"
+#include "models/MMWin2b.h"
 #include "models/Approx.h"
 #include "models/Approx3a.h"
 #include "models/Approx3b.h"
 #include "models/Approx2.h"
-#include "models/MinMax.h"
-#include "models/MinMax2.h"
+#include "models/Incr3.h"
+#include "models/Incr2.h"
 #include "models/MA.h"
 #include "models/MA2.h"
 #include "models/GA.h"
@@ -31,31 +31,31 @@
 Arr *models_create_new() {
   // Arr[Model]
   Arr *r = arr_new((FPROC)model_free);
-/*
-  arr_push(r, appMM_new());
-  arr_push(r, appMMa_new());
-  arr_push(r, appMMb_new());
-  arr_push(r, appMM1_new());
-  arr_push(r, appMM1B_new());
-  arr_push(r, appMM2B_new());
-  arr_push(r, appMM2Ba_new());
-  arr_push(r, appMM2Bb_new());
-  arr_push(r, appMMB_new());
-  arr_push(r, appMMB2_new());
-  arr_push(r, appMMS_new());
-  arr_push(r, appMMS1_new());
-  arr_push(r, appMMSa_new());
-*/  arr_push(r, appMMSb_new());
-/*  arr_push(r, approx_new());
+
+  arr_push(r, mM2A_new());
+  arr_push(r, mM2Aa_new());
+  arr_push(r, mM2Ab_new());
+  arr_push(r, mM1_new());
+  arr_push(r, mMBack1_new());
+  arr_push(r, mMBack2_new());
+  arr_push(r, mMBack2a_new());
+  arr_push(r, mMBack2b_new());
+  arr_push(r, mM4_new());
+  arr_push(r, mM2B_new());
+  arr_push(r, mMWin2_new());
+  arr_push(r, mMWin1_new());
+  arr_push(r, mMWin2a_new());
+  arr_push(r, mMWin2b_new());
+  arr_push(r, approx_new());
   arr_push(r, approx2_new());
   arr_push(r, approx3a_new());
   arr_push(r, approx3b_new());
 //  arr_push(r, gA_new());
 //  arr_push(r, mA_new());
   arr_push(r, mA2_new());
-  arr_push(r, minMax_new());
-//  arr_push(r, minMax2_new());
+  arr_push(r, incr3_new());
+//  arr_push(r, incr2_new());
 //  arr_push(r, supRes3_new());
-*/
+
   return r;
 }
