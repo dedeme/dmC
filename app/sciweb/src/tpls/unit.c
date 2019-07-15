@@ -16,7 +16,7 @@ char *unit_html (char *unit_key) {
     "<link rel=\"stylesheet\" href=\"../../styles.css\" type=\"text/css\" />\n"
     "<script type=\"text/x-mathjax-config\">\n"
     "  MathJax.Hub.Config({\n"
-    "    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},\n"
+    "    tex2jax: {inlineMath: [['$','$']]},\n"
     "    SVG: {scale: 83}\n"
     "  });\n"
     "</script>\n"

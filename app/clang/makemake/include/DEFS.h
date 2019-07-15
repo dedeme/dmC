@@ -4,17 +4,15 @@
 #ifndef DEFS_H
   #define DEFS_H
 
-/// Working directory
-#define MK_DIR ".mkdir"
+/// Path of auxiliar directory
+#define AUX_DIR ".mkaux"
 
-/// Make launcher script
-#define MK_FILE "mk"
+/// Path of obj directory
+#define OBJ_DIR ".mkaux/obj"
 
-/// Libraries directory
-#define LIB_DIR "lib"
+#define LIB_NAME "MkAux"
 
-/// C objects directory
-#define OBJ_DIR "obj"
-
+/// Path of auxiliar lib file
+#define LIB_FILE ".mkaux/libMkAux.a"
 
 #endif

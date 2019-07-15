@@ -3,28 +3,67 @@
 
 #include "main.h"
 //#include "assert.h"
-#include "reader.h"
-#include "encoder.h"
 #include "DEFS.h"
+#include "reader.h"
+#include "writer.h"
 
 static void help (void) {
   puts(
     "Use in a root directory with 'bin', 'include' and 'src' subdirectories:\n"
-    "  makemake [--help | --prg <name> [--libs <libs>]]\n"
+    "  makemake [--help | --prg <name> --main <file_name> [--libs <libs>]]\n"
     "For example:\n"
     "  makemake\n"
     "  makemake --help\n"
-    "  makemake --prg myprogram\n"
-    "  makemake --prg myprogram --libs dmc\n"
-    "  makemake --prg myprogram --libs dmc:market"
+    "  makemake --prg myprogram --main main\n"
+    "  makemake --prg myprogram --main main --libs dmc\n"
+    "  makemake --prg myprogram --main main --libs dmc:market"
   );
 }
 
-int main (int argc, char *argv[]) {
-  sys_init("makemake");
+// libs is Arr[char], os is Arr[char]
+static void add_dependency (Arr *libs, Arr *os, Buf *bf, char *d) {
+  int fn (char *f) { return str_eq(f, d); }
+  if (it_contains(arr_to_it(os), (FPRED)fn)) {
+    return;
+  }
+  arr_push(os, d);
 
-  if (!reader_check_directories()) {
-    puts("Fail checking directories");
+  // Arr[char]
+  Arr *includes = arr_new();
+  EACH(libs, char, lib)
+    arr_push(includes, str_f(" \\\n\t\t-I$(LIB_INCLUDE_%s)", lib));
+  _EACH
+
+  // Arr[char]
+  Arr *deps = reader_dependencies(d);
+
+  // Arr[char]
+  Arr *hdeps = arr_new();
+  EACH(deps, char, d)
+    arr_push(hdeps, str_f("include/%s.h src/%s.c", d, d));
+  _EACH
+
+  buf_add(bf, str_f("%s/%s.o : ", OBJ_DIR, d));
+  buf_add(bf, str_f("%s\n", str_cjoin(hdeps, ' ')));
+
+  buf_add(bf, "\tgcc $(CFLAGS) ");
+  buf_add(bf, str_f("-c src/%s.c ", d));
+  buf_add(bf, str_f("-o %s/%s.o \\\n", OBJ_DIR, d));
+
+  buf_add(bf, "\t\t-Iinclude");
+  buf_add(bf, str_cjoin(includes, '\n'));
+
+  buf_add(bf, "\n\n");
+
+  EACH(deps, char, d)
+    add_dependency(libs, os, bf, d);
+  _EACH
+}
+
+int main (int argc, char *argv[]) {
+  exc_init();
+
+  if (reader_check_directories()) {
     help();
     return 1;
   }
@@ -35,24 +74,42 @@ int main (int argc, char *argv[]) {
   }
 
   char *prg = "";
+  char *src = "";
   // Arr[char]
   Arr *libs = arr_new();
-  if (argc == 3 || argc == 5) {
-    if (str_eq(argv[1], "--prg")) {
-      prg = argv[2];
-      if (argc == 5) {
-        if (str_eq(argv[3], "--libs")) {
-          libs = str_csplit(argv[4], ':');
-        } else {
-          puts ("Expected '--prg'");
+  int c = 1;
+  if (argc == 5 || argc == 7) {
+    while (c < argc) {
+      char *op = argv[c++];
+      if (str_eq(op, "--prg")) {
+        if (*prg) {
+          puts("Option --prg duplicated");
           help();
           return 1;
+        } else {
+          prg = argv[c++];
         }
+      } else if (str_eq(op, "--main")) {
+        if (*src) {
+          puts("Option --main duplicated");
+          help();
+          return 1;
+        } else {
+          src = argv[c++];
+        }
+      } else if (str_eq(op, "--libs")) {
+        if (arr_size(libs)) {
+          puts("Option --libs duplicated");
+          help();
+          return 1;
+        } else {
+          libs = str_csplit(argv[c++], ':');
+        }
+      } else {
+        printf("Unkown option '%s'\n", op);
+        help();
+        return 1;
       }
-    } else {
-      puts ("Expected '--prg'");
-      help();
-      return 1;
     }
   } else {
     puts("Wrong number of arguments");
@@ -60,37 +117,30 @@ int main (int argc, char *argv[]) {
     return 1;
   }
 
-  if (!reader_check_libs(libs)) return 1;
+  if (src[0] == '/') {
+    printf("'%s' is an absolute path\n", src);
+    help();
+    return 1;
+  }
 
-  Node1 *n1 = opt_nget(reader_mk_tree());
-  if (!n1) return 1;
+  char *cfile = str_f("src/%s.c", src);
+  if (!file_exists(cfile)) {
+    printf("'%s' is missing\n", cfile);
+    help();
+    return 1;
+  }
 
-  // puts(node1_to_str(n1));
+  if (reader_check_libraries(libs)) {
+    help();
+    return 1;
+  }
 
-  // Arr[Node2]
-  Arr *ns = arr_new();
-  Node2 *n2 = node1_to_node2(ns, n1, 0);
+  Buf *bf = buf_new();
+  // Arr[char] os
+  Arr *os = arr_new();
+  add_dependency(libs, os, bf, src);
 
-  // puts(node2_to_str(n2));
-  //assert(str_eq(node1_to_str(n1), node2_to_str(n2)));
-
-  node2_sort(ns);
-  node2_optimize(ns);
-
-  file_del(MK_DIR);
-  file_mkdir(MK_DIR);
-
-  EACH(ns, Node2, n)
-    if (node2_depth(n)) {
-      char *mkf = str_f("%s/%s/%s/Makefile", MK_DIR, LIB_DIR, node2_path(n));
-      file_mkdir(path_parent(mkf));
-      file_write(mkf, encoder_makefile(libs, n));
-      file_mkdir(str_f("%s/%s/%s", MK_DIR, OBJ_DIR, node2_path(n)));
-    }
-  _EACH
-
-  file_write("Makefile", encoder_main_makefile(prg, libs, ns, n2));
-  file_write(MK_FILE, encoder_mk(ns));
+  writer_mkmake (prg, libs, src, os, buf_to_str(bf));
 
   return 0;
 }
