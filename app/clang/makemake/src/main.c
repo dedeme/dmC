@@ -135,12 +135,32 @@ int main (int argc, char *argv[]) {
     return 1;
   }
 
-  Buf *bf = buf_new();
-  // Arr[char] os
-  Arr *os = arr_new();
-  add_dependency(libs, os, bf, src);
+  int mk_all = 0;
 
-  writer_mkmake (prg, libs, src, os, buf_to_str(bf));
+  if (writer_prune()) {
+    mk_all = 1;
+  } else if (!file_exists("Makefile")) {
+    mk_all = 1;
+  } else {
+    // Opt[char]
+    char *new_makefile = opt_nget(reader_check_changes());
+    if (new_makefile) {
+      if (*new_makefile) {
+        file_write("Makefile", new_makefile);
+      }
+    } else {
+      mk_all = 1;
+    }
+  }
+
+  if (mk_all) {
+    Buf *bf = buf_new();
+    // Arr[char] os
+    Arr *os = arr_new();
+    add_dependency(libs, os, bf, src);
+
+    writer_mkmake (prg, libs, src, os, buf_to_str(bf));
+  }
 
   return 0;
 }

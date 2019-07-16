@@ -8,6 +8,10 @@
 
 #include "dmc/std.h"
 
+/// Removes .o files without its corresponding .c. Returns 1 if some file was
+/// removed.
+int writer_prune (void);
+
 /// Generates Makefile file.
 ///   prg: Program name
 ///   libs: Arr[char] Libreries whom program depends on.

@@ -4,6 +4,40 @@
 #include "writer.h"
 #include "DEFS.h"
 
+int writer_prune (void) {
+  int prune (char *path) {
+    char *opath = str_f("%s/%s", OBJ_DIR, path);
+    if (file_is_directory(opath)) {
+      char *cpath = str_f("%s/%s", "src", path);
+      if (!file_exists(cpath)) {
+        file_del(opath);
+        return 1;
+      } else {
+        int r = 0;
+        EACH(file_dir(opath), char, f)
+          r = r || prune(str_f("%s/%s", path, f));
+        _EACH
+        return r;
+      }
+    } else {
+      char *cpath = str_f("%s/%s", "src", path);
+      cpath[strlen(cpath) - 1] = 'c';
+      if (!file_exists(cpath)) {
+        file_del(opath);
+        return 1;
+      }
+      return 0;
+    }
+  }
+
+  int r = 0;
+  EACH(file_dir(OBJ_DIR), char, f)
+    r = r | prune(f);
+  _EACH
+
+  return r;
+}
+
 // libs is Arr[char], os is Arr[char]
 void writer_mkmake (
   char *prg, Arr *libs, char *main_source, Arr *os, char *partial

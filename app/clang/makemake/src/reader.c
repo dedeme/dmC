@@ -2,6 +2,9 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "reader.h"
+#include <sys/stat.h>
+#include "dmc/Iarr.h"
+#include "DEFS.h"
 
 int reader_check_directories (void) {
   if (!file_is_directory("bin")) {
@@ -100,3 +103,89 @@ Arr *reader_dependencies (char *file) {
 
   return r;
 }
+
+Opt *reader_check_changes (void) {
+  // Arr[char]
+  Arr *ls = str_csplit(file_read("Makefile"), '\n');
+  // Map[int]
+  Map *ios = map_new();
+  char *prefix = str_cat(OBJ_DIR, "/", NULL);
+  int len_prefix = strlen(prefix);
+  EACH_IX(ls, char, l, ix)
+    if (str_starts(l, prefix)) {
+      int *pix = ATOMIC(sizeof(int));
+      *pix = ix;
+      map_put(ios, str_sub(l, len_prefix, str_cindex(l, ':') - 1), pix);
+    }
+  _EACH
+
+  int check (Iarr *ixs, char *path) {
+    int path_len1 = strlen(path) - 1;
+    char *cpath = str_f("%s/%s", "src", path);
+    if (file_is_directory(cpath)) {
+      EACH(file_dir(cpath), char, f)
+        if (check (ixs, str_f("%s/%s", path, f))) return 1;
+      _EACH
+      return 0;
+    } else if (path[path_len1] == 'c' && path[path_len1 - 1] == '.') {
+      char *opath = str_new(path);
+      opath[path_len1] = 'o';
+
+      int fn (Kv *kv) { return str_eq(kv_key(kv), opath); }
+      // Kv[int]
+      Kv *kv = opt_nget(it_find(it_from((Arr *)ios), (FPRED)fn));
+      if (kv) {
+        char *hpath = str_new(path);
+        hpath[path_len1] = 'h';
+        struct stat *cstst = file_info(cpath);
+        struct stat *ostst = file_info(str_f("%s/%s", OBJ_DIR, opath));
+        struct stat *hstst = file_info(str_f("%s/%s", "include", hpath));
+        if (
+          cstst->st_mtime > ostst->st_mtime ||
+          hstst->st_mtime > ostst->st_mtime
+        ) {
+          iarr_push(ixs, *((int *)kv_value(kv)));
+        }
+        return 0;
+      }
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  Iarr *ixs = iarr_new();
+  EACH(file_dir("src"), char, f)
+    if (check(ixs, f)) return opt_empty();
+  _EACH
+
+  if (iarr_size(ixs)) {
+    int changed = 0;
+    IEACH(ixs, ix)
+      char *line = arr_get(ls, ix);
+      // Arr[char]
+      Arr *parts = str_csplit_trim(line, ':');
+      char *file = str_sub(arr_get(parts, 0), len_prefix, -2);
+      // Arr[char]
+      Arr *adeps = reader_dependencies(file);
+      // Arr[char]
+      Arr *hdeps = arr_new();
+      EACH(adeps, char, d)
+        arr_push(hdeps, str_f("include/%s.h src/%s.c", d, d));
+      _EACH
+      char *deps = str_cjoin(hdeps, ' ');
+
+      if (!str_eq(deps, arr_get(parts, 1))) {
+        arr_set(ls, ix, str_f("%s : %s", arr_get(parts, 0), deps));
+        changed = 1;
+      }
+    _EACH
+
+    if (changed) {
+      return opt_new(str_cjoin(ls, '\n'));
+    }
+  }
+
+  return opt_new("");
+}
+

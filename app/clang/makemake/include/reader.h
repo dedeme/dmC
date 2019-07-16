@@ -19,4 +19,11 @@ int reader_check_libraries (Arr *libs);
 ///   return: Arr[char] Dependencies path without extension
 Arr *reader_dependencies (char *file);
 
+/// Check if .c files have changed.
+///   return: Opt[char]
+///           - If there are new files returns opt_empty
+///           - If there are changes returns a new makefile
+///           - If there is no change returns an empty string.
+Opt *reader_check_changes (void);
+
 #endif
