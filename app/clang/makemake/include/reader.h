@@ -15,15 +15,16 @@ int reader_check_libraries (Arr *libs);
 
 /// Returns dependencies of 'file' (searches in src/<file>.c and
 /// include/<file>.h)
+///   gc: Garbage collector
 ///   file: Path to search without extension.
 ///   return: Arr[char] Dependencies path without extension
-Arr *reader_dependencies (char *file);
+Arr *reader_dependencies (Gc *gc, char *file);
 
 /// Check if .c files have changed.
 ///   return: Opt[char]
 ///           - If there are new files returns opt_empty
 ///           - If there are changes returns a new makefile
 ///           - If there is no change returns an empty string.
-Opt *reader_check_changes (void);
+Opt *reader_check_changes (Gc *gc);
 
 #endif

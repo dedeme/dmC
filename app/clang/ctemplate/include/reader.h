@@ -7,6 +7,6 @@
 #include "dmc/std.h"
 
 /// Returns Arr[Tpl]
-Arr *reader_read (char *fsrc);
+Arr *reader_read (Gc *gc, char *fsrc);
 
 #endif

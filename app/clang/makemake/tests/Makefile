@@ -1,18 +1,26 @@
-PRG = tests
-LIB = dmc
+LIB_PATH_local = lib/liblocal
+LIB_INCLUDE_local = $(LIB_PATH_local)/include
 
-C_FILES = $(wildcard src/*.c) \
-					$(filter-out ../src/main.c, $(wildcard ../src/*.c))
-H_FILES = $(wildcard include/*.h) \
-					$(filter-out ../include/main.h, $(wildcard ../include/*.h))
-
-LIB_PATH = ../lib/lib$(LIB)
-LIB_INCLUDE = ../lib/lib$(LIB)/include
+LIB_PATH_dmc = lib/libdmc
+LIB_INCLUDE_dmc = $(LIB_PATH_dmc)/include
 
 CFLAGS = -Wall -rdynamic
-FILES = $(C_FILES) $(H_FILES)
-bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
-	gcc $(CFLAGS) $(FILES) -o bin/$(PRG) \
-	  -Iinclude -I../include -I$(LIB_INCLUDE) \
-		-L$(LIB_PATH) -l$(LIB) \
-		-lgc -lm
+bin/tests : src/tests.c include/tests.h lib/liblocalcompilation/liblocalcompilation.a
+	gcc $(CFLAGS) src/tests.c -o bin/tests \
+		-Iinclude \
+		-I$(LIB_INCLUDE_local) \
+		-I$(LIB_INCLUDE_dmc) \
+		-Llib/liblocalcompilation -llocalcompilation \
+		-L$(LIB_PATH_local) -llocal \
+		-L$(LIB_PATH_dmc) -ldmc \
+		-lgc -lpthread -lm
+
+lib/liblocalcompilation/liblocalcompilation.a : lib/liblocalcompilation/obj/tests.o
+	ar rcs lib/liblocalcompilation/liblocalcompilation.a lib/liblocalcompilation/obj/tests.o
+
+lib/liblocalcompilation/obj/tests.o : include/tests.h src/tests.c
+	gcc $(CFLAGS) -c src/tests.c -o lib/liblocalcompilation/obj/tests.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_local) \
+		-I$(LIB_INCLUDE_dmc)
+

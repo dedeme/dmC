@@ -10,14 +10,17 @@ struct tpl_TplArgument {
   enum AttType access;
   char *name;
   char *type;
+  Gc *gc;
 };
 
-TplArgument *tplArgument_new (void) {
-  TplArgument *this = MALLOC(TplArgument);
+TplArgument *tplArgument_new (Tpl *tpl) {
+  Gc *gc = tpl_gc(tpl);
+  TplArgument *this = GC_MALLOC(TplArgument);
   this->comment = opt_empty();
   this->access = NO_ACCESS;
   this->name = "";
   this->type = "";
+  this->gc = gc;
   return this;
 }
 
@@ -48,57 +51,67 @@ char *tplArgument_type (TplArgument *this) {
 
 static char *coll = " Opt Arr List Map Hash ";
 
-static char *test_single_type(char *t) {
-  if (str_index(coll, str_f(" %s ", t)) != -1) {
-    return str_f("'%s' used as single type", t);
+static char *test_single_type(Gc *gc, char *t) {
+  GCL_NEW
+
+  if (str_index(coll, str_f(gcl, " %s ", t)) != -1) {
+    return GCL_CLEAN(str_f(gc, "'%s' used as single type", t));
   }
 
   if (str_ends(t, "*") && !str_eq(t, "char*")) {
-    return "Only 'char *' ends at '*'";
+    return GC_CLEAN("Only 'char *' ends at '*'");
   }
 
-  return "";
+  return GCL_CLEAN("");
 }
 
 static char *test_collection_type(char *t) {
-  if (str_index(coll, str_f(" %s ", t)) != -1) {
-    return "";
+  GC_NEW
+
+  if (str_index(coll, str_f(gc, " %s ", t)) != -1) {
+    return GC_CLEAN("");
   }
-  return "Only 'Opt', 'Arr', 'List', 'Map' or 'Hash' can be collection type";
+  return GC_CLEAN(
+    "Only 'Opt', 'Arr', 'List', 'Map' or 'Hash' can be collection type"
+  );
 }
 
-static char *test_type (char *type) {
+static char *test_type (Gc *gc, char *type) {
   if (!*type) {
     return "Argument type is empty";
   }
 
+  GCL_NEW
+
   // Arr[char]
-  Arr *parts = str_csplit_trim(type, '-');
+  Arr *parts = str_csplit_trim(gcl, type, '-');
   int sz = arr_size(parts);
   char *err;
   if (sz == 1) {
-    err = test_single_type(arr_get(parts, 0));
+    err = test_single_type(gc, arr_get(parts, 0));
     if (*err) {
-      return err;
+      return GCL_CLEAN(err);
     }
   } else if (sz == 2) {
     err = test_collection_type(arr_get(parts, 0));
     if (*err) {
-      return (err);
+      return GCL_CLEAN(err);
     }
-    err = test_single_type(arr_get(parts, 1));
+    err = test_single_type(gc, arr_get(parts, 1));
     if (*err) {
-      return err;
+      return GCL_CLEAN(err);
     }
   } else {
-    return "Too much '-'";
+    return GCL_CLEAN("Too much '-'");
   }
 
-  return "";
+  return GCL_CLEAN("");
 }
 
-static char *intrim (char *s){
-  Buf *bf = buf_new();
+static char *intrim (Gc *gc, char *s){
+  GCL_NEW
+
+  Buf *bf = buf_new(gcl);
   int i;
   for (i = 0; i < strlen(s); ++i) {
     char ch = s[i];
@@ -106,17 +119,20 @@ static char *intrim (char *s){
       buf_cadd(bf, ch);
     }
   }
-  return buf_to_str(bf);
+
+  return GCL_CLEAN(buf_to_str(gc, bf));
 }
 
-char *tplArgument_set_name_type (TplArgument *this, char *name, char *type) {
+char *tplArgument_set_name_type (
+  Gc *gc, TplArgument *this, char *name, char *type
+) {
   if (!*name) {
     return "Argument name is empty";
   }
 
-  type = intrim(type);
+  type = intrim(this->gc, type);
 
-  char *err = test_type(type);
+  char *err = test_type(gc, type);
 
   if (*err) {
     return err;
@@ -137,15 +153,18 @@ struct tpl_TplVariable {
   char *name;
   char *type;
   char *value;
+  Gc *gc;
 };
 
-TplVariable *tplVariable_new (void) {
-  TplVariable *this = MALLOC(TplVariable);
+TplVariable *tplVariable_new (Tpl *tpl) {
+  Gc *gc = tpl_gc(tpl);
+  TplVariable *this = GC_MALLOC(TplVariable);
   this->comment = opt_empty();
   this->access = NO_ACCESS;
   this->name = "";
   this->type = "";
   this->value = "";
+  this->gc = gc;
   return this;
 }
 
@@ -179,15 +198,15 @@ char *tplVariable_value (TplVariable *this) {
 }
 
 char *tplVariable_set_name_type_value (
-  TplVariable *this, char *name, char *type, char *value
+  Gc *gc, TplVariable *this, char *name, char *type, char *value
 ) {
   if (!*name) {
     return "Argument name is empty";
   }
 
-  type = intrim(type);
+  type = intrim(this->gc, type);
 
-  char *err = test_type(type);
+  char *err = test_type(gc, type);
 
   if (*err) {
     return err;
@@ -196,7 +215,7 @@ char *tplVariable_set_name_type_value (
   this->name = name;
   this->type = type;
   this->value = value;
-  return "";
+  return err;
 }
 
 char *tplVariable_set_function (TplVariable *this, char *def, char *value) {
@@ -210,29 +229,32 @@ char *tplVariable_set_function (TplVariable *this, char *def, char *value) {
     return "Bad function definition: Expected arguments";
   }
 
-  char *pre = str_ltrim(str_left(def, begin));
+  GC_NEW
+
+  char *pre = str_ltrim(gc, str_left(gc, def, begin));
   if (strlen(pre) < 2) {
-    return "Bad function definition: Expected return type";
+    return GC_CLEAN("Bad function definition: Expected return type");
   }
 
-  char *post = str_rtrim(str_right(def, end));
+  char *post = str_rtrim(gc, str_right(gc, def, end));
   if (strlen(post) < 2) {
-    return "Bad function definition: Expected arguments";
+    return GC_CLEAN("Bad function definition: Expected arguments");
   }
 
-  char *name = str_trim(str_sub(def, begin, end));
+  char *name = str_trim(gc, str_sub(gc, def, begin, end));
   if (*name != '*') {
-    return "Bad function definition: Expected asterisc";
+    return GC_CLEAN("Bad function definition: Expected asterisc");
   }
-  name = str_ltrim(str_right(name, 1));
+  name = str_ltrim(this->gc, str_right(gc, name, 1));
   if (!strlen(name)) {
-    return "Bad function definition: Name is missing";
+    return GC_CLEAN("Bad function definition: Name is missing");
   }
 
   this->name = name;
-  this->type = str_f("%s*#%s", pre, post);
+  this->type = str_f(this->gc, "%s*#%s", pre, post);
   this->value = value;
-  return "";
+
+  return GC_CLEAN("");
 }
 
 TplArgument *tplVariable_to_tplArgument (TplVariable *this) {
@@ -255,20 +277,26 @@ struct tpl_Tpl {
   Arr *variables;
   // Arr[TplVariable]
   Arr *functions;
+  Gc *gc;
 };
 
 
-Tpl *tpl_new (void) {
-  Tpl *this = MALLOC(Tpl);
+Tpl *tpl_new (Gc *gc) {
+  Tpl *this = GC_MALLOC(Tpl);
   this->struct_comment = opt_empty();
   this->struct_type = PUBLIC;
   this->constructor_type = NORMAL;
   this->serial_type = NONE;
   this->struct_name = "";
-  this->arguments = arr_new();
-  this->variables = arr_new();
-  this->functions = arr_new();
+  this->arguments = arr_new(gc);
+  this->variables = arr_new(gc);
+  this->functions = arr_new(gc);
+  this->gc = gc;
   return this;
+}
+
+Gc *tpl_gc (Tpl *this) {
+  return this->gc;
 }
 
 // Opt[char]
@@ -320,6 +348,10 @@ int tpl_arguments_size (Tpl *this) {
   return arr_size(this->arguments);
 }
 
+Gc *tplArgument_gc(TplArgument *this) {
+  return this->gc;
+}
+
 void tpl_add_argument (Tpl *this, TplArgument *ar) {
   arr_push(this->arguments, ar);
 }
@@ -340,8 +372,10 @@ void tpl_add_function (Tpl *this, TplVariable *fun) {
   arr_push(this->functions, fun);
 }
 
-char *tpl_to_str (Tpl *this) {
-  Buf *args = buf_new();
+char *tpl_to_str (Gc *gc, Tpl *this) {
+  GCL_NEW
+
+  Buf *args = buf_new(gcl);
   EACH(this->arguments, TplArgument, a)
     if (opt_is_empty(a->comment)) {
       buf_add(args, "[No doc]");
@@ -353,10 +387,10 @@ char *tpl_to_str (Tpl *this) {
       args,
       a->access == NO_ACCESS ? "-" : a->access == GETTER ? "" : "@"
     );
-    buf_add(args, str_f("%s: %s\n", a->name, a->type));
+    buf_add(args, str_f(gcl, "%s: %s\n", a->name, a->type));
   _EACH
 
-  Buf *vars = buf_new();
+  Buf *vars = buf_new(gcl);
   EACH(this->variables, TplVariable, v)
     if (opt_is_empty(v->comment)) {
       buf_add(vars, "[No doc]");
@@ -368,10 +402,10 @@ char *tpl_to_str (Tpl *this) {
       vars,
       v->access == NO_ACCESS ? "-" : v->access == GETTER ? "" : "@"
     );
-    buf_add(vars, str_f("%s: %s: %s\n", v->name, v->type, v->value));
+    buf_add(vars, str_f(gcl, "%s: %s: %s\n", v->name, v->type, v->value));
   _EACH
 
-  Buf *funs = buf_new();
+  Buf *funs = buf_new(gcl);
   EACH(this->functions, TplVariable, v)
     if (opt_is_empty(v->comment)) {
       buf_add(funs, "[No doc]");
@@ -383,14 +417,15 @@ char *tpl_to_str (Tpl *this) {
       funs,
       v->access == NO_ACCESS ? "-" : v->access == GETTER ? "" : "@"
     );
-    buf_add(funs, str_f(
+    buf_add(funs, str_f(gcl,
       "%s: %s\n",
-      str_replace(v->type, "#", v->name),
+      str_replace(gcl, v->type, "#", v->name),
       v->value
     ));
   _EACH
 
-  return str_cat(
+  return GCL_CLEAN(str_cat(
+    gc,
     opt_is_empty(this->struct_comment)
       ? "[No doc]"
       : opt_get(this->struct_comment),
@@ -405,12 +440,12 @@ char *tpl_to_str (Tpl *this) {
         ? ": from\n"
         : this->serial_type == SERIAL ? ": serial\n" : "\n",
     buf_str(args),
-    *buf_str(vars) ? str_f("---\n%s", buf_str(vars)) : "",
+    *buf_str(vars) ? str_f(gcl, "---\n%s", buf_str(vars)) : "",
     *buf_str(funs)
       ? *buf_str(vars)
-        ? str_f("---\n%s", buf_str(funs))
-        : str_f("---\n---\n%s", buf_str(funs))
+        ? str_f(gcl, "---\n%s", buf_str(funs))
+        : str_f(gcl, "---\n---\n%s", buf_str(funs))
       : "",
     NULL
-  );
+  ));
 }

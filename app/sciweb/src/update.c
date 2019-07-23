@@ -22,13 +22,13 @@ void update (void) {
       char *funit = str_f("%s.html", ukey);
       if (!file_exists(funit)) {
         file_write(funit, unit_html(ukey));
-        arr_push(msgs, str_f("Creado '%s'", funit));
+        arr_push(msgs, str_f("Created '%s'", funit));
       }
 
       char *exedir = str_f("exercises/%s", ukey);
       if (!file_exists(exedir)) {
         file_mkdir(exedir);
-        arr_push(msgs, str_f("Creado '%s'", exedir));
+        arr_push(msgs, str_f("Created '%s'", exedir));
       }
 
       EACH(exes, ConfExe, exe)
@@ -38,7 +38,7 @@ void update (void) {
         char *fexe = str_f("exercises/%s/%s.html", ukey, ekey);
         if (!file_exists(fexe)) {
           file_write(fexe, exercise_html(ukey, ekey));
-          arr_push(msgs, str_f("Creado '%s'", fexe));
+          arr_push(msgs, str_f("Created '%s'", fexe));
         }
       _EACH
     _EACH
@@ -47,7 +47,7 @@ void update (void) {
   if (arr_size(msgs)) {
     puts(str_cjoin(msgs, '\n'));
   } else {
-    puts("No update was done");
+    puts("No file was created");
   }
 
 }

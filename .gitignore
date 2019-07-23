@@ -1,8 +1,6 @@
 lib
 obj
 bin
-_test
 .directory
-.mkaux
 gitk
 *.geany

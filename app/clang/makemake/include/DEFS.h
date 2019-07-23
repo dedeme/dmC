@@ -5,14 +5,14 @@
   #define DEFS_H
 
 /// Path of auxiliar directory
-#define AUX_DIR ".mkaux"
+#define AUX_DIR "lib/liblocalcompilation"
 
 /// Path of obj directory
-#define OBJ_DIR ".mkaux/obj"
+#define OBJ_DIR "lib/liblocalcompilation/obj"
 
-#define LIB_NAME "MkAux"
+#define LIB_NAME "localcompilation"
 
 /// Path of auxiliar lib file
-#define LIB_FILE ".mkaux/libMkAux.a"
+#define LIB_FILE "lib/liblocalcompilation/liblocalcompilation.a"
 
 #endif

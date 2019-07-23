@@ -1,4 +1,4 @@
-// Copyright 25-Oct-2018 ºDeme
+// Copyright 23-Jul-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #ifndef MAIN_H

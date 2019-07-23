@@ -6,35 +6,42 @@
 
 int writer_prune (void) {
   int prune (char *path) {
-    char *opath = str_f("%s/%s", OBJ_DIR, path);
+    Gc *gc = gc_new();
+    char *opath = str_f(gc, "%s/%s", OBJ_DIR, path);
     if (file_is_directory(opath)) {
-      char *cpath = str_f("%s/%s", "src", path);
+      char *cpath = str_f(gc, "%s/%s", "src", path);
       if (!file_exists(cpath)) {
         file_del(opath);
-        return 1;
-      } else {
-        int r = 0;
-        EACH(file_dir(opath), char, f)
-          r = r || prune(str_f("%s/%s", path, f));
-        _EACH
-        return r;
-      }
-    } else {
-      char *cpath = str_f("%s/%s", "src", path);
-      cpath[strlen(cpath) - 1] = 'c';
-      if (!file_exists(cpath)) {
-        file_del(opath);
+        gc_free(gc);
         return 1;
       }
-      return 0;
+      int r = 0;
+      EACH(file_dir(gc, opath), char, f)
+        r = r || prune(str_f(gc, "%s/%s", path, f));
+      _EACH
+      gc_free(gc);
+      return r;
     }
+    char *cpath = str_f(gc, "%s/%s", "src", path);
+    cpath[strlen(cpath) - 1] = 'c';
+    if (!file_exists(cpath)) {
+      file_del(opath);
+      gc_free(gc);
+      return 1;
+    }
+    gc_free(gc);
+    return 0;
   }
 
+  if (!file_is_directory(OBJ_DIR)) return 1;
+
+  Gc *gc = gc_new();
   int r = 0;
-  EACH(file_dir(OBJ_DIR), char, f)
+  EACH(file_dir(gc, OBJ_DIR), char, f)
     r = r | prune(f);
   _EACH
 
+  gc_free(gc);
   return r;
 }
 
@@ -42,65 +49,68 @@ int writer_prune (void) {
 void writer_mkmake (
   char *prg, Arr *libs, char *main_source, Arr *os, char *partial
 ) {
+  Gc *gc = gc_new();
   file_mkdir(AUX_DIR);
   file_mkdir(OBJ_DIR);
 
   EACH(os, char, f)
-    file_mkdir(str_f("%s/%s", OBJ_DIR, path_parent(f)));
+    file_mkdir(str_f(gc, "%s/%s", OBJ_DIR, path_parent(gc, f)));
   _EACH
 
-  Buf *bf = buf_new();
+  Buf *bf = buf_new(gc);
 
   // Arr[char]
-  Arr *lib_defs = arr_new();
+  Arr *lib_defs = arr_new(gc);
   EACH(libs, char, lib)
-    arr_push(lib_defs, str_f(
+    arr_push(lib_defs, str_f(gc,
       "LIB_PATH_%s = lib/lib%s\n"
       "LIB_INCLUDE_%s = $(LIB_PATH_%s)/include\n",
       lib, lib, lib, lib
     ));
   _EACH
-  buf_add(bf, str_cjoin(lib_defs, '\n'));
+  buf_add(bf, str_cjoin(gc, lib_defs, '\n'));
 
   buf_add(bf, "\nCFLAGS = -Wall -rdynamic\n");
 
-  buf_add(bf, str_f(
+  buf_add(bf, str_f(gc,
     "bin/%s : src/%s.c include/%s.h %s\n",
     prg, main_source, main_source, LIB_FILE
   ));
-  buf_add(bf, str_f(
+  buf_add(bf, str_f(gc,
     "\tgcc $(CFLAGS) src/%s.c -o bin/%s \\\n", main_source, prg
   ));
 
   // Arr[char]
-  Arr *includes = arr_new();
+  Arr *includes = arr_new(gc);
   EACH(libs, char, lib)
-    arr_push(includes, str_f(" \\\n\t\t-I$(LIB_INCLUDE_%s)", lib));
+    arr_push(includes, str_f(gc, " \\\n\t\t-I$(LIB_INCLUDE_%s)", lib));
   _EACH
   buf_add(bf, "\t\t-Iinclude");
-  buf_add(bf, str_cjoin(includes, '\n'));
+  buf_add(bf, str_join(gc, includes, ""));
 
   // Arr[char]
-  Arr *ls = arr_new();
+  Arr *ls = arr_new(gc);
   EACH(libs, char, lib)
-    arr_push(ls, str_f(" \\\n\t\t-L$(LIB_PATH_%s) -l%s", lib, lib));
+    arr_push(ls, str_f(gc, " \\\n\t\t-L$(LIB_PATH_%s) -l%s", lib, lib));
   _EACH
-  buf_add(bf, str_f("\\\n\t\t-L%s -l%s", AUX_DIR, LIB_NAME));
-  buf_add(bf, str_cjoin(ls, '\n'));
+  buf_add(bf, str_f(gc, " \\\n\t\t-L%s -l%s", AUX_DIR, LIB_NAME));
+  buf_add(bf, str_join(gc, ls, ""));
 
   buf_add(bf, " \\\n\t\t-lgc -lpthread -lm\n\n");
 
   // Arr[char]
-  Arr *osf = arr_new();
+  Arr *osf = arr_new(gc);
   EACH(os, char, f)
-    arr_push(osf, str_f("%s/%s.o", OBJ_DIR, f));
+    arr_push(osf, str_f(gc, "%s/%s.o", OBJ_DIR, f));
   _EACH
-  char *oss = str_cjoin(osf, ' ');
+  char *oss = str_cjoin(gc, osf, ' ');
 
-  buf_add(bf, str_f("%s : %s\n", LIB_FILE, oss));
-  buf_add(bf, str_f("\tar rcs %s %s\n\n", LIB_FILE, oss));
+  buf_add(bf, str_f(gc, "%s : %s\n", LIB_FILE, oss));
+  buf_add(bf, str_f(gc, "\tar rcs %s %s\n\n", LIB_FILE, oss));
 
   buf_add(bf, partial);
 
   file_write("Makefile", buf_str(bf));
+
+  gc_free(gc);
 }
