@@ -10,7 +10,7 @@
 typedef struct log_Log Log;
 
 /// Start with a line number equals 0
-Log *log_new(Gc *gc, char *file);
+Log *log_new(char *file);
 
 /// Increments line number
 void log_inc(Log *this);

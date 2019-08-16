@@ -8,14 +8,11 @@
 #include "DEFS.h"
 #include "Log.h"
 
-///
-typedef struct tpl_Tpl Tpl;
-
 /// Argument parameters
 typedef struct tpl_TplArgument TplArgument;
 
 ///
-TplArgument *tplArgument_new (Tpl *tpl);
+TplArgument *tplArgument_new (void);
 
 /// Opt[char]
 Opt *tplArgument_comment (TplArgument *this);
@@ -36,12 +33,8 @@ char *tplArgument_name (TplArgument *this);
 char *tplArgument_type (TplArgument *this);
 
 /// Retuns an error if name is empty or type is not valid. Otherwise returns ""
-char *tplArgument_set_name_type (
-  Gc *gc, TplArgument *this, char *name, char *type
-);
+char *tplArgument_set_name_type (TplArgument *this, char *name, char *type);
 
-///
-Gc *tplArgument_gc(TplArgument *this);
 
 // ------------------- //
 // ------------------- //
@@ -49,8 +42,8 @@ Gc *tplArgument_gc(TplArgument *this);
 /// Variable and function parameters
 typedef struct tpl_TplVariable TplVariable;
 
-/// 'tpl' is the container of TplVariable
-TplVariable *tplVariable_new (Tpl *tpl);
+///
+TplVariable *tplVariable_new (void);
 
 /// Opt[char]
 Opt *tplVariable_comment (TplVariable *this);
@@ -75,7 +68,7 @@ char *tplVariable_value (TplVariable *this);
 
 /// Retuns an error if name is empty or type is not valid. Otherwise returns ""
 char *tplVariable_set_name_type_value (
-  Gc *gc, TplVariable *this, char *name, char *type, char *value
+  TplVariable *this, char *name, char *type, char *value
 );
 
 /// Retuns an error if name is empty or type is not valid. Otherwise returns ""
@@ -88,10 +81,10 @@ TplArgument *tplVariable_to_tplArgument (TplVariable *this);
 // ------------------- //
 
 ///
-Tpl *tpl_new (Gc *gc);
+typedef struct tpl_Tpl Tpl;
 
 ///
-Gc *tpl_gc (Tpl *this);
+Tpl *tpl_new (void);
 
 /// Returns Opt[char]
 Opt *tpl_struct_comment (Tpl *this);
@@ -145,6 +138,6 @@ Arr *tpl_functions (Tpl *this);
 void tpl_add_function (Tpl *this, TplVariable *fun);
 
 ///
-char *tpl_to_str (Gc *gc, Tpl *this);
+char *tpl_to_str (Tpl *this);
 
 #endif

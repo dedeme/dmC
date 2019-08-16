@@ -17,33 +17,27 @@ static void help (void) {
 }
 
 static void process_dirs(char *include, char *src) {
-  GC_NEW
-
   char *fsrc, *finclude;
-  EACH(file_dir(gc, src), char, f)
-    GCL_NEW
-
-    fsrc = str_f(gcl, "%s/%s", src, f);
+  EACH(file_dir(src), char, f)
+    fsrc = str_f("%s/%s", src, f);
     if (file_is_directory(fsrc)) {
-      process_dirs(str_f(gcl, "%s/%s", include, f), fsrc);
+      process_dirs(str_f("%s/%s", include, f), fsrc);
     } else if (str_ends(f, ".c")) {
-      finclude = str_f(gcl, "%s/%s.h", include, str_left(gc, f, -2));
+      finclude = str_f("%s/%s.h", include, str_left(f, -2));
       // Arr[Tpl]
-      Arr *tps = reader_read(gcl, fsrc);
+      Arr *tps = reader_read(fsrc);
       if (arr_size(tps)) {
         if (writer_mk_tmp(finclude, fsrc, tps)) {
           writer_copy_tmp(finclude, fsrc);
         }
       }
     }
-
-    GCL_FREE
   _EACH
-
-  GC_FREE
 }
 
 int main (int argc, char *argv[]) {
+  sys_init("ctemplate");
+
   if (argc != 2) {
     puts("'ctemplate' allows one and only one argument");
     help();
@@ -55,20 +49,14 @@ int main (int argc, char *argv[]) {
     return 0;
   }
 
-  GC_NEW
-
-  sys_init(gc, "ctemplate");
-
-  char *include = path_cat(gc, argv[1], "include", NULL);
-  char *src = path_cat(gc, argv[1], "src", NULL);
+  char *include = path_cat(argv[1], "include", NULL);
+  char *src = path_cat(argv[1], "src", NULL);
 
   if (!file_exists(include))
-    EXC_IO(str_f(gc, "File '%s' not found", include))
+    EXC_IO(str_f("File '%s' not found", include))
 
   if (!file_exists(src))
-    EXC_IO(str_f(gc, "File '%s' not found", src))
+    EXC_IO(str_f("File '%s' not found", src))
 
   process_dirs(include, src);
-
-  GC_FREE
 }

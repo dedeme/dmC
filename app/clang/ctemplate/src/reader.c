@@ -11,27 +11,23 @@ enum reader_ResultType {reader_ERROR, reader_MORE, reader_END};
 RS {
   enum reader_ResultType type;
   Tpl *tpl;
-  Gc *gc;
 };
 
-static RS *reader_result_new(Gc *gc) {
-  RS *this = gc_add(gc, malloc(sizeof(RS)));
+static RS *reader_result_new(void) {
+  RS *this = MALLOC(RS);
   this->type = reader_ERROR;
-  this->tpl = tpl_new(gc);
-  this->gc = gc;
+  this->tpl = tpl_new();
   return this;
 }
 
 static RS *rfunctions (Log *log, FileLck *f, RS *rs) {
-  GC_NEW
-
   Tpl *tpl = rs->tpl;
   char *doc = "";
   char *line, *l;
   char start;
-  while (*(line = file_read_line(gc, f))) {
+  while (*(line = file_read_line(f))) {
     log_inc(log);
-    l = str_trim(gc, line);
+    l = str_trim(line);
     if (!*l) {
       doc = "";
       continue;
@@ -39,7 +35,7 @@ static RS *rfunctions (Log *log, FileLck *f, RS *rs) {
     start = *l;
 
     if (start == '#') {
-      doc = str_f(tpl_gc(tpl), "%s%s\n", doc, str_right(gc, l, 1));
+      doc = str_f("%s%s\n", doc, str_right(l, 1));
       continue;
     }
 
@@ -48,25 +44,25 @@ static RS *rfunctions (Log *log, FileLck *f, RS *rs) {
       break;
     }
 
-    TplVariable *fun = tplVariable_new(tpl);
+    TplVariable *fun = tplVariable_new();
 
     if (*doc) {
-      tplVariable_set_comment(fun, str_new(tpl_gc(tpl), doc));
+      tplVariable_set_comment(fun, doc);
       doc = "";
     }
 
     if (start == '-') {
       tplVariable_set_access(fun, NO_ACCESS);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else if (start == '@') {
       tplVariable_set_access(fun, GETTER_SETTER);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else {
       tplVariable_set_access(fun, GETTER);
     }
 
     // Arr[char]
-    Arr *parts = str_csplit_trim(tpl_gc(tpl), l, ':');
+    Arr *parts = str_csplit_trim(l, ':');
     int parts_sz = arr_size(parts);
     if (parts_sz == 2) { // ----- Ok
       char *err = tplVariable_set_function(
@@ -91,20 +87,17 @@ static RS *rfunctions (Log *log, FileLck *f, RS *rs) {
 
     break;
   }
-
-  return GC_CLEAN(rs);
+  return rs;
 }
 
 static RS *rvariables (Log *log, FileLck *f, RS *rs) {
-  GC_NEW
-
   Tpl *tpl = rs->tpl;
   char *doc = "";
   char *line, *l;
   char start;
-  while (*(line = file_read_line(gc, f))) {
+  while (*(line = file_read_line(f))) {
     log_inc(log);
-    l = str_trim(gc, line);
+    l = str_trim(line);
     if (!*l) {
       doc = "";
       continue;
@@ -112,7 +105,7 @@ static RS *rvariables (Log *log, FileLck *f, RS *rs) {
     start = *l;
 
     if (start == '#') {
-      doc = str_f(gc, "%s%s\n", doc, str_right(gc, l, 1));
+      doc = str_f("%s%s\n", doc, str_right(l, 1));
       continue;
     }
 
@@ -126,28 +119,28 @@ static RS *rvariables (Log *log, FileLck *f, RS *rs) {
       break;
     }
 
-    TplVariable *var = tplVariable_new(tpl);
+    TplVariable *var = tplVariable_new();
 
     if (*doc) {
-      tplVariable_set_comment(var, str_new(tpl_gc(tpl), doc));
+      tplVariable_set_comment(var, doc);
       doc = "";
     }
 
     if (start == '-') {
       tplVariable_set_access(var, NO_ACCESS);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else if (start == '@') {
       tplVariable_set_access(var, GETTER_SETTER);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else {
       tplVariable_set_access(var, GETTER);
     }
 
     // Arr[char]
-    Arr *parts = str_csplit_trim(tpl_gc(tpl), l, ':');
+    Arr *parts = str_csplit_trim(l, ':');
     int parts_sz = arr_size(parts);
     if (parts_sz == 3) { // ----- Ok
-      char *err = tplVariable_set_name_type_value(gc,
+      char *err = tplVariable_set_name_type_value(
         var, arr_get(parts, 0), arr_get(parts, 1), arr_get(parts, 2)
       );
       if (!*err) {
@@ -170,20 +163,17 @@ static RS *rvariables (Log *log, FileLck *f, RS *rs) {
     break;
 
   }
-
-  return GC_CLEAN(rs);
+  return rs;
 }
 
 static RS *rarguments (Log *log, FileLck *f, RS *rs) {
-  GC_NEW
-
   Tpl *tpl = rs->tpl;
   char *doc = "";
   char *line, *l;
   char start;
-  while (*(line = file_read_line(gc, f))) {
+  while (*(line = file_read_line(f))) {
     log_inc(log);
-    l = str_trim(gc, line);
+    l = str_trim(line);
     if (!*l) {
       doc = "";
       continue;
@@ -191,7 +181,7 @@ static RS *rarguments (Log *log, FileLck *f, RS *rs) {
     start = *l;
 
     if (start == '#') {
-      doc = str_f(tpl_gc(tpl), "%s%s\n", doc, str_right(gc, l, 1));
+      doc = str_f("%s%s\n", doc, str_right(l, 1));
       continue;
     }
 
@@ -204,35 +194,35 @@ static RS *rarguments (Log *log, FileLck *f, RS *rs) {
       if (tpl_arguments_size(tpl)) {
         rs->type = start == '=' ? reader_MORE : reader_END;
       } else {
-        log_msg(log, line, str_f(gc,
+        log_msg(log, line, str_f(
           "structure '%s' is empty", tpl_struct_name(rs->tpl)
         ));
       }
       break;
     }
 
-    TplArgument *ar = tplArgument_new(tpl);
+    TplArgument *ar = tplArgument_new();
 
     if (*doc) {
-      tplArgument_set_comment(ar, str_new(tpl_gc(tpl), doc));
+      tplArgument_set_comment(ar, doc);
       doc = "";
     }
 
     if (start == '-') {
       tplArgument_set_access(ar, NO_ACCESS);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else if (start == '@') {
       tplArgument_set_access(ar, GETTER_SETTER);
-      l = str_right(gc, l, 1);
+      l = str_right(l, 1);
     } else {
       tplArgument_set_access(ar, GETTER);
     }
 
     // Arr[char]
-    Arr *parts = str_csplit_trim(tpl_gc(tpl), l, ':');
+    Arr *parts = str_csplit_trim(l, ':');
     int parts_sz = arr_size(parts);
     if (parts_sz == 2) { // ----- Ok
-      char *err = tplArgument_set_name_type(gc,
+      char *err = tplArgument_set_name_type(
         ar, arr_get(parts, 0), arr_get(parts, 1)
       );
       if (!*err) {
@@ -254,20 +244,17 @@ static RS *rarguments (Log *log, FileLck *f, RS *rs) {
 
     break;
   }
-
-  return GC_CLEAN(rs);
+  return rs;
 }
 
-static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
-  GCL_NEW
-
-  RS *r = reader_result_new(gc);
+static RS *rstruct (Log *log, FileLck *f) {
+  RS *r = reader_result_new();
   char *doc = "";
   char *line, *l;
   char start;
-  while (*(line = file_read_line(gcl, f))) {
+  while (*(line = file_read_line(f))) {
     log_inc(log);
-    l = str_trim(gcl, line);
+    l = str_trim(line);
     if (!*l) {
       doc = "";
       continue;
@@ -275,7 +262,7 @@ static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
     start = *l;
 
     if (start == '#') {
-      doc = str_f(gcl, "%s%s\n", doc, str_right(gcl, l, 1));
+      doc = str_f("%s%s\n", doc, str_right(l, 1));
       continue;
     }
 
@@ -285,15 +272,15 @@ static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
   Tpl *tpl = r->tpl;
 
   if (*doc) {
-    tpl_set_struct_comment(tpl, str_new(tpl_gc(tpl), doc));
+    tpl_set_struct_comment(tpl, doc);
   }
 
   if (start == '-') {
     tpl_set_struct_type(tpl, PRIVATE);
-    l = str_ltrim(gcl, str_right(gcl, l, 1));
+    l = str_ltrim(str_right(l, 1));
   } else if (start == '=') {
     tpl_set_struct_type(tpl, HIDDEN);
-    l = str_ltrim(gcl, str_right(gcl, l, 1));
+    l = str_ltrim(str_right(l, 1));
   } else {
     tpl_set_struct_type(tpl, PUBLIC);
   }
@@ -301,7 +288,7 @@ static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
   tpl_set_constructor_type(tpl, NORMAL);
 
   // Arr[char]
-  Arr *parts = str_csplit_trim(tpl_gc(tpl), l, ':');
+  Arr *parts = str_csplit_trim(l, ':');
   int parts_sz = arr_size(parts);
 
   if (parts_sz == 2 || parts_sz == 1) { // ----- Ok
@@ -324,18 +311,18 @@ static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
         log_msg(
           log, line, "Serialization type only can be: to | from | serial"
         );
-        return GCL_CLEAN(r); // ----- Fail
+        return r; // ----- Fail
       }
     }
 
     char *name = arr_get(parts, 0);
     if (!*name) {
       log_msg(log, line, "Struct name is missing");
-      return GCL_CLEAN(r); // ----- Fail
+      return r; // ----- Fail
     }
     tpl_set_struct_name(tpl, name);
 
-    return GCL_CLEAN(rarguments(log, f, r)); // ----------------- go rarguments
+    return rarguments(log, f, r); // ----------------------------- go rarguments
   }
 
   // ----- Fail
@@ -346,16 +333,17 @@ static RS *rstruct (Gc *gc, Log *log, FileLck *f) {
     log_msg(log, line, "Struct name is missing");
   };
 
-  return GCL_CLEAN(r);
+  return r;
 }
 
-static Arr *rtpls (Gc *gc, Log *log, FileLck *f) {
+static Arr *rtpls (Log *log, FileLck *f) {
   // Arr[Tpl]
-  Arr *r = arr_new(gc);
+  Arr *r = arr_new();
   for (;;) {
-    RS *rs = rstruct(gc, log, f);
+    RS *rs = rstruct(log, f);
+//    puts(tpl_to_str(rs->tpl));
     if (rs->type == reader_ERROR) {
-      r = arr_new(gc);
+      r = arr_new();
       break;
     } else {
       if (tpl_struct_type(rs->tpl) == HIDDEN) {
@@ -379,24 +367,21 @@ static Arr *rtpls (Gc *gc, Log *log, FileLck *f) {
 }
 
 // Returns Arr[Tpl]
-Arr *reader_read(Gc *gc, char *fsrc) {
-  GCL_NEW
-
+Arr *reader_read(char *fsrc) {
   // Arr[Tpl]
-  Arr *r = arr_new(gc);
-  Log *log = log_new(gcl, fsrc);
-  FileLck *f = file_ropen(gcl, fsrc);
+  Arr *r = arr_new();
+  Log *log = log_new(fsrc);
+  FileLck *f = file_ropen(fsrc);
   char *l;
-  while (*(l = file_read_line(gcl, f))) {
+  while (*(l = file_read_line(f))) {
     log_inc(log);
-    if (str_eq(str_trim(gcl, l), "/*.")) {
-      r = rtpls(gc, log, f);
+    if (str_eq(str_trim(l), "/*.")) {
+      r = rtpls(log, f);
       break;
     }
   }
   file_close(f);
-
-  return GCL_CLEAN(r);
+  return r;
 }
 
 #undef RS

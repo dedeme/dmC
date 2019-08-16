@@ -10,14 +10,12 @@ static char *months[] = {
     "Jul", "Aug", "Sept", "Oct", "Nov","Dec"
   };
 
-static char *mk_date(Gc *gc) {
-  Gc *gcl = gc_new();
+static char *mk_date() {
   time_t date = date_now();
-  char *r = date_f(gcl, date, "%d-M-%Y");
+  char *r = date_f(date, "%d-M-%Y");
   int month = date_month(date) - 1;
   char *tmp = r;
-  r = str_replace(gc, tmp, "M", months[month]);
-  gc_free(gcl);
+  r = str_replace(tmp, "M", months[month]);
   return r;
 }
 
@@ -37,7 +35,6 @@ static void help () {
 }
 
 static void mkh(char *hfile, char *path) {
-  Gc *gc = gc_new();
   char *template =
     "// Copyright $DATE$ ºDeme\n"
     "// GNU General Public License - V3 <http://www.gnu.org/licenses/>\n\n"
@@ -47,31 +44,24 @@ static void mkh(char *hfile, char *path) {
     "#endif\n"
   ;
 
-  char *d = mk_date(gc);
-  char *cname = str_creplace(gc, str_to_upper(gc, path), '/', '_');
-  char *tx = str_replace(gc,
-    str_replace(gc, template, "$DATE$", d),
+  char *d = mk_date();
+  char *cname = str_creplace(str_to_upper(path), '/', '_');
+  char *tx = str_replace(str_replace(template, "$DATE$", d),
     "$CNAME$", cname
   );
   file_write(hfile, tx);
-  gc_free(gc);
 }
 
 static void mkc(char *cfile, char *path) {
-  Gc *gc = gc_new();
   char *template =
     "// Copyright $DATE$ ºDeme\n"
     "// GNU General Public License - V3 <http://www.gnu.org/licenses/>\n\n"
     "#include \"$CNAME$.h\"\n\n"
   ;
 
-  char *d = mk_date(gc);
-  char *tx = str_replace(gc,
-    str_replace(gc, template, "$DATE$", d),
-    "$CNAME$", path
-  );
+  char *d = mk_date();
+  char *tx = str_replace(str_replace(template, "$DATE$", d), "$CNAME$", path);
   file_write(cfile, tx);
-  gc_free(gc);
 }
 
 int main (int argc, char **argv) {
@@ -85,31 +75,27 @@ int main (int argc, char **argv) {
   char *path = argv[1];
 
   if (!file_is_directory(path))
-    EXC_ILLEGAL_STATE(str_f(gc_new(), "'%s' is not a directory", path))
+    EXC_ILLEGAL_STATE(str_f("'%s' is not a directory", path))
 
-  Gc *gc = gc_new();
-
-  char *include = path_cat(gc, path, "include", NULL);
+  char *include = path_cat(path, "include", NULL);
   if (!file_is_directory(include))
-    EXC_ILLEGAL_STATE(str_f(gc_new(), "'%s' is not a directory", include))
+    EXC_ILLEGAL_STATE(str_f("'%s' is not a directory", include))
 
-  char *src = path_cat(gc, path, "src", NULL);
+  char *src = path_cat(path, "src", NULL);
   if (!file_is_directory(src))
-    EXC_ILLEGAL_STATE(str_f(gc_new(), "'%s' is not a directory", src))
+    EXC_ILLEGAL_STATE(str_f("'%s' is not a directory", src))
 
   char *file_name = argv[2];
 
-  char *hfile = str_f(gc, "%s/%s.h", include, file_name);
+  char *hfile = str_f("%s/%s.h", include, file_name);
   if (file_exists(hfile))
-    EXC_ILLEGAL_STATE(str_f(gc, "'%s' already exists", hfile))
+    EXC_ILLEGAL_STATE(str_f("'%s' already exists", hfile))
 
-  char *cfile = str_f(gc, "%s/%s.c", src, file_name);
+  char *cfile = str_f("%s/%s.c", src, file_name);
   if (file_exists(cfile))
-    EXC_ILLEGAL_STATE(str_f(gc, "'%s' already exists", cfile))
+    EXC_ILLEGAL_STATE(str_f("'%s' already exists", cfile))
 
   mkh(hfile, file_name);
   mkc(cfile, file_name);
-
-  gc_free(gc);
   return 0;
 }

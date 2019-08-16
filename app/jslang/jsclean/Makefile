@@ -1,18 +1,40 @@
-PRG = jsclean
-LIB = dmc
-
-C_FILES = $(wildcard src/*.c) \
-					$(wildcard src/tp/*.c)
-H_FILES = $(wildcard include/*.h) \
-					$(wildcard include/tp/*.h)
-
-LIB_PATH = lib/lib$(LIB)
-LIB_INCLUDE = lib/lib$(LIB)/include
+LIB_PATH_dmc = lib/libdmc
+LIB_INCLUDE_dmc = $(LIB_PATH_dmc)/include
 
 CFLAGS = -Wall -rdynamic
-FILES = $(C_FILES) $(H_FILES)
-bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
-	gcc $(CFLAGS) $(C_FILES) -o bin/$(PRG) \
-	  -Iinclude -I$(LIB_INCLUDE) \
-		-L$(LIB_PATH) -l$(LIB) \
-		-lgc
+bin/jsclean : src/jsclean.c include/jsclean.h lib/liblocalcompilation/liblocalcompilation.a
+	gcc $(CFLAGS) src/jsclean.c -o bin/jsclean \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc) \
+		-Llib/liblocalcompilation -llocalcompilation \
+		-L$(LIB_PATH_dmc) -ldmc \
+		-lgc -lpthread -lm
+
+lib/liblocalcompilation/liblocalcompilation.a : lib/liblocalcompilation/obj/jsclean.o lib/liblocalcompilation/obj/data/Params.o lib/liblocalcompilation/obj/io.o lib/liblocalcompilation/obj/data/Path.o lib/liblocalcompilation/obj/lint.o
+	ar rcs lib/liblocalcompilation/liblocalcompilation.a lib/liblocalcompilation/obj/jsclean.o lib/liblocalcompilation/obj/data/Params.o lib/liblocalcompilation/obj/io.o lib/liblocalcompilation/obj/data/Path.o lib/liblocalcompilation/obj/lint.o
+
+lib/liblocalcompilation/obj/jsclean.o : include/jsclean.h src/jsclean.c include/data/Params.h src/data/Params.c include/io.h src/io.c include/lint.h src/lint.c
+	gcc $(CFLAGS) -c src/jsclean.c -o lib/liblocalcompilation/obj/jsclean.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+
+lib/liblocalcompilation/obj/data/Params.o : include/data/Params.h src/data/Params.c
+	gcc $(CFLAGS) -c src/data/Params.c -o lib/liblocalcompilation/obj/data/Params.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+
+lib/liblocalcompilation/obj/io.o : include/io.h src/io.c include/data/Params.h src/data/Params.c include/data/Path.h src/data/Path.c
+	gcc $(CFLAGS) -c src/io.c -o lib/liblocalcompilation/obj/io.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+
+lib/liblocalcompilation/obj/data/Path.o : include/data/Path.h src/data/Path.c
+	gcc $(CFLAGS) -c src/data/Path.c -o lib/liblocalcompilation/obj/data/Path.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+
+lib/liblocalcompilation/obj/lint.o : include/lint.h src/lint.c
+	gcc $(CFLAGS) -c src/lint.c -o lib/liblocalcompilation/obj/lint.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+

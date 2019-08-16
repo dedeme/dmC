@@ -8,8 +8,8 @@ struct log_Log {
   int nline;
 };
 
-Log *log_new(Gc *gc, char *file) {
-  Log *this = GC_MALLOC(Log);
+Log *log_new(char *file) {
+  Log *this = MALLOC(Log);
   this->file = file;
   this->nline = 0;
   return this;
@@ -20,10 +20,8 @@ void log_inc(Log *this) {
 }
 
 void log_msg(Log *this, char *code, char *msg) {
-  GC_NEW
   printf(
     "%s:%d: %s\n  in '%s'\n\n",
-    this->file, this->nline, msg, str_trim(gc, code)
+    this->file, this->nline, msg, str_trim(code)
   );
-  GC_FREE
 }

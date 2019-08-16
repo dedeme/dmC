@@ -28,8 +28,8 @@ struct f_Sell {
   void *(*fn)(Sell *this, int n);
 };
 
-static Sell *_sell_new (Gc *gc, size_t nick) {
-  Sell *this = gc_add(gc, malloc(sizeof(Sell)));
+static Sell *_sell_new (size_t nick) {
+  Sell *this = MALLOC(Sell);
   this->nick = nick;
   this->tmp = "";
   this->fn = ext_fn;
@@ -52,13 +52,12 @@ void sell_set_fn (Sell *this, void *(*value)(Sell *this, int n)) {
   this->fn = value;
 }
 
-Js *sell_to_js (Gc *gc, Sell *this) {
-  Gc *gcl = gc_new();
+Js *sell_to_js (Sell *this) {
   // Arr[Js]
-  Arr *js = arr_new(gcl);
-  arr_push(js, js_wl(gcl, (long)this->nick));
-  arr_push(js, js_ws(gcl, this->tmp));
-  return gc_clean(gcl, js_wa(gc, js));
+  Arr *js = arr_new();
+  arr_push(js, js_wl((long)this->nick));
+  arr_push(js, js_ws(this->tmp));
+  return js_wa(js);
 }
 
 struct f_Buy {
@@ -67,8 +66,8 @@ struct f_Buy {
   Opt *friend;
 };
 
-Buy *buy_new (Gc *gc, size_t nick, double4 *quote, Opt *friend) {
-  Buy *this = gc_add(gc, malloc(sizeof(Buy)));
+Buy *buy_new (size_t nick, double4 *quote, Opt *friend) {
+  Buy *this = MALLOC(Buy);
   this->nick = nick;
   this->quote = quote;
   this->friend = friend;
@@ -87,32 +86,30 @@ Opt *buy_friend (Buy *this) {
   return this->friend;
 }
 
-Js *buy_to_js (Gc *gc, Buy *this) {
-  Gc *gcl = gc_new();
+Js *buy_to_js (Buy *this) {
   // Arr[Js]
-  Arr *js = arr_new(gcl);
-  arr_push(js, js_wl(gcl, (long)this->nick));
-  arr_push(js, double4_to_js(gcl, this->quote));
+  Arr *js = arr_new();
+  arr_push(js, js_wl((long)this->nick));
+  arr_push(js, double4_to_js(this->quote));
   arr_push(js, opt_is_empty(this->friend)
     ? js_wn()
-    : person_to_js(gcl, opt_get(this->friend))
+    : person_to_js(opt_get(this->friend))
   );
-  return gc_clean(gcl, js_wa(gc, js));
+  return js_wa(js);
 }
 
-Buy *buy_from_js (Gc *gc, Js *js) {
-  Gc *gcl = gc_new();
+Buy *buy_from_js (Js *js) {
   // Arr[Js]
-  Arr *a = js_ra(gcl, js);
+  Arr *a = js_ra(js);
   Js **p = (Js **)arr_start(a);
-  Buy *this = gc_add(gc, malloc(sizeof(Buy)));
+  Buy *this = MALLOC(Buy);
   this->nick = (size_t)js_rl(*p++);
-  this->quote = double4_from_js(gc, *p++);
+  this->quote = double4_from_js(*p++);
   this->friend = js_is_null(*p)
       ? p++? opt_empty(): NULL
-      : opt_new(person_from_js(gc, *p++))
+      : opt_new(person_from_js(*p++))
   ;
-  return gc_clean(gcl, this);
+  return this;
 }
 
 /*--*/

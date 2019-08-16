@@ -4,3 +4,4 @@ bin
 .directory
 gitk
 *.geany
+trash*

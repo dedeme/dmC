@@ -19,73 +19,62 @@ static void help (void) {
   );
 }
 
-// libs is Arr[char], os is GcVal[Arr[char]]
-static void add_dependency (Arr *libs, GcVal *gc_os, Buf *bf, char *d) {
-  Gc *gc = gc_new();
-
-  // Arr[char]
-  Arr *os = gcVal_value(gc_os);
+// libs is Arr[char], os is Arr[char]
+static void add_dependency (Arr *libs, Arr *os, Buf *bf, char *d) {
   int fn (char *f) { return str_eq(f, d); }
-  if (it_contains(arr_to_it(gc, os), (FPRED)fn)) {
-    gc_free(gc);
+  if (it_contains(arr_to_it(os), (FPRED)fn)) {
     return;
   }
 
   arr_push(os, d);
 
   // Arr[char]
-  Arr *includes = arr_new(gc);
+  Arr *includes = arr_new();
   EACH(libs, char, lib)
-    arr_push(includes, str_f(gc, " \\\n\t\t-I$(LIB_INCLUDE_%s)", lib));
+    arr_push(includes, str_f(" \\\n\t\t-I$(LIB_INCLUDE_%s)", lib));
   _EACH
 
   // Arr[char]
-  Arr *deps = reader_dependencies(gcVal_gc(gc_os), d);
+  Arr *deps = reader_dependencies(d);
 
   // Arr[char]
-  Arr *hdeps = arr_new(gc);
+  Arr *hdeps = arr_new();
   EACH(deps, char, d)
-    arr_push(hdeps, str_f(gc, "include/%s.h src/%s.c", d, d));
+    arr_push(hdeps, str_f("include/%s.h src/%s.c", d, d));
   _EACH
 
-  buf_add(bf, str_f(gc, "%s/%s.o : ", OBJ_DIR, d));
-  buf_add(bf, str_f(gc, "%s\n", str_cjoin(gc, hdeps, ' ')));
+  buf_add(bf, str_f("%s/%s.o : ", OBJ_DIR, d));
+  buf_add(bf, str_f("%s\n", str_cjoin(hdeps, ' ')));
 
   buf_add(bf, "\tgcc $(CFLAGS) ");
-  buf_add(bf, str_f(gc, "-c src/%s.c ", d));
-  buf_add(bf, str_f(gc, "-o %s/%s.o \\\n", OBJ_DIR, d));
+  buf_add(bf, str_f("-c src/%s.c ", d));
+  buf_add(bf, str_f("-o %s/%s.o \\\n", OBJ_DIR, d));
 
   buf_add(bf, "\t\t-Iinclude");
-  buf_add(bf, str_join(gc, includes, ""));
+  buf_add(bf, str_join(includes, ""));
 
   buf_add(bf, "\n\n");
 
   EACH(deps, char, d)
-    add_dependency(libs, gc_os, bf, d);
+    add_dependency(libs, os, bf, d);
   _EACH
-
-  gc_free(gc);
 }
 
 int main (int argc, char *argv[]) {
-  Gc *gc = gc_new();
-
   if (reader_check_directories()) {
     help();
-    gc_free(gc);
     return 1;
   }
 
   if (argc == 2 && str_eq(argv[1], "--help")) {
     help();
-    gc_free(gc);
     return 0;
   }
 
   char *prg = "";
   char *src = "";
   // Arr[char]
-  Arr *libs = arr_new(gc);
+  Arr *libs = arr_new();
   int c = 1;
   if (argc == 1 || argc == 3 || argc == 5 || argc == 7) {
     while (c < argc) {
@@ -94,7 +83,6 @@ int main (int argc, char *argv[]) {
         if (*prg) {
           puts("Option --prg duplicated");
           help();
-          gc_free(gc);
           return 1;
         } else {
           prg = argv[c++];
@@ -103,7 +91,6 @@ int main (int argc, char *argv[]) {
         if (*src) {
           puts("Option --main duplicated");
           help();
-          gc_free(gc);
           return 1;
         } else {
           src = argv[c++];
@@ -112,57 +99,49 @@ int main (int argc, char *argv[]) {
         if (arr_size(libs)) {
           puts("Option --libs duplicated");
           help();
-          gc_free(gc);
           return 1;
         } else {
-          libs = str_csplit(gc, argv[c++], ':');
+          libs = str_csplit(argv[c++], ':');
         }
       } else {
         printf("Unkown option '%s'\n", op);
         help();
-        gc_free(gc);
         return 1;
       }
     }
   } else {
     puts("Wrong number of arguments");
     help();
-    gc_free(gc);
     return 1;
   }
 
-  if (!*prg) prg = path_name(gc, file_cwd(gc));
+  if (!*prg) prg = path_name(file_cwd());
   if (!*prg) {
     puts ("'Progam name' argument is missing");
-    gc_free(gc);
     return 1;
   }
 
-  if (!*src) src = path_name(gc, file_cwd(gc));
+  if (!*src) src = path_name(file_cwd());
   if (!*src) {
     puts ("'Main file' argument is missing");
-    gc_free(gc);
     return 1;
   }
 
   if (src[0] == '/') {
     printf("'%s' is an absolute path\n", src);
     help();
-    gc_free(gc);
     return 1;
   }
 
-  char *cfile = str_f(gc, "src/%s.c", src);
+  char *cfile = str_f("src/%s.c", src);
   if (!file_exists(cfile)) {
     printf("'%s' is missing\n", cfile);
     help();
-    gc_free(gc);
     return 1;
   }
 
   if (reader_check_libraries(libs)) {
     help();
-    gc_free(gc);
     return 1;
   }
 
@@ -174,7 +153,7 @@ int main (int argc, char *argv[]) {
     mk_all = 1;
   } else {
     // Opt[char]
-    char *new_makefile = opt_nget(reader_check_changes(gc));
+    char *new_makefile = opt_nget(reader_check_changes());
     if (new_makefile) {
       if (*new_makefile) {
         file_write("Makefile", new_makefile);
@@ -185,18 +164,14 @@ int main (int argc, char *argv[]) {
   }
 
   if (mk_all) {
-    Buf *bf = buf_new(gc);
+    Buf *bf = buf_new();
     // Arr[char] os
-    Arr *os = arr_new(gc);
+    Arr *os = arr_new();
 
-    // GcVal[Arr[char]]
-    GcVal *gc_os = gcVal_new(gc, os);
+    add_dependency(libs, os, bf, src);
 
-    add_dependency(libs, gc_os, bf, src);
-
-    writer_mkmake (prg, libs, src, os, buf_to_str(gc, bf));
+    writer_mkmake (prg, libs, src, os, buf_to_str(bf));
   }
 
-  gc_free(gc);
   return 0;
 }

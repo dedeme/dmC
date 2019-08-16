@@ -25,7 +25,7 @@ void *(*sell_fn (Sell *this))(Sell *this, int n);
 void sell_set_fn (Sell *this, void *(*value)(Sell *this, int n));
 
 ///
-Js *sell_to_js (Gc *gc, Sell *this);
+Js *sell_to_js (Sell *this);
 
 ///
 ///   Arguments:
@@ -35,7 +35,7 @@ Js *sell_to_js (Gc *gc, Sell *this);
 typedef struct f_Buy Buy;
 
 ///
-Buy *buy_new (Gc *gc, size_t nick, double4 *quote, Opt *friend);
+Buy *buy_new (size_t nick, double4 *quote, Opt *friend);
 
 /// Market quote
 double4 *buy_quote (Buy *this);
@@ -47,10 +47,10 @@ void buy_set_quote (Buy *this, double4 *value);
 Opt *buy_friend (Buy *this);
 
 ///
-Js *buy_to_js (Gc *gc, Buy *this);
+Js *buy_to_js (Buy *this);
 
 ///
-Buy *buy_from_js (Gc *gc, Js *js);
+Buy *buy_from_js (Js *js);
 
 /*--*/
 
