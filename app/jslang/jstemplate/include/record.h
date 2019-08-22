@@ -1,6 +1,8 @@
 // Copyright 12-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+/// Template type record.
+
 #ifndef RECORD_H
   #define RECORD_H
 

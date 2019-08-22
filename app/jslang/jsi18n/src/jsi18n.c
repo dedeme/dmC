@@ -1,44 +1,17 @@
 // Copyright 13-Feb-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <gc.h>
-#include "dmc/DEFS.h"
-#include "dmc/str.h"
-#include "dmc/exc.h"
-#include "dmc/path.h"
-#include "dmc/Map.h"
-#include "dmc/Buf.h"
-#include "dmc/file.h"
-#include "dmc/Arr.h"
-#include "dmc/Opt.h"
-#include "dmc/Map.h"
-#include "dmc/Tuples.h"
-#include "dmc/ct/Achar.h"
-#include "dmc/ct/Ochar.h"
-#include "dmc/ct/Mchar.h"
 #include "jsi18n.h"
+#include "dmc/std.h"
 
-#define TY Pos
-#define FN pos
-#include "dmc/tpl/tarr.c"
-#undef TY
-#undef FN
-
-#define TY Apos
-#define FN apos
-#include "dmc/tpl/topt.c"
-#include "dmc/tpl/tmap.c"
-#undef TY
-#undef FN
+typedef struct pos_Pos Pos;
 
 struct pos_Pos {
   char *file;
-  uint line;
+  int line;
 };
 
-static Pos *pos_new(char *file, uint line) {
+static Pos *pos_new(char *file, int line) {
   Pos *this = MALLOC(Pos);
   this->file = file;
   this->line = line;
@@ -63,7 +36,8 @@ static char *rdoc(char *tx) {
   return str_replace(str_replace(str_trim(tx), "\\\"", "\""), "\"", "\\\"");
 }
 
-static void extract_file(Mapos *keys, char *file) {
+// keys is Map[Arr[Pos]]
+static void extract_file(Map *keys, char *file) {
   enum Status {
     CODE,
     PRECOMMENT,
@@ -72,6 +46,8 @@ static void extract_file(Mapos *keys, char *file) {
     BCOMMENT2,
     QUOTE,
     QUOTE2,
+    BKQUOTE,
+    BKQUOTE2,
     SQUOTE,
     ENTRY1,
     ENTRY2,
@@ -81,127 +57,144 @@ static void extract_file(Mapos *keys, char *file) {
 
   enum Status code_state(char ch) {
     switch(ch) {
-    case '/': return PRECOMMENT;
-    case '"': return QUOTE;
-    case '\'': return SQUOTE;
-    case '_': return ENTRY1;
-    default: return CODE;
+      case '/': return PRECOMMENT;
+      case '"': return QUOTE;
+      case '`': return BKQUOTE;
+      case '\'': return SQUOTE;
+      case '_': return ENTRY1;
+      default: return CODE;
     }
   }
 
   Buf *bf = buf_new();
   enum Status state = CODE;
-  uint nl = 1;
-  LckFile *lck = file_ropen (file);
+  int nl = 1;
+  FileLck *lck = file_ropen (file);
   char *l = file_read_line(lck);
   while (*l) {
     char *pl = l;
     while (*pl) {
       char ch = *pl++;
       switch (state) {
-      case PRECOMMENT:
-        switch (ch){
-        case '/':
-          state = LCOMMENT;
+        case PRECOMMENT:
+          switch (ch){
+            case '/':
+              state = LCOMMENT;
+              break;
+            case '*':
+              state = BCOMMENT;
+              break;
+            default:
+              state = code_state(ch);
+          }
           break;
-        case '*':
-          state = BCOMMENT;
+        case LCOMMENT:
+          if (ch == '\n') {
+            state = CODE;
+          }
           break;
-        default:
-          state = code_state(ch);
-        }
-        break;
-      case LCOMMENT:
-        if (ch == '\n') {
-          state = CODE;
-        }
-        break;
-      case BCOMMENT:
-        if (ch == '*') {
-          state = BCOMMENT2;
-        }
-        break;
-      case BCOMMENT2:
-        if (ch == '/') {
-          state = CODE;
-        } else {
-          state = BCOMMENT;
-        }
-        break;
-      case QUOTE:
-        switch (ch) {
-        case '"':
-        case '\n':
-          state = CODE;
+        case BCOMMENT:
+          if (ch == '*') {
+            state = BCOMMENT2;
+          }
           break;
-        case '\\':
-          state = QUOTE2;
+        case BCOMMENT2:
+          if (ch == '/') {
+            state = CODE;
+          } else {
+            state = ch == '*' ? BCOMMENT2 : BCOMMENT;
+          }
           break;
-        }
-        break;
-      case QUOTE2:
-        state = QUOTE;
-        break;
-      case SQUOTE:
-        switch (ch) {
-        case '\'':
-        case '\n':
-          state = CODE;
+        case QUOTE:
+          switch (ch) {
+            case '"':
+            case '\n':
+              state = CODE;
+              break;
+            case '\\':
+              state = QUOTE2;
+              break;
+          }
           break;
-        case '\\':
-          state = QUOTE2;
+        case QUOTE2:
+          state = QUOTE;
           break;
-        }
-        break;
-      case ENTRY1:
-        if (ch == '(') {
-          state = ENTRY2;
-        } else {
-          state = code_state(ch);
-        }
-        break;
-      case ENTRY2:
-        if (ch == '"') {
-          state = EQUOTE;
-        } else {
-          state = code_state(ch);
-        }
-        break;
-      case EQUOTE:
-        switch (ch) {
-        case '"':
-        case '\n':
+        case BKQUOTE:
+          switch (ch) {
+            case '`':
+              state = CODE;
+              break;
+            case '\\':
+              state = BKQUOTE2;
+              break;
+          }
+          break;
+        case BKQUOTE2:
+          state = BKQUOTE;
+          break;
+        case SQUOTE:
+          switch (ch) {
+            case '\'':
+            case '\n':
+              state = CODE;
+              break;
+            case '\\':
+              state = QUOTE2;
+              break;
+          }
+          break;
+        case ENTRY1:
+          if (ch == '(') {
+            state = ENTRY2;
+          } else {
+            state = code_state(ch);
+          }
+          break;
+        case ENTRY2:
           if (ch == '"') {
-            char *key = buf_str(bf);
-            if (str_cindex(key, '=') == -1) {
-              Pos *pos = pos_new(file, nl);
-              Oapos *value = mapos_get(keys, key);
-              if (oapos_is_null(value)) {
-                Apos *val = apos_new();
-                apos_add(val, pos);
-                mapos_put(keys, key, val);
+            state = EQUOTE;
+          } else {
+            state = code_state(ch);
+          }
+          break;
+        case EQUOTE:
+          switch (ch) {
+          case '"':
+          case '\n':
+            if (ch == '"') {
+              char *key = buf_str(bf);
+              if (str_cindex(key, '=') == -1) {
+                Pos *pos = pos_new(file, nl);
+                // Arr[Pos]
+                Arr *poss = opt_nget(map_get(keys, key));
+                if (poss) {
+                  arr_push(poss, pos);
+                } else {
+                  poss = arr_new();
+                  arr_push(poss, pos);
+                  map_put(keys, key, poss);
+                }
               } else {
-                apos_add(oapos_value(value), pos);
+                printf("Line %d: Sign '=' is not allowed in keys", nl);
               }
             }
+            bf = buf_new();
+            state = CODE;
+            break;
+          case '\\':
+            buf_cadd(bf, ch);
+            state = EQUOTE2;
+            break;
+          default:
+            buf_cadd(bf, ch);
           }
-          bf = buf_new();
-          state = CODE;
           break;
-        case '\\':
+        case EQUOTE2:
           buf_cadd(bf, ch);
-          state = EQUOTE2;
+          state = EQUOTE;
           break;
         default:
-          buf_cadd(bf, ch);
-        }
-        break;
-      case EQUOTE2:
-        buf_cadd(bf, ch);
-        state = EQUOTE;
-        break;
-      default:
-        state = code_state(ch);
+          state = code_state(ch);
       }
     }
 
@@ -212,12 +205,14 @@ static void extract_file(Mapos *keys, char *file) {
   file_close(lck);
 }
 
-static void extract(Mapos *keys, char *source) {
+// keys is Map[Arr[Pos]];
+static void extract(Map *keys, char *source) {
   puts(source);
   if (file_is_directory(source)) {
-    Achar *files = file_dir(source);
+    // Arr[char]
+    Arr *files = file_dir(source);
     EACH(files, char, f) {
-      extract(keys, f);
+      extract(keys, path_cat(source, f, NULL));
     }_EACH
   } else if (file_exists(source)) {
     if (str_ends(source, ".js")) {
@@ -228,7 +223,8 @@ static void extract(Mapos *keys, char *source) {
   }
 }
 
-static char *make_dic(Mapos *keys, char *lang, char *target) {
+// keys is Map[Arr[Pos]];
+static char *make_dic(Map *keys, char *lang, char *target) {
   char *tdir = path_cat(target, "i18n", NULL);
   if (!file_exists(tdir)) {
     file_mkdir(tdir);
@@ -238,14 +234,16 @@ static char *make_dic(Mapos *keys, char *lang, char *target) {
     THROW("") "'%s' is not a directory\n", tdir _THROW
   }
 
-  char *dic_path = path_cat(tdir, str_printf("%s.txt", lang), NULL);
+  char *dic_path = path_cat(tdir, str_f("%s.txt", lang), NULL);
   if (!file_exists(dic_path)) {
     file_write(dic_path, "");
   }
 
-  Mchar *old_dic = mchar_new();
+  // Map[char]
+  Map *old_dic = map_new();
   char *text = file_read(dic_path);
-  Achar *entries = str_csplit(text, '\n');
+  // Arr[char]
+  Arr *entries = str_csplit(text, '\n');
   EACH(entries, char, e) {
     char *trim = str_trim(e);
     if (!*trim || *trim == '#') {
@@ -256,9 +254,9 @@ static char *make_dic(Mapos *keys, char *lang, char *target) {
       continue;
     }
     char *key = rdoc(str_sub(trim, 0, ix));
-    char *value = rdoc(str_sub_end(trim, ix + 1));
+    char *value = rdoc(str_right(trim, ix + 1));
     if (*key && *value) {
-      mchar_put(old_dic, key, value);
+      map_put(old_dic, key, value);
     }
   }_EACH
 
@@ -267,44 +265,44 @@ static char *make_dic(Mapos *keys, char *lang, char *target) {
 	Buf *trans = buf_new();
 	Buf *dic = buf_new();
 
-  bool sort(void *e1, void *e2) {
+  int fgreater(void *e1, void *e2) {
     Kv *kv1 = e1;
     Kv *kv2 = e2;
-    return str_cmp(kv_key(kv1), kv_key(kv2)) > 0;
+    return strcmp(kv_key(kv1), kv_key(kv2)) > 0;
   }
-  arr_sort((Arr *)keys, sort);
-  arr_sort((Arr *)old_dic, sort);
+  arr_sort((Arr *)keys, fgreater);
+  arr_sort((Arr *)old_dic, fgreater);
 
   EACH(keys, Kv, kv) {
     char *k = kv_key(kv);
-    Apos *poss = kv_value(kv);
-    Ochar *ov = mchar_get(old_dic, k);
-    if (ochar_is_null(ov)) {
+    // Arr[Pos]
+    Arr *poss = kv_value(kv);
+    char *v = opt_nget(map_get(old_dic, k));
+    if (v) {
+      EACH(poss, Pos, p) {
+        buf_add(trans, str_f("# %s: %d\n", p->file, p->line));
+      }_EACH
+      buf_add(trans, str_f("%s = %s\n\n", k, v));
+      buf_add(dic, str_f("  \"%s\": \"%s\",\n", k, v));
+
+      map_remove(old_dic, k);
+    } else {
       buf_add(todo, "# TO DO\n");
       EACH(poss, Pos, p) {
-        buf_add(todo, str_printf("# %s: %d\n", p->file, p->line));
+        buf_add(todo, str_f("# %s: %d\n", p->file, p->line));
       }_EACH
       buf_add(todo, k);
       buf_add(todo, " = \n\n");
-    } else {
-      char *v = ochar_value(ov);
-      EACH(poss, Pos, p) {
-        buf_add(trans, str_printf("# %s: %d\n", p->file, p->line));
-      }_EACH
-      buf_add(trans, str_printf("%s = %s\n\n", k, v));
-      buf_add(dic, str_printf("  \"%s\": \"%s\",\n", k, v));
-
-      mchar_remove(old_dic, k);
     }
   }_EACH
 
   EACH(old_dic, Kv, kv) {
-    buf_add(orphan, str_printf(
+    buf_add(orphan, str_f(
       "# ORPHAN\n%s = %s\n\n", kv_key(kv), (char *)kv_value(kv)
     ));
   }_EACH
 
-  LckFile *lck = file_wopen(dic_path);
+  FileLck *lck = file_wopen(dic_path);
  	file_write_text(lck, "# File generated by jsi18n.\n\n");
 	file_write_text(lck, buf_str(orphan));
 	file_write_text(lck, buf_str(todo));
@@ -312,7 +310,7 @@ static char *make_dic(Mapos *keys, char *lang, char *target) {
   file_close(lck);
 
   if (*buf_str(dic)) {
-    return str_printf("%s\n", str_sub(buf_str(dic), 0, buf_length(dic) - 2));
+    return str_f("%s\n", str_left(buf_str(dic), buf_len(dic) - 2));
   }
   return "";
 }
@@ -325,15 +323,18 @@ int main (int argc, char **argv) {
     return 0;
   }
 
-  Achar *langs = str_csplit(argv[1], ':');
-  Achar *sources = str_csplit(argv[2], ':');
+  // Arr[char]
+  Arr *langs = str_csplit(argv[1], ':');
+  // Arr[char]
+  Arr *sources = str_csplit(argv[2], ':');
   char *target = argv[3];
 
   if (!file_is_directory(target)) {
     THROW("") "'%s' is not a directory\n", target _THROW
   }
 
-  Mapos *current_keys = mapos_new();
+  // Map[Arr[Pos]]
+  Map *current_keys = map_new();
   EACH(sources, char, source) {
     extract(current_keys, source);
   }_EACH
@@ -344,7 +345,7 @@ int main (int argc, char **argv) {
   }
 
   char *jstarget = path_cat(target, "src", "I18n.js", NULL);
-  LckFile *lck = file_wopen (jstarget);
+  FileLck *lck = file_wopen (jstarget);
 
   file_write_text(lck,
     "// Generate by jsi18n. Don't modify\n"
@@ -356,7 +357,7 @@ int main (int argc, char **argv) {
 
   EACH(langs, char, lang) {
     char *dic = make_dic(current_keys, lang, target);
-    char *tx = str_printf(
+    char *tx = str_f(
       "const %s = {\n"
 			"%s"
 			"};\n\n",

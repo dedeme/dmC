@@ -203,7 +203,7 @@ char *record_code (void) {
   EACH(fields, struct Field, f)
     arr_push(fnames, f->name);
 
-    buf_add(bf, "   * @param ");
+    buf_add(bf, "      @param ");
     buf_add(bf, field_type(f));
     buf_cadd(bf, ' ');
     buf_add(bf, f->name);
@@ -213,7 +213,7 @@ char *record_code (void) {
     }
     buf_cadd(bf, '\n');
   _EACH
-  buf_add(bf, "   */\n");
+  buf_add(bf, "  **/\n");
   // -------------------------------------------------- HEAD
   buf_add(bf, "  constructor (");
   if (nfields > 4) {
@@ -228,10 +228,10 @@ char *record_code (void) {
   EACH(fields, struct Field, f)
     buf_add(bf, str_cat(
       "\n    /**\n",
-      "     * @private\n",
-      "     * @type ",
+      "        @private\n",
+      "        @type ",
       field_type(f),
-      "\n     */\n    this._",
+      "\n    **/\n    this._",
       f->name,
       " = ",
       f->name,
@@ -246,9 +246,9 @@ char *record_code (void) {
   EACH(fields, struct Field, f)
     char *fn = field_type(f);
     buf_add(bf, str_cat(
-      "\n  /**  @return ",
+      "\n  /**\n      @return ",
       fn,
-      " */\n  get ",
+      "\n  **/\n  get ",
       f->name,
       " () {\n    return this._",
       f->name,
@@ -261,9 +261,9 @@ char *record_code (void) {
       *name = toupper(*name);
       buf_add(bf, str_cat(
         "\n  /**\n",
-        "   * @param ",
+        "      @param ",
         fn,
-        " value\n   * @return void\n   */\n  set",
+        " value\n   * @return void\n  **/\n  set",
         name,
         " (value) {\n    this._",
         f->name,
@@ -278,7 +278,9 @@ char *record_code (void) {
   // ---------------------------------------------------- TO
 
   if (toJs) {
-    buf_add(bf, "\n  /** @return {!Array<?>} */\n  toJs () {\n    return [");
+    buf_add(bf, "\n  /**\n");
+    buf_add(bf, "      @return {!Array<?>}\n");
+    buf_add(bf, "  **/\n  toJs () {\n    return [");
     // Arr[char]
     Arr *fs = arr_new();
     EACH(fields, struct Field, f)
@@ -353,11 +355,11 @@ char *record_code (void) {
   if (fromJs) {
     buf_add(bf, str_cat(
       "\n  /**\n"
-      "   * @param {!Array<?>} serial\n"
-      "   * @return {!",
+      "      @param {!Array<?>} serial\n"
+      "      @return {!",
       cname,
       "}\n"
-      "   */\n"
+      "  **/\n"
       "  static fromJs (serial) {\n"
       "    return new ",
       cname,

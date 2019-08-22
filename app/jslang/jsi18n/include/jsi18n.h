@@ -80,26 +80,6 @@
 #ifndef JSI18N_H
   #define JSI18N_H
 
-typedef struct pos_Pos Pos;
-
-typedef struct apos_Apos Apos;
-typedef struct ipos_Ipos Ipos;
-#define TY Pos
-#define FN pos
-#include "dmc/tpl/tarr.h"
-#undef TY
-#undef FN
-
-typedef struct oapos_Oapos Oapos;
-typedef struct iapos_Iapos Iapos;
-typedef struct mapos_Mapos Mapos;
-#define TY Apos
-#define FN apos
-#include "dmc/tpl/topt.h"
-#include "dmc/tpl/tmap.h"
-#undef TY
-#undef FN
-
 ///
 int main (int argc, char **argv);
 

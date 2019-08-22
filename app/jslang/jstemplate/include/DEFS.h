@@ -1,11 +1,14 @@
 // Copyright 12-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+/// Global definitions.
+
 #ifndef DEFS_H
   #define DEFS_H
 
 #include "dmc/std.h"
 
+///
 enum State {
   CODE0, // Normal code at the beginning
   CODE, // Normal code
@@ -16,6 +19,7 @@ enum State {
   ERROR // An error happened
 };
 
+///
 enum TypeTemplate {
   RECORD // Template type record
 };
