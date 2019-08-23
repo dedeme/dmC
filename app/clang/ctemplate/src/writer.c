@@ -30,6 +30,7 @@ static char *mk_type (char *type) {
   if (str_eq(type, "char*")) return "char *";
   if (str_eq(type, "Iarr")) return "Iarr *";
   if (str_eq(type, "Darr")) return "Darr *";
+  if (str_starts(type, "enum|")) return str_creplace(type, '|', ' ');
   if (str_starts(type, "Opt-")) return "Opt *";
   if (str_starts(type, "Arr-")) return "Arr *";
   if (str_starts(type, "List-")) return "List *";
@@ -59,7 +60,11 @@ static char *mk_to_single (char *type, char *name) {
   if (str_eq(type, "bool")) {
     return str_f("js_wb(%s)", name);
   }
-  if (str_eq(type, "char") || str_eq(type, "int")) {
+  if (
+    str_eq(type, "char") ||
+    str_eq(type, "int") ||
+    str_starts(type, "enum|")
+  ) {
     return str_f("js_wi((int)%s)", name);
   }
   if (
@@ -123,9 +128,10 @@ static char *mk_from_single(char *type) {
   if (str_eq(type, "bool")) {
     return "js_rb(*p++)";
   }
-  if (str_eq(type, "int")) {
+  if (str_eq(type, "int") || str_starts(type, "enum|")) {
     return "js_ri(*p++)";
   }
+
   if (
     str_eq(type, "long") ||
     str_eq(type, "size_t") ||

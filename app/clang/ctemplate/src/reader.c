@@ -140,8 +140,11 @@ static RS *rvariables (Log *log, FileLck *f, RS *rs) {
     Arr *parts = str_csplit_trim(l, ':');
     int parts_sz = arr_size(parts);
     if (parts_sz == 3) { // ----- Ok
+      char *tp = arr_get(parts, 1);
+      if (str_starts(tp, "enum "))
+        tp = str_f("enum|%s", str_ltrim(str_right(tp, 4)));
       char *err = tplVariable_set_name_type_value(
-        var, arr_get(parts, 0), arr_get(parts, 1), arr_get(parts, 2)
+        var, arr_get(parts, 0), tp, arr_get(parts, 2)
       );
       if (!*err) {
         tpl_add_variable(tpl, var);
@@ -222,9 +225,10 @@ static RS *rarguments (Log *log, FileLck *f, RS *rs) {
     Arr *parts = str_csplit_trim(l, ':');
     int parts_sz = arr_size(parts);
     if (parts_sz == 2) { // ----- Ok
-      char *err = tplArgument_set_name_type(
-        ar, arr_get(parts, 0), arr_get(parts, 1)
-      );
+      char *tp = arr_get(parts, 1);
+      if (str_starts(tp, "enum "))
+        tp = str_f("enum|%s", str_ltrim(str_right(tp, 4)));
+      char *err = tplArgument_set_name_type(ar, arr_get(parts, 0), tp);
       if (!*err) {
         tpl_add_argument(tpl, ar);
         continue;
