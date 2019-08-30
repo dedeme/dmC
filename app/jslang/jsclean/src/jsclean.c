@@ -9,6 +9,7 @@
 int main (int argc, char *argv[]) {
   sys_init("jsclean");
 
+  // Kv<Params>. Key != "" is an error.
   Kv *_ps = params_read(argc, argv);
   if (*kv_key(_ps)) {
     puts(kv_key(_ps));
@@ -16,6 +17,7 @@ int main (int argc, char *argv[]) {
   }
   Params *ps = kv_value(_ps);
 
+  // e is a error message
   char *e = io_dir_exists(ps);
   if (*e) {
     puts(e);
@@ -35,16 +37,16 @@ int main (int argc, char *argv[]) {
     return 1;
   }
 
-  // Arr[char]
-  Arr *lint_files = io_filter_lint(paths, params_target(ps));
+  // Arr[Path]
+  Arr *lint_paths = io_filter_lint(paths, params_target(ps));
 
-  e = lint_run(lint_files);
-  if (e) {
+  e = lint_run(lint_paths);
+  if (*e) {
     puts(e);
-    io_write_cache(lint_files);
+    io_write_cache(lint_paths);
   } else {
     io_write_cache(arr_new());
   }
 
-  io_copy_js (paths, params_target(ps));
+  io_copy_js (lint_paths, params_target(ps));
 }

@@ -42,6 +42,7 @@ static char *help = ""
   "jsclean src:lib www\n"
 ;
 
+// Kv <Params>
 Kv *params_read (int argc, char *argv[]) {
   if (argc != 3) {
     return kv_new(

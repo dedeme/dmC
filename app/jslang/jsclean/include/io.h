@@ -18,8 +18,8 @@ Arr *io_all_files (Params *ps);
 /// Arr[Char]. 'paths' is Arr[Path]. It filters files to scan with a lint.
 Arr *io_filter_lint (Arr *paths, char *target);
 
-/// 'files' is Arr[char]
-void io_write_cache (Arr *files);
+/// 'paths' is Arr[Path]
+void io_write_cache (Arr *paths);
 
 /// 'paths' is Arr[Path]
 void io_copy_js (Arr *paths, char *target);

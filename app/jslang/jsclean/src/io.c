@@ -6,9 +6,10 @@
 char *io_dir_exists (Params *ps) {
   char *r = "";
   void fn (char *path) {
-    if (!file_is_directory(path)) {
+    if (!file_is_directory(path))
       r = str_f("'%s' is not a directory", path);
-    }
+    if (*path == '/')
+      r = str_f("'%s' an absolute path", path);
   }
   it_each(it_from(params_roots(ps)), (FPROC)fn);
   return r;
@@ -40,70 +41,83 @@ Arr *io_all_files (Params *ps) {
   return r;
 }
 
+// Arr<Path>. paths is Arr<Path>
 Arr *io_filter_lint (Arr *paths, char *target) {
-  char *cache_path = path_cat(sys_home(), "cache.db", NULL);
-  // Arr[char]
-  Arr *cache_files = file_exists(cache_path)
-    ? arr_from_js((Js *)file_read(cache_path), (FFROM)js_rs)
+  int cut = strlen(target) + 1;
+  // Arr<char>
+  Arr *ts = arr_new();
+  void ts_add (char *dir) {
+    EACH(file_dir(dir), char, f) {
+      char *f2 = path_cat(dir, f, NULL);
+      if (file_is_directory(f2)) {
+        ts_add(f2);
+      } else {
+        if (str_ends(f2, ".js"))
+          arr_push(ts, path_new(f2, str_right(f2, cut)));
+      }
+    }_EACH
+  }
+  ts_add(target);
+
+  EACH(ts, Path, p) {
+    int fn (Path *pth) { return path_eq(p, pth); }
+    if (arr_index(paths, (FPRED)fn) == -1) {
+      file_del(path_absolute(p));
+    }
+  }_EACH
+  EACH(ts, Path, p) {
+    char *f = path_absolute(p);
+    if (file_is_directory(f) && !arr_size(file_dir(f)))
+      file_del(f);
+  }_EACH
+
+  char *cache = path_cat(sys_home(), "cache.db", NULL);
+  // Arr[Path]
+  Arr *cache_paths = file_exists(cache)
+    ? arr_from_js((Js *)file_read(cache), (FFROM)path_from_js)
     : arr_new()
   ;
-  // Arr[char]
-  Arr *target_files = arr_new();
-  void ftarget_files (char *dir) {
-    EACH(file_dir(dir), char, name) {
-      char *file = path_cat(dir, name, NULL);
-      if (file_is_directory(file)) {
-        ftarget_files(file);
-      } else {
-        arr_push(target_files, file);
-      }
-    }_EACH
-  }
-  if (file_is_directory(target)) {
-    ftarget_files(target);
-  }
 
-  int filter_cache (char *f) {
-    EACH(paths, Path, p) {
-      if (str_eq(path_absolute(p), f)) {
-        return 1;
-      }
-    }_EACH
-    return 0;
-  }
-
-  int filter_js (Path *p) {
-    char *target_file = path_cat(target, path_relative(p), NULL);
-    return file_exists(target_file)
-      ? file_modified(path_absolute(p)) > file_modified(target_file)
-      : 1
-    ;
-  }
-
-  // Arr[char]
-  Arr *tmpr = it_to(it_cat(
-    it_filter(it_from(cache_files), (FPRED)filter_cache),
-    it_map(it_filter(it_from(paths), (FPRED)filter_js), (FCOPY)path_absolute)
-  ));
-
-  return tp_e2(arr_duplicates(tmpr, (FCMP)str_eq));
-}
-
-// 'files' is Arr[char]
-void io_write_cache (Arr *files) {
-  char *cache_path = path_cat(sys_home(), "cache.db", NULL);
-  file_write(cache_path, (char *)arr_to_js(files, (FTO)js_ws));
-}
-
-void io_copy_js (Arr *paths, char *target) {
-  file_del(target);
-  file_mkdir(target);
+  // Arr<Path>
+  Arr *r = arr_new();
+  EACH(cache_paths, Path, cp) {
+    int fn (Path *p) { return path_eq(cp, p); }
+    if (arr_index(paths, (FPRED)fn) != -1)
+      arr_push(r, cp);
+  }_EACH
 
   EACH(paths, Path, p) {
-    char *t = path_cat(target, path_relative(p), NULL);
-    if (!file_exists(path_parent(t))) {
-      file_mkdir(path_parent(t));
-    }
-    file_copy(path_absolute(p), t);
+    int fn (Path *pth) { return path_eq(pth, p); }
+    if (arr_index(r, (FPRED)fn) != -1)
+      continue;
+
+    int add = 1;
+    EACH(ts, Path, pt) {
+      if (
+        str_eq(path_relative(pt), path_relative(p)) &&
+        file_modified(path_absolute(p)) < file_modified(path_absolute(pt))
+      ) {
+        add = 0;
+        break;
+      }
+    }_EACH
+    if (add) arr_push(r, p);
+  }_EACH
+
+  return r;
+}
+
+// 'paths' is Arr[Path]
+void io_write_cache (Arr *paths) {
+  char *cache_path = path_cat(sys_home(), "cache.db", NULL);
+  file_write(cache_path, (char *)arr_to_js(paths, (FTO)path_to_js));
+}
+
+// 'paths' is Arr<Path>
+void io_copy_js (Arr *paths, char *target) {
+  EACH(paths, Path, p) {
+    char *ft = path_cat(target, path_relative(p), NULL);
+    file_mkdir(path_parent(ft));
+    file_copy(path_absolute(p), ft);
   }_EACH
 }

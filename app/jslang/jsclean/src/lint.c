@@ -2,14 +2,19 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "lint.h"
+#include "data/Path.h"
 
-// files is Arr[char]
-char *lint_run(Arr *files) {
-  if (arr_size(files) == 0) {
+// files is Arr[Path]
+char *lint_run(Arr *paths) {
+  if (arr_size(paths) == 0) {
     return "";
   }
 
-  char *params = str_cjoin(files, ' ');
+  char *fn (Path *p) { return path_absolute(p); }
+  char *params = str_cjoin(
+    arr_map(paths, (FCOPY)fn),
+    ' '
+  );
   // Opt[char]
   return opt_oget(
     sys_cmd(str_f("eslint %s", params)),

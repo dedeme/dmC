@@ -6,7 +6,7 @@
 
 #include "dmc/std.h"
 
-/// Returns lint errors or "". 'files' is Arr[char]
-char *lint_run(Arr *files);
+/// Returns lint errors or "". 'paths' is Arr[Path]
+char *lint_run(Arr *paths);
 
 #endif
