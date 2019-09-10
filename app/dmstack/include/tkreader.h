@@ -6,7 +6,7 @@
 #ifndef TKREADER_H
   #define TKREADER_H
 
-#include "dmc/std.h"
+#include "dmc/async.h"
 #include "Reader.h"
 
 /// Returns Opt<Token> - Reads one token from machine_prg(). If there are no

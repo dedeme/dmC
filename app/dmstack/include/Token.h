@@ -6,7 +6,8 @@
 #ifndef TOKEN_H
   #define TOKEN_H
 
-#include "dmc/std.h"
+#include "dmc/async.h"
+#include "Symbol.h"
 
 ///
 enum token_Type {
@@ -32,7 +33,7 @@ Token *token_new_blob (int length);
 Token *token_new_list (Arr *value);
 
 ///
-Token *token_new_symbol (char *value);
+Token *token_new_symbol (Symbol *value);
 
 ///
 enum token_Type token_type (Token *this);
@@ -53,7 +54,13 @@ Bytes *token_blob (Token *this);
 Arr *token_list (Token *this);
 
 ///
-char *token_symbol (Token *this);
+Symbol *token_symbol (Token *this);
+
+/// Returns a new token equals to 'this'
+Token *token_clone (Token *this);
+
+///
+int token_eq (Token *this, Token *other);
 
 ///
 char *token_to_str (Token *this);

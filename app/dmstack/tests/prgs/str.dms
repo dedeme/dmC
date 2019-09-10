@@ -1,0 +1,236 @@
+// Copyright 07-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// String tests
+
+"str" import
+
+// starts-ends
+
+"ab" "" str.starts assert
+"" "" str.starts assert
+"ab" "a" str.starts assert
+"ab" "ab" str.starts assert
+"" "b" str.starts ! assert
+"ab" "b" str.starts ! assert
+"ab" "abc" str.starts ! assert
+
+"ab" "" str.ends assert
+"" "" str.ends assert
+"ab" "a" str.ends ! assert
+"ab" "ab" str.ends assert
+"" "b" str.ends ! assert
+"ab" "b" str.ends assert
+"ab" "cba" str.ends ! assert
+
+// index - lastIndex
+
+"ab" "a" str.index 0 == assert
+"" "a" str.index -1 == assert
+"ab" "b" str.index 1 == assert
+"ab" "c" str.index -1 == assert
+"ab" "" str.index 0 == assert
+"" "" str.index 0 == assert
+"ab" "abc" str.index -1 == assert
+"abcd" "bc" str.index 1 == assert
+"abcd" "bcd" str.index 1 == assert
+"abcd" "d" str.index 3 == assert
+"abcd" "d" 0 str.indexFrom 3 == assert
+"abcd" "d" 2 str.indexFrom 3 == assert
+"abcde" "d" 4 str.indexFrom -1 == assert
+"abcd" "ad" str.index -1 == assert
+
+"ab" "a" str.lastIndex 0 == assert
+"abac" "a" str.lastIndex 2 == assert
+"" "a" str.lastIndex -1 == assert
+"ab" "b" str.lastIndex 1 == assert
+"abdb" "b" str.lastIndex 3 == assert
+"ab" "c" str.lastIndex -1 == assert
+"ab" "" str.lastIndex 0 == assert
+"" "" str.lastIndex 0 == assert
+"ab" "abc" str.lastIndex -1 == assert
+"abcd" "bc" str.lastIndex 1 == assert
+"abcdbc" "bc" str.lastIndex 4 == assert
+"abcd" "bcd" str.lastIndex 1 == assert
+"abcd" "d" str.lastIndex 3 == assert
+"abcddd" "d" str.lastIndex 5 == assert
+"abcd" "ad" str.lastIndex -1 == assert
+
+// sub - left - right
+
+"ab" 1 left r =
+"a" r == assert
+r "b" + -2 -1 sub r #
+"a" r == assert
+r "b" + 0 0 sub r #
+"" r == assert
+r "ab" + -1 0 sub r #
+"" r == assert
+r "ab" + 2 2 sub r #
+"" r == assert
+r "ab" + 0 2 sub r #
+"ab" r == assert
+r 1 2 sub r #
+"b" r == assert
+r 1 right r #
+"" r == assert
+r "ab" + 0 right r #
+"ab" r == assert
+r -1 right r #
+"b" r == assert
+"" 0 left "" == assert
+"abc" 0 left "" == assert
+"abc" 1 left "a" == assert
+"abc" 3 left "abc" == assert
+"" 0 right "" == assert
+"abc" 0 right "abc" == assert
+"abc" 1 right "bc" == assert
+"abc" 3 right "" == assert
+
+// trim - ltrim - rtrim
+
+"" str.trim "" == assert
+" " str.trim "" == assert
+"   " str.trim "" == assert
+" a" str.trim "a" == assert
+"a " str.trim "a" == assert
+" a " str.trim "a" == assert
+" a   " str.trim "a" == assert
+"   a " str.trim "a" == assert
+"   a   " str.trim "a" == assert
+"ab c" str.trim "ab c" == assert
+" ab c" str.trim "ab c" == assert
+"ab c " str.trim "ab c" == assert
+" ab c " str.trim "ab c" == assert
+"   ab c " str.trim "ab c" == assert
+" ab c   " str.trim "ab c" == assert
+"    ab c   " str.trim "ab c" == assert
+"" str.ltrim "" == assert
+" " str.ltrim "" == assert
+"   " str.ltrim "" == assert
+" a" str.ltrim "a" == assert
+"a " str.ltrim "a " == assert
+" a " str.ltrim "a " == assert
+" a   " str.ltrim "a   " == assert
+"   a " str.ltrim "a " == assert
+"   a   " str.ltrim "a   " == assert
+"ab c" str.ltrim "ab c" == assert
+" ab c" str.ltrim "ab c" == assert
+"ab c " str.ltrim "ab c " == assert
+" ab c " str.ltrim "ab c " == assert
+"   ab c " str.ltrim "ab c " == assert
+" ab c   " str.ltrim "ab c   " == assert
+"    ab c   " str.ltrim "ab c   " == assert
+"" str.rtrim "" == assert
+" " str.rtrim "" == assert
+"   " str.rtrim "" == assert
+" a" str.rtrim " a" == assert
+"a " str.rtrim "a" == assert
+" a " str.rtrim " a" == assert
+" a   " str.rtrim " a" == assert
+"   a " str.rtrim "   a" == assert
+"   a   " str.rtrim "   a" == assert
+"ab c" str.rtrim "ab c" == assert
+" ab c" str.rtrim " ab c" == assert
+"ab c " str.rtrim "ab c" == assert
+" ab c " str.rtrim " ab c" == assert
+"   ab c " str.rtrim "   ab c" == assert
+" ab c   " str.rtrim " ab c" == assert
+"    ab c   " str.rtrim "    ab c" == assert
+
+// split - splitTrim - join
+
+"" ";" str.split ";" str.join "" == assert
+";" ";" str.split ";" str.join "" == assert
+"ab" ";" str.split ";" str.join "ab" == assert
+"ab;" ";" str.split ";" str.join "ab" == assert
+"ab;c;de" ";" str.split ";" str.join "ab;c;de" == assert
+";--" ";--" str.split ";--" str.join "" == assert
+"ab;--" ";--" str.split ";--" str.join "ab" == assert
+"ab;--" ";--" str.split ";--" str.join "ab" == assert
+"ab;--c;--de" ";--" str.split ";--" str.join "ab;--c;--de" == assert
+"ab ;--  c \t ;--  de" ";--" str.split ";--" str.join
+  "ab ;--  c \t ;--  de" == assert
+"" ";" str.splitTrim ";" str.join "" == assert
+";" ";" str.splitTrim ";" str.join "" == assert
+"ab" ";" str.splitTrim ";" str.join "ab" == assert
+"ab;" ";" str.splitTrim ";" str.join "ab" == assert
+"ab;c;de" ";" str.splitTrim ";" str.join "ab;c;de" == assert
+";--" ";--" str.splitTrim ";--" str.join "" == assert
+"ab;--" ";--" str.splitTrim ";--" str.join "ab" == assert
+"ab;--" ";--" str.splitTrim ";--" str.join "ab" == assert
+"ab;--c;--de" ";--" str.splitTrim ";--" str.join "ab;--c;--de" == assert
+"ab ;--  c \t ;--  de" ";--" str.splitTrim ";--" str.join
+  "ab;--c;--de" == assert
+
+// replace
+
+"" "." "" str.replace "" == assert
+"." "." "" str.replace "" == assert
+"f.j" "." "" str.replace "fj" == assert
+"f.j." "." "" str.replace "fj" == assert
+"" "." "," str.replace "" == assert
+"." "." "," str.replace "," == assert
+"f.j" "." "," str.replace "f,j" == assert
+"f.j." "." "," str.replace "f,j," == assert
+"" ".." "---" str.replace "" == assert
+".." ".." "---" str.replace "---" == assert
+"f..j" ".." "---" str.replace "f---j" == assert
+"f.j.." ".." "---" str.replace "f.j---" == assert
+
+// utf8
+
+"" str.runes 0 == assert
+"a" str.runes 1 == assert
+"\n" str.runes 1 == assert
+"ú" str.runes 1 == assert
+"ñ" str.runes 1 == assert
+"€" str.runes 1 == assert
+"a b" str.runes 3 == assert
+"a\nb" str.runes 3 == assert
+"añb" str.runes 3 == assert
+"a€b" str.runes 3 == assert
+" a\tb €\n" str.runes 7 == assert
+"cañón | a\tb €\n" u8source =
+"" u8target =
+(u8source str.nextRune u8target stk.swap + u8target # u8source #)
+(u8source size 0 >)
+while
+u8target "cañón | a\tb €\n" == assert
+
+"" str.toUnicode str.fromUnicode "" == assert
+"a" str.toUnicode str.fromUnicode "a" == assert
+"\n" str.toUnicode str.fromUnicode "\n" == assert
+"ú" str.toUnicode str.fromUnicode "ú" == assert
+"ñ" str.toUnicode str.fromUnicode "ñ" == assert
+"€" str.toUnicode str.fromUnicode "€" == assert
+"a b" str.toUnicode str.fromUnicode "a b" == assert
+"a\nb" str.toUnicode str.fromUnicode "a\nb" == assert
+"añb" str.toUnicode str.fromUnicode "añb" == assert
+"a€b" str.toUnicode str.fromUnicode "a€b" == assert
+" a\tb €\n" str.toUnicode str.fromUnicode " a\tb €\n" == assert
+"cañón | a\tb €\n¶" str.toUnicode str.fromUnicode "cañón | a\tb €\n¶"
+  == assert
+
+"" str.fromIso "" == assert
+"a" str.fromIso "a" == assert
+"!!" str.fromIso "!!" == assert
+"ñ" str.fromIso "ñ" != assert
+
+"cañón" str.toUpper "CAÑÓN" != assert
+"é" "f" > assert
+"é" "f" str.cmp 0 < ! assert
+"é" "f" str.greater assert
+"es_ES.utf8" str.locale
+"cañón" str.toUpper "CAÑÓN" == assert
+"CAÑÓN" str.toLower "cañón" == assert
+"é" "f" > assert
+"é" "f" str.cmp 0 < assert
+"é" "f" str.greater ! assert
+"C" str.locale
+"CAÑÓN" str.toLower "cañón" != assert
+"é" "f" > assert
+"é" "f" str.cmp 0 < ! assert
+"é" "f" str.greater assert
+
+stk.empty? assert

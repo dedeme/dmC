@@ -10,6 +10,7 @@ struct reader_Reader {
   int nline;
   char *prg;
   int prg_ix;
+  Token *next_tk;
 };
 
 Reader *reader_new (char *source, char *prg, int nline, int prg_ix) {
@@ -18,6 +19,7 @@ Reader *reader_new (char *source, char *prg, int nline, int prg_ix) {
   this->nline = nline;
   this->prg = prg;
   this->prg_ix = prg_ix;
+  this->next_tk = NULL;
   return this;
 }
 
@@ -40,6 +42,14 @@ char *reader_prg (Reader *this) {
   return this->prg;
 }
 
+Token *reader_next_tk (Reader *this) {
+  return this->next_tk;
+}
+
+void reader_set_next_tk (Reader *this, Token *tk) {
+  this->next_tk = tk;
+}
+
 int reader_prg_ix (Reader *this) {
   return this->prg_ix;
 }
@@ -57,9 +67,6 @@ void reader_set_nline (Reader *this, int value) {
 }
 
 void reader_fail (Reader *this, char *msg) {
-  THROW(ST_EXC) str_f("%s:%d: %s", this->source, this->nline, msg) _THROW
-}
-
-void reader_fail_resend (Reader *this, char *msg) {
-  THROW(ST_EXC) str_f("%s: from %s:%d", msg, this->source, this->nline) _THROW
+  printf("%s:%d: %s\n", this->source, this->nline, msg);
+  exit(1);
 }

@@ -6,7 +6,7 @@
 #ifndef DMSTACK_H
   #define DMSTACK_H
 
-#include "dmc/std.h"
+#include "dmc/async.h"
 
 ///
 int main (int argc, char *argv[]);

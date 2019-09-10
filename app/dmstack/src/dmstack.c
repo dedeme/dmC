@@ -4,14 +4,18 @@
 /// Process starter.
 
 #include "dmstack.h"
-#include "main.h"
+#include "dmc/rnd.h"
 #include "primitives.h"
 #include "Reader.h"
 #include "Machine.h"
+#include "fails.h"
+#include "DEFS.h"
 
 int main (int argc, char *argv[]) {
   exc_init();
+  rnd_init();
   primitives_init();
+  fails_init();
 
   if (argc != 2) {
     EXC_RANGE(argc, 2, 2);
@@ -24,6 +28,8 @@ int main (int argc, char *argv[]) {
   }
 
   Reader *r = reader_new(f, file_read(f), 1, 0);
-  machine_process(list_new(), reader_process(r));
-
+  machine_process(
+    str_left(f, -4), list_cons(list_new(), machine_new_root()),
+    reader_process(r)
+  );
 }

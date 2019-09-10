@@ -116,6 +116,7 @@ void io_write_cache (Arr *paths) {
 // 'paths' is Arr<Path>
 void io_copy_js (Arr *paths, char *target) {
   EACH(paths, Path, p) {
+    puts(path_relative(p));
     char *ft = path_cat(target, path_relative(p), NULL);
     file_mkdir(path_parent(ft));
     file_copy(path_absolute(p), ft);

@@ -9,6 +9,7 @@ union token_Value {
   char *s;
   Bytes *bs;
   Arr *a; // Arr<Token>
+  Symbol *sym;
 };
 
 struct token_Token {
@@ -45,8 +46,7 @@ Token *token_new_string (char *value) {
 
 Token *token_new_blob (int length) {
   union token_Value *v = MALLOC(union token_Value);
-  unsigned char *bs = ATOMIC(length);
-  v->bs = bytes_from_bytes(bs, length);
+  v->bs = bytes_bf_new(length);
   Token *this = MALLOC(Token);
   this->type = token_BLOB;
   this->value = v;
@@ -63,9 +63,9 @@ Token *token_new_list (Arr *value) {
   return this;
 }
 
-Token *token_new_symbol (char *value) {
+Token *token_new_symbol (Symbol *value) {
   union token_Value *v = MALLOC(union token_Value);
-  v->s = value;
+  v->sym = value;
   Token *this = MALLOC(Token);
   this->type = token_SYMBOL;
   this->value = v;
@@ -97,8 +97,71 @@ Arr *token_list (Token *this) {
   return this->value->a;
 }
 
-char *token_symbol (Token *this) {
-  return this->value->s;
+Symbol *token_symbol (Token *this) {
+  return this->value->sym;
+}
+
+Token *token_clone (Token *this) {
+  switch (this->type) {
+    case token_INT: return token_new_int(this->value->i);
+    case token_FLOAT: return token_new_float(this->value->f);
+    case token_STRING: return token_new_string(str_new(this->value->s));
+    case token_SYMBOL: return token_new_symbol(symbol_clone(this->value->sym));
+    case token_BLOB: {
+      int len = bytes_len(this->value->bs);
+      Token *r = token_new_blob(len);
+      memcpy(bytes_bs(r->value->bs), bytes_bs(this->value->bs), len);
+      return r;
+    }
+    case token_LIST: {
+      int size = arr_size(this->value->a);
+      Token **r = GC_MALLOC(size * sizeof(Token *));
+      Token **source = (Token **)arr_start(this->value->a);
+      Token **target = r;
+      int sz = size;
+      while (sz--)
+        *target++ = token_clone(*source++);
+      return token_new_list(arr_new_c(size, (void **)r));
+    }
+  }
+  EXC_ILLEGAL_STATE("switch not exhaustive");
+  return NULL; // not reachable.
+}
+
+int token_eq (Token *this, Token *other) {
+  int bseq (Bytes *bs1, Bytes *bs2) {
+    int len = bytes_len(bs1);
+    if (len != bytes_len(bs2)) return 0;
+    unsigned char *b1 = bytes_bs(bs1);
+    unsigned char *b2 = bytes_bs(bs2);
+    unsigned char *end = b1 + len;
+    while (b1 < end)
+      if (*b1++ != *b2++) return 0;
+    return 1;
+  }
+  // a1 and a2 are Arr<Token>
+  int arreq (Arr *a1, Arr *a2) {
+    int size = arr_size(a1);
+    if (size != arr_size(a2)) return 0;
+    Token **ts1 = (Token **)arr_start(a1);
+    Token **ts2 = (Token **)arr_start(a2);
+    Token **end = ts1 + size;
+    while (ts1 < end)
+      if (!token_eq(*ts1++, *ts2++)) return 0;
+    return 1;
+  }
+
+  enum token_Type t = token_type(this);
+  if (t != token_type(other)) return 0;
+
+  return
+    t == token_INT ? this->value->i == other->value->i
+    : t == token_FLOAT ? this->value->f == other->value->f
+    : t == token_STRING ? str_eq(this->value->s, other->value->s)
+    : t == token_SYMBOL ? symbol_eq(this->value->sym, other->value->sym)
+    : t == token_BLOB ? bseq(this->value->bs, other->value->bs)
+    : arreq(this->value->a, other->value->a);
+  ;
 }
 
 char *token_to_str (Token *this) {
@@ -106,7 +169,7 @@ char *token_to_str (Token *this) {
     case token_INT: return (char *)js_wi(this->value->i);
     case token_FLOAT: return (char *)js_wd(this->value->f);
     case token_STRING: return (char *)js_ws(this->value->s);
-    case token_SYMBOL: return this->value->s;
+    case token_SYMBOL: return symbol_to_str(this->value->sym);
     case token_BLOB: return str_f("blob(%d)", bytes_len(this->value->bs));
     case token_LIST: {
       // Arr<char>
@@ -134,3 +197,5 @@ char *token_type_to_str (enum token_Type type) {
   EXC_ILLEGAL_STATE("switch not exhaustive");
   return NULL; // not reachable.
 }
+
+

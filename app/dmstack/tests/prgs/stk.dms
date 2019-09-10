@@ -1,0 +1,20 @@
+// Copyright 07-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Stack tests.
+
+3 4 stk.swap 3 == assert 4 == assert
+3 4 stk.pop 3 == assert
+5 stk.dup + 10 == assert
+stk.empty? assert
+nop
+stk.empty? assert
+3 3
+stk.empty? ! assert
+stk.clear
+stk.empty? assert
+
+// 4 5 6 stk.show
+// stk.clear stk.show
+
+stk.empty? assert

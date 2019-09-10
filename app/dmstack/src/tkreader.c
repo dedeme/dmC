@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 static int is_blank (char ch) {
-  return ch <= ' ' || ch == ',' || ch == ':';
+  return ((unsigned char)ch) <= ' ' || ch == ',' || ch == ':' || ch == ';';
 }
 
 static void to_unicode(Buf *bf, char *hexdigits) {
@@ -34,6 +34,11 @@ static void to_unicode(Buf *bf, char *hexdigits) {
 }
 
 Opt *tkreader_next(Reader *reader) {
+  if (reader_next_tk(reader)) {
+    Token *r = reader_next_tk(reader);
+    reader_set_next_tk(reader, NULL);
+    return opt_new(r);
+  }
   int nline = reader_nline(reader);
   int prg_ix = reader_prg_ix(reader);
   char *prg = reader_prg(reader) + prg_ix;
@@ -46,19 +51,58 @@ Opt *tkreader_next(Reader *reader) {
       ch = *++p;
       continue;
     }
+
+    if (ch == '/' && *(p + 1) == '/') {
+      p += 2;
+      ch = *p;
+      while (ch && ch != '\n')
+        ch = *++p;
+      if (ch) {
+        ++nline;
+        ch = *++p;
+      }
+      continue;
+    }
+
+    if (ch == '/' && *(p + 1) == '*') {
+      reader_set_nline(reader, nline);
+      p += 2;
+      ch = *p;
+      while (ch && (ch != '*' || *(p + 1) != '/')) {
+        if (ch == '\n') ++nline;
+        ch = *++p;
+      }
+      if (ch) {
+        ++p;
+        ch = *++p;
+      } else {
+        reader_fail(reader, "Unclosed commentary");
+      }
+      continue;
+    }
+
     break;
   }
+  reader_set_nline(reader, nline);
 
-  char *prgd = p;
+  char *prgd = p; // no blank start.
   if (ch) {
+    // assert ------------------------------------------------------------------
+    if (str_starts(p, "assert")) {
+      reader_set_prg_ix(reader, prg_ix + p - prg + 6);
+      reader_set_next_tk(reader, token_new_symbol(symbol_new("assert")));
+      return opt_new(token_new_string(str_f(
+        "%s:%d", path_name(reader_source(reader)), reader_nline(reader)
+      )));
+    }
+
     // Minus sign --------------------------------------------------------------
     if (ch == '-') {
       ch = *++p;
       if (ch < '0' || ch > '9') {
         if (is_blank(ch)) {
-          reader_set_nline(reader, nline);
           reader_set_prg_ix(reader, prg_ix + p - prg);
-          return opt_new(token_new_symbol("-"));
+          return opt_new(token_new_symbol(symbol_new("-")));
         }
       }
     }
@@ -76,7 +120,6 @@ Opt *tkreader_next(Reader *reader) {
         if (errno) reader_fail(reader, str_f("Float overflow in '%s'", n));
         if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
-        reader_set_nline(reader, nline);
         reader_set_prg_ix(reader, prg_ix + p - prg);
         return opt_new(token_new_float(d));
       }
@@ -87,7 +130,6 @@ Opt *tkreader_next(Reader *reader) {
       if (errno) reader_fail(reader, str_f("Integer overflow in '%s'", n));
       if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
-      reader_set_nline(reader, nline);
       reader_set_prg_ix(reader, prg_ix + p - prg);
       return opt_new(token_new_int(i));
     }
@@ -102,7 +144,7 @@ Opt *tkreader_next(Reader *reader) {
 
       ++p;
       Buf *bf = buf_new();
-      while (*p >= ' ' && *p != '"') {
+      while (((unsigned char)*p) >= ' ' && *p != '"') {
         if (*p == '\\') {
           ++p;
           switch (*p) {
@@ -152,11 +194,11 @@ Opt *tkreader_next(Reader *reader) {
       }
       if (*p != '"') {
         reader_fail(reader, str_f(
-          "String does not end with \" in %s", str_sub(prgd, 0, p - prgd)
+          "String does not end with \" in %s (%d)",
+          str_sub(prgd, 0, p - prgd), (int) *p
         ));
       }
 
-      reader_set_nline(reader, nline);
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
       return opt_new(token_new_string(buf_to_str(bf)));
     }
@@ -191,6 +233,17 @@ Opt *tkreader_next(Reader *reader) {
             --sum2;
             break;
         }
+
+        if (ch == '"') {
+          char ch = *++p;
+          while (ch && ch != '"') {
+            if (ch == '\\' && p[1] == '"') ++p;
+            ch = *++p;
+          }
+          if (!ch) --p;
+          continue;
+        }
+
         char e = ' ';
         if (sum0 < 0) e = '(';
         if (sum1 < 0) e = '[';
@@ -225,6 +278,7 @@ Opt *tkreader_next(Reader *reader) {
         nline,
         0
       );
+
       // Arr<Token>
       Arr *a = arr_new();
       Token *tk = opt_nget(tkreader_next(subr));
@@ -233,16 +287,14 @@ Opt *tkreader_next(Reader *reader) {
         tk = opt_nget(tkreader_next(subr));
       }
 
-      reader_set_nline(reader, nline);
+      reader_set_nline(reader, reader_nline(subr));
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
       return opt_new(token_new_list(a));
     }
 
-
     while (!is_blank(*++p));
-    reader_set_nline(reader, nline);
     reader_set_prg_ix(reader, prg_ix + p - prg);
-    return opt_new(token_new_symbol(str_sub(prgd, 0, p - prgd)));
+    return opt_new(token_new_symbol(symbol_new(str_sub(prgd, 0, p - prgd))));
   }
 
   return opt_empty();

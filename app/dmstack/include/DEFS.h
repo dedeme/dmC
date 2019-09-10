@@ -6,7 +6,7 @@
 #ifndef DEFS_H
   #define DEFS_H
 
-#include "dmc/std.h"
+#include "dmc/async.h"
 
 #define ST_EXC "ST_EXC"
 

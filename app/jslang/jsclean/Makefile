@@ -37,3 +37,4 @@ lib/liblocalcompilation/obj/lint.o : include/lint.h src/lint.c include/data/Path
 	gcc $(CFLAGS) -c src/lint.c -o lib/liblocalcompilation/obj/lint.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
+

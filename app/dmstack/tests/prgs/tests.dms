@@ -1,0 +1,14 @@
+// Copyright 07-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+"./float" import
+"./int" import
+"./logic" import
+"./loop" import
+"./smath" import
+"./stk" import
+"./sys" import
+// "./thread" import
+"./str" import
+"./lst" import
+

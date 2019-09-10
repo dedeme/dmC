@@ -6,7 +6,7 @@
 #ifndef READER_H
   #define READER_H
 
-#include "dmc/std.h"
+#include "dmc/async.h"
 #include "dmc/List.h"
 #include "Token.h"
 
@@ -35,6 +35,13 @@ int reader_prg_ix (Reader *this);
 ///
 void reader_set_prg_ix (Reader *this, int value);
 
+/// Used to pass an extra Tokebn.
+/// Its return can be NULL.
+Token *reader_next_tk (Reader *this);
+
+///
+void reader_set_next_tk (Reader *this, Token *tk);
+
 ///
 int reader_nline (Reader *this);
 
@@ -43,8 +50,5 @@ void reader_set_nline (Reader *this, int value);
 
 ///
 void reader_fail (Reader *this, char *msg);
-
-///
-void reader_fail_resend (Reader *this, char *msg);
 
 #endif

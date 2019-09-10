@@ -4,7 +4,7 @@
 #include "reader_tests.h"
 #include <assert.h>
 #include "tkreader.h"
-#include "main.h"
+#include "dmstack.h"
 
 void reader_tests (void) {
   puts("Reader tests:");

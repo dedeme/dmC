@@ -61,6 +61,8 @@ static void add_dependency (Arr *libs, Arr *os, Buf *bf, char *d) {
 }
 
 int main (int argc, char *argv[]) {
+  exc_init();
+
   if (reader_check_directories()) {
     help();
     return 1;

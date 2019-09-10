@@ -6,6 +6,6 @@
 
 #include "dmc/std.h"
 
-int main ();
+int main (int arc, char *argv[]);
 
 #endif

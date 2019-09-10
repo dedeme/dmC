@@ -1,0 +1,129 @@
+// Copyright 07-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Int tests
+
+// EQUALITY
+// ========
+// Ints
+128 128 == assert
+12 128 != assert
+
+// Floats
+3.15 3.15 == assert
+3.15 3.14 != assert
+
+// Strings
+"" "" == assert
+"" "a" != assert
+"cd" "" != assert
+"abc" "abc" == assert
+"abc" "acc" != assert
+
+// Lists
+() () == assert
+(1) () != assert
+() ("a") != assert
+(1 2 x25) (1 2 x25) == assert
+(1 2 x25) (1 2 x24) != assert
+(1 2 x25) (1 2 x25 3) != assert
+(1 ("a" 3) +) (1 ("a" 3) +) == assert
+{"one": 1, "two": 2} ("one" 1 "two" 2) == assert
+
+// LOGIC OPERATORS
+// ===============
+(&& ==) andEq =
+// And
+1 1 123 andEq assert
+0 0 123 andEq assert
+0 1 0 andEq assert
+0 0 0 andEq assert
+
+(&& ==) orEq =
+// Or
+1 1 123 orEq assert
+0 0 123 orEq assert
+0 1 0 orEq assert
+0 0 0 orEq assert
+
+// Not
+189 ! ! assert
+0 ! assert
+
+
+// CMP OPERATORS
+// =============
+
+// >
+2 2 > ! assert
+1.5 1.5 > ! assert
+2 -4 > assert
+2 1.4 > assert
+-4 2 > ! assert
+1.4 2 > ! assert
+-2.3 -12.35 > assert
+12.0e3 3.0e2 > assert
+0x16 16 > assert
+"" "a" > ! assert
+" " "" > assert
+"a" "ab" > ! assert
+"cdr" "ab" > assert
+" dr" "ab" > ! assert
+"" "" > ! assert
+"abc" "abc" > ! assert
+
+// >=
+2 2 >= assert
+1.5 1.5 >= assert
+2 -4 >= assert
+2 1.4 >= assert
+-4 2 >= ! assert
+1.4 2 >= ! assert
+-2.3 -12.35 >= assert
+12.0e3 3.0e2 >= assert
+0x16 16 >= assert
+"" "a" >= ! assert
+" " "" >= assert
+"a" "ab" >= ! assert
+"cdr" "ab" >= assert
+" dr" "ab" >= ! assert
+"" "" >= assert
+"abc" "abc" >= assert
+
+// <
+2 2 < ! assert
+1.5 1.5 < ! assert
+2 -4 < ! assert
+2 1.4 < ! assert
+-4 2 < assert
+1.4 2 < assert
+-2.3 -12.35 < ! assert
+12.0e3 3.0e2 < ! assert
+0x16 16 < ! assert
+"" "a" < assert
+" " "" < ! assert
+"a" "ab" < assert
+"cdr" "ab" < ! assert
+" dr" "ab" < assert
+"" "" < ! assert
+"abc" "abc" < ! assert
+
+// <=
+2 2 <= assert
+1.5 1.5 <= assert
+2 -4 <= ! assert
+2 1.4 <= ! assert
+-4 2 <= assert
+1.4 2 <= assert
+-2.3 -12.35 <= ! assert
+12.0e3 3.0e2 <= ! assert
+0x16 16 <= ! assert
+"" "a" <= assert
+" " "" <= ! assert
+"a" "ab" <= assert
+"cdr" "ab" <= ! assert
+" dr" "ab" <= assert
+"" "" <= assert
+"abc" "abc" <= assert
+
+stk.empty? assert

@@ -1,0 +1,13 @@
+// Copyright 07-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Thread tests.
+
+((i print 200 sleep) (i (5)) for) thread
+((i print 200 sleep) (i (10)) for) jthread Th1 =
+((i print 200 sleep) (i (10)) for) jthread Th2 =
+
+Th1 join
+Th2 join
+
+stk.empty? assert

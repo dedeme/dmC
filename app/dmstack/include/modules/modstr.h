@@ -1,15 +1,15 @@
-// Copyright 28-Aug-2019 ºDeme
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Sys module
+// String module.
 
-#ifndef MODULES_MODSYS_H
-  #define MODULES_MODSYS_H
+#ifndef MODULES_MODSTR_H
+  #define MODULES_MODSTR_H
 
 #include "dmc/async.h"
 #include "primitives.h"
 
 /// Returns Map<primitives_Fn>
-Map *modsys_mk (void);
+Map *modstr_mk (void);
 
 #endif
