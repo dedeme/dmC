@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modstr.h"
+#include "primitives/modstr.h"
 #include "fails.h"
 #include "Machine.h"
 

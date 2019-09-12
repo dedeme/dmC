@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modint.h"
+#include "primitives/modint.h"
 #include "dmc/rnd.h"
 #include "fails.h"
 #include "Machine.h"

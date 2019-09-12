@@ -6,6 +6,7 @@
 #include "dmstack.h"
 #include "dmc/rnd.h"
 #include "primitives.h"
+#include "modules.h"
 #include "Reader.h"
 #include "Machine.h"
 #include "fails.h"
@@ -15,6 +16,7 @@ int main (int argc, char *argv[]) {
   exc_init();
   rnd_init();
   primitives_init();
+  modules_init();
   fails_init();
 
   if (argc != 2) {

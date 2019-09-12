@@ -1,7 +1,7 @@
 // Copyright 31-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modsys1.h"
+#include "primitives/modsys1.h"
 #include "fails.h"
 
 void modsys1_and (Machine *m) {

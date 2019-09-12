@@ -1,11 +1,11 @@
 // Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modsys.h"
+#include "primitives/modsys.h"
 #include "fails.h"
-#include "modules/modsys0.h"
-#include "modules/modsys1.h"
-#include "modules/modsys2.h"
+#include "primitives/modsys0.h"
+#include "primitives/modsys1.h"
+#include "primitives/modsys2.h"
 #include "Token.h"
 
 static void print (Machine *m) {

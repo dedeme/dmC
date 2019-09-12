@@ -1,4 +1,217 @@
-// Copyright 04-Sept-2019 ºDeme
+// Copyright 25-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Token reader.
+
+#ifndef TKREADER_H
+  #define TKREADER_H
+
+#include "dmc/async.h"
+#include "Reader.h"
+
+/// Returns Opt<Token> - Reads one token from machine_prg(). If there are no
+/// more tokens, returns 'opt_empty()'.
+/// Throw 'ST_EXC' if fails.
+Opt *tkreader_next(Reader *reader);
+
+#endif// Copyright 05-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Variables heap.
+
+#ifndef HEAP_H
+  #define HEAP_H
+
+#include "dmc/async.h"
+#include "Token.h"
+
+///
+typedef struct heap_Entry HeapEntry;
+
+///
+Symbol *heapEntry_symbol (HeapEntry *this);
+
+///
+Token *heapEntry_token (HeapEntry *this);
+
+///
+typedef struct heap_Heap Heap;
+
+///
+Heap *heap_new (void);
+
+/// Adds a new element to 'this'
+void heap_add (Heap *this, Symbol *s, Token *tk);
+
+/// Returns a token o NULL
+Token *heap_get (Heap *this, Symbol *s);
+
+/// Changes 's' and returns '1'. If 's' is not found returns '0'.
+int heap_set (Heap *this, Symbol *s, Token *tk);
+
+/// Removes an element if it exists.
+void heap_remove (Heap *this, Symbol *s);
+
+/// Arr<HeapEntry>
+Arr *heap_entries (Heap *this);
+
+#endif// Copyright 25-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Entry point.
+
+#ifndef DMSTACK_H
+  #define DMSTACK_H
+
+#include "dmc/async.h"
+
+///
+int main (int argc, char *argv[]);
+
+#endif// Copyright 29-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Errors generator.
+
+#ifndef FAILS_H
+  #define FAILS_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+void fails_init (void);
+
+/// Register the machine of current thread.
+void fails_register_machine (Machine *m);
+
+/// Unregister the machine of current thread.
+void fails_unregister_machine (void);
+
+/// Error found an unexpected type.
+///   m    : Machine
+///   types: Expected type.
+void fails_type (Machine *m, enum token_Type type);
+
+/// Error found an unexpected type.
+///   m    : Machine
+///   n    : Number of errors.
+///   types: array of expected types. For example:
+///          (enum token_Type[]){token_INT, token_FLOAT}
+void fails_types (Machine *m, int n, enum token_Type *types);
+
+/// Error in list size.
+void fails_size_list (Machine *m, Arr *list, int expected);
+
+/// Error in field type of list.
+void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected);
+
+/// Error index out of range.
+///   m  : Machine
+///   min: Minimum value of range, inclusive.
+///   max: Maximum value of range, inclusive.
+///   ix : Value out of range.
+void fails_range (Machine *m, int min, int max, int ix);
+
+/// Throws a fails_range if ix < min or ix > max
+///   m  : Machine
+///   min: Minimum value of range, inclusive.
+///   max: Maximum value of range, inclusive.
+///   ix : Value out of range.
+void fails_check_range (Machine *m, int min, int max, int ix);
+
+#endif// Copyright 25-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Token reader.
+
+#ifndef READER_H
+  #define READER_H
+
+#include "dmc/async.h"
+#include "dmc/List.h"
+#include "Token.h"
+
+///
+typedef struct reader_Reader Reader;
+
+/// Creates a new stack machine
+///   source: Program source (file name, *string* or other identifier)
+///   prg   : Program to process.
+///   nline : Current process line.
+///   prg_ix: Current char index of prg. Process will start in this char.
+Reader *reader_new (char *source, char *prg, int nline, int prg_ix);
+
+/// Returns a token type token_LIST.
+Token *reader_process (Reader *this);
+
+///
+char *reader_source (Reader *this);
+
+///
+char *reader_prg (Reader *this);
+
+///
+int reader_prg_ix (Reader *this);
+
+///
+void reader_set_prg_ix (Reader *this, int value);
+
+/// Used to pass an extra Tokebn.
+/// Its return can be NULL.
+Token *reader_next_tk (Reader *this);
+
+///
+void reader_set_next_tk (Reader *this, Token *tk);
+
+///
+int reader_nline (Reader *this);
+
+///
+void reader_set_nline (Reader *this, int value);
+
+///
+void reader_fail (Reader *this, char *msg);
+
+#endif// Copyright 28-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Record of primitive functions
+
+#ifndef PRIMITIVES_H
+  #define PRIMITIVES_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+typedef void (*primitives_Fn) (Machine *m);
+
+///
+void primitives_init (void);
+
+/// Returns Opt<primitives_Fn>
+Opt *primitives_get (char *module, char *id);
+
+/// Returns Opt<Map<Token>> - Functions from a module.
+Opt *primitives_module (char *module);
+
+#endif// Copyright 10-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// It module.
+
+#ifndef MODULES_MODIT_H
+  #define MODULES_MODIT_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modit_mk (void);
+
+
+#endif// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Math module.
@@ -227,204 +440,6 @@ Map *modint_mk (void);
 
 /// Returns Map<primitives_Fn>
 Map *modsys_mk (void);
-
-#endif// Copyright 25-Aug-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Token reader.
-
-#ifndef TKREADER_H
-  #define TKREADER_H
-
-#include "dmc/async.h"
-#include "Reader.h"
-
-/// Returns Opt<Token> - Reads one token from machine_prg(). If there are no
-/// more tokens, returns 'opt_empty()'.
-/// Throw 'ST_EXC' if fails.
-Opt *tkreader_next(Reader *reader);
-
-#endif// Copyright 05-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Variables heap.
-
-#ifndef HEAP_H
-  #define HEAP_H
-
-#include "dmc/async.h"
-#include "Token.h"
-
-///
-typedef struct heap_Entry HeapEntry;
-
-///
-Symbol *heapEntry_symbol (HeapEntry *this);
-
-///
-Token *heapEntry_token (HeapEntry *this);
-
-///
-typedef struct heap_Heap Heap;
-
-///
-Heap *heap_new (void);
-
-/// Adds a new element to 'this'
-void heap_add (Heap *this, Symbol *s, Token *tk);
-
-/// Returns a token o NULL
-Token *heap_get (Heap *this, Symbol *s);
-
-/// Changes 's' and returns '1'. If 's' is not found returns '0'.
-int heap_set (Heap *this, Symbol *s, Token *tk);
-
-/// Removes an element if it exists.
-void heap_remove (Heap *this, Symbol *s);
-
-/// Arr<HeapEntry>
-Arr *heap_entries (Heap *this);
-
-#endif// Copyright 25-Aug-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Entry point.
-
-#ifndef DMSTACK_H
-  #define DMSTACK_H
-
-#include "dmc/async.h"
-
-///
-int main (int argc, char *argv[]);
-
-#endif// Copyright 29-Aug-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Errors generator.
-
-#ifndef FAILS_H
-  #define FAILS_H
-
-#include "dmc/async.h"
-#include "Machine.h"
-
-///
-void fails_init (void);
-
-/// Register the machine of current thread.
-void fails_register_machine (Machine *m);
-
-/// Unregister the machine of current thread.
-void fails_unregister_machine (void);
-
-/// Error found an unexpected type.
-///   m    : Machine
-///   types: Expected type.
-void fails_type (Machine *m, enum token_Type type);
-
-/// Error found an unexpected type.
-///   m    : Machine
-///   n    : Number of errors.
-///   types: array of expected types. For example:
-///          (enum token_Type[]){token_INT, token_FLOAT}
-void fails_types (Machine *m, int n, enum token_Type *types);
-
-/// Error in list size.
-void fails_size_list (Machine *m, Arr *list, int expected);
-
-/// Error in field type of list.
-void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected);
-
-/// Error index out of range.
-///   m  : Machine
-///   min: Minimum value of range, inclusive.
-///   max: Maximum value of range, inclusive.
-///   ix : Value out of range.
-void fails_range (Machine *m, int min, int max, int ix);
-
-/// Throws a fails_range if ix < min or ix > max
-///   m  : Machine
-///   min: Minimum value of range, inclusive.
-///   max: Maximum value of range, inclusive.
-///   ix : Value out of range.
-void fails_check_range (Machine *m, int min, int max, int ix);
-
-#endif// Copyright 25-Aug-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Token reader.
-
-#ifndef READER_H
-  #define READER_H
-
-#include "dmc/async.h"
-#include "dmc/List.h"
-#include "Token.h"
-
-///
-typedef struct reader_Reader Reader;
-
-/// Creates a new stack machine
-///   source: Program source (file name, *string* or other identifier)
-///   prg   : Program to process.
-///   nline : Current process line.
-///   prg_ix: Current char index of prg. Process will start in this char.
-Reader *reader_new (char *source, char *prg, int nline, int prg_ix);
-
-/// Returns a token type token_LIST.
-Token *reader_process (Reader *this);
-
-///
-char *reader_source (Reader *this);
-
-///
-char *reader_prg (Reader *this);
-
-///
-int reader_prg_ix (Reader *this);
-
-///
-void reader_set_prg_ix (Reader *this, int value);
-
-/// Used to pass an extra Tokebn.
-/// Its return can be NULL.
-Token *reader_next_tk (Reader *this);
-
-///
-void reader_set_next_tk (Reader *this, Token *tk);
-
-///
-int reader_nline (Reader *this);
-
-///
-void reader_set_nline (Reader *this, int value);
-
-///
-void reader_fail (Reader *this, char *msg);
-
-#endif// Copyright 28-Aug-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Record of primitive functions
-
-#ifndef PRIMITIVES_H
-  #define PRIMITIVES_H
-
-#include "dmc/async.h"
-#include "Machine.h"
-
-///
-typedef void (*primitives_Fn) (Machine *m);
-
-///
-void primitives_init (void);
-
-/// Returns Opt<primitives_Fn>
-Opt *primitives_get (char *module, char *id);
-
-/// Returns Opt<Map<Token>> - Functions from a module.
-Opt *primitives_module (char *module);
 
 #endif// Copyright 26-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -718,6 +733,12 @@ void arr_sort (Arr *this, int (*greater)(void *e1, void *e2));
 /// arr_shuflle remix 'this' elements. It should be used after calling
 /// rnd_init() or sys_init().
 void arr_shuffle (Arr *this);
+
+/// Returns '1' if every element of 'this' yields '1' with 'pred'.
+int arr_all (Arr *this, int (*pred)(void *e));
+
+/// Returns '1' if some element of 'this' yields '1' with 'pred'.
+int arr_any (Arr *this, int (*pred)(void *e));
 
 /// arr_index returns the index of the first elements which returns 'true'
 /// with 'pred', or -1 if such element does not exist.

@@ -3,208 +3,245 @@
 
 /// List tests
 
-() L0 =
-(23) L1 =
-(1, 2, 3, 4, 5, 6) L2 =
-
-(2 %) odd =
-(odd !) even =
-4 even assert
-5 odd assert
-
-// clear
-
-L0 lst.clear L0 == assert
-L1 lst.clear L0 == assert
-L2 lst.clear L0 == assert
-
-// push - push0 - pop - pop0 - peek - peek0
-
-() 23 lst.push L1 == assert
-(1) 2 lst.push (1, 2) == assert
-(1, 2, 3) 4 lst.push (1, 2, 3, 4) == assert
-() 23 lst.push0 L1 == assert
-(1) 2 lst.push0 (2, 1) == assert
-(1, 2, 3) 4 lst.push0 (4, 1, 2, 3) == assert
-(1) L =
-L lst.pop 1 == assert; L () == assert
-(1, 2, 3) L #
-L lst.pop 3 == assert; L (1, 2) == assert
-(1) L #
-L lst.pop0 1 == assert; L () == assert
-(1, 2, 3) L #
-L lst.pop0 1 == assert; L (2, 3) == assert
-(1) L #
-L lst.peek 1 == assert; L (1) == assert
-(1, 2, 3) L #
-L lst.peek 3 == assert; L (1, 2, 3) == assert
-(1) L #
-L lst.peek0 1 == assert; L (1) == assert
-(1, 2, 3) L #
-L lst.peek0 1 == assert; L (1, 2, 3) == assert
-
-// insert - insertList
-
-() 0 1 lst.insert (1) == assert
-(23) 0 1 lst.insert (1, 23) == assert
-(23) 1 1 lst.insert (23, 1) == assert
-(1, 2, 3) 0 99 lst.insert (99, 1, 2, 3) == assert
-(1, 2, 3) 2 99 lst.insert (1, 2, 99, 3) == assert
-(1, 2, 3) 3 99 lst.insert (1, 2, 3, 99) == assert
-() 0 () lst.insertList () == assert
-(23) 0 () lst.insertList (23) == assert
-(23) 1 () lst.insertList (23) == assert
-(1, 2, 3) 0 () lst.insertList (1, 2, 3) == assert
-(1, 2, 3) 2 () lst.insertList (1, 2, 3) == assert
-(1, 2, 3) 3 () lst.insertList (1, 2, 3) == assert
-() 0 (99) lst.insertList (99) == assert
-(23) 0 (99) lst.insertList (99, 23) == assert
-(23) 1 (99) lst.insertList (23, 99) == assert
-(1, 2, 3) 0 (99) lst.insertList (99, 1, 2, 3) == assert
-(1, 2, 3) 2 (99) lst.insertList (1, 2, 99, 3) == assert
-(1, 2, 3) 3 (99) lst.insertList (1, 2, 3, 99) == assert
-() 0 (77, 88, 99) lst.insertList (77, 88, 99) == assert
-(23) 0 (77, 88, 99) lst.insertList (77, 88, 99, 23) == assert
-(23) 1 (77, 88, 99) lst.insertList (23, 77, 88, 99) == assert
-(1, 2, 3) 0 (77, 88, 99) lst.insertList (77, 88, 99, 1, 2, 3) == assert
-(1, 2, 3) 2 (77, 88, 99) lst.insertList (1, 2, 77, 88, 99, 3) == assert
-(1, 2, 3) 3 (77, 88, 99) lst.insertList (1, 2, 3, 77, 88, 99) == assert
-
-// remove - removeRange
-
-(23) 0 lst.remove () == assert
-(1, 2, 3) 0 lst.remove (2, 3) == assert
-(1, 2, 3) 1 lst.remove (1, 3) == assert
-(1, 2, 3) 2 lst.remove (1, 2) == assert
-(23) 0, 1 lst.removeRange () == assert
-(1, 2, 3) 0, 1 lst.removeRange (2, 3) == assert
-(1, 2, 3) 1, 2 lst.removeRange (1, 3) == assert
-(1, 2, 3) 2, 3 lst.removeRange (1, 2) == assert
-(1, 2, 3) 0, 2 lst.removeRange (3) == assert
-(1, 2, 3) 1, 3 lst.removeRange (1) == assert
-(1, 2, 3) 0, 3 lst.removeRange () == assert
-
-// reverse - shuffle
-
-() lst.reverse () == assert
-(23) lst.reverse (23) == assert
-(1, 2, 3) lst.reverse (3, 2, 1) == assert
-
-() lst.shuffle () == assert
-(23) lst.shuffle (23) == assert
-// (1, 2, 3) lst.shuffle Ls = (Ls i get print) (i, (3)) for
-
-// sort
-
-() (>) lst.sort () == assert
-(23) (>) lst.sort (23) == assert
-(1, 3, 2) (>) lst.sort (1, 2, 3) == assert
-
-// index - indexf
-
-() 23 lst.index -1 == assert
-(23) 23 lst.index 0 == assert
-(1, 2, 3) 23 lst.index -1 == assert
-(1, 2, 3) 1 lst.index 0 == assert
-(1, 2, 3) 2 lst.index 1 == assert
-(1, 2, 3) 3 lst.index 2 == assert
-() (23 ==) lst.indexf -1 == assert
-(23) (23 ==) lst.indexf 0 == assert
-(1, 2, 3) (23 ==) lst.indexf -1 == assert
-(1, 2, 3) (1 ==) lst.indexf 0 == assert
-(1, 2, 3) (2 ==) lst.indexf 1 == assert
-(1, 2, 3) (3 ==) lst.indexf 2 == assert
-
-// find
-
-() (2 %) lst.find () == assert
-(23) (2 %) lst.find (23) == assert
-(1, 2, 3) (2 %) lst.find (1) == assert
-() (2 % !) lst.find () == assert
-(23) (2 % !) lst.find () == assert
-(1, 2, 3) (2 % !) lst.find (2) == assert
-
-// drop - dropf
-
-L0 0 lst.drop L0 == assert
-L1 0 lst.drop L1 == assert
-L2 0 lst.drop L2 == assert
-L0 1 lst.drop L0 == assert
-L1 1 lst.drop L0 == assert
-L2 1 lst.drop (2, 3, 4, 5, 6) == assert
-L0 4 lst.drop L0 == assert
-L1 4 lst.drop L0 == assert
-L2 4 lst.drop (5, 6) == assert
-L0 40 lst.drop L0 == assert
-L1 40 lst.drop L0 == assert
-L2 40 lst.drop L0 == assert
-
-L0 odd:& lst.dropf L0 == assert
-L1 odd:& lst.dropf L0 == assert
-L2 odd:& lst.dropf (2, 3, 4, 5, 6) == assert
-L0 even:& lst.dropf L0 == assert
-L1 even:& lst.dropf L1 == assert
-L2 even:& lst.dropf L2 == assert
-(2, 4, 8, 1) even:& lst.dropf (1) == assert
-(2, 4, 8, 10) even:& lst.dropf () == assert
-
-// filter
-
-L0 odd:& lst.filter L0 == assert
-L1 odd:& lst.filter (23) == assert
-L2 odd:& lst.filter (1, 3, 5) == assert
-L0 even:& lst.filter L0 == assert
-L1 even:& lst.filter L0 == assert
-L2 even:& lst.filter (2, 4, 6) == assert
-(2, 4, 8, 1) even:& lst.filter (2, 4, 8) == assert
-(2, 4, 8, 10) even:& lst.filter (2, 4, 8, 10) == assert
-
-// take - takef
-
-L0 0 lst.take L0 == assert
-L1 0 lst.take L0 == assert
-L2 0 lst.take L0 == assert
-L0 1 lst.take L0 == assert
-L1 1 lst.take L1 == assert
-L2 1 lst.take (1) == assert
-L0 4 lst.take L0 == assert
-L1 4 lst.take L1 == assert
-L2 4 lst.take (1, 2, 3, 4) == assert
-L0 40 lst.take L0 == assert
-L1 40 lst.take L1 == assert
-L2 40 lst.take L2 == assert
-
-L0 odd:& lst.takef L0 == assert
-L1 odd:& lst.takef L1 == assert
-L2 odd:& lst.takef (1) == assert
-L0 even:& lst.takef L0 == assert
-L1 even:& lst.takef L0 == assert
-L2 even:& lst.takef L0 == assert
-(2, 4, 8, 1) even:& lst.takef (2, 4, 8) == assert
-(2, 4, 8, 10) even:& lst.takef (2, 4, 8, 10) == assert
-
-L0 (2 *) lst.map L0 == assert
-L1 (2 *) lst.map (46) == assert
-L2 (2 *) lst.map (2, 4, 6, 8, 10, 12) == assert
-
 (
-  () stk.swap lst.push
-  (
-    0
-    (
-      It =; It 0 get Ls =; It 1 get i =;
-      (())(Ls i get R =; It 1 i ++ set stk.pop;() R lst.push;)(Ls size i >)
-        else if
-    )
-  ) +
-) it.from =
+  () L0 =
+  (23) L1 =
+  (1, 2, 3, 4, 5, 6) L2 =
 
-(stk.dup 2 get run) it.next =
+  (2 %) odd =
+  (odd !) even =
+  4 even assert
+  5 odd assert
 
-(
-  fn =; It =;
-  (It it.next R = (break) (R lst.pop fn) (R size) else if) loop
-) it.each =
+  // new - unary - tp2 - tp3
 
-stk.empty? assert
+  lst.new () == assert
+  "a" lst.unary ("a") == assert
+  1 2 lst.tp (1, 2) == assert
+  "a" 1 "b" lst.tp3 ["a", 1, "b"] == assert
 
+  // clear
+
+  L0 lst.clear L0 == assert
+  L1 lst.clear L0 == assert
+  L2 lst.clear L0 == assert
+
+  // push - push0 - pop - pop0 - peek - peek0
+
+  () 23 lst.push L1 == assert
+  (1) 2 lst.push (1, 2) == assert
+  (1, 2, 3) 4 lst.push (1, 2, 3, 4) == assert
+  () 23 lst.push0 L1 == assert
+  (1) 2 lst.push0 (2, 1) == assert
+  (1, 2, 3) 4 lst.push0 (4, 1, 2, 3) == assert
+  (1) L =
+  L lst.pop 1 == assert; L () == assert
+  (1, 2, 3) L #
+  L lst.pop 3 == assert; L (1, 2) == assert
+  (1) L #
+  L lst.pop0 1 == assert; L () == assert
+  (1, 2, 3) L #
+  L lst.pop0 1 == assert; L (2, 3) == assert
+  (1) L #
+  L lst.peek 1 == assert; L (1) == assert
+  (1, 2, 3) L #
+  L lst.peek 3 == assert; L (1, 2, 3) == assert
+  (1) L #
+  L lst.peek0 1 == assert; L (1) == assert
+  (1, 2, 3) L #
+  L lst.peek0 1 == assert; L (1, 2, 3) == assert
+
+  // insert - insertList
+
+  () 0 1 lst.insert (1) == assert
+  (23) 0 1 lst.insert (1, 23) == assert
+  (23) 1 1 lst.insert (23, 1) == assert
+  (1, 2, 3) 0 99 lst.insert (99, 1, 2, 3) == assert
+  (1, 2, 3) 2 99 lst.insert (1, 2, 99, 3) == assert
+  (1, 2, 3) 3 99 lst.insert (1, 2, 3, 99) == assert
+  () 0 () lst.insertList () == assert
+  (23) 0 () lst.insertList (23) == assert
+  (23) 1 () lst.insertList (23) == assert
+  (1, 2, 3) 0 () lst.insertList (1, 2, 3) == assert
+  (1, 2, 3) 2 () lst.insertList (1, 2, 3) == assert
+  (1, 2, 3) 3 () lst.insertList (1, 2, 3) == assert
+  () 0 (99) lst.insertList (99) == assert
+  (23) 0 (99) lst.insertList (99, 23) == assert
+  (23) 1 (99) lst.insertList (23, 99) == assert
+  (1, 2, 3) 0 (99) lst.insertList (99, 1, 2, 3) == assert
+  (1, 2, 3) 2 (99) lst.insertList (1, 2, 99, 3) == assert
+  (1, 2, 3) 3 (99) lst.insertList (1, 2, 3, 99) == assert
+  () 0 (77, 88, 99) lst.insertList (77, 88, 99) == assert
+  (23) 0 (77, 88, 99) lst.insertList (77, 88, 99, 23) == assert
+  (23) 1 (77, 88, 99) lst.insertList (23, 77, 88, 99) == assert
+  (1, 2, 3) 0 (77, 88, 99) lst.insertList (77, 88, 99, 1, 2, 3) == assert
+  (1, 2, 3) 2 (77, 88, 99) lst.insertList (1, 2, 77, 88, 99, 3) == assert
+  (1, 2, 3) 3 (77, 88, 99) lst.insertList (1, 2, 3, 77, 88, 99) == assert
+
+  // remove - removeRange
+
+  (23) 0 lst.remove () == assert
+  (1, 2, 3) 0 lst.remove (2, 3) == assert
+  (1, 2, 3) 1 lst.remove (1, 3) == assert
+  (1, 2, 3) 2 lst.remove (1, 2) == assert
+  (23) 0, 1 lst.removeRange () == assert
+  (1, 2, 3) 0, 1 lst.removeRange (2, 3) == assert
+  (1, 2, 3) 1, 2 lst.removeRange (1, 3) == assert
+  (1, 2, 3) 2, 3 lst.removeRange (1, 2) == assert
+  (1, 2, 3) 0, 2 lst.removeRange (3) == assert
+  (1, 2, 3) 1, 3 lst.removeRange (1) == assert
+  (1, 2, 3) 0, 3 lst.removeRange () == assert
+
+  // reverse - shuffle
+
+  () lst.reverse () == assert
+  (23) lst.reverse (23) == assert
+  (1, 2, 3) lst.reverse (3, 2, 1) == assert
+
+  () lst.shuffle () == assert
+  (23) lst.shuffle (23) == assert
+  // (1, 2, 3) lst.shuffle Ls = (Ls i get print) (i, (3)) for
+
+  // sort
+
+  () (>) lst.sort () == assert
+  (23) (>) lst.sort (23) == assert
+  (1, 3, 2) (>) lst.sort (1, 2, 3) == assert
+
+  // duplicates
+
+  () (==) lst.duplicates ((), ()) == assert
+  (1, 2, 3) (==) lst.duplicates ((), (1, 2, 3)) == assert
+  (1, 1, 2, 1, 3, 2) (==) lst.duplicates ((1, 2), (1, 2, 3)) == assert
+
+  // any - all
+
+  () (3 <) lst.any ! assert
+  () (3 <) lst.all assert
+  (1, 2) (3 <) lst.any assert
+  (1, 2) (3 <) lst.all assert
+  (1, 5, 2) (3 <) lst.any assert
+  (1, 5, 2) (3 <) lst.all ! assert
+  (5, 6, 7) (3 <) lst.any ! assert
+  (5, 6, 7) (3 <) lst.all ! assert
+
+  // index - indexf
+
+  () 23 lst.index -1 == assert
+  (23) 23 lst.index 0 == assert
+  (1, 2, 3) 23 lst.index -1 == assert
+  (1, 2, 3) 1 lst.index 0 == assert
+  (1, 2, 3) 2 lst.index 1 == assert
+  (1, 2, 3) 3 lst.index 2 == assert
+  () (23 ==) lst.indexf -1 == assert
+  (23) (23 ==) lst.indexf 0 == assert
+  (1, 2, 3) (23 ==) lst.indexf -1 == assert
+  (1, 2, 3) (1 ==) lst.indexf 0 == assert
+  (1, 2, 3) (2 ==) lst.indexf 1 == assert
+  (1, 2, 3) (3 ==) lst.indexf 2 == assert
+
+  // find
+
+  () (2 %) lst.find () == assert
+  (23) (2 %) lst.find (23) == assert
+  (1, 2, 3) (2 %) lst.find (1) == assert
+  () (2 % !) lst.find () == assert
+  (23) (2 % !) lst.find () == assert
+  (1, 2, 3) (2 % !) lst.find (2) == assert
+
+  // reduce
+
+  L0 100 (-) lst.reduce 100 == assert
+  L1 100 (-) lst.reduce 77 == assert
+  L2 100 (-) lst.reduce 79 == assert
+
+  // drop - dropf
+
+  L0 0 lst.drop L0 == assert
+  L1 0 lst.drop L1 == assert
+  L2 0 lst.drop L2 == assert
+  L0 1 lst.drop L0 == assert
+  L1 1 lst.drop L0 == assert
+  L2 1 lst.drop (2, 3, 4, 5, 6) == assert
+  L0 4 lst.drop L0 == assert
+  L1 4 lst.drop L0 == assert
+  L2 4 lst.drop (5, 6) == assert
+  L0 40 lst.drop L0 == assert
+  L1 40 lst.drop L0 == assert
+  L2 40 lst.drop L0 == assert
+
+  L0 odd:& lst.dropf L0 == assert
+  L1 odd:& lst.dropf L0 == assert
+  L2 odd:& lst.dropf (2, 3, 4, 5, 6) == assert
+  L0 even:& lst.dropf L0 == assert
+  L1 even:& lst.dropf L1 == assert
+  L2 even:& lst.dropf L2 == assert
+  (2, 4, 8, 1) even:& lst.dropf (1) == assert
+  (2, 4, 8, 10) even:& lst.dropf () == assert
+
+  // filter
+
+  L0 odd:& lst.filter L0 == assert
+  L1 odd:& lst.filter (23) == assert
+  L2 odd:& lst.filter (1, 3, 5) == assert
+  L0 even:& lst.filter L0 == assert
+  L1 even:& lst.filter L0 == assert
+  L2 even:& lst.filter (2, 4, 6) == assert
+  (2, 4, 8, 1) even:& lst.filter (2, 4, 8) == assert
+  (2, 4, 8, 10) even:& lst.filter (2, 4, 8, 10) == assert
+
+  // take - takef
+
+  L0 0 lst.take L0 == assert
+  L1 0 lst.take L0 == assert
+  L2 0 lst.take L0 == assert
+  L0 1 lst.take L0 == assert
+  L1 1 lst.take L1 == assert
+  L2 1 lst.take (1) == assert
+  L0 4 lst.take L0 == assert
+  L1 4 lst.take L1 == assert
+  L2 4 lst.take (1, 2, 3, 4) == assert
+  L0 40 lst.take L0 == assert
+  L1 40 lst.take L1 == assert
+  L2 40 lst.take L2 == assert
+
+  L0 odd:& lst.takef L0 == assert
+  L1 odd:& lst.takef L1 == assert
+  L2 odd:& lst.takef (1) == assert
+  L0 even:& lst.takef L0 == assert
+  L1 even:& lst.takef L0 == assert
+  L2 even:& lst.takef L0 == assert
+  (2, 4, 8, 1) even:& lst.takef (2, 4, 8) == assert
+  (2, 4, 8, 10) even:& lst.takef (2, 4, 8, 10) == assert
+
+  // map
+
+  L0 (2 *) lst.map L0 == assert
+  L1 (2 *) lst.map (46) == assert
+  L2 (2 *) lst.map (2, 4, 6, 8, 10, 12) == assert
+
+  // zip - zip3
+
+  L0 L0 lst.zip () == assert
+  L0 L1 lst.zip () == assert
+  L0 L2 lst.zip () == assert
+  L1 L0 lst.zip () == assert
+  L1 L1 lst.zip ((23, 23)) == assert
+  L1 L2 lst.zip ((23, 1)) == assert
+  L2 L0 lst.zip () == assert
+  L2 L1 lst.zip ((1, 23)) == assert
+  L2 L2 lst.zip ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6)) == assert
+  L2 L0 L2 lst.zip3 () == assert
+  L2 L1 L2 lst.zip3 ((1, 23, 1)) == assert
+  L2 L2 L2 lst.zip3
+    ((1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5), (6, 6, 6)) == assert
+  () lst.unzip ((), ()) == assert
+  ((1, 3)) lst.unzip ((1), (3)) == assert
+  ((1, "a"), (2, "b")) lst.unzip ((1, 2), ("a", "b")) == assert
+  () lst.unzip3 ((), (), ()) == assert
+  ((1, 3, 5)) lst.unzip3 ((1), (3), (5)) == assert
+  ((1, "a", (1.)), (2, "b", (2.))) lst.unzip3
+    ((1, 2), ("a", "b") ((1.), (2.))) == assert
+
+  stk.empty? assert
+) run

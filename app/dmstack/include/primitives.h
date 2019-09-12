@@ -1,7 +1,7 @@
 // Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Record of primitive functions
+/// Primitives functions,
 
 #ifndef PRIMITIVES_H
   #define PRIMITIVES_H

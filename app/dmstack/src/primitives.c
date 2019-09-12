@@ -2,15 +2,15 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "primitives.h"
-#include "modules/modsys.h"
-#include "modules/modstk.h"
-#include "modules/modblob.h"
-#include "modules/modint.h"
-#include "modules/modfloat.h"
-#include "modules/modmath.h"
-#include "modules/modlist.h"
-#include "modules/modmap.h"
-#include "modules/modstr.h"
+#include "primitives/modsys.h"
+#include "primitives/modstk.h"
+#include "primitives/modblob.h"
+#include "primitives/modint.h"
+#include "primitives/modfloat.h"
+#include "primitives/modmath.h"
+#include "primitives/modlist.h"
+#include "primitives/modmap.h"
+#include "primitives/modstr.h"
 
 /// Map<Map<primitives_Fn>>
 static Map *modules = NULL;

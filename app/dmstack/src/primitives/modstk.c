@@ -1,7 +1,7 @@
 // Copyright 02-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modstk.h"
+#include "primitives/modstk.h"
 #include "fails.h"
 #include "Machine.h"
 

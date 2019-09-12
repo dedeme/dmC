@@ -4,6 +4,7 @@
 #include "Machine.h"
 #include "Reader.h"
 #include "primitives.h"
+#include "modules.h"
 #include "fails.h"
 #include "Heap.h"
 
@@ -57,23 +58,38 @@ Machine *machine_new_root (void) {
   this->prg = token_new_list(arr_new());
   this->ix = 0;
 
-  void load (char *module) {
+  void loadp (char *module) {
     arr_push(this->imports, module);
     EACH(opt_get(primitives_module(module)), Kv, kv) {
       machine_create_var(this, symbol_new(kv_key(kv)), kv_value(kv));
     }_EACH
   }
-  load("sys");
-  load("str");
-  load("lst");
-  load("stk");
-  load("float");
-  load("int");
+  void loadm (char *module) {
+    arr_push(this->imports, module);
+    EACH(opt_get(modules_module(module)), Kv, kv) {
+      machine_create_var(this, symbol_new(kv_key(kv)), kv_value(kv));
+    }_EACH
+  }
+  loadp("sys");
+  loadp("str");
+  loadp("lst");
+  loadp("stk");
+  loadm("it");
+  loadp("float");
+  loadp("int");
 
   return this;
 }
 
 // static ---------------------------------------------------------------------
+
+static void eval (Machine *this) {
+  char *prg = token_string(machine_pop_exc(this, token_STRING));
+  Reader *r = reader_new("[EVAL]", prg, 1, 0);
+  machine_process(
+    "[EVAL]", list_cons(this->pmachines, this), reader_process(r)
+  );
+}
 
 static void run (Machine *this) {
   Token *prg = machine_pop_exc(this, token_LIST);
@@ -93,7 +109,7 @@ static void xrun (Machine *this) {
   char *r = opt_nget(sys_cmd(command));
   if (r)
     machine_push(
-      this, token_new_list(it_to(it_unary(token_new_string(r))))
+      this, token_new_list(arr_new_c(1, (void *[]){token_new_string(r)}))
     );
   else
     machine_push(this, token_new_list(arr_new()));
@@ -350,18 +366,34 @@ static void import (Machine *this) {
     );
 
     EACH(heap_entries(m->heap), HeapEntry, e) {
-      machine_create_var(this, heapEntry_symbol(e), heapEntry_token(e));
+      Symbol *sym = heapEntry_symbol(e);
+      EACHL(list_cons(this->pmachines, this), Machine, m) {
+        if (heap_get(m->heap, sym))
+          machine_fail(m, str_f(
+            "Duplicate symbol '%s' when importing '%s'",
+            symbol_name(sym), source
+          ));
+      }_EACH
+      machine_create_var(this, sym, heapEntry_token(e));
     }_EACH
   } else {
     // Map<Token>
-    Map *fns;
-    fns = opt_nget(primitives_module(source));
-    if (!fns)
-      machine_fail(this, str_f("Memory module '%s' not found", source));
-
-    EACH(fns, Kv, kv) {
-      machine_create_var(this, symbol_new(kv_key(kv)), kv_value(kv));
-    }_EACH
+    Map *fns = opt_nget(primitives_module(source));
+    if (fns) {
+      EACH(fns, Kv, kv) {
+        machine_create_var(this, symbol_new(kv_key(kv)), kv_value(kv));
+      }_EACH
+    } else {
+      // Map<Token>
+      Map *prgs = opt_nget(modules_module(source));
+      if (prgs) {
+        EACH(prgs, Kv, kv) {
+          machine_create_var(this, symbol_new(kv_key(kv)), kv_value(kv));
+        }_EACH
+      } else {
+        machine_fail(this, str_f("Memory module '%s' not found", source));
+      }
+    }
   }
 
   arr_push(this->imports, source);
@@ -510,7 +542,10 @@ Token *machine_get_var (Machine *this, Symbol *id) {
 }
 
 void machine_create_var (Machine *this, Symbol *id, Token *value) {
-  Token *r = heap_get(this->heap, id);
+  Token *r = NULL;
+  EACHL(list_cons(this->pmachines, this), Machine, m) {
+    if ((r = heap_get(m->heap, id))) break;
+  }_EACH
   if (r)
     machine_fail(this, str_f(
       "Duplicate variable '%s' can not be created", symbol_name(id)
@@ -569,6 +604,7 @@ static Machine *cprocess (Machine *m) {
       char *name = symbol_name(symbol);
 
       if (str_eq(name, "nop")) continue;
+      else if (str_eq(name, "eval")) eval(m);
       else if (str_eq(name, "run")) run(m);
       else if (str_eq(name, "mrun")) mrun(m);
       else if (str_eq(name, "xrun")) xrun(m);
@@ -598,7 +634,11 @@ static Machine *cprocess (Machine *m) {
   if (sym) {
     Token *t = machine_get_var(m, sym);
     arr_push(m->stack, t);
-    if (token_type(t) == token_LIST) run(m);
+    char sname = *symbol_name(sym);
+    if (
+      token_type(t) == token_LIST &&
+      (sname > 'Z' || sname < 'A')
+    ) run(m);
   }
 
   fails_unregister_machine();

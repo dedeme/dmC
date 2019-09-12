@@ -1,7 +1,7 @@
 // Copyright 07-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modsys2.h"
+#include "primitives/modsys2.h"
 #include "fails.h"
 
 void modsys2_size (Machine *m) {

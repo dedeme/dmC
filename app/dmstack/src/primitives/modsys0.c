@@ -1,7 +1,7 @@
 // Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "modules/modsys0.h"
+#include "primitives/modsys0.h"
 #include "fails.h"
 
 void modsys0_add (Machine *m) {
@@ -185,14 +185,34 @@ void modsys0_mod (Machine *m) {
   machine_push(m, token_new_int(token_int(tk2) % token_int(tk)));
 }
 
+static void incrdecr (Machine *m, int is_inc) {
+  // Arr<Token>
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  if (arr_size(a) != 1) fails_size_list(m, a, 1);
+  Token *vn = *arr_start(a);
+  if (token_type(vn) == token_SYMBOL) {
+    Symbol *sym = token_symbol(vn);
+    Token *n = machine_get_var(m, sym);
+    if (token_type(n) == token_INT) {
+      machine_set_var(
+        m, sym, token_new_int(token_int(n) + (is_inc ? 1 : -1))
+      );
+      return;
+    }
+    machine_fail(m, str_f(
+      "Expected Int as value of '++' variable, found %s",
+      token_type_to_str(token_type(n))
+    ));
+  }
+  machine_fail(m, str_f(
+    "Expected Symbol in '++' found %s", token_type_to_str(token_type(vn))
+  ));
+}
+
 void modsys0_incr (Machine *m) {
-  machine_push(
-    m, token_new_int(token_int(machine_pop_exc(m, token_INT)) + 1)
-  );
+  incrdecr(m, 1);
 }
 
 void modsys0_decr (Machine *m) {
-  machine_push(
-    m, token_new_int(token_int(machine_pop_exc(m, token_INT)) - 1)
-  );
+  incrdecr(m, 0);
 }
