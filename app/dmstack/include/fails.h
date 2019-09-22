@@ -18,17 +18,34 @@ void fails_register_machine (Machine *m);
 /// Unregister the machine of current thread.
 void fails_unregister_machine (void);
 
+///
+void fails_from_exception (Exc *ex);
+
+/// Error found an unexpected type in stack.
+///   m   : Machine
+///   type: Expected type.
+void fails_type (Machine *m, enum token_Type type);
+
+/// Error found an unexpected type in stack.
+///   m    : Machine
+///   n    : Number of errors.
+///   types: array of expected types. For example:
+///          (enum token_Type[]){token_INT, token_FLOAT}
+void fails_types (Machine *m, int n, enum token_Type *types);
+
 /// Error found an unexpected type.
 ///   m    : Machine
-///   types: Expected type.
-void fails_type (Machine *m, enum token_Type type);
+///   type : Expected type.
+///   token: Failed token.
+void fails_type_in (Machine *m, enum token_Type type, Token *token);
 
 /// Error found an unexpected type.
 ///   m    : Machine
 ///   n    : Number of errors.
 ///   types: array of expected types. For example:
 ///          (enum token_Type[]){token_INT, token_FLOAT}
-void fails_types (Machine *m, int n, enum token_Type *types);
+///   token: Failed token.
+void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token);
 
 /// Error in list size.
 void fails_size_list (Machine *m, Arr *list, int expected);

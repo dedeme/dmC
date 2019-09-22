@@ -1,0 +1,25 @@
+// Copyright 20-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  0 4 long,new L1 =
+  0 11 long,new L2 =
+  L1 L2 long,+ (0, 15) == assert
+  L2 L1 long,- (0, 7) == assert
+  L1 L2 long,* (0, 44) == assert
+  L2 L1 long / (0, 2) == assert
+  L2 L1 long,% (0, 3) == assert
+
+  4 0 long,new L3 =
+  0 4 long,new L4 =
+  L4 L1 == assert
+  L3 L1 != assert
+  L3 L1 long,> assert
+  L3 L1 long,>= assert
+  L4 L1 long,>= assert
+  L1 L3 long,< assert
+  L1 L3 long,<= assert
+  L4 L1 long,<= assert
+
+  empty? assert
+) run

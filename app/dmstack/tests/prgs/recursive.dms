@@ -1,0 +1,66 @@
+// Copyright 15-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Recursive tests
+
+(
+  // "start" print
+
+  ( (pop; pop; 0)
+    else
+    (n =; fn =; n fn:& n 1 - fn +)
+    (dup 0 >)
+    if
+  ) sum =
+  // "Recursive not tail function" print
+  sum:& 6 sum 21 == assert
+
+  ( ( (pop; r =; pop; r)
+      else
+      (n =; r =; fn =; fn:&, r n +, n 1 - : fn)
+      (dup 1 >) if
+    ) sum1 =
+    n =; sum1:&, 1, n : sum1
+  ) sum =
+  // "Recursive tail function" print
+  6 sum 21 == assert
+
+  ( ( (pop; break)
+      else
+      (n =; r =; r n +, n 1 -)
+      (dup 1 >) if
+    ) sum1 =
+    n =; 1 n sum1:& loop
+  ) sum =
+  // "Recursive tail function to loop" print
+  6 sum 21 == assert
+
+  (1 + it,range0 R =; 0 R (+) it,each) sum =
+  // "Range" print
+  6 sum 21 == assert
+
+  (n =; 0 n 1 + (i =; i +) (()) for) sum =
+  // "for" print
+  6  sum 21 == assert
+
+  ( 1 swap
+    ( (pop; break)
+      else
+      (n =; n +; n 1 -)
+      (dup 1 >) if
+    ) loop
+  ) sum =
+  // "loop" print
+  6  sum 21 == assert
+
+
+  ( 1 swap
+    (n =; n +; n 1 -)
+    (dup 1 >) while
+    pop
+  ) sum =
+  // "while" print
+  6  sum 21 == assert
+) run
+
+empty? assert

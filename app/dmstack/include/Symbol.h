@@ -11,11 +11,17 @@
 ///
 typedef struct symbol_Symbol Symbol;
 
-/// Creates a new Symbo with name 'name' and machine and ix with value '-1'.
+/// Creates a new Symbol with an id different to name.
+Symbol *symbol_new_id (char *id, char *name);
+
+/// Creates a new Symbol with equals id and name.
 Symbol *symbol_new (char *name);
 
 /// Returns the name of 'this'
 char *symbol_name (Symbol *this);
+
+/// Returns the id of 'this'
+char *symbol_id (Symbol *this);
 
 /// Returns the symbol hash.
 int symbol_hash (Symbol *this);

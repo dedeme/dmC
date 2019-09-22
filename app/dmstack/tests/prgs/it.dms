@@ -9,174 +9,246 @@
   (1, 2, 3, 4, 5, 6) L2 =
 
   (2 %) odd =
-  (odd !) even =
+
+  (2 % !) even =
   4 even assert
   5 odd assert
 
-  (odd stk.swap odd ==) oddeq =
+  (2 % swap 2 % ==) oddeq =
 
   // empty - unary - from
-  it.empty It0 =
-  It0 it.has ! assert
+  it,empty It0 =
+  It0 it,has? ! assert
 
-  0 it.unary It1 =
-  It1 it.has assert
-  It1 it.has assert
-  It1 it.peek 0 == assert
-  It1 it.next 0 == assert
-  It1 it.has ! assert
+  0 it,unary It1 =
+  It1 it,has? assert
+  It1 it,has? assert
+  It1 it,peek 0 == assert
+  It1 it,next 0 == assert
+  It1 it,has? ! assert
 
-  () it.from ItL0 =
-  ItL0 it.has ! assert
-  (1) it.from ItL1 =
-  ItL1 it.has assert
-  ItL1 it.peek 1 == assert
-  ItL1 it.next 1 == assert
-  ItL1 it.has ! assert
-  (4, "a", ()) it.from ItL =
-  ItL it.has assert
-  ItL it.peek 4 == assert
-  ItL it.next 4 == assert
-  ItL it.has assert
-  ItL it.peek "a" == assert
-  ItL it.next "a" == assert
-  ItL it.has assert
-  ItL it.peek () == assert
-  ItL it.next () == assert
-  ItL it.has ! assert
-  () it.from it.to () == assert
-  (1) it.from it.to (1) == assert
-  (4, "a", ()) it.from it.to (4, "a", ()) == assert
-/*
+  () it,from ItL0 =
+  ItL0 it,has? ! assert
+  (1) it,from ItL1 =
+  ItL1 it,has? assert
+  ItL1 it,peek 1 == assert
+  ItL1 it,next 1 == assert
+  ItL1 it,has? ! assert
+  (4, "a", ()) it,from ItL =
+  ItL it,has? assert
+  ItL it,peek 4 == assert
+  ItL it,next 4 == assert
+  ItL it,has? assert
+  ItL it,peek "a" == assert
+  ItL it,next "a" == assert
+  ItL it,has? assert
+  ItL it,peek () == assert
+  ItL it,next () == assert
+  ItL it,has? ! assert
+  () it,from it,to () == assert
+  (1) it,from it,to (1) == assert
+  (4, "a", ()) it,from it,to (4, "a", ()) == assert
+
+  // range - range0
+
+  4 4 it,range it,to () == assert
+  4 -4 it,range it,to () == assert
+  4 7 it,range it,to (4, 5, 6) == assert
+  -5 -3 it,range it,to (-5, -4) == assert
+
+  0 it,range0 it,to () == assert
+  -7 it,range0 it,to () == assert
+  3 it,range0 it,to (0, 1, 2) == assert
+
   // + - push - push0
 
-  () it.from () it.from it.+ it.to () == assert
-  ("a") it.from () it.from it.+ it.to ("a") == assert
-  () it.from ("b") it.from it.+ it.to ("b") == assert
-  ("a", "b") it.from ("b", "c") it.from it.+ it.to ("a" "b" "b" "c") == assert
+  () it,from () it,from it,+ it,to () == assert
+  ("a") it,from () it,from it,+ it,to ("a") == assert
+  () it,from ("b") it,from it,+ it,to ("b") == assert
+  ("a", "b") it,from ("b", "c") it,from it,+ it,to ("a" "b" "b" "c") == assert
 
-  () it.from "a" it.push it.to ("a") == assert
-  (1, 2) it.from "a" it.push it.to (1, 2, "a") == assert
-  () it.from "a" it.push0 it.to ("a") == assert
-  (1, 2) it.from "a" it.push0 it.to ("a", 1, 2) == assert
+  () it,from "a" it,push it,to ("a") == assert
+  (1, 2) it,from "a" it,push it,to (1, 2, "a") == assert
+  () it,from "a" it,push0 it,to ("a") == assert
+  (1, 2) it,from "a" it,push0 it,to ("a", 1, 2) == assert
 
   // drop - dropf
 
- // L0 it.from 0 it.drop it.to L0 == assert
-  L1 it.from 0 it.drop it.to L1 == assert
-  L2 it.from 0 it.drop it.to L2 == assert
-  L0 it.from 1 it.drop it.to L0 == assert
-  L1 it.from 1 it.drop it.to L0 == assert
-  L2 it.from 1 it.drop it.to (2, 3, 4, 5, 6) == assert
-  L0 it.from 4 it.drop it.to L0 == assert
-  L1 it.from 4 it.drop it.to L0 == assert
-  L2 it.from 4 it.drop it.to (5, 6) == assert
-  L0 it.from 40 it.drop it.to L0 == assert
-  L1 it.from 40 it.drop it.to L0 == assert
-  L2 it.from 40 it.drop it.to L0 == assert
+  L0 it,from 0 it,drop it,to L0 == assert
+  L1 it,from 0 it,drop it,to L1 == assert
+  L2 it,from 0 it,drop it,to L2 == assert
+  L0 it,from 1 it,drop it,to L0 == assert
+  L1 it,from 1 it,drop it,to L0 == assert
+  L2 it,from 1 it,drop it,to (2, 3, 4, 5, 6) == assert
+  L0 it,from 4 it,drop it,to L0 == assert
+  L1 it,from 4 it,drop it,to L0 == assert
+  L2 it,from 4 it,drop it,to (5, 6) == assert
+  L0 it,from 40 it,drop it,to L0 == assert
+  L1 it,from 40 it,drop it,to L0 == assert
+  L2 it,from 40 it,drop it,to L0 == assert
 
-  L0 it.from odd:& it.dropf it.to L0 == assert
-  L1 it.from odd:& it.dropf it.to L0 == assert
-  L2 it.from odd:& it.dropf it.to (2, 3, 4, 5, 6) == assert
-  L0 it.from even:& it.dropf it.to L0 == assert
-  L1 it.from even:& it.dropf it.to L1 == assert
-  L2 it.from even:& it.dropf it.to L2 == assert
-  (2, 4, 8, 1) it.from even:& it.dropf it.to (1) == assert
-  (2, 4, 8, 10) it.from even:& it.dropf it.to () == assert
+  L0 it,from odd:& it,dropf it,to L0 == assert
+  L1 it,from odd:& it,dropf it,to L0 == assert
+  L2 it,from odd:& it,dropf it,to (2, 3, 4, 5, 6) == assert
+  L0 it,from even:& it,dropf it,to L0 == assert
+  L1 it,from even:& it,dropf it,to L1 == assert
+  L2 it,from even:& it,dropf it,to L2 == assert
+  (2, 4, 8, 1) it,from even:& it,dropf it,to (1) == assert
+  (2, 4, 8, 10) it,from even:& it,dropf it,to () == assert
 
   // filter
 
-  L0 it.from odd:& it.filter it.to L0 == assert
-  L1 it.from odd:& it.filter it.to (23) == assert
-  L2 it.from odd:& it.filter it.to (1, 3, 5) == assert
-  L0 it.from even:& it.filter it.to L0 == assert
-  L1 it.from even:& it.filter it.to L0 == assert
-  L2 it.from even:& it.filter  it.to (2, 4, 6) == assert
-  (2, 4, 8, 1) it.from even:& it.filter it.to (2, 4, 8) == assert
-  (2, 4, 8, 10) it.from even:& it.filter it.to (2, 4, 8, 10) == assert
+  L0 it,from odd:& it,filter it,to L0 == assert
+  L1 it,from odd:& it,filter it,to (23) == assert
+  L2 it,from odd:& it,filter it,to (1, 3, 5) == assert
+  L0 it,from even:& it,filter it,to L0 == assert
+  L1 it,from even:& it,filter it,to L0 == assert
+  L2 it,from even:& it,filter  it,to (2, 4, 6) == assert
+  (2, 4, 8, 1) it,from even:& it,filter it,to (2, 4, 8) == assert
+  (2, 4, 8, 10) it,from even:& it,filter it,to (2, 4, 8, 10) == assert
+
+  // map - map2
+
+  L0 it,from (2 *) it,map it,to L0 == assert;
+  L1 it,from (2 *) it,map it,to (46) == assert;
+  L2 it,from (2 *) it,map it,to (2, 4, 6, 8, 10, 12) == assert;
+  L0 it,from (10 +) (2 *) it,map2 it,to L0 == assert;
+  L1 it,from (10 +) (2 *) it,map2 it,to (33) == assert;
+  L2 it,from (10 +) (2 *) it,map2 it,to (11, 4, 6, 8, 10, 12) == assert;
+
+  // take - takef
+
+  L0 it,from 0 it,take it,to L0 == assert
+  L1 it,from 0 it,take it,to L0 == assert
+  L2 it,from 0 it,take it,to L0 == assert
+  L0 it,from 1 it,take it,to L0 == assert
+  L1 it,from 1 it,take it,to L1 == assert
+  L2 it,from 1 it,take it,to (1) == assert
+  L0 it,from 4 it,take it,to L0 == assert
+  L1 it,from 4 it,take it,to L1 == assert
+  L2 it,from 4 it,take it,to (1, 2, 3, 4) == assert
+  L0 it,from 40 it,take it,to L0 == assert
+  L1 it,from 40 it,take it,to L1 == assert
+  L2 it,from 40 it,take it,to L2 == assert
+
+  L0 it,from odd:& it,takef it,to L0 == assert
+  L1 it,from odd:& it,takef it,to L1 == assert
+  L2 it,from odd:& it,takef it,to (1) == assert
+  L0 it,from even:& it,takef it,to L0 == assert
+  L1 it,from even:& it,takef it,to L0 == assert
+  L2 it,from even:& it,takef it,to L0 == assert
+  (2, 4, 8, 1) it,from even:& it,takef it,to (2, 4, 8) == assert
+  (2, 4, 8, 10) it,from even:& it,takef it,to (2, 4, 8, 10) == assert
+
+  // zip - zip3
+
+  () it,from () it,from it,zip it,to () == assert
+  (1, 2) it,from () it,from it,zip it,to () == assert
+  () it,from ("a", "b", "c") it,from it,zip it,to () == assert
+  (1, 2) it,from ("a", "b", "c") it,from it,zip it,to
+    ((1, "a"), (2, "b")) == assert
+
+  () it,from () it,from () it,from it,zip3 it,to () == assert
+  (1, 2, 3) it,from (1, 2) it,from () it,from it,zip3 it,to () == assert
+  (1, 2, 3) it,from () it,from ("a", "b", "c") it,from
+    it,zip3 it,to () == assert
+  (1, 2, 3) it,from (1, 2) it,from ("a", "b", "c") it,from
+    it,zip3 it,to ((1, 1, "a"), (2, 2, "b")) == assert
+
+  // all? - any?
+
+  () it,from (3 <) it,any? ! assert
+  () it,from (3 <) it,all? assert
+  (1, 2) it,from (3 <) it,any? assert
+  (1, 2) it,from (3 <) it,all? assert
+  (1, 5, 2) it,from (3 <) it,any? assert
+  (1, 5, 2) it,from (3 <) it,all? ! assert
+  (5, 6, 7) it,from (3 <) it,any? ! assert
+  (5, 6, 7) it,from (3 <) it,all? ! assert
+
+  // count
+  () it,from it,count 0 == assert
+  (2) it,from it,count 1 == assert
+  ("a", 3, 2) it,from it,count 3 == assert
 
   // duplicates
 
-  () it.from (==) it.duplicates ((), ()) == assert
-  (1, 2, 3) it.from (==) it.duplicates ((), (1, 2, 3)) == assert
-  (1, 1, 2, 1, 3, 2) it.from (==) it.duplicates ((1, 2), (1, 2, 3)) == assert
-
-  // all - any
-
-  () it.from (3 <) it.any ! assert
-  () it.from (3 <) it.all assert
-  (1, 2) it.from (3 <) it.any assert
-  (1, 2) it.from (3 <) it.all assert
-  (1, 5, 2) it.from (3 <) it.any assert
-  (1, 5, 2) it.from (3 <) it.all ! assert
-  (5, 6, 7) it.from (3 <) it.any ! assert
-  (5, 6, 7) it.from (3 <) it.all ! assert
-
-  // count
-  () it.from it.count 0 == assert
-  (2) it.from it.count 1 == assert
-  ("a", 3, 2) it.from it.count 3 == assert
+  () it,from (==) it,duplicates ((), ()) == assert
+  (1, 2, 3) it,from (==) it,duplicates ((), (1, 2, 3)) == assert
+  (1, 1, 2, 1, 3, 2) it,from (==) it,duplicates ((1, 2), (1, 2, 3)) == assert
 
   // each - eachIx
 
-  0 sum =; (1, 2, 3) it.from (sum + sum #) it.each; sum 6 == assert
-  0 sum #; () it.from (sum + sum #) it.each; sum 0 == assert
+  0 (1, 2, 3) it,from (+) it,each; 6 == assert
+  0 () it,from (+) it,each; 0 == assert
 
-  () A =; () it.from (toStr + A stk.swap lst.push stk.pop) it.eachIx
-    A () == assert
-  () A #; ("a") it.from (toStr + A stk.swap lst.push stk.pop) it.eachIx
-    A ("a0") == assert
-  () A #; ("a", "b", "c") it.from (toStr + A stk.swap lst.push stk.pop)
-    it.eachIx; A ("a0", "b1", "c2") == assert
+  () () it,from (i = e =; e i toStr + lst,push) it,eachIx
+    () == assert
+  () ("a") it,from (i = e =; e i toStr + lst,push) it,eachIx
+    ("a0") == assert
+  () ("a", "b", "c") it,from (i = e =; e i toStr + lst,push) it,eachIx
+    ("a0", "b1", "c2") == assert
 
-  // == - eq
+  // == - eq?
 
-  () it.from () it.from it.== assert
-  (1) it.from (1) it.from it.== assert
-  (1, 2, 3) it.from (1, 2, 3) it.from it.== assert
-  () it.from (1) it.from it.!= assert
-  (1, 2, 3) it.from () it.from it.!= assert
-  (1, 2, 3) it.from (1) it.from it.!= assert
+  () it,from () it,from it,== assert
+  (1) it,from (1) it,from it,== assert
+  (1, 2, 3) it,from (1, 2, 3) it,from it,== assert
+  () it,from (1) it,from it,!= assert
+  (1, 2, 3) it,from () it,from it,!= assert
+  (1, 2, 3) it,from (1) it,from it,!= assert
 
-  () it.from () it.from (oddeq) it.eq assert
-  (1) it.from (1) it.from (oddeq) it.eq assert
-  (1, 2, 3) it.from (1, 2, 5) it.from (oddeq) it.eq assert
-  () it.from (1) it.from (oddeq) it.neq assert
-  (1, 2, 3) it.from () it.from (oddeq) it.neq assert
-  (1, 2, 3) it.from (1, 2, 4) it.from (oddeq) it.neq assert
+  () it,from () it,from oddeq:& it,eq? assert
+  (1) it,from (1) it,from oddeq:& it,eq? assert
+  (1, 2, 3) it,from (1, 2, 5) it,from oddeq:& it,eq? assert
+  () it,from (1) it,from oddeq:& it,neq? assert
+  (1, 2, 3) it,from () it,from oddeq:& it,neq? assert
+  (1, 2, 3) it,from (1, 2, 4) it,from oddeq:& it,neq? assert
 
   // find
 
-  () it.from (2 %) it.find () == assert
-  (23) it.from (2 %) it.find (23) == assert
-  (1, 2, 3) it.from (2 %) it.find (1) == assert
-  () it.from (2 % !) it.find () == assert
-  (23) it.from (2 % !) it.find () == assert
-  (1, 2, 3) it.from (2 % !) it.find (2) == assert
+  () it,from (2 %) it,find () == assert
+  (23) it,from (2 %) it,find (23) == assert
+  (1, 2, 3) it,from (2 %) it,find (1) == assert
+  () it,from (2 % !) it,find () == assert
+  (23) it,from (2 % !) it,find () == assert
+  (1, 2, 3) it,from (2 % !) it,find (2) == assert
 
   // index - lastIndex
 
-  () it.from (3 ==) it.index -1 == assert
-  (2) it.from (3 ==) it.index -1 == assert
-  (3) it.from (3 ==) it.index 0 == assert
-  (1, 2, 3) it.from (3 ==) it.index 2 == assert
-  (3, 2, 1) it.from (3 ==) it.index 0 == assert
-  (3, 3, 1) it.from (3 ==) it.index 0 == assert
-  (1, 3, 3) it.from (3 ==) it.index 1 == assert
+  () it,from (3 ==) it,index -1 == assert
+  (2) it,from (3 ==) it,index -1 == assert
+  (3) it,from (3 ==) it,index 0 == assert
+  (1, 2, 3) it,from (3 ==) it,index 2 == assert
+  (3, 2, 1) it,from (3 ==) it,index 0 == assert
+  (3, 3, 1) it,from (3 ==) it,index 0 == assert
+  (1, 3, 3) it,from (3 ==) it,index 1 == assert
 
-  () it.from (3 ==) it.lastIndex -1 == assert
-  (2) it.from (3 ==) it.lastIndex -1 == assert
-  (3) it.from (3 ==) it.lastIndex 0 == assert
-  (1, 2, 3) it.from (3 ==) it.lastIndex 2 == assert
-  (3, 2, 1) it.from (3 ==) it.lastIndex 0 == assert
-  (3, 3, 1) it.from (3 ==) it.lastIndex 1 == assert
-  (1, 3, 3) it.from (3 ==) it.lastIndex 2 == assert
+  () it,from (3 ==) it,lastIndex -1 == assert
+  (2) it,from (3 ==) it,lastIndex -1 == assert
+  (3) it,from (3 ==) it,lastIndex 0 == assert
+  (1, 2, 3) it,from (3 ==) it,lastIndex 2 == assert
+  (3, 2, 1) it,from (3 ==) it,lastIndex 0 == assert
+  (3, 3, 1) it,from (3 ==) it,lastIndex 1 == assert
+  (1, 3, 3) it,from (3 ==) it,lastIndex 2 == assert
 
   // reduce
 
-  () it.from () (lst.push) it.reduce () == assert
-  (1) it.from () (lst.push) it.reduce (1) == assert
-  (4, "a", ()) it.from () (lst.push) it.reduce (4, "a", ()) == assert
-*/
-  stk.empty? assert
+  () it,from () (lst,push) it,reduce () == assert
+  (1) it,from () (lst,push) it,reduce (1) == assert
+  (4, "a", ()) it,from () (lst,push) it,reduce (4, "a", ()) == assert
+
+  // shuffle - reverse - sort
+
+  () it,from it,shuffle it,to () == assert
+  // (3, 5, 6) it,from it,shuffle it,to puts
+  (3, 5, 6) it,from it,reverse it,to (6, 5, 3) == assert
+  (6, 5, 3) it,from (>) it,sort it,to (3, 5, 6) == assert
+
+  // box
+
+  //("a", "b", "c") it,box
+  //  (i =; dup it,next puts) ((5)) for; pop
+
+  empty? assert
 ) run

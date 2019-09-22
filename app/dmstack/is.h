@@ -1,4 +1,33 @@
-// Copyright 25-Aug-2019 ºDeme
+// Copyright 11-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Iterator module.
+
+#ifndef MODULES_MODIT_H
+  #define MODULES_MODIT_H
+
+#include "dmc/async.h"
+
+// Map<Token>
+Map *modit_mk (void);
+
+#endif// Copyright 11-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Momory modules
+
+#ifndef MODULES_H
+  #define MODULES_H
+
+#include "dmc/async.h"
+
+///
+void modules_init (void);
+
+/// Returns Opt<Map<Token>> - Functions from a module.
+Opt *modules_module (char *module);
+
+#endif// Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Token reader.
@@ -46,12 +75,6 @@ void heap_add (Heap *this, Symbol *s, Token *tk);
 /// Returns a token o NULL
 Token *heap_get (Heap *this, Symbol *s);
 
-/// Changes 's' and returns '1'. If 's' is not found returns '0'.
-int heap_set (Heap *this, Symbol *s, Token *tk);
-
-/// Removes an element if it exists.
-void heap_remove (Heap *this, Symbol *s);
-
 /// Arr<HeapEntry>
 Arr *heap_entries (Heap *this);
 
@@ -88,17 +111,34 @@ void fails_register_machine (Machine *m);
 /// Unregister the machine of current thread.
 void fails_unregister_machine (void);
 
+///
+void fails_from_exception (Exc *ex);
+
+/// Error found an unexpected type in stack.
+///   m   : Machine
+///   type: Expected type.
+void fails_type (Machine *m, enum token_Type type);
+
+/// Error found an unexpected type in stack.
+///   m    : Machine
+///   n    : Number of errors.
+///   types: array of expected types. For example:
+///          (enum token_Type[]){token_INT, token_FLOAT}
+void fails_types (Machine *m, int n, enum token_Type *types);
+
 /// Error found an unexpected type.
 ///   m    : Machine
-///   types: Expected type.
-void fails_type (Machine *m, enum token_Type type);
+///   type : Expected type.
+///   token: Failed token.
+void fails_type_in (Machine *m, enum token_Type type, Token *token);
 
 /// Error found an unexpected type.
 ///   m    : Machine
 ///   n    : Number of errors.
 ///   types: array of expected types. For example:
 ///          (enum token_Type[]){token_INT, token_FLOAT}
-void fails_types (Machine *m, int n, enum token_Type *types);
+///   token: Failed token.
+void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token);
 
 /// Error in list size.
 void fails_size_list (Machine *m, Arr *list, int expected);
@@ -176,7 +216,7 @@ void reader_fail (Reader *this, char *msg);
 #endif// Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Record of primitive functions
+/// Primitives functions,
 
 #ifndef PRIMITIVES_H
   #define PRIMITIVES_H
@@ -193,23 +233,54 @@ void primitives_init (void);
 /// Returns Opt<primitives_Fn>
 Opt *primitives_get (char *module, char *id);
 
-/// Returns Opt<Map<Token>> - Functions from a module.
+/// Returns Opt<Map[Token]> - Functions from a module.
 Opt *primitives_module (char *module);
 
-#endif// Copyright 10-Sept-2019 ºDeme
+#endif// Copyright 19-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// It module.
+/// Date-time management.
 
-#ifndef MODULES_MODIT_H
-  #define MODULES_MODIT_H
+#ifndef PRIMITIVES_MODTIME_H
+  #define PRIMITIVES_MODTIME_H
 
 #include "dmc/async.h"
 #include "primitives.h"
 
 /// Returns Map<primitives_Fn>
-Map *modit_mk (void);
+Map *modtime_mk (void);
 
+#endif// Copyright 31-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Logical operations.
+
+#ifndef MODULES_MODGLOBAL1_H
+  #define MODULES_MODGLOBAL1_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+/// Operation &&
+void modglobal1_and (Machine *m);
+
+/// Operation ||
+void modglobal1_or (Machine *m);
+
+/// Operation !
+void modglobal1_not (Machine *m);
+
+/// Operation >
+void modglobal1_greater (Machine *m);
+
+/// Operation >=
+void modglobal1_greater_eq (Machine *m);
+
+/// Operation <
+void modglobal1_less (Machine *m);
+
+/// Operation <=
+void modglobal1_less_eq (Machine *m);
 
 #endif// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -295,109 +366,119 @@ Map *modblob_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modstk_mk (void);
 
-#endif// Copyright 30-Aug-2019 ºDeme
+#endif// Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Module of simple mathematical operations.
+/// Global scope module
 
-#ifndef MODULES_MODSYS0_H
-  #define MODULES_MODSYS0_H
+#ifndef MODULES_MODGLOBAL_H
+  #define MODULES_MODGLOBAL_H
 
 #include "dmc/async.h"
-#include "Machine.h"
+#include "primitives.h"
 
-/// Operation +
-void modsys0_add (Machine *m);
+/// Returns Map<primitives_Fn>
+Map *modglobal_mk (void);
 
-/// Operation -
-void modsys0_sub (Machine *m);
-
-/// Operation *
-void modsys0_mul (Machine *m);
-
-/// Operation /
-void modsys0_div (Machine *m);
-
-/// Operation %
-void modsys0_mod (Machine *m);
-
-/// Increment
-void modsys0_incr (Machine *m);
-
-/// Decrement
-void modsys0_decr (Machine *m);
-
-#endif// Copyright 31-Aug-2019 ºDeme
+#endif// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Logical operations.
+/// Cryptographic module
 
-#ifndef MODULES_MODSYS1_H
-  #define MODULES_MODSYS1_H
+#ifndef PRIMITIVES_MODCRYP_H
+  #define PRIMITIVES_MODCRYP_H
 
 #include "dmc/async.h"
-#include "Machine.h"
+#include "primitives.h"
 
-/// Operation &&
-void modsys1_and (Machine *m);
+/// Returns Map<primitives_Fn>
+Map *modcryp_mk (void);
 
-/// Operation ||
-void modsys1_or (Machine *m);
 
-/// Operation !
-void modsys1_not (Machine *m);
+#endif// Copyright 18-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Operation >
-void modsys1_greater (Machine *m);
+/// B64 module.
+#ifndef PRIMITIVES_MODB64_H
+  #define PRIMITIVES_MODB64_H
 
-/// Operation >=
-void modsys1_greater_eq (Machine *m);
+#include "dmc/async.h"
+#include "primitives.h"
 
-/// Operation <
-void modsys1_less (Machine *m);
+/// Returns Map<primitives_Fn>
+Map *modb64_mk (void);
 
-/// Operation <=
-void modsys1_less_eq (Machine *m);
+#endif// Copyright 17-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Obj module.
+
+#ifndef PRIMITIVES_MODOBJ_H
+  #define PRIMITIVES_MODOBJ_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modobj_mk (void);
+
+#endif// Copyright 17-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+// JSON module.
+
+#ifndef PRIMITIVES_MODJS_H
+  #define PRIMITIVES_MODJS_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modjs_mk (void);
 
 #endif// Copyright 07-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Container operations.
 
-#ifndef MODULES_MODSYS2_H
-  #define MODULES_MODSYS2_H
+#ifndef MODULES_MODGLOBAL2_H
+  #define MODULES_MODGLOBAL2_H
 
 #include "dmc/async.h"
 #include "Machine.h"
 
 /// Resturns container size.
-void modsys2_size (Machine *m);
+void modglobal2_size (Machine *m);
 
 /// Return an element of container and removes the container.
-void modsys2_get (Machine *m);
+void modglobal2_get (Machine *m);
 
 /// Return an element of container and keeps the container.
-void modsys2_getplus (Machine *m);
+void modglobal2_getplus (Machine *m);
 
 /// Sets an element of container and removes the container.
 /// Stack has: container - index - value.
-void modsys2_set (Machine *m);
+void modglobal2_set (Machine *m);
 
-/// Sets an element of container and keeps the container.
-/// Stack has: container - index - value.
-void modsys2_setplus (Machine *m);
+#endif// Copyright 20-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Returns a new subcontainer.
-/// Stack has: container - start - end.
-void modsys2_sub (Machine *m);
+/// Long numbers module.
 
-/// Returns a new subcontainer.
-/// Stack has: container - cut. (container[cut] excluded).
-void modsys2_left (Machine *m);
+#ifndef PRIMITIVES_MODLONG_H
+  #define PRIMITIVES_MODLONG_H
 
-/// Returns a new subcontainer.
-/// Stack has: container - cut. (container[cut] included).
-void modsys2_right (Machine *m);
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modlong_mk (void);
+
+///
+long modlong_to_long (Machine *m, Token *tk);
+
+///
+Token *modlong_from_long (long n);
 
 #endif// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -413,6 +494,52 @@ void modsys2_right (Machine *m);
 /// Returns Map<primitives_Fn>
 Map *modstr_mk (void);
 
+#endif// Copyright 30-Aug-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Module of simple mathematical operations.
+
+#ifndef MODULES_MODGLOBAL0_H
+  #define MODULES_MODGLOBAL0_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+/// Operation +
+void modglobal0_add (Machine *m);
+
+/// Operation -
+void modglobal0_sub (Machine *m);
+
+/// Operation *
+void modglobal0_mul (Machine *m);
+
+/// Operation /
+void modglobal0_div (Machine *m);
+
+/// Operation %
+void modglobal0_mod (Machine *m);
+
+/// Increment
+void modglobal0_incr (Machine *m);
+
+/// Decrement
+void modglobal0_decr (Machine *m);
+
+#endif// Copyright 20-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Clock module.
+
+#ifndef PRIMITIVES_MODCLOCK_H
+  #define PRIMITIVES_MODCLOCK_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modclock_mk (void);
+
 #endif// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -427,19 +554,33 @@ Map *modstr_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modint_mk (void);
 
-#endif// Copyright 28-Aug-2019 ºDeme
+#endif// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Sys module
+/// System module.
 
-#ifndef MODULES_MODSYS_H
-  #define MODULES_MODSYS_H
+#ifndef PRIMITIVES_MODSYS_H
+  #define PRIMITIVES_MODSYS_H
 
 #include "dmc/async.h"
 #include "primitives.h"
 
 /// Returns Map<primitives_Fn>
 Map *modsys_mk (void);
+
+#endif// Copyright 18-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Tuples and assimilate objectes.
+
+#ifndef PRIMITIVES_MODTP_H
+  #define PRIMITIVES_MODTP_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modtp_mk (void);
 
 #endif// Copyright 26-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -451,9 +592,43 @@ Map *modsys_mk (void);
 
 #include "dmc/async.h"
 
-#define ST_EXC "ST_EXC"
+#endif// Copyright 16-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#endif// Copyright 05-Sept-2019 ºDeme
+/// Imports library
+
+#ifndef LIB_H
+  #define LIB_H
+
+#include "dmc/async.h"
+#include "Heap.h"
+
+///
+typedef struct lib_Entry LibEntry;
+
+///
+Symbol *libEntry_symbol (LibEntry *this);
+
+///
+Heap *libEntry_heap (LibEntry *this);
+
+///
+typedef struct lib_Lib Lib;
+
+///
+Lib *lib_new (void);
+
+/// Adds a new element to 'this'
+void lib_add (Lib *this, Symbol *s, Heap *heap);
+
+/// Returns a Heap o NULL
+Heap *lib_get (Lib *this, Symbol *s);
+
+/// Arr<LibEntry>
+Arr *lib_entries (Lib *this);
+
+#endif
+// Copyright 05-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Token 'Symbol'.
@@ -466,11 +641,17 @@ Map *modsys_mk (void);
 ///
 typedef struct symbol_Symbol Symbol;
 
-/// Creates a new Symbo with name 'name' and machine and ix with value '-1'.
+/// Creates a new Symbol with an id different to name.
+Symbol *symbol_new_id (char *id, char *name);
+
+/// Creates a new Symbol with equals id and name.
 Symbol *symbol_new (char *name);
 
 /// Returns the name of 'this'
 char *symbol_name (Symbol *this);
+
+/// Returns the id of 'this'
+char *symbol_id (Symbol *this);
 
 /// Returns the symbol hash.
 int symbol_hash (Symbol *this);
@@ -504,25 +685,28 @@ enum token_Type {
 typedef struct token_Token Token;
 
 ///
-Token *token_new_int (int value);
+Token *token_new_int (int line, int value);
 
 ///
-Token *token_new_float (double value);
+Token *token_new_float (int line, double value);
 
 ///
-Token *token_new_string (char *value);
+Token *token_new_string (int line, char *value);
 
 ///
-Token *token_new_blob (int length);
+Token *token_new_blob (int line, Bytes *bs);
 
 /// 'value' is Arr<Token>
-Token *token_new_list (Arr *value);
+Token *token_new_list (int line, Arr *value);
 
 ///
-Token *token_new_symbol (Symbol *value);
+Token *token_new_symbol (int line, Symbol *value);
 
 ///
 enum token_Type token_type (Token *this);
+
+///
+int token_line (Token *this);
 
 ///
 int token_int (Token *this);
@@ -554,6 +738,42 @@ char *token_to_str (Token *this);
 ///
 char *token_type_to_str (enum token_Type type);
 
+#endif// Copyright 12-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Import cache.
+
+#ifndef IMPORTS_H
+  #define IMPORTS_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+void imports_init ();
+
+/// Annotation of an import on way.
+void imports_put_on_way (Symbol *key);
+
+/// Removes nnotation of an import on way.
+void imports_quit_on_way (Symbol *key);
+
+/// Returns if an import is on way.
+int imports_is_on_way (Symbol *key);
+
+///
+void imports_add (Symbol *key, Heap *heap);
+
+/// Returns an import from library or NULL.
+Heap *imports_get (Symbol *key);
+
+/// Returns system heap.
+Heap *imports_base (void);
+
+/// Reads an import symbol. If reading fails return an
+/// error message in 'key'. Otherwise key is "".
+Kv *imports_read_symbol (Token *tk);
+
 #endif// Copyright 27-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -571,9 +791,6 @@ typedef struct machine_Machine Machine;
 ///
 char *machine_source (Machine *this);
 
-/// Arr<char>
-Arr *machine_imports (Machine *this);
-
 /// List<Machine>
 List *machine_pmachines (Machine *this);
 
@@ -584,9 +801,6 @@ Heap *machine_heap (Machine *this);
 
 ///
 Token *machine_prg (Machine *this);
-
-/// Creates a root machine. (To use by 'main()')
-Machine *machine_new_root (void);
 
 ///
 void machine_fail (Machine *this, char *msg);
@@ -617,26 +831,23 @@ Token *machine_pop_exc (Machine *this, enum token_Type type);
 Token *machine_pop_opt (Machine *this, enum token_Type type);
 
 /// Gets a variable value o raise a fail if 'id' does not exist.
-Token *machine_get_var (Machine *this, Symbol *id);
+Token *machine_get_varx (Machine *this, Symbol *id);
 
 /// Creates a new local variable or raise a fail is 'id' is local-duplicate.
-void machine_create_var (Machine *this, Symbol *id, Token *value);
+void machine_create_varx (Machine *this, Symbol *id, Token *value);
 
-/// Changes token of a variable or raise a fail is 'id' does not exist.
-void machine_set_var (Machine *this, Symbol *id, Token *value);
-
-/// Returns a new Machine wose state is the result of process. The new process
-/// shares stack with the calling process.
+/// Run a process. The new process shares stack with the calling process.
 ///   source   : Source of 'prg'. Programatic 'prg's have as souce "".
 ///   pmachines: List<Machine> Parent machines.
 ///   prg      : Token of type token_LIST.
+///   return   : A new machine creates by this function.
 Machine *machine_process (char *source, List *pmachines, Token *prg);
 
-/// Returns a new Machine  wose state is the result of process. The new process
-/// uses a new own stack.
+/// Runs a process. The new process uses a new own stack.
 ///   source   : Source of 'prg'. Programatic 'prg's have as souce "".
 ///   pmachines: List<Machine> Parent machines.
 ///   prg      : Token of type token_LIST.
+///   return   : A new machine creates by this function.
 Machine *machine_isolate_process (char *source, List *pmachines, Token *prg);
 
 #endif// Copyright 15-Oct-2018 ºDeme
@@ -974,13 +1185,14 @@ Darr *darr_bf_new(int buffer);
 /// undetermined.
 Darr *darr_new_c (int size, double *es);
 
-/// If ix is < 0 then is changed to 'darr_size - ix'.
+/// Returns a new Darr with elements from 0 to 'ix' (exclusive),
 Darr *darr_left(Darr *this, int ix);
 
-/// If ix is < 0 then is changed to 'darr_size - ix'.
+/// Returns a new Darr with elements from 'ix' (inclusive) to end of 'this'.
 Darr *darr_right(Darr *this, int ix);
 
-/// If begin or end are < 0 then is changed to 'darr_size - itsValue'.
+/// Returns a new Darr with elements from 'begin' (inclusive) to
+/// to 'end' (exclusive),
 Darr *darr_sub(Darr *this, int begin, int end);
 
 ///
@@ -1535,7 +1747,7 @@ Tp *it_duplicates (It *this, int (feq)(void *e1, void *e2));
 char *ext_wget(char *url);
 
 /// Reads a text using GUI. It calls:
-///   zenity --entry --title='title' --text='prompt'
+///   zenity --entry --title='title' --text='prompt' 2>/dev/null
 /// The return removes starting and trailing spaces.
 /// If user clicks on cancel, it returns an empty string.
 /// It is posible set a default text adding in promp:
@@ -1543,7 +1755,7 @@ char *ext_wget(char *url);
 char *ext_zenity_entry(char *title, char *prompt);
 
 /// ext_zenity_msg shows a message box. It calls:
-///   zenity --notification --window-icon='icon' --text='text'
+///   zenity --notification --window-icon='icon' --text='text' 2>/dev/null
 /// 'icon' is one of gnome icon stock. For example: info, dialog-warning,
 /// dialog-error, dialog-information, face-wink, etc
 void ext_zenity_msg(char *icon, char *text);
@@ -1606,6 +1818,8 @@ void *tp3_e3(Tp3 *this);
 #ifndef DMC_PATH_H
   #define DMC_PATH_H
 
+#include "Opt.h"
+
 /// Returns name and extension of path.
 /// If path is "" or ends at ("/") it returns "".
 char *path_name (char *path);
@@ -1625,6 +1839,11 @@ char *path_only_name (char *path);
 
 /// Concatenates paths. Variable argumens must finish with NULL.
 char *path_cat (char *s, char *more, ...);
+
+/// Returns Opt<char> Cannonical representation of 'path'.
+///   - If some component of 'path' is not in file system, returns 'opt_empty'.
+///   - Directories do not finish in '/'.
+Opt *path_canonical (char *s);
 
 #endif// Copyright 18-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -2549,10 +2768,10 @@ void *opt_nget (Opt *this);
 #include "dmc/Arr.h"
 #include "dmc/Map.h"
 
-/// 'Js' is an alias of 'char'. It is freed with 'free'.
+/// 'Js' is an alias of 'char'.
 typedef struct js_Js Js;
 
-/// Returns true if json is "null" or false in another case.
+/// Returns '1' if json is "null" or '0' in another case.
 int js_is_null (Js *json);
 
 /// Read boolean.
@@ -2626,13 +2845,14 @@ Iarr *iarr_bf_new(int buffer);
 /// undetermined.
 Iarr *iarr_new_c (int size, int *es);
 
-/// If ix is < 0 then is changed to 'iarr_size - ix'.
+/// Returns a new Iarr with elements from 0 to 'ix' (exclusive),
 Iarr *iarr_left(Iarr *this, int ix);
 
-/// If ix is < 0 then is changed to 'iarr_size - ix'.
+/// Returns a new Iarr with elements from 'ix' (inclusive) to end of 'this'.
 Iarr *iarr_right(Iarr *this, int ix);
 
-/// If begin or end are < 0 then is changed to 'iarr_size - itsValue'.
+/// Returns a new Iarr with elements from 'begin' (inclusive) to
+/// to 'end' (exclusive),
 Iarr *iarr_sub(Iarr *this, int begin, int end);
 
 ///
@@ -2810,11 +3030,14 @@ char *sys_home (void);
 char *sys_uname (void);
 
 /// Sets LC_ALL, for example:
-///   sys_locale("es_ES.utf8")
-void sys_locale (char *language);
+///   sys_set_locale("es_ES.utf8")
+void sys_set_locale (char *language);
+
+/// Returns the current locale.
+char *sys_locale (void);
 
 /// Executes 'command', redirecting stderr to stdout, and returns its standard
-/// out and standard error. If command fails, function returns an empty Opt.
+/// output. If command fails, function returns an empty Opt.
 ///   return: Opt<char>.
 Opt *sys_cmd(char *command);
 

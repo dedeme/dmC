@@ -30,12 +30,6 @@ void heap_add (Heap *this, Symbol *s, Token *tk);
 /// Returns a token o NULL
 Token *heap_get (Heap *this, Symbol *s);
 
-/// Changes 's' and returns '1'. If 's' is not found returns '0'.
-int heap_set (Heap *this, Symbol *s, Token *tk);
-
-/// Removes an element if it exists.
-void heap_remove (Heap *this, Symbol *s);
-
 /// Arr<HeapEntry>
 Arr *heap_entries (Heap *this);
 

@@ -1,21 +1,21 @@
 // Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "primitives/modsys0.h"
+#include "primitives/modglobal0.h"
 #include "fails.h"
 
-void modsys0_add (Machine *m) {
+void modglobal0_add (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(token_int(tk2) + token_int(tk)));
+      machine_push(m, token_new_int(0, token_int(tk2) + token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(token_float(tk2) + (double)token_int(tk)));
+        token_new_float(0, token_float(tk2) + (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -25,12 +25,12 @@ void modsys0_add (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float((double)token_int(tk2) + token_float(tk)));
+        token_new_float(0, (double)token_int(tk2) + token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(token_float(tk2) + token_float(tk)));
+      machine_push(m, token_new_float(0, token_float(tk2) + token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -38,45 +38,49 @@ void modsys0_add (Machine *m) {
 
   tk = machine_pop_opt(m, token_STRING);
   if (tk) {
-    Token *tk2 = machine_pop_opt(m, token_STRING);
-    if (tk2) {
-      machine_push(m, token_new_string(str_cat(
-        token_string(tk2), token_string(tk), NULL
-      )));
-      return;
-    }
-    fails_type(m, token_STRING);
+    Token *tk2 = machine_pop_exc(m, token_STRING);
+    machine_push(m, token_new_string(0, str_cat(
+      token_string(tk2), token_string(tk), NULL
+    )));
+    return;
   }
 
   tk = machine_pop_opt(m, token_LIST);
   if (tk) {
-    Token *tk2 = machine_pop_opt(m, token_LIST);
-    if (tk2) {
-      machine_push(m, token_new_list(it_to(it_cat(
-        it_from(token_list(tk2)), it_from(token_list(tk))
-      ))));
-      return;
-    }
-    fails_type(m, token_STRING);
+    Token *tk2 = machine_pop_exc(m, token_LIST);
+    machine_push(m, token_new_list(0, it_to(it_cat(
+      it_from(token_list(tk2)), it_from(token_list(tk))
+    ))));
+    return;
+  }
+
+  tk = machine_pop_opt(m, token_BLOB);
+  if (tk) {
+    Token *tk2 = machine_pop_exc(m, token_BLOB);
+    Bytes *bs = bytes_new();
+    bytes_add(bs, token_blob(tk2));
+    bytes_add(bs, token_blob(tk));
+    machine_push(m, token_new_blob(0, bs));
+    return;
   }
 
   fails_types(m, 4, (enum token_Type[]){
-    token_INT, token_FLOAT, token_STRING, token_LIST
+    token_INT, token_FLOAT, token_STRING, token_LIST, token_BLOB
   });
 }
 
-void modsys0_sub (Machine *m) {
+void modglobal0_sub (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(token_int(tk2) - token_int(tk)));
+      machine_push(m, token_new_int(0, token_int(tk2) - token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(token_float(tk2) - (double)token_int(tk)));
+        token_new_float(0, token_float(tk2) - (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -87,12 +91,12 @@ void modsys0_sub (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float((double)token_int(tk2) - token_float(tk)));
+        token_new_float(0, (double)token_int(tk2) - token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(token_float(tk2) - token_float(tk)));
+      machine_push(m, token_new_float(0, token_float(tk2) - token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -103,18 +107,18 @@ void modsys0_sub (Machine *m) {
   });
 }
 
-void modsys0_mul (Machine *m) {
+void modglobal0_mul (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(token_int(tk2) * token_int(tk)));
+      machine_push(m, token_new_int(0, token_int(tk2) * token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(token_float(tk2) * (double)token_int(tk)));
+        token_new_float(0, token_float(tk2) * (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -125,12 +129,12 @@ void modsys0_mul (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float((double)token_int(tk2) * token_float(tk)));
+        token_new_float(0, (double)token_int(tk2) * token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(token_float(tk2) * token_float(tk)));
+      machine_push(m, token_new_float(0, token_float(tk2) * token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -141,18 +145,18 @@ void modsys0_mul (Machine *m) {
   });
 }
 
-void modsys0_div (Machine *m) {
+void modglobal0_div (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(token_int(tk2) / token_int(tk)));
+      machine_push(m, token_new_int(0, token_int(tk2) / token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(token_float(tk2) / (double)token_int(tk)));
+        token_new_float(0, token_float(tk2) / (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -163,12 +167,12 @@ void modsys0_div (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float((double)token_int(tk2) / token_float(tk)));
+        token_new_float(0, (double)token_int(tk2) / token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(token_float(tk2) / token_float(tk)));
+      machine_push(m, token_new_float(0, token_float(tk2) / token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -179,40 +183,20 @@ void modsys0_div (Machine *m) {
   });
 }
 
-void modsys0_mod (Machine *m) {
+void modglobal0_mod (Machine *m) {
   Token *tk = machine_pop_exc(m, token_INT);
   Token *tk2 = machine_pop_exc(m, token_INT);
-  machine_push(m, token_new_int(token_int(tk2) % token_int(tk)));
+  machine_push(m, token_new_int(0, token_int(tk2) % token_int(tk)));
 }
 
-static void incrdecr (Machine *m, int is_inc) {
-  // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
-  if (arr_size(a) != 1) fails_size_list(m, a, 1);
-  Token *vn = *arr_start(a);
-  if (token_type(vn) == token_SYMBOL) {
-    Symbol *sym = token_symbol(vn);
-    Token *n = machine_get_var(m, sym);
-    if (token_type(n) == token_INT) {
-      machine_set_var(
-        m, sym, token_new_int(token_int(n) + (is_inc ? 1 : -1))
-      );
-      return;
-    }
-    machine_fail(m, str_f(
-      "Expected Int as value of '++' variable, found %s",
-      token_type_to_str(token_type(n))
-    ));
-  }
-  machine_fail(m, str_f(
-    "Expected Symbol in '++' found %s", token_type_to_str(token_type(vn))
+void modglobal0_incr (Machine *m) {
+  machine_push(m, token_new_int(
+    0, token_int(machine_pop_exc(m, token_INT)) + 1
   ));
 }
 
-void modsys0_incr (Machine *m) {
-  incrdecr(m, 1);
-}
-
-void modsys0_decr (Machine *m) {
-  incrdecr(m, 0);
+void modglobal0_decr (Machine *m) {
+  machine_push(m, token_new_int(
+    0, token_int(machine_pop_exc(m, token_INT)) - 1
+  ));
 }

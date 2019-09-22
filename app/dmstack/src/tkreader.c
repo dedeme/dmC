@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 static int is_blank (char ch) {
-  return ((unsigned char)ch) <= ' ' || ch == ',' || ch == ':' || ch == ';';
+  return ((unsigned char)ch) <= ' ' || ch == ';' || ch == ':' || ch == ',';
 }
 
 static void to_unicode(Buf *bf, char *hexdigits) {
@@ -87,22 +87,13 @@ Opt *tkreader_next(Reader *reader) {
 
   char *prgd = p; // no blank start.
   if (ch) {
-    // assert ------------------------------------------------------------------
-    if (str_starts(p, "assert")) {
-      reader_set_prg_ix(reader, prg_ix + p - prg + 6);
-      reader_set_next_tk(reader, token_new_symbol(symbol_new("assert")));
-      return opt_new(token_new_string(str_f(
-        "%s:%d", path_name(reader_source(reader)), reader_nline(reader)
-      )));
-    }
-
     // Minus sign --------------------------------------------------------------
     if (ch == '-') {
       ch = *++p;
       if (ch < '0' || ch > '9') {
         if (is_blank(ch)) {
           reader_set_prg_ix(reader, prg_ix + p - prg);
-          return opt_new(token_new_symbol(symbol_new("-")));
+          return opt_new(token_new_symbol(nline, symbol_new("-")));
         }
       }
     }
@@ -121,7 +112,7 @@ Opt *tkreader_next(Reader *reader) {
         if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
         reader_set_prg_ix(reader, prg_ix + p - prg);
-        return opt_new(token_new_float(d));
+        return opt_new(token_new_float(nline, d));
       }
 
       errno = 0;
@@ -131,7 +122,7 @@ Opt *tkreader_next(Reader *reader) {
       if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
       reader_set_prg_ix(reader, prg_ix + p - prg);
-      return opt_new(token_new_int(i));
+      return opt_new(token_new_int(nline, i));
     }
 
     // String ------------------------------------------------------------------
@@ -200,7 +191,7 @@ Opt *tkreader_next(Reader *reader) {
       }
 
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
-      return opt_new(token_new_string(buf_to_str(bf)));
+      return opt_new(token_new_string(nline, buf_to_str(bf)));
     }
 
     // List --------------------------------------------------------------------
@@ -210,6 +201,7 @@ Opt *tkreader_next(Reader *reader) {
       int sum1 = sign == '[' ? 1 : 0;
       int sum2 = sign == '{' ? 1 : 0;
       char *lstart = p + 1;
+      int nline_start = nline;
 
       while (sum0 + sum1 + sum2 && *++p) {
         char ch = *p;
@@ -289,12 +281,17 @@ Opt *tkreader_next(Reader *reader) {
 
       reader_set_nline(reader, reader_nline(subr));
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
-      return opt_new(token_new_list(a));
+      return opt_new(token_new_list(nline_start, a));
     }
 
+    // Symbol ------------------------------------------------------------------
     while (!is_blank(*++p));
     reader_set_prg_ix(reader, prg_ix + p - prg);
-    return opt_new(token_new_symbol(symbol_new(str_sub(prgd, 0, p - prgd))));
+    char *name = str_sub(prgd, 0, p - prgd);
+    char *id = str_eq(name, "this") ? reader_source(reader) : name;
+    return opt_new(token_new_symbol(
+      nline, symbol_new_id(id, name)
+    ));
   }
 
   return opt_empty();

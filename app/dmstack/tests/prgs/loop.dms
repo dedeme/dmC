@@ -2,54 +2,86 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Loop tests
+(
 
-(1 assert) (1 1 ==) if
-(0 assert) ("a" "" ==) if
+  (1 assert) (1 1 ==) if
+  (0 assert) ("a" "" ==) if
 
-(0 assert) (1 assert) ("a" "a" ==) else if
-(1 assert) (0 assert) ("a" "a" !=) else if
+  (0 assert) else (1 assert) ("a" "a" ==) if
+  (1 assert) else (0 assert) ("a" "a" !=) if
 
-("") ("abc") (2 1 >=) else if "abc" == assert
-("") ("abc") (2 1 <) else if "" == assert
+  ("") else ("abc") (2 1 >=) if "abc" == assert
+  ("") else ("abc") (2 1 <) if "" == assert
 
-(1 assert) (0 assert) (0) else
-  (0 assert) (0) else if
-(0 assert) (1 assert) (1) else
-  (0 assert) (0) else if
-(0 assert) (0 assert) (0) else
-  (1 assert) (1) else if
-(0 assert) (0 assert) (1) else
-  (1 assert) (1) else if
+  (1 assert) else (0 assert) (0) elif (0 assert) (0) if
+  (0 assert) else (1 assert) (1) elif (0 assert) (0) if
+  (0 assert) else (0 assert) (0) elif (1 assert) (1) if
+  (0 assert) else (0 assert) (1) elif (1 assert) (1) if
+  0 (pop 1) (1) elif (pop 0) (0) if assert
+  0 (pop 0) (1) elif (pop 1) (1) if assert
 
-("") ("de") (0) else
-  ("abc") (2 1 >=) else if "abc" == assert
-("") ("de") (1) else
-  ("abc") (2 1 >=) else if "abc" == assert
-("") ("de") (0) else
-  ("abc") (2 1 <) else if "" == assert
-("") ("de") (1) else
-  ("abc") (2 1 <) else if "de" == assert
+  ("") else ("de") (0) elif ("abc") (2 1 >=) if "abc" == assert
+  ("") else ("de") (1) elif ("abc") (2 1 >=) if "abc" == assert
+  ("") else ("de") (0) elif ("abc") (2 1 <) if "" == assert
+  ("") else ("de") (1) elif ("abc") (2 1 <) if "de" == assert
 
-0 sum =
-0 c =
-((break) (sum c + sum # c 1 + c #) (c 10 <) else if) loop
-sum 45 == assert
+  // "Loop (1): " sys,print; clock,now C1 =
+  0 // sum
+  0 // c
+  ( (pop; break) else
+    (c =; c +; c 1 +)
+    (dup 10 <) if) loop
+  45 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
 
-0 sum #
-0 c #
-(sum c + sum # c 1 + c #) (c 10 <) while
-sum 45 == assert
+  // "Loop (2): " sys,print; clock,now C1 =
+  0 // sum
+  0 // c
+  ( (pop; break) else
+    (c =; c +; c 1 +)
+    (dup 10 <) if) loop
+  45 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
 
-0 sum #
-(sum i + sum #) (i (10)) for
-sum 45 == assert
+  // "While: " sys,print; clock,now C1 =
+  0 // sum
+  0 // c
+  (c =; c +; c 1 +) (dup 10 <) while
+  pop 45 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
 
-0 sum #
-(sum i + sum #) (i (2) (10)) for
-sum 44 == assert
+  // "While to 4 (1): " sys,print; clock,now C1 =
+  0 // sum
+  0 // c
+  ((c = c +; c 1 +) else (break) (dup 4 >) if) (dup 10 <) while
+  pop 10 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
 
-0 sum #
-(sum i + sum #) (i (9) (-1) (-1)) for
-sum 45 == assert
+  // "For: " sys,print; clock,now C1 =
+  0 // sum
+  (i =; i +) ((10)) for
+  45 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
 
-stk.empty? assert
+  // "For to 4 (1): " sys,print; clock,now C1 =
+  0 // sum
+  0 // counter
+  ((i =; c =; i +; i) else (i =; break) (dup 4 >) if) ((10)) for pop
+  10 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
+
+  // "For (2): " sys,print; clock,now C1 =
+  0 // sum
+  (i =; i +) ((2) (10)) for
+  44 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
+
+  // "For (3): " sys,print; clock,now C1 =
+  0 // sum
+  (i =; i +) ((9) (-1) (-1)) for
+  45 == assert
+  // clock,now C1 clock,- 1 get long,toInt puts
+
+  empty? assert
+
+) run

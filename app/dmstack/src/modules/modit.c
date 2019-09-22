@@ -5,207 +5,410 @@
 #include "Reader.h"
 
 static Token *read (char *id, char *prg) {
-  return reader_process(reader_new(str_f("[IT-%s]", id), prg, 1, 0));
+  return reader_process(reader_new(str_f("", id), prg, 1, 0));
 }
 
-Token *new () {
+static Token *new () {
   return read("NEW",
-    "prg =; stk.dup prg; prg:& lst.tp3"
+    "prg =; dup prg; prg:& tp,new3"
   );
 }
 
-Token *empty () {
+static Token *empty () {
   return read("EMPTY",
-    "0 () 0 lst.tp3"
+    "0 () 0 tp,new3"
   );
 }
 
-Token *from () {
-  return read("FROM",
-    "stk.dup size 0 lst.tp3 "
-    "( Ob =; Ob 0 get Ls =; Ob 1 get sz =; Ob 2 get i = "
-    "  (()) "
-    "  (Ls i get lst.unary; Ob 2 i 1 + set; stk.pop;) "
-    "  (i sz <) else if ) "
-    "it.new"
-  );
-}
-
-Token *unary () {
+static Token *unary () {
   return read("UNARY",
-   "() stk.swap lst.unary () lst.tp3"
+   "() swap lst,unary () tp,new3"
   );
 }
 
-Token *has () {
+static Token *from () {
+  return read("FROM",
+    "dup size 0 tp,new3 "
+    "( Ob =; Ob; Ob 1 get; Ob 2 get " // Ob sz i
+    "  (pop; pop; ()) else "
+    "  (i =; Ob =; Ob 0 get i get lst,unary; Ob 2 i 1 + set; pop;) "
+    "  (i =; sz =; i; i sz <) if ) "
+    "it,new"
+  );
+}
+
+static Token *range () {
+  return read("RANGE",
+   "tp,new2 "
+   "( (pop; ()) "
+   "  else "
+   "  (Ob =; Ob 0 get r =; Ob 0 r 1 + set; pop; r lst,unary) "
+   "  (Ob = Ob; Ob 0 get Ob 1 get <) "
+   "  if) "
+   "it,new"
+  );
+}
+
+static Token *range0 () {
+  return read("RANGE0",
+   "0 swap it,range"
+  );
+}
+
+static Token *has () {
   return read("HAS",
     "1 get size"
   );
 }
 
-Token *peek () {
+static Token *peek () {
   return read("PEEK",
-    "It =; (\"Iterator is empty\" fail) (It 1 get 0 get) (It it.has) else if"
+    "(\"Iterator is empty\" fail) else (1 get 0 get) (dup it,has?) if"
   );
 }
 
-Token *next () {
+static Token *next () {
   return read("NEXT",
-    "It =; "
-    "(\"Iterator is empty\" fail) "
-    "(It 1 get 0 get; It 1 :It 0 get It 2 get run: set; stk.pop) "
-    "(It it.has) else if"
+    "(\"Iterator is empty\" fail) else "
+    "(It =; It 1 get 0 get; It 1 :It 0 get It 2 get run: set; pop) "
+    "(dup it,has?) if"
   );
 }
 
-Token *plus () {
+static Token *plus () {
   return read("PLUS",
-    "lst.tp "
-    "( Its =; Its 0 get It1 =; Its 1 get It2 ="
-    "  (())"
-    "  (It2 it.next lst.unary) (It2 it.has) else"
-    "  (It1 it.next lst.unary) (It1 it.has) else if ) "
-    "it.new"
+    "tp,new2 "
+    "( Its =; Its 1 get; Its 0 get" // It2 It1
+    "  ( pop; "
+    "    (pop; ()) else "
+    "    (it,next lst,unary) (dup it,has?) if "
+    "  ) else "
+    "  (it,next lst,unary; swap; pop) (dup it,has?) if) "
+    "it,new"
   );
 }
 
 
-Token *drop () {
+static Token *drop () {
   return read("PUSH",
-    "n =; It =; 0 i =; "
-    "(It it.next; stk.pop; (i) ++) (i n < It it.has &&) while; It"
+    "swap; 0 " // i
+    "(i =; dup; it,next; pop; 1 i +) "
+    "(i =; It =; n =; n; It; i; i n < It it,has? &&) while; "
+    "pop; swap; pop"
   );
 }
 
-Token *dropf () {
+static Token *dropf () {
   return read("PUSH",
-    "fn =; It =;"
-    "(It it.next; stk.pop) ((0) (It it.peek fn) (It it.has) else if) while; It"
+    "swap "
+    "(dup it,next; pop) "
+    "( (0) else "
+    "  (It =; fn =; fn:&; It; dup it,peek fn) (dup it,has?) if) "
+    "while; swap; pop"
   );
 }
 
-Token *filter () {
+static Token *filter () {
   return read("FILTER",
-    "lst.tp "
-    "( Tp =; Tp 0 get It =; Tp 1 get fn = "
-    "  (It it.next; stk.pop) "
-    "  ((0) (It it.peek fn !) (It it.has) else if) while "
-    "  (()) (It it.next lst.unary) (It it.has) else if) "
-    "it.new"
+    "tp,new2 "
+    "( Tp =; Tp 1 get; Tp 0 get "  // fn It
+    "  (dup it,next; pop) "
+    "  ( (0) else "
+    "    (It =; fn =; It it,peek fn r =; fn:& It r !) (dup it,has?) if) "
+    "  while "
+    "  (pop; pop; ()) else "
+    "  (It =; pop; It it,next lst,unary) (dup it,has?) if) "
+    "it,new"
   );
 }
 
-Token *push () {
+static Token *map () {
+  return read("MAP",
+    "tp,new2 " // It fn
+    "( "
+    "  (pop; ()) "
+    "  else "
+    "  (Ob =; Ob 0 get it,next; Ob 1 get run R =; R lst,unary) "
+    "  (dup; 0 get it,has?) "
+    "  if) "
+    "it,new"
+  );
+}
+
+static Token *map2 () {
+  return read("MAP2",
+    "Fn2 = Fn1 = It = "
+    "It (it,next it,unary) (dup it,has?) if It1 = "
+    "It1 Fn1 it,map Itm1 = "
+    "It Fn2 it,map Itm2 = "
+    "Itm1 Itm2 it,+"
+  );
+}
+
+static Token *push () {
   return read("PUSH",
-    "it.unary it.+"
+    "it,unary it,+"
   );
 }
 
-Token *push0 () {
+static Token *push0 () {
   return read("PUSH0",
-    "it.unary stk.swap it.+"
+    "it,unary swap it,+"
   );
 }
 
-Token *all () {
+static Token *take () {
+  return read("TAKE",
+    "0 tp,new3 " // It n i
+    "( (pop; ()) "
+    "  else "
+    "  (Ob =; Ob 2 :: Ob 2 get 1 + :: set; 0 get it,next lst,unary) "
+    "  (Ob = Ob; Ob 2 get Ob 1 get < Ob 0 get it,has? &&) "
+    "  if) "
+    "it,new"
+  );
+}
+
+static Token *takef () {
+  return read("TAKEF",
+    "tp,new2 " // It fn
+    "( (pop; ()) "
+    "  else "
+    "  (Ob =; Ob 0 get it,next lst,unary) "
+    "  ( (0) "
+    "    else "
+    "    (Ob =; Ob 0 get it,peek; Ob 1 get run r =; Ob r) "
+    "    (dup 0 get it,has?) "
+    "    if) "
+    "  if) "
+    "it,new"
+  );
+}
+
+static Token *zip () {
+  return read("ZIP",
+    "tp,new2 " // It1 It2
+    "( (pop; ())"
+    "  else"
+    "  (Ob =; Ob 0 get it,next; Ob 1 get it,next; tp,new2; lst,unary)"
+    "  (Ob =; Ob; Ob 0 get it,has? Ob 1 get it,has? &&)"
+    "  if)"
+    "it,new "
+  );
+}
+
+static Token *zip3 () {
+  return read("ZIP3",
+    "tp,new3 " // It1 It2 It3
+    "( (pop; ())"
+    "  else"
+    "  ( Ob =; Ob 0 get it,next; Ob 1 get it,next; Ob 2 get it,next; "
+    "    tp,new3; lst,unary)"
+    "  (Ob =; Ob; Ob 0 get it,has? Ob 1 get it,has? && Ob 2 get it,has? &&)"
+    "  if)"
+    "it,new "
+  );
+}
+
+static Token *all () {
   return read("ALL",
-    "fn =; It =; 1 r =; "
-    "((0 r # break) (It it.next fn !) if) (It it.has) while; r"
+    "swap "
+    "( (pop; pop; 1; break) "
+    "  else "
+    "  ( (pop; pop; 0; break) (It = fn? =; It it,next fn? r =; fn?:& It r !) "
+    "    if) "
+    "  (dup it,has?) "
+    "  if)"
+    "loop "
   );
 }
 
-Token *any () {
+static Token *any () {
   return read("ANY",
-    "fn =; It =; 0 r =; "
-    "((1 r # break) (It it.next fn) if) (It it.has) while; r"
+    "swap "
+    "( (pop; pop; 0; break) "
+    "  else "
+    "  ( (pop; pop; 1; break) (It = fn? =; It it,next fn? r =; fn?:& It r) "
+    "    if) "
+    "  (dup it,has?) "
+    "  if)"
+    "loop "
   );
 }
 
-Token *count () {
+static Token *count () {
   return read("COUNT",
-    "0 (stk.pop 1 +) it.reduce"
+    "0 (pop 1 +) it,reduce"
   );
 }
 
-Token *duplicates () {
+static Token *duplicates () {
   return read("DUPLICATES",
-    "fn =; It =; lst.new Dup =; lst.new Res =; 0 e = "
-    "( (Res e lst.push; stk.pop) "
-    "  ((Dup e lst.push; stk.pop) (Dup (e fn) lst.any !) if) "
-    "  (It it.next e #; Res (e fn) lst.any) else if) "
-    "(It it.has) "
-    "while; Dup Res lst.tp"
+    "lst,new lst,new tp,new2 tp,new3 (0) + " // (It fn (Dup Res) ie) Ob =
+    "( dup; Ob =; 3 Ob 0 get it,next set; "
+    "  ( ( dup; Ob =; Ob 2 get 1 get; Ob 3 get; lst,push; pop) "
+    "    else "
+    "    ( dup; Ob =; Ob 2 get 0 get; Ob 3 get; lst,push; pop) "
+    "    ( dup 2 get 1 get " // Res
+    "      (e =; dup; Ob =; e; Ob 3 get; Ob 1 get; run) " // (e ie fn)
+    "      lst,any? "
+    "    ) "
+    "    if "
+    "  ) "
+    "  ( dup 2 get 0 get " // Dup
+    "    (e =; dup; Ob =; e; Ob 3 get; Ob 1 get; run) " // (e ie fn)
+    "    lst,any? ! "
+    "  ) if) "
+    "(dup; 0 get; it,has?) "
+    "while "
+    "2 get"
   );
 }
 
-Token *each () {
+static Token *each () {
   return read("EACH",
-    "fn =; It =; (It it.next fn) (It it.has) while"
+    "swap "
+    "(It =; fn =; It it,next fn; fn:&; It) (dup it,has?) while "
+    "pop; pop"
   );
 }
 
-Token *eachIx () {
+static Token *eachIx () {
   return read("EACHIX",
-    "fn =; It =; 0 i =; (It it.next i fn; (i) ++) (It it.has) while"
+    "Fn = It = 0 Fn It "
+    "(It = fn = i =; It it,next i fn; 1 i + fn:& It ) "
+    "(dup it,has?) while "
+    "pop; pop; pop"
   );
 }
 
-Token *equals () {
+static Token *equals () {
   return read("EQUALS",
-    "(==) it.eq"
+    "(==) it,eq?"
   );
 }
 
-Token *notequals () {
-  return read("EQUALS",
-    "(==) it.neq"
+static Token *notequals () {
+  return read("NOTEQUALS",
+    "(==) it,neq?"
   );
 }
 
-Token *eq () {
+static Token *eq () {
   return read("EQ",
-    "fn =; It2 =; It1 = ; 1 r = "
-    "((0 r #; break) (It1 it.next It2 it.next fn !) if) "
-    "(It1 it.has It2 it.has &&) while "
-    "(0) (It1 it.has It2 it.has || !) (r) else if"
+    "1 " // It1 It2 fn r
+    "( (break) "
+    "  else "
+    "  ( "
+    "    (pop; 0; break) "
+    "    else "
+    "    () "
+    "    (r = fn = It2 = It1 =; It1 It2 fn:& r; It1 it,next It2 it,next fn) "
+    "    if) "
+    "  (r = Fn = It2 = It1 =; It1 It2 Fn r; It1 it,has? It2 it,has? &&) "
+    "  if) "
+    "loop "
+    "(pop; pop; pop; 0) else "
+    "(Fn = It2 = It1 =; It1 it,has? It2 it,has? || !) (nop) if"
   );
 }
 
-Token *find () {
+static Token *neq () {
+  return read("NEQ",
+    "it,eq? !"
+  );
+}
+
+static Token *find () {
   return read("FIND",
-    "fn =; lst.new; stk.swap (e =; (e lst.push) (e fn) if) it.each"
+    "( (pop; pop; (); break) "
+    "  else "
+    "  ( (Fn = It =; It Fn; It it,next pop)"
+    "    else "
+    "    (pop; It =; It it,peek lst,unary; break) "
+    "    (fn? = It =; It it,peek fn? r =; It fn?:& r) "
+    "    if) "
+    "  (Fn = It =; It Fn; It it,has?) "
+    "  if) "
+    "loop"
   );
 }
 
-Token *iindex () {
+static Token *iindex () {
   return read("INDEX",
-    "fn =; It =; -1; 0 c = "
-    "(((c) ++) (stk.pop c; break) (It it.next fn) else if) (It it.has) while"
+    "0 "
+    "( (pop; pop; pop; -1; break) "
+    "  else "
+    "  ( (1 +)"
+    "    else "
+    "    (c =; pop; pop; c; break) "
+    "    (c = fn? = It =; It fn?:& c; It it,next fn?) "
+    "    if) "
+    "  (c = Fn = It =; It Fn c; It it,has?) "
+    "  if) "
+    "loop"
   );
 }
 
-Token *lastIndex () {
+static Token *lastIndex () {
   return read("LASTINDEX",
-    "fn =; It =; -1 r =; 0 c = "
-    "((c r #) (It it.next fn) if; (c) ++) (It it.has) while; r"
+    "Fn = It =; -1; 0; Fn "
+    "It "
+    "( (Fn =; 1 +; Fn) "
+    "  else "
+    "  (Fn =; c =; pop; c; c 1 +; Fn) "
+    "  (e =; fn? =; fn?:&; e fn?) "
+    "  if) "
+    "it,each "
+    "pop; pop"
   );
 }
 
-Token *neq () {
-  return read("EQ",
-    "it.eq !"
-  );
-}
-
-Token *reduce () {
+static Token *reduce () {
   return read("REDUCE",
-    "fn =; Seed =; It =; (Seed It it.next fn Seed #) (It it.has) while; Seed"
+    "(fn = Seed = It =; Seed It it,next fn R =; It R fn:&) "
+    "(F = S = It =; It S F; It it,has?) "
+    "while "
+    "pop; swap; pop"
   );
 }
 
-Token *to () {
+static Token *to () {
   return read("TO",
-    "lst.new stk.swap (lst.push) it.each"
+    "lst,new (lst,push) it,reduce"
+  );
+}
+
+static Token *shuffle () {
+  return read("SUFFLE",
+    "it,to lst,shuffle it,from"
+  );
+}
+
+static Token *reverse () {
+  return read("REVERSE",
+    "it,to lst,reverse it,from"
+  );
+}
+
+static Token *sort () {
+  return read("SORT",
+    "swap it,to swap lst,sort it,from"
+  );
+}
+
+static Token *box () {
+  return read("BOX",
+    "dup lst,shuffle it,from tp,new2 " // List It
+    "( "
+    "  ( Ob = "
+    "    Ob 1 Ob 0 get lst,shuffle it,from set "
+    "      1 get it,next lst,unary) "
+    "  else "
+    "  (1 get it,next lst,unary) "
+    "  (dup 1 get it,has?) "
+    "  if) "
+    "it,new"
   );
 }
 
@@ -213,36 +416,51 @@ Map *modit_mk (void) {
   // Map<Token>
   Map *r = map_new();
 
-  map_put(r, "it.new", new());
-  map_put(r, "it.empty", empty());
-  map_put(r, "it.from", from());
-  map_put(r, "it.unary", unary());
-  map_put(r, "it.has", has());
-  map_put(r, "it.peek", peek());
-  map_put(r, "it.next", next());
+  map_put(r, "new", new());
+  map_put(r, "empty", empty());
+  map_put(r, "unary", unary());
+  map_put(r, "from", from());
+  map_put(r, "range", range());
+  map_put(r, "range0", range0());
+  map_put(r, "has?", has());
+  map_put(r, "peek", peek());
+  map_put(r, "next", next());
 
-  map_put(r, "it.+", plus());
-  map_put(r, "it.drop", drop());
-  map_put(r, "it.dropf", dropf());
-  map_put(r, "it.filter", filter());
-  map_put(r, "it.push", push());
-  map_put(r, "it.push0", push0());
+  map_put(r, "+", plus());
+  map_put(r, "drop", drop());
+  map_put(r, "dropf", dropf());
+  map_put(r, "filter", filter());
+  map_put(r, "map", map());
+  map_put(r, "map2", map2());
+  map_put(r, "push", push());
+  map_put(r, "push0", push0());
+  map_put(r, "take", take());
+  map_put(r, "takef", takef());
+  map_put(r, "zip", zip());
+  map_put(r, "zip3", zip3());
 
-  map_put(r, "it.all", all());
-  map_put(r, "it.any", any());
-  map_put(r, "it.count", count());
-  map_put(r, "it.duplicates", duplicates());
-  map_put(r, "it.each", each());
-  map_put(r, "it.eachIx", eachIx());
-  map_put(r, "it.==", equals());
-  map_put(r, "it.!=", notequals());
-  map_put(r, "it.eq", eq());
-  map_put(r, "it.find", find());
-  map_put(r, "it.index", iindex());
-  map_put(r, "it.lastIndex", lastIndex());
-  map_put(r, "it.neq", neq());
-  map_put(r, "it.reduce", reduce());
-  map_put(r, "it.to", to());
+  map_put(r, "all?", all());
+  map_put(r, "any?", any());
+  map_put(r, "count", count());
+  map_put(r, "duplicates", duplicates());
+  map_put(r, "each", each());
+  map_put(r, "eachIx", eachIx());
+  map_put(r, "==", equals());
+  map_put(r, "!=", notequals());
+  map_put(r, "eq?", eq());
+  map_put(r, "find", find());
+  map_put(r, "index", iindex());
+  map_put(r, "lastIndex", lastIndex());
+  map_put(r, "neq?", neq());
+  map_put(r, "reduce", reduce());
+  map_put(r, "to", to());
+
+
+  map_put(r, "shuffle", shuffle());
+  map_put(r, "reverse", reverse());
+  map_put(r, "sort", sort());
+
+  map_put(r, "box", box());
 
   return r;
 }

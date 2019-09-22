@@ -1,0 +1,26 @@
+// Copyright 19-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  // sub - left - right
+
+  [1, 2] blob,from 1 blob,left R = [1] R blob,to == assert
+  R [2] blob,from + -2 -1 blob,sub R = [1] R blob,to == assert
+  R [2] blob,from + 0 0 blob,sub R = [] R blob,to == assert
+  R [1, 2] blob,from + -1 0 blob,sub R = [] R blob,to == assert
+  R [1, 2] blob,from + 2 2 blob,sub R = [] R blob,to == assert
+  R [1, 2] blob,from + 0 2 blob,sub R = [1, 2] R blob,to == assert
+  R 1 2 blob,sub R = [2] R blob,to == assert
+  R 1 blob,right R = [] R blob,to == assert
+  R [1, 2] blob,from + 0 blob,right R = [1, 2] R blob,to == assert
+  R -1 blob,right R = [2] R blob,to == assert
+  [] blob,from 0 blob,left  blob,to [] == assert
+  [1, 2, 33] blob,from 0 blob,left blob,to [] == assert
+  [1, 2, 33] blob,from 1 blob,left blob,to [1] == assert
+  [1, 2, 33] blob,from 3 blob,left blob,to [1, 2, 33] == assert
+  [] blob,from 0 blob,right blob,to [] == assert
+  [1, 2, 33] blob,from 0 blob,right blob,to [1, 2, 33] == assert
+  [1, 2, 33] blob,from 1 blob,right blob,to [2, 33] == assert
+  [1, 2, 33] blob,from 3 blob,right blob,to [] == assert
+
+) run

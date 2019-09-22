@@ -1,0 +1,24 @@
+// Copyright 18-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  "Cañónç䍆" b64,encode "Q2HDscOzbsOn5I2G" == assert
+  "" b64,encode "" == assert
+  "Cañónç䍆" b64,encode b64,decode "Cañónç䍆" == assert
+  "" b64,encode b64,decode "" == assert
+
+  (
+    len =; len blob,new;
+    len (i =; i i 10 + set) ((nop)) for
+  )
+  ((120) (130)) for
+
+  ( i =; B =; B b64,encodeBytes; b64,decodeBytes
+    B B size
+    (i =; B1 =; B2 =; B1 i get B2 i get == assert; B2; B1)
+    ((nop)) for
+    pop; pop)
+  ((10)) for
+
+  empty? assert
+) run

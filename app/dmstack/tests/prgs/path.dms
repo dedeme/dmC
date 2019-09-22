@@ -1,0 +1,41 @@
+// Copyright 22-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  "./" path,canonical pop
+  "/xxx/" path,canonical () == assert
+
+  "" path,name "" == assert
+  "/" path,name "" == assert
+  "ab" path,name "ab" == assert
+  "/ab.c" path,name "ab.c" == assert
+  "cd/" path,name "" == assert
+  "c/ab.c" path,name "ab.c" == assert
+
+  "" path,parent "" == assert
+  "/" path,parent "" == assert
+  "ab" path,parent "" == assert
+  "/ab.c" path,parent "" == assert
+  "cd/" path,parent "cd" == assert
+  "cg/r/ab.c" path,parent "cg/r" == assert
+
+  "" path,extension "" == assert
+  "/" path,extension "" == assert
+  "ab" path,extension "" == assert
+  "/ab.c" path,extension ".c" == assert
+  "cd/" path,extension "" == assert
+  "cd/ab.c" path,extension ".c" == assert
+  "cd/." path,extension "." == assert
+  "cd/f." path,extension "." == assert
+
+  "" path,onlyName "" == assert
+  "/" path,onlyName "" == assert
+  "ab" path,onlyName "ab" == assert
+  "/ab.c" path,onlyName "ab" == assert
+  "cd/" path,onlyName "" == assert
+  "/cd/a.b" path,onlyName "a" == assert
+  "cd/." path,onlyName "" == assert
+  "cd/f." path,onlyName "f" == assert
+
+  empty? assert
+) run

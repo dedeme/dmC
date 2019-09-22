@@ -1,0 +1,31 @@
+// Copyright 18-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  ((0) () () tp,option) op =
+  tp,none op 0 == assert
+  tp,none tp,none? assert
+  tp,none tp,some? ! assert
+  "a" tp,some op "a" == assert
+  "a" tp,some tp,none? ! assert
+  "a" tp,some tp,some? assert
+
+  (() () () tp,either) op =
+  "fail" tp,left op "fail" == assert
+  "fail" tp,left tp,left? assert
+  "fail" tp,left tp,right? ! assert
+  1 tp,right op 1 == assert
+  1 tp,right tp,left? ! assert
+  1 tp,right tp,right? assert
+
+  10 20 tp,new2 Tp =
+  Tp 0 get 10 == assert
+  Tp 1 get 20 == assert
+
+  110 220 3 tp,new3 Tp =
+  Tp 0 get 110 == assert
+  Tp 1 get 220 == assert
+  Tp 2 get 3 == assert
+
+  empty? assert
+) run

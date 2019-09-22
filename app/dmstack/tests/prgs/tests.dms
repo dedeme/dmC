@@ -1,14 +1,28 @@
 // Copyright 07-Sep-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-"./float" import
+("./float", fl) import
 "./int" import
-"./logic" import
+"logic" import
 "./loop" import
 "./smath" import
 "./stk" import
-"./sys" import
+"./global" import
 // "./thread" import
-"./str" import
-"./lst" import
-"./it" import
+"str" import
+"lst" import
+"blob" import
+"long" import
+"tp" import
+"it" import
+"recursive" import
+"obj" import
+"map" import
+"js" import
+"b64" import
+"cryp" import
+"time" import
+"clock" import
+"path" import
+
+empty? assert

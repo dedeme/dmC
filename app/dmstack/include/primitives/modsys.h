@@ -1,10 +1,10 @@
-// Copyright 28-Aug-2019 ºDeme
+// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Sys module
+/// System module.
 
-#ifndef MODULES_MODSYS_H
-  #define MODULES_MODSYS_H
+#ifndef PRIMITIVES_MODSYS_H
+  #define PRIMITIVES_MODSYS_H
 
 #include "dmc/async.h"
 #include "primitives.h"

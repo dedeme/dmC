@@ -8,6 +8,4 @@
 
 #include "dmc/async.h"
 
-#define ST_EXC "ST_EXC"
-
 #endif

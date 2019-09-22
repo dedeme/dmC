@@ -12,12 +12,6 @@
 
 typedef struct machine_Machine Machine;
 
-///
-char *machine_source (Machine *this);
-
-/// Arr<char>
-Arr *machine_imports (Machine *this);
-
 /// List<Machine>
 List *machine_pmachines (Machine *this);
 
@@ -28,9 +22,6 @@ Heap *machine_heap (Machine *this);
 
 ///
 Token *machine_prg (Machine *this);
-
-/// Creates a root machine. (To use by 'main()')
-Machine *machine_new_root (void);
 
 ///
 void machine_fail (Machine *this, char *msg);
@@ -60,27 +51,18 @@ Token *machine_pop_exc (Machine *this, enum token_Type type);
 /// Otherwise the element is not removed and returns NULL.
 Token *machine_pop_opt (Machine *this, enum token_Type type);
 
-/// Gets a variable value o raise a fail if 'id' does not exist.
-Token *machine_get_var (Machine *this, Symbol *id);
-
-/// Creates a new local variable or raise a fail is 'id' is local-duplicate.
-void machine_create_var (Machine *this, Symbol *id, Token *value);
-
-/// Changes token of a variable or raise a fail is 'id' does not exist.
-void machine_set_var (Machine *this, Symbol *id, Token *value);
-
-/// Returns a new Machine wose state is the result of process. The new process
-/// shares stack with the calling process.
+/// Run a process. The new process shares stack with the calling process.
 ///   source   : Source of 'prg'. Programatic 'prg's have as souce "".
 ///   pmachines: List<Machine> Parent machines.
 ///   prg      : Token of type token_LIST.
+///   return   : A new machine creates by this function.
 Machine *machine_process (char *source, List *pmachines, Token *prg);
 
-/// Returns a new Machine  wose state is the result of process. The new process
-/// uses a new own stack.
+/// Runs a process. The new process uses a new own stack.
 ///   source   : Source of 'prg'. Programatic 'prg's have as souce "".
 ///   pmachines: List<Machine> Parent machines.
 ///   prg      : Token of type token_LIST.
+///   return   : A new machine creates by this function.
 Machine *machine_isolate_process (char *source, List *pmachines, Token *prg);
 
 #endif

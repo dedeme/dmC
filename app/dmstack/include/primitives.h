@@ -18,7 +18,7 @@ void primitives_init (void);
 /// Returns Opt<primitives_Fn>
 Opt *primitives_get (char *module, char *id);
 
-/// Returns Opt<Map<Token>> - Functions from a module.
+/// Returns Opt<Map[Token]> - Functions from a module.
 Opt *primitives_module (char *module);
 
 #endif

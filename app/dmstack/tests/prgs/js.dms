@@ -1,0 +1,119 @@
+// Copyright 17-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// JSON tests.
+
+(
+  "2" js,null? ! assert
+  "null" js,null? assert
+
+  "true" js,rb  assert
+  "false" js,rb ! assert
+
+  "4" js,ri 4 == assert
+  "4" js,rf 4. == assert
+  "4.56" js,rf 4.56 == assert
+
+  "\"\"" js,rs "" == assert
+  "\"a\\\"b\\\"\\ncñ€\"" js,rs "a\"b\"\ncñ€" == assert
+
+  "[]" js,ra () == assert
+  "[1, 2, [], 3, {}, {\"a\": 11}, [true, null]]" js,ra A =
+  A 0 get js,ri 1 == assert
+  A 1 get js,ri 2 == assert
+  A 2 get js,ra () == assert
+  A 3 get js,ri 3 == assert
+  A 4 get js,ro {} == assert
+  A 5 get js,ro "a" obj,get js,ri 11 == assert
+  A 6 get js,ra A2 =
+  A2 0 get js,rb assert
+  A2 0 get js,null? ! assert
+  A2 1 get js,null? assert
+
+  "{\"a\": 1, \"b\": [], \"c\": {}, \"d\": [1, false], "
+  "\"e\": {\"a2\": \"\", \"b2\": null} }" + js,ro A =
+  A "a" obj,get js,ri 1 == assert
+  A "b" obj,get js,ra () == assert
+  A "c" obj,get js,ro () == assert
+  A "d" obj,get js,ra 0 get js,ri 1 == assert
+  A "d" obj,get js,ra 1 get js,rb ! assert
+  A "e" obj,get js,ro "a2" obj,get js,null? ! assert
+  A "e" obj,get js,ro "a2" obj,get js,rs "" == assert
+  A "e" obj,get js,ro "b2" obj,get js,null? assert
+
+  js,wn js,null? assert
+  1 js,wb js,rb assert
+  0 js,wb js,rb ! assert
+  23 js,wi js,ri 23 == assert
+  23. js,wf js,ri 23 == assert
+  12.6 js,wf js,rf 12.6 == assert
+  "" js,ws js,rs "" == assert
+  "a\"b\"\ncñ€" js,ws js,rs "a\"b\"\ncñ€" == assert
+  [] js,wa js,ra [] == assert
+  []
+    1 js,wi lst,push; 2 js,wi lst,push; lst,new js,wa lst,push
+    3.5 js,wf lst,push; obj,new js,wo lst,push;
+    {} "a" 11 js,wi obj,put
+    js,wo lst,push
+    [] 1 js,wb lst,push; js,wn lst,push
+    js,wa lst,push js,wa
+    Js =
+  Js js,ra Jss =
+  []
+    Jss 0 get js,ri lst,push
+    Jss 1 get js,ri lst,push
+    Jss 2 get js,ra lst,push
+    Jss 3 get js,rf lst,push
+    Jss 4 get js,ro lst,push
+    Jss 5 get js,ro O =
+      {}
+        "a" O "a" obj,get js,ri
+        obj,put
+      lst,push
+    Jss 6 get js,ra A =
+      []
+        A 0 get js,rb lst,push
+        A (1) else (0) (1 get js,null?) if lst,push
+      lst,push
+    [1, 2, [], 3.5, {}, {"a": 11}, [1, 0]] == assert
+  {} js,wo js,ro {} == assert
+  {}
+    "a" 1 js,wi obj,put; "b" [] js,wa obj,put; "c" {} js,wo obj,put
+    "d"
+      [] 1 js,wi lst,push; 0 js,wb lst,push
+      js,wa obj,put
+    "e"
+      {} "a2" "" js,ws obj,put; "b2" js,wn obj,put
+      js,wo obj,put
+    js,wo Js =
+  Js js,ro Jss =
+  {}
+    "a" Jss "a" obj,get js,ri obj,put
+    "b" Jss "b" obj,get js,ra obj,put
+    "c" Jss "c" obj,get js,ro obj,put
+    "d"
+      []
+        Jss "d" obj,get js,ra A =
+        A 0 get js,ri lst,push; A 1 get js,rb lst,push
+      obj,put
+    "e"
+      {}
+        Jss "e" obj,get js,ro O =
+        "a2"
+          O "a2" obj,get js,rs
+          obj,put
+        "b2"
+          O (1) else (0) ("b2" obj,get js,null?) if
+          obj,put
+      obj,put
+    {"a": 1, "b": [], "c": {}, "d": [1, 0], "e": {"a2": "", "b2": 0}} == assert
+
+  [] (js,ws) js,fromList (js,rs) js,toList [] == assert
+  ["a", "b"] (js,ws) js,fromList (js,rs) js,toList ["a", "b"] == assert
+
+  {} (js,ws) js,fromMap (js,rs) js,toMap {} == assert
+  {("a": 1), ("b": 2)} (js,wi) js,fromMap (js,ri) js,toMap
+    {("a": 1), ("b": 2)} == assert
+
+  empty? assert
+) run

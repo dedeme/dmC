@@ -5,15 +5,17 @@
 
 struct symbol_Symbol {
   char *name;
+  char *id;
   int hash;
 };
 
-Symbol *symbol_new (char *name) {
+Symbol *symbol_new_id (char *id, char *name) {
   Symbol *this = MALLOC(Symbol);
+  this->id = id;
   this->name = name;
   int hash = 0;
   int base = 0;
-  char *p = name;
+  char *p = id;
   while (*p) {
     hash += base + *p++;
     base += 75;
@@ -22,8 +24,16 @@ Symbol *symbol_new (char *name) {
   return this;
 }
 
+Symbol *symbol_new (char *name) {
+  return symbol_new_id(name, name);
+}
+
 char *symbol_name (Symbol *this) {
   return this->name;
+}
+
+char *symbol_id (Symbol *this) {
+  return this->id;
 }
 
 int symbol_hash (Symbol *this) {
@@ -32,13 +42,14 @@ int symbol_hash (Symbol *this) {
 
 Symbol *symbol_clone (Symbol *this) {
   Symbol *r = MALLOC(Symbol);
+  r->id = this->id;
   r->name = this->name;
   r->hash = this->hash;
   return r;
 }
 
 int symbol_eq (Symbol *this, Symbol *other) {
-  return this->hash == other->hash && str_eq(this->name, other->name);
+  return this->hash == other->hash && str_eq(this->id, other->id);
 }
 
 char *symbol_to_str (Symbol *this) {

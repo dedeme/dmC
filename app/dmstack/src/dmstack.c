@@ -5,6 +5,7 @@
 
 #include "dmstack.h"
 #include "dmc/rnd.h"
+#include "imports.h"
 #include "primitives.h"
 #include "modules.h"
 #include "Reader.h"
@@ -17,6 +18,7 @@ int main (int argc, char *argv[]) {
   rnd_init();
   primitives_init();
   modules_init();
+  imports_init();
   fails_init();
 
   if (argc != 2) {
@@ -25,13 +27,19 @@ int main (int argc, char *argv[]) {
 
   char *f = argv[1];
   if (!str_ends(f, ".dms")) f = str_cat(f, ".dms", NULL);
-  if (!file_exists(f)) {
-    EXC_IO(str_f("File '%s' not found"));
-  }
+  char *fc = opt_nget(path_canonical(f));
+  if (!fc)
+    EXC_IO(str_f("File '%s' not found.", f));
 
-  Reader *r = reader_new(f, file_read(f), 1, 0);
-  machine_process(
-    str_left(f, -4), list_cons(list_new(), machine_new_root()),
-    reader_process(r)
-  );
+  char *fid = str_left(fc, -4);
+  Symbol *ssource = symbol_new_id(fid, f);
+  imports_put_on_way(ssource);
+
+  TRY {
+    Reader *r = reader_new(fid, file_read(fc), 1, 0);
+    machine_isolate_process(fc, list_new(), reader_process(r));
+  } CATCH (e) {
+    fails_from_exception(e);
+  }_TRY
+
 }

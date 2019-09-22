@@ -2,6 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "primitives/modstr.h"
+#include "dmc/Dec.h"
 #include "fails.h"
 #include "Machine.h"
 
@@ -10,19 +11,19 @@ static char *getstr (Machine *m) {
 }
 
 static void pushstr (Machine *m, char *s) {
-  machine_push(m, token_new_string(s));
+  machine_push(m, token_new_string(0, s));
 }
 
 static void cmp (Machine *m) {
   char *s2 = getstr(m);
   char *s1 = getstr(m);
-  machine_push(m, token_new_int(str_cmp_locale(s1, s2)));
+  machine_push(m, token_new_int(0, str_cmp_locale(s1, s2)));
 }
 
 static void ends (Machine *m) {
   char *sub = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_ends(s, sub)));
+  machine_push(m, token_new_int(0, str_ends(s, sub)));
 }
 
 static void from_iso (Machine *m) {
@@ -43,26 +44,26 @@ static void from_unicode (Machine *m) {
 static void greater (Machine *m) {
   char *s2 = getstr(m);
   char *s1 = getstr(m);
-  machine_push(m, token_new_int(str_greater_locale(s1, s2)));
+  machine_push(m, token_new_int(0, str_greater_locale(s1, s2)));
 }
 
 static void sindex (Machine *m) {
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_index(s, subs)));
+  machine_push(m, token_new_int(0, str_index(s, subs)));
 }
 
 static void index_from (Machine *m) {
   int ix = token_int(machine_pop_exc(m, token_INT));
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_index_from(s, subs, ix)));
+  machine_push(m, token_new_int(0, str_index_from(s, subs, ix)));
 }
 
 static void last_index (Machine *m) {
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_last_index(s, subs)));
+  machine_push(m, token_new_int(0, str_last_index(s, subs)));
 }
 
 static void join (Machine *m) {
@@ -83,50 +84,47 @@ static void join (Machine *m) {
   pushstr(m, buf_to_str(bf));
 }
 
-static void locale (Machine *m) {
-  char *l = getstr(m);
-  sys_locale(l);
-}
-
 static void replace (Machine *m) {
   char *new = getstr(m);
   char *old = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_string(str_replace(s, old, new)));
+  machine_push(m, token_new_string(0, str_replace(s, old, new)));
 }
 
 static void next_rune (Machine *m) {
   char *s = getstr(m);
   char *rune;
-  machine_push(m, token_new_string(str_next_rune(&rune, s)));
-  machine_push(m, token_new_string(rune));
+  machine_push(m, token_new_string(0, str_next_rune(&rune, s)));
+  machine_push(m, token_new_string(0, rune));
 }
 
 static void runes (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_runes(s)));
+  machine_push(m, token_new_int(0, str_runes(s)));
 }
 
 static void split (Machine *m) {
   char *sep = getstr(m);
   char *s = getstr(m);
+  Token * fn(char *s) { return token_new_string(0, s); }
   machine_push(m, token_new_list(
-    arr_map(str_split(s, sep), (FCOPY)token_new_string)
+    0, arr_map(str_split(s, sep), (FCOPY)fn)
   ));
 }
 
 static void split_trim (Machine *m) {
   char *sep = getstr(m);
   char *s = getstr(m);
+  Token * fn(char *s) { return token_new_string(0, s); }
   machine_push(m, token_new_list(
-    arr_map(str_split_trim(s, sep), (FCOPY)token_new_string)
+    0, arr_map(str_split_trim(s, sep), (FCOPY)fn)
   ));
 }
 
 static void starts (Machine *m) {
   char *sub = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(str_starts(s, sub)));
+  machine_push(m, token_new_int(0, str_starts(s, sub)));
 }
 
 static void trim (Machine *m) {
@@ -157,9 +155,9 @@ static void to_unicode (Machine *m) {
     unsigned *p = u;
     while (*p++) ++size;
     int len = size * 4 + 4;
-    Token *tk = token_new_blob(len);
-    memcpy(bytes_bs(token_blob(tk)), u, len);
-    machine_push(m, tk);
+    Bytes *bs = bytes_bf_new(len);
+    memcpy(bytes_bs(bs), u, len);
+    machine_push(m, token_new_blob(0, bs));
     return;
   }
   machine_fail(m, "String is no a valid UTF-8 one");
@@ -170,33 +168,96 @@ static void to_upper (Machine *m) {
   pushstr(m, str_to_upper(s));
 }
 
+static void subaux (Machine *m, int begin, int end, int is_right) {
+  void bounds (int size) {
+    if (is_right) end = size;
+    if (begin < 0) begin = size + begin;
+    if (begin < 0 || begin > size) fails_range(m, 0, size, begin);
+    if (end < 0) end = size + end;
+    if (end < 0 || end > size) fails_range(m, 0, size, end);
+  }
+
+  Token *tk = machine_pop_exc(m, token_STRING);
+  char *s = token_string(tk);
+  bounds(strlen(s));
+  machine_push(m, token_new_string(0, str_sub(s, begin, end)));
+}
+
+static void sub (Machine *m) {
+  Token *tk3 = machine_pop_opt(m, token_INT);
+  int end = token_int(tk3);
+  Token *tk2 = machine_pop_opt(m, token_INT);
+  int begin = token_int(tk2);
+  subaux(m, begin, end, 0);
+}
+
+static void left (Machine *m) {
+  Token *tk2 = machine_pop_opt(m, token_INT);
+  int cut = token_int(tk2);
+  subaux(m, 0, cut, 0);
+}
+
+static void right (Machine *m) {
+  Token *tk2 = machine_pop_opt(m, token_INT);
+  int cut = token_int(tk2);
+  subaux(m, cut, 0, 1);
+}
+
+static void isdigits (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_int(0, dec_digits(s)));
+}
+
+static void isnumber (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_int(0, dec_number(s)));
+}
+
+static void riso (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_string(0, dec_regularize_iso(s)));
+}
+
+static void rus (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_string(0, dec_regularize_us(s)));
+}
+
 // Resturns Map<primitives_Fn>
 Map *modstr_mk (void) {
   // Map<primitives_Fn>
   Map *r = map_new();
 
-  map_put(r, "str.cmp", cmp); // in locale
-  map_put(r, "str.ends", ends);
-  map_put(r, "str.fromIso", from_iso);
-  map_put(r, "str.fromUnicode", from_unicode);
-  map_put(r, "str.greater", greater); // in locale
-  map_put(r, "str.index", sindex);
-  map_put(r, "str.indexFrom", index_from);
-  map_put(r, "str.lastIndex", last_index);
-  map_put(r, "str.join", join);
-  map_put(r, "str.locale", locale);
-  map_put(r, "str.replace", replace);
-  map_put(r, "str.nextRune", next_rune);
-  map_put(r, "str.runes", runes);
-  map_put(r, "str.split", split);
-  map_put(r, "str.splitTrim", split_trim);
-  map_put(r, "str.starts", starts);
-  map_put(r, "str.trim", trim);
-  map_put(r, "str.ltrim", ltrim);
-  map_put(r, "str.rtrim", rtrim);
-  map_put(r, "str.toLower", to_lower);
-  map_put(r, "str.toUnicode", to_unicode);
-  map_put(r, "str.toUpper", to_upper);
+  map_put(r, "cmp", cmp); // in locale
+  map_put(r, "ends", ends);
+  map_put(r, "fromIso", from_iso);
+  map_put(r, "fromUnicode", from_unicode);
+  map_put(r, "greater", greater); // in locale
+  map_put(r, "index", sindex);
+  map_put(r, "indexFrom", index_from);
+  map_put(r, "lastIndex", last_index);
+  map_put(r, "join", join);
+  map_put(r, "replace", replace);
+  map_put(r, "nextRune", next_rune);
+  map_put(r, "runes", runes);
+  map_put(r, "split", split);
+  map_put(r, "splitTrim", split_trim);
+  map_put(r, "starts", starts);
+  map_put(r, "trim", trim);
+  map_put(r, "ltrim", ltrim);
+  map_put(r, "rtrim", rtrim);
+  map_put(r, "toLower", to_lower);
+  map_put(r, "toUnicode", to_unicode);
+  map_put(r, "toUpper", to_upper);
+
+  map_put(r, "sub", sub);
+  map_put(r, "left", left);
+  map_put(r, "right", right);
+
+  map_put(r, "digits?", isdigits);
+  map_put(r, "number?", isnumber);
+  map_put(r, "regularizeIso", riso);
+  map_put(r, "regularizeUs", rus);
 
   return r;
 }

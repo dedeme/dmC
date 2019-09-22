@@ -3,11 +3,11 @@
 
 /// Thread tests.
 
-((i print 200 sleep) (i (5)) for) thread
-((i print 200 sleep) (i (10)) for) jthread Th1 =
-((i print 200 sleep) (i (10)) for) jthread Th2 =
+((i =; i puts 200 sys,sleep; i) ((5)) for) sys,freeThread
+((i =; i puts 200 sys,sleep; i) ((10)) for) sys,thread Th1 =
+((i =; i puts 200 sys,sleep; i) ((10)) for) sys,thread Th2 =
 
-Th1 join
-Th2 join
+Th1 sys,join
+Th2 sys,join
 
-stk.empty? assert
+empty? assert

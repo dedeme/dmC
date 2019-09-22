@@ -4,35 +4,33 @@
 /// Int tests
 
 (
-  "int" import
-  "stk" import
+  "0" int,fromStr 0 == assert
+  "45" int,fromStr 45 == assert
+  "-452" int,fromStr -452 == assert
 
-  "0" int.fromStr 0 == assert
-  "45" int.fromStr 45 == assert
-  "-452" int.fromStr -452 == assert
+  -0 int,abs 0 == assert
+  45 int,abs 45 == assert
+  -452 int,abs 452 == assert
 
-  -0 int.abs 0 == assert
-  45 int.abs 45 == assert
-  -452 int.abs 452 == assert
+  // 2345 int,rnd print
+  // 2345 int,rnd print
 
-  // 2345 int.rnd println
-  // 2345 int.rnd println
+  43 5 int,div; 3 == assert; 8 == assert
 
-  43 5 int.div; 3 == assert; 8 == assert
+  5 5 int,max 5 == assert
+  2 5 int,max 5 == assert
+  5 2 int,max 5 == assert
 
-  5 5 int.max 5 == assert
-  2 5 int.max 5 == assert
-  5 2 int.max 5 == assert
+  5 5 int,min 5 == assert
+  12 5 int,min 5 == assert
+  5 12 int,min 5 == assert
 
-  5 5 int.min 5 == assert
-  12 5 int.min 5 == assert
-  5 12 int.min 5 == assert
+  0 i =
+  i ++ i =; i 1 == assert
+  i ++ i =; i 2 == assert
+  i -- i =; i 1 == assert
+  i -- i =; i 0 == assert
 
-  0 i =;
-  (i) ++; i 1 == assert
-  (i) ++; i 2 == assert
-  (i) --; i 1 == assert
-  (i) --; i 0 == assert
-
-  stk.empty? assert
+  empty? assert
 ) run
+

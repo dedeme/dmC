@@ -8,18 +8,18 @@
 
 static void fn1 (Machine *m, double (*f)(double)) {
   machine_push(m, token_new_float(
-    f(token_float(machine_pop_exc(m, token_FLOAT)))
+    0, f(token_float(machine_pop_exc(m, token_FLOAT)))
   ));
 }
 
 static void fn2 (Machine *m, double (*f)(double, double)) {
   double n2 = token_float(machine_pop_exc(m, token_FLOAT));
   double n1 = token_float(machine_pop_exc(m, token_FLOAT));
-  machine_push(m, token_new_float(f(n1, n2)));
+  machine_push(m, token_new_float(0, f(n1, n2)));
 }
 
 static void pi (Machine *m) {
-  machine_push(m, token_new_float(M_PI));
+  machine_push(m, token_new_float(0, M_PI));
 }
 
 static void ssin (Machine *m) {
@@ -51,7 +51,7 @@ static void satan2 (Machine *m) {
 }
 
 static void e (Machine *m) {
-  machine_push(m, token_new_float(M_E));
+  machine_push(m, token_new_float(0, M_E));
 }
 
 static void sexp (Machine *m) {
@@ -96,26 +96,26 @@ Map *modmath_mk (void) {
   // Map<primitives_Fn>
   Map *r = map_new();
 
-  map_put(r, "math.PI", pi);
-  map_put(r, "math.sin", ssin);
-  map_put(r, "math.cos", scos);
-  map_put(r, "math.tan", stan);
-  map_put(r, "math.asin", sasin);
-  map_put(r, "math.acos", sacos);
-  map_put(r, "math.atan", satan);
-  map_put(r, "math.atan2", satan2);
+  map_put(r, "pi", pi);
+  map_put(r, "sin", ssin);
+  map_put(r, "cos", scos);
+  map_put(r, "tan", stan);
+  map_put(r, "asin", sasin);
+  map_put(r, "acos", sacos);
+  map_put(r, "atan", satan);
+  map_put(r, "atan2", satan2);
 
-  map_put(r, "math.E", e);
-  map_put(r, "math.exp", sexp);
-  map_put(r, "math.exp2", sexp2);
-  map_put(r, "math.exp10", sexp10);
-  map_put(r, "math.log", slog);
-  map_put(r, "math.log2", slog2);
-  map_put(r, "math.log10", slog10);
+  map_put(r, "e", e);
+  map_put(r, "exp", sexp);
+  map_put(r, "exp2", sexp2);
+  map_put(r, "exp10", sexp10);
+  map_put(r, "log", slog);
+  map_put(r, "log2", slog2);
+  map_put(r, "log10", slog10);
 
-  map_put(r, "math.pow", spow);
-  map_put(r, "math.sqrt", ssqrt);
-  map_put(r, "math.cbrt", scbrt);
+  map_put(r, "pow", spow);
+  map_put(r, "sqrt", ssqrt);
+  map_put(r, "cbrt", scbrt);
 
   return r;
 }

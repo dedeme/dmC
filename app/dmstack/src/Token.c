@@ -15,65 +15,76 @@ union token_Value {
 struct token_Token {
   enum token_Type type;
   union token_Value *value;
+  int line;
 };
 
-Token *token_new_int (int value) {
+Token *token_new_int (int line, int value) {
   union token_Value *v = MALLOC(union token_Value);
   v->i = value;
   Token *this = MALLOC(Token);
   this->type = token_INT;
   this->value = v;
+  this->line = line;
   return this;
 }
 
-Token *token_new_float (double value) {
+Token *token_new_float (int line, double value) {
   union token_Value *v = MALLOC(union token_Value);
   v->f = value;
   Token *this = MALLOC(Token);
   this->type = token_FLOAT;
   this->value = v;
+  this->line = line;
   return this;
 }
 
-Token *token_new_string (char *value) {
+Token *token_new_string (int line, char *value) {
   union token_Value *v = MALLOC(union token_Value);
   v->s = value;
   Token *this = MALLOC(Token);
   this->type = token_STRING;
   this->value = v;
+  this->line = line;
   return this;
 }
 
-Token *token_new_blob (int length) {
+Token *token_new_blob (int line, Bytes *bs) {
   union token_Value *v = MALLOC(union token_Value);
-  v->bs = bytes_bf_new(length);
+  v->bs = bs;
   Token *this = MALLOC(Token);
   this->type = token_BLOB;
   this->value = v;
+  this->line = line;
   return this;
 }
 
 // value is Arr<Token>
-Token *token_new_list (Arr *value) {
+Token *token_new_list (int line, Arr *value) {
   union token_Value *v = MALLOC(union token_Value);
   v->a = value;
   Token *this = MALLOC(Token);
   this->type = token_LIST;
   this->value = v;
+  this->line = line;
   return this;
 }
 
-Token *token_new_symbol (Symbol *value) {
+Token *token_new_symbol (int line, Symbol *value) {
   union token_Value *v = MALLOC(union token_Value);
   v->sym = value;
   Token *this = MALLOC(Token);
   this->type = token_SYMBOL;
   this->value = v;
+  this->line = line;
   return this;
 }
 
 enum token_Type token_type (Token *this) {
   return this->type;
+}
+
+int token_line (Token *this) {
+  return this->line;
 }
 
 int token_int (Token *this) {
@@ -103,15 +114,15 @@ Symbol *token_symbol (Token *this) {
 
 Token *token_clone (Token *this) {
   switch (this->type) {
-    case token_INT: return token_new_int(this->value->i);
-    case token_FLOAT: return token_new_float(this->value->f);
-    case token_STRING: return token_new_string(str_new(this->value->s));
-    case token_SYMBOL: return token_new_symbol(symbol_clone(this->value->sym));
+    case token_INT: return token_new_int(0, this->value->i);
+    case token_FLOAT: return token_new_float(0, this->value->f);
+    case token_STRING: return token_new_string(0, str_new(this->value->s));
+    case token_SYMBOL: return token_new_symbol(
+      0, symbol_clone(this->value->sym)
+    );
     case token_BLOB: {
-      int len = bytes_len(this->value->bs);
-      Token *r = token_new_blob(len);
-      memcpy(bytes_bs(r->value->bs), bytes_bs(this->value->bs), len);
-      return r;
+      Bytes *bs = this->value->bs;
+      return token_new_blob(0, bytes_from_bytes(bytes_bs(bs), bytes_len(bs)));
     }
     case token_LIST: {
       int size = arr_size(this->value->a);
@@ -121,7 +132,7 @@ Token *token_clone (Token *this) {
       int sz = size;
       while (sz--)
         *target++ = token_clone(*source++);
-      return token_new_list(arr_new_c(size, (void **)r));
+      return token_new_list(0, arr_new_c(size, (void **)r));
     }
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");

@@ -126,4 +126,4 @@
 "" "" <= assert
 "abc" "abc" <= assert
 
-stk.empty? assert
+empty? assert

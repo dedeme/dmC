@@ -18,25 +18,28 @@ enum token_Type {
 typedef struct token_Token Token;
 
 ///
-Token *token_new_int (int value);
+Token *token_new_int (int line, int value);
 
 ///
-Token *token_new_float (double value);
+Token *token_new_float (int line, double value);
 
 ///
-Token *token_new_string (char *value);
+Token *token_new_string (int line, char *value);
 
 ///
-Token *token_new_blob (int length);
+Token *token_new_blob (int line, Bytes *bs);
 
 /// 'value' is Arr<Token>
-Token *token_new_list (Arr *value);
+Token *token_new_list (int line, Arr *value);
 
 ///
-Token *token_new_symbol (Symbol *value);
+Token *token_new_symbol (int line, Symbol *value);
 
 ///
 enum token_Type token_type (Token *this);
+
+///
+int token_line (Token *this);
 
 ///
 int token_int (Token *this);

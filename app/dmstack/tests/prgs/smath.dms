@@ -43,4 +43,4 @@ multi /* comment */
 ("a") (+) + toStr "(\"a\", +)" == assert
 ("a" ()) ((5) (3 1.4)) + toStr "(\"a\", (), (5), (3, 1.4))" == assert
 
-stk.empty? assert
+empty? assert

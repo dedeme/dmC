@@ -3,6 +3,7 @@
 
 #include "fails.h"
 #include <signal.h>
+#include <errno.h>
 
 struct fails_Mentry {
   pthread_t t;
@@ -49,20 +50,46 @@ void fails_unregister_machine (void) {
   arr_filter_in(current_machines, (FPRED)fn);
 }
 
+void fails_from_exception (Exc *ex) {
+  if (fatal_error_in_progress)
+    return;
+  fatal_error_in_progress = 1;
+
+  pthread_t th = pthread_self();
+  int fn (struct fails_Mentry *e) { return pthread_equal(e->t, th); }
+  struct fails_Mentry *e = opt_nget(
+    it_find(it_from(current_machines), (FPRED)fn)
+  );
+  if (e) {
+    Machine *current_machine = e->m;
+    if (current_machine)
+      machine_fail(current_machine, exc_msg(ex));
+  }
+  exit(0);
+}
+
 void fails_init (void) {
   current_machines = arr_new();
   signal(SIGFPE, signal_handler);
 }
 
 void fails_type (Machine *m, enum token_Type type) {
-  machine_fail(m, str_f(
-    "Stack pop: Expected token of type '%s', found type '%s'",
-    token_type_to_str(type),
-    token_type_to_str(token_type(arr_peek(machine_stack(m))))
-  ));
+  fails_type_in(m, type, arr_peek(machine_stack(m)));
 }
 
 void fails_types (Machine *m, int n, enum token_Type *types) {
+  fails_types_in(m, n, types, arr_peek(machine_stack(m)));
+}
+
+void fails_type_in (Machine *m, enum token_Type type, Token *token) {
+  machine_fail(m, str_f(
+    "Stack pop: Expected token of type '%s', found type '%s'",
+    token_type_to_str(type),
+    token_type_to_str(token_type(token))
+  ));
+}
+
+void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token) {
   // Arr<char>
   Arr *ts = arr_new();
   RANGE0(i, n) {
@@ -71,21 +98,21 @@ void fails_types (Machine *m, int n, enum token_Type *types) {
   machine_fail(m, str_f(
     "Stack pop: Expected token of type ['%s'], found type '%s'",
     str_join(ts, ", "),
-    token_type_to_str(token_type(arr_peek(machine_stack(m))))
+    token_type_to_str(token_type(token))
   ));
 }
 
 void fails_size_list (Machine *m, Arr *list, int expected) {
   machine_fail(m, str_f(
     "List %s\nExpected size: %d, actual size: %d",
-    token_to_str(token_new_list(list)), expected, arr_size(list)
+    token_to_str(token_new_list(0, list)), expected, arr_size(list)
   ));
 }
 
 void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected) {
   machine_fail(m, str_f(
     "List %s\nExpected element of type %d: '%s', actual: '%s'",
-    token_to_str(token_new_list(list)), ix,
+    token_to_str(token_new_list(0, list)), ix,
     token_type_to_str(expected),
     token_type_to_str(token_type(arr_get(list, ix)))
   ));
