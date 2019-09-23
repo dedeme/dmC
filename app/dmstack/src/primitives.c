@@ -23,6 +23,7 @@
 #include "primitives/modclock.h"
 #include "primitives/modpath.h"
 #include "primitives/modfile.h"
+#include "primitives/modiserver.h"
 
 /// Map<Map<primitives_Fn>>
 static Map *modules = NULL;
@@ -50,6 +51,7 @@ void primitives_init (void) {
   map_put(modules, "clock", modclock_mk());
   map_put(modules, "path", modpath_mk());
   map_put(modules, "file", modfile_mk());
+  map_put(modules, "iserver", modiserver_mk());
 }
 
 /// Returns Opt<primitives_Fn>

@@ -5,6 +5,7 @@
 
 #include "dmstack.h"
 #include "dmc/rnd.h"
+#include "args.h"
 #include "imports.h"
 #include "primitives.h"
 #include "modules.h"
@@ -21,11 +22,9 @@ int main (int argc, char *argv[]) {
   imports_init();
   fails_init();
 
-  if (argc != 2) {
-    EXC_RANGE(argc, 2, 2);
-  };
+  if (args_init(argc, argv)) return(0);
 
-  char *f = argv[1];
+  char *f = opt_get(args_param("dms"));
   if (!str_ends(f, ".dms")) f = str_cat(f, ".dms", NULL);
   char *fc = opt_nget(path_canonical(f));
   if (!fc)
@@ -36,7 +35,7 @@ int main (int argc, char *argv[]) {
   imports_put_on_way(ssource);
 
   TRY {
-    Reader *r = reader_new(fid, file_read(fc), 1, 0);
+    Reader *r = reader_new(1, fid, file_read(fc));
     machine_isolate_process(fc, list_new(), reader_process(r));
   } CATCH (e) {
     fails_from_exception(e);

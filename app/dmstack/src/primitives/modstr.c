@@ -229,10 +229,10 @@ Map *modstr_mk (void) {
   Map *r = map_new();
 
   map_put(r, "cmp", cmp); // in locale
-  map_put(r, "ends", ends);
+  map_put(r, "ends?", ends);
   map_put(r, "fromIso", from_iso);
   map_put(r, "fromUnicode", from_unicode);
-  map_put(r, "greater", greater); // in locale
+  map_put(r, "greater?", greater); // in locale
   map_put(r, "index", sindex);
   map_put(r, "indexFrom", index_from);
   map_put(r, "lastIndex", last_index);
@@ -242,7 +242,7 @@ Map *modstr_mk (void) {
   map_put(r, "runes", runes);
   map_put(r, "split", split);
   map_put(r, "splitTrim", split_trim);
-  map_put(r, "starts", starts);
+  map_put(r, "starts?", starts);
   map_put(r, "trim", trim);
   map_put(r, "ltrim", ltrim);
   map_put(r, "rtrim", rtrim);

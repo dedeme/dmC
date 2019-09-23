@@ -15,7 +15,7 @@ static Heap *base = NULL;
 static char *mprimitives[] = {
   "str", "lst", "stk", "tp", "sys", "map", "obj", "js", "path", "file",
   "time", "dec", "long", "cryp", "b64", "float", "int", "math",
-  "blob", "clock", NULL
+  "blob", "iserver", "clock", NULL
 };
 static char *mmemory[] = {
   "it", NULL

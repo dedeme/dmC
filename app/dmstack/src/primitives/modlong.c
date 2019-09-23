@@ -42,6 +42,30 @@ Token *modlong_from_long (long n) {
   ));
 }
 
+void *modlong_to_pointer (Machine *m, char *type, Token *tk) {
+  if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
+  // Arr<Token>
+  Arr *a = token_list(tk);
+  if (arr_size(a) != 2) fails_size_list(m, a, 2);
+  Token *sym = *arr_start(a);
+  Token *n = *(arr_start(a) + 1);
+  if (token_type(sym) != token_SYMBOL) fails_type_in(m, token_SYMBOL, sym);
+  char *id = symbol_id(token_symbol(sym));
+  if (!str_eq(id, type))
+    machine_fail(m, str_f(
+      "Expected pointer of type '%s', found '%s'", type, id
+    ));
+  return (void *)modlong_to_long(m, n);
+}
+
+Token *modlong_from_pointer (char *type, void *p) {
+  return token_new_list(0, arr_new_from(
+    token_new_symbol(0, symbol_new(type)),
+    modlong_from_long((long) p),
+    NULL
+  ));
+}
+
 static void new (Machine *m) {
   int i2 = token_int(machine_pop_exc(m, token_INT));
   int i1 = token_int(machine_pop_exc(m, token_INT));
@@ -114,6 +138,18 @@ static void less_eq (Machine *m) {
   machine_push(m, token_new_int(0, n1 <= n2));
 }
 
+static void add2 (Machine *m) {
+  long n2 = token_int(machine_pop_exc(m, token_INT));
+  long n1 = modlong_to_long(m, machine_pop(m));
+  machine_push(m, modlong_from_long(n1 + n2));
+}
+
+static void sub2 (Machine *m) {
+  long n2 = token_int(machine_pop_exc(m, token_INT));
+  long n1 = modlong_to_long(m, machine_pop(m));
+  machine_push(m, modlong_from_long(n1 - n2));
+}
+
 // Resturns Map<primitives_Fn>
 Map *modlong_mk (void) {
   // Map<primitives_Fn>
@@ -133,6 +169,9 @@ Map *modlong_mk (void) {
   map_put(r, ">=", greater_eq); // [LIST - LIST] - INT
   map_put(r, "<", less); // [LIST - LIST] - INT
   map_put(r, "<=", less_eq); // [LIST - LIST] - INT
+
+  map_put(r, "+Int", add2); // [LIST - INT] - LIST
+  map_put(r, "-Int", sub2); // [LIST - INT] - LIST
 
   return r;
 }

@@ -8,4 +8,6 @@
 
 #include "dmc/async.h"
 
+#define VERSION "201909"
+
 #endif

@@ -34,6 +34,17 @@ static void to_unicode(Buf *bf, char *hexdigits) {
 }
 
 Opt *tkreader_next(Reader *reader) {
+  if (reader_is_file(reader)) {
+    if (reader_nline(reader) == 1 && reader_prg_ix(reader) == 0) {
+      char *prg = reader_prg(reader);
+      if (*prg && *prg == '#' && prg[1] == '!') {
+        int ix = str_cindex(prg, '\n');
+        if (ix == -1) ix = strlen(prg);
+        reader_set_nline(reader, 2);
+        reader_set_prg_ix(reader, ix + 1);
+      }
+    }
+  }
   if (reader_next_tk(reader)) {
     Token *r = reader_next_tk(reader);
     reader_set_next_tk(reader, NULL);
@@ -265,10 +276,9 @@ Opt *tkreader_next(Reader *reader) {
       }
 
       Reader *subr = reader_new(
+        0,
         reader_source(reader),
-        str_sub(lstart, 0, p - lstart),
-        nline,
-        0
+        str_sub(lstart, 0, p - lstart)
       );
 
       // Arr<Token>

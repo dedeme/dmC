@@ -2,4 +2,94 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 (
+  ("systemTests" sys,init) (sys,init? !) if
+  sys,home file,dir size ! assert
+
+  sys,home "f1.txt" path,+ Path =
+  Path file,exists? ! assert
+  Path "" file,write
+  Path file,exists? assert
+
+  sys,home file,dir size 1 == assert
+  sys,home file,directory? assert
+  sys,home file,dir "" str,join : Path path,name : == assert
+
+  sys,home "f2.txt" path,+ Path =
+  Path "" file,write
+  Path file,regular? assert
+  sys,home file,dir size 2 == assert
+
+  sys,home "f0.txt" path,+ Path0 =
+  Path0 "" file,write
+  Path0 file,size long,toInt ! assert
+  Path0 file,read "" == assert
+
+  Path0 "ab" file,append
+  Path0 "123\n" file,append
+  Path0 "xx" file,append
+  Path0 file,size long,toInt assert
+  Path0 file,read "ab123\nxx" == assert
+
+  sys,home "f10.txt" path,+ Path10 =
+  Path10 "a" file,write
+  Path10 file,size long,toInt 1 == assert
+  Path10 file,read "a" == assert
+
+  sys,home "f11.txt" path,+ Path11 =
+  Path11 "a\nb" file,write
+  Path11 file,size long,toInt 3 == assert
+  Path11 file,read "a\nb" == assert
+
+  sys,home "f12.txt" path,+ Path12 =
+  Path12 "\n01234567890\n" file,write
+  Path12 file,size long,toInt 13 == assert
+  Path12 file,read "\n01234567890\n" == assert
+
+  sys,home "f2.txt" path,+ Path2 =
+  Path2 "aa\nb\n01234567890\n" file,write
+  Path2 file,size long,toInt 17 == assert
+  Path2 file,read "aa\nb\n01234567890\n" == assert
+
+  Path2 file,ropen BinFile =
+  BinFile file,readBin Bss =
+  BinFile file,close
+
+  sys,home "f2.bin" path,+ Path2b =
+  Path2b file,wopen BinFile =
+  BinFile Bss file,writeBin
+  BinFile file,close
+  Path2b file,read "aa\nb\n01234567890\n" == assert
+
+  sys,home "file" path,+ Dpath =;
+  Dpath file,mkdir
+
+  (
+    file,ropen File =
+    lst,new
+    (File file,readLine; (lst,push) else (pop; break) (dup "" ==) if ) loop
+    File, file,rclose
+    "" str,join
+  ) readText =
+
+  Dpath "f.txt" path,+ Path =
+  Path "aa\nb\n01234567890\n" file,write
+  Path file,read "aa\nb\n01234567890\n" == assert
+
+  Path "" file,write
+  Path file,read "" == assert
+
+  Path file,wopen File =
+  (i =; File i toStr file,writeText) ((10)) for
+  File file,close
+  Path file,read "0123456789" == assert
+
+  Path file,aopen File =
+  File "AB" file,writeText
+  File file,close
+  Path "XX" file,append
+  Path file,read "0123456789ABXX" == assert
+
+  sys,home file,del sys,home file,mkdir
+
+  empty? assert
 ) run

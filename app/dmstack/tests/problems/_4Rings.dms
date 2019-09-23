@@ -1,0 +1,96 @@
+// Copyright 22-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( Row =
+  (Row swap get toStr sys,print) ((7)) for
+  "" sys,println
+) printRow =
+
+// Row ix value
+( value =; ix =; Row =
+  1 (i =; (pop 0 break) (Row i get value ==) if) ((ix)) for
+) newDigit? =
+
+(  tp,new3  // Row min max - min & max inclusive
+  ( dup dup 0 get Row =
+    1 get mn =
+    2 get mx =
+    Row size sz =
+    sz 1 - // i
+    (
+      (
+        dup i =
+        Row i get 1 + value =
+        Row i value set; pop
+        (
+          (1 + i1 =; (Row i1 mn 1 - set; pop) (i1 sz <) if; i1)
+          (Row i value this,newDigit?)
+          if
+        )
+        else
+        ( 1 -)
+        ( value mx >)
+        if
+      )
+      else
+      (break)
+      (dup i =; i 0 < : i sz == : ||)
+      if
+    ) loop
+    (lst,new) else (Row clone lst,unary) (sz ==) if
+  )
+  it,new
+) mkIt =
+
+( Row =
+  Row 0 get a =
+  Row 1 get b =
+  Row 2 get c =
+  Row 3 get d =
+  Row 4 get e =
+  Row 5 get f =
+  Row 6 get g =
+
+  a b + r1 =
+  b c d + + r2 =
+  d e f + + r3 =
+  f g + r4 =
+
+  (1) else (0) (r1 r4 !=) elif (0) (r1 r3 !=) elif (0) (r1 r2 !=) if
+
+) filter =
+
+
+"Solutions for 1 to 7" sys,println
+(1, 2, 3, 4, 5, 6, 6) blob,from 1 7 mkIt It =
+It (this,filter) it,filter
+  (this,printRow) it,each
+
+"\nSolutions for 3 to 9" sys,println
+(3, 4, 5, 6, 7, 8, 8) blob,from 3 9 mkIt It =
+It (this,filter) it,filter
+  (this,printRow) it,each
+
+0
+( a =
+  ( b =
+    ( c =
+      ( d =
+        ( e =
+          ( f =
+            ( g =
+              a b + r1 =
+              b c d + + r2 =
+              d e f + + r3 =
+              f g + r4 =
+
+              (1 +) (r1 r2 == r1 r3 == r1 r4 == && &&) if
+            ) ((10)) for
+          ) ((10)) for
+        ) ((10)) for
+      ) ((10)) for
+    ) ((10)) for
+  ) ((10)) for
+) ((10)) for
+puts
+

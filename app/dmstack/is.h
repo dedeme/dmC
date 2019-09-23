@@ -11,7 +11,8 @@
 // Map<Token>
 Map *modit_mk (void);
 
-#endif// Copyright 11-Sept-2019 ºDeme
+#endif
+// Copyright 11-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Momory modules
@@ -27,7 +28,8 @@ void modules_init (void);
 /// Returns Opt<Map<Token>> - Functions from a module.
 Opt *modules_module (char *module);
 
-#endif// Copyright 25-Aug-2019 ºDeme
+#endif
+// Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Token reader.
@@ -43,7 +45,8 @@ Opt *modules_module (char *module);
 /// Throw 'ST_EXC' if fails.
 Opt *tkreader_next(Reader *reader);
 
-#endif// Copyright 05-Sept-2019 ºDeme
+#endif
+// Copyright 05-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Variables heap.
@@ -78,7 +81,8 @@ Token *heap_get (Heap *this, Symbol *s);
 /// Arr<HeapEntry>
 Arr *heap_entries (Heap *this);
 
-#endif// Copyright 25-Aug-2019 ºDeme
+#endif
+// Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Entry point.
@@ -91,7 +95,8 @@ Arr *heap_entries (Heap *this);
 ///
 int main (int argc, char *argv[]);
 
-#endif// Copyright 29-Aug-2019 ºDeme
+#endif
+// Copyright 29-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Errors generator.
@@ -160,7 +165,8 @@ void fails_range (Machine *m, int min, int max, int ix);
 ///   ix : Value out of range.
 void fails_check_range (Machine *m, int min, int max, int ix);
 
-#endif// Copyright 25-Aug-2019 ºDeme
+#endif
+// Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Token reader.
@@ -176,14 +182,16 @@ void fails_check_range (Machine *m, int min, int max, int ix);
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   source: Program source (file name, *string* or other identifier)
-///   prg   : Program to process.
-///   nline : Current process line.
-///   prg_ix: Current char index of prg. Process will start in this char.
-Reader *reader_new (char *source, char *prg, int nline, int prg_ix);
+///   is_file: Set to '1' if source came from a file.
+///   source : Program source (file name, *string* or other identifier)
+///   prg    : Program to process.
+Reader *reader_new (int is_file, char *source, char *prg);
 
 /// Returns a token type token_LIST.
 Token *reader_process (Reader *this);
+
+///
+int reader_is_file (Reader *is_file);
 
 ///
 char *reader_source (Reader *this);
@@ -213,7 +221,8 @@ void reader_set_nline (Reader *this, int value);
 ///
 void reader_fail (Reader *this, char *msg);
 
-#endif// Copyright 28-Aug-2019 ºDeme
+#endif
+// Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Primitives functions,
@@ -236,7 +245,23 @@ Opt *primitives_get (char *module, char *id);
 /// Returns Opt<Map[Token]> - Functions from a module.
 Opt *primitives_module (char *module);
 
-#endif// Copyright 19-Sept-2019 ºDeme
+#endif
+// Copyright 22-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// File system management.
+
+#ifndef PRIMITIVES_MODFILE_H
+  #define PRIMITIVES_MODFILE_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modfile_mk (void);
+
+#endif
+// Copyright 19-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Date-time management.
@@ -250,7 +275,8 @@ Opt *primitives_module (char *module);
 /// Returns Map<primitives_Fn>
 Map *modtime_mk (void);
 
-#endif// Copyright 31-Aug-2019 ºDeme
+#endif
+// Copyright 31-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Logical operations.
@@ -282,7 +308,23 @@ void modglobal1_less (Machine *m);
 /// Operation <=
 void modglobal1_less_eq (Machine *m);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+#endif
+// Copyright 23-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Internet server.
+
+#ifndef PRIMITIVES_MODISERVER_H
+  #define PRIMITIVES_MODISERVER_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modiserver_mk (void);
+
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Math module.
@@ -296,7 +338,8 @@ void modglobal1_less_eq (Machine *m);
 /// Returns Map<primitives_Fn>
 Map *modmath_mk (void);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // List module.
@@ -310,7 +353,8 @@ Map *modmath_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modlist_mk (void);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Map module.
@@ -324,7 +368,8 @@ Map *modlist_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modmap_mk (void);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Float module.
@@ -338,7 +383,8 @@ Map *modmap_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modfloat_mk (void);
 
-#endif// Copyright 03-Sept-2019 ºDeme
+#endif
+// Copyright 03-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Blob module.
@@ -352,7 +398,8 @@ Map *modfloat_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modblob_mk (void);
 
-#endif// Copyright 02-Sept-2019 ºDeme
+#endif
+// Copyright 02-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Stack management module.
@@ -366,7 +413,8 @@ Map *modblob_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modstk_mk (void);
 
-#endif// Copyright 28-Aug-2019 ºDeme
+#endif
+// Copyright 28-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Global scope module
@@ -380,7 +428,23 @@ Map *modstk_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modglobal_mk (void);
 
-#endif// Copyright 18-Sept-2019 ºDeme
+#endif
+// Copyright 22-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Path management.
+
+#ifndef PRIMITIVES_MODPATH_H
+  #define PRIMITIVES_MODPATH_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modpath_mk (void);
+
+#endif
+// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Cryptographic module
@@ -395,7 +459,8 @@ Map *modglobal_mk (void);
 Map *modcryp_mk (void);
 
 
-#endif// Copyright 18-Sept-2019 ºDeme
+#endif
+// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// B64 module.
@@ -408,7 +473,23 @@ Map *modcryp_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modb64_mk (void);
 
-#endif// Copyright 17-Sept-2019 ºDeme
+#endif
+// Copyright 20-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Floats with a fix number of decimals.
+
+#ifndef PRIMITIVES_MODDEC_H
+  #define PRIMITIVES_MODDEC_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *moddec_mk (void);
+
+#endif
+// Copyright 17-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Obj module.
@@ -422,7 +503,8 @@ Map *modb64_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modobj_mk (void);
 
-#endif// Copyright 17-Sept-2019 ºDeme
+#endif
+// Copyright 17-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // JSON module.
@@ -436,7 +518,8 @@ Map *modobj_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modjs_mk (void);
 
-#endif// Copyright 07-Sept-2019 ºDeme
+#endif
+// Copyright 07-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Container operations.
@@ -460,7 +543,8 @@ void modglobal2_getplus (Machine *m);
 /// Stack has: container - index - value.
 void modglobal2_set (Machine *m);
 
-#endif// Copyright 20-Sept-2019 ºDeme
+#endif
+// Copyright 20-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Long numbers module.
@@ -480,7 +564,14 @@ long modlong_to_long (Machine *m, Token *tk);
 ///
 Token *modlong_from_long (long n);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+///
+void *modlong_to_pointer (Machine *m, char *type, Token *tk);
+
+///
+Token *modlong_from_pointer (char *type, void *p);
+
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // String module.
@@ -494,7 +585,8 @@ Token *modlong_from_long (long n);
 /// Returns Map<primitives_Fn>
 Map *modstr_mk (void);
 
-#endif// Copyright 30-Aug-2019 ºDeme
+#endif
+// Copyright 30-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Module of simple mathematical operations.
@@ -526,7 +618,8 @@ void modglobal0_incr (Machine *m);
 /// Decrement
 void modglobal0_decr (Machine *m);
 
-#endif// Copyright 20-Sept-2019 ºDeme
+#endif
+// Copyright 20-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Clock module.
@@ -540,7 +633,8 @@ void modglobal0_decr (Machine *m);
 /// Returns Map<primitives_Fn>
 Map *modclock_mk (void);
 
-#endif// Copyright 04-Sept-2019 ºDeme
+#endif
+// Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 // Int module.
@@ -554,7 +648,8 @@ Map *modclock_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modint_mk (void);
 
-#endif// Copyright 18-Sept-2019 ºDeme
+#endif
+// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// System module.
@@ -568,7 +663,8 @@ Map *modint_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modsys_mk (void);
 
-#endif// Copyright 18-Sept-2019 ºDeme
+#endif
+// Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Tuples and assimilate objectes.
@@ -582,7 +678,8 @@ Map *modsys_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modtp_mk (void);
 
-#endif// Copyright 26-Aug-2019 ºDeme
+#endif
+// Copyright 26-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Global definitions.
@@ -592,7 +689,30 @@ Map *modtp_mk (void);
 
 #include "dmc/async.h"
 
-#endif// Copyright 16-Sept-2019 ºDeme
+#endif
+// Copyright 23-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Program arguments management.
+
+#ifndef ARGS_H
+  #define ARGS_H
+
+#include "dmc/std.h"
+
+/// If there is any error, show a message and returns '1'.
+int args_init (int argc, char *args[]);
+
+/// Returns Opt<char>. Arguments of dmstack.
+/// Params are:
+///   dms: Dms file.
+Opt *args_param (char *key);
+
+/// Returns Arr<char>. Argumentes of dms file.
+Arr *args_dms_params (void);
+
+#endif
+// Copyright 16-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Imports library
@@ -628,6 +748,7 @@ Heap *lib_get (Lib *this, Symbol *s);
 Arr *lib_entries (Lib *this);
 
 #endif
+
 // Copyright 05-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -665,7 +786,8 @@ int symbol_eq (Symbol *this, Symbol *other);
 ///
 char *symbol_to_str (Symbol *this);
 
-#endif// Copyright 25-Aug-2019 ºDeme
+#endif
+// Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Minimal meaning unit of program.
@@ -738,7 +860,8 @@ char *token_to_str (Token *this);
 ///
 char *token_type_to_str (enum token_Type type);
 
-#endif// Copyright 12-Sept-2019 ºDeme
+#endif
+// Copyright 12-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Import cache.
@@ -774,7 +897,8 @@ Heap *imports_base (void);
 /// error message in 'key'. Otherwise key is "".
 Kv *imports_read_symbol (Token *tk);
 
-#endif// Copyright 27-Aug-2019 ºDeme
+#endif
+// Copyright 27-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Stack intepreter.
@@ -787,9 +911,6 @@ Kv *imports_read_symbol (Token *tk);
 #include "Heap.h"
 
 typedef struct machine_Machine Machine;
-
-///
-char *machine_source (Machine *this);
 
 /// List<Machine>
 List *machine_pmachines (Machine *this);
@@ -830,12 +951,6 @@ Token *machine_pop_exc (Machine *this, enum token_Type type);
 /// Otherwise the element is not removed and returns NULL.
 Token *machine_pop_opt (Machine *this, enum token_Type type);
 
-/// Gets a variable value o raise a fail if 'id' does not exist.
-Token *machine_get_varx (Machine *this, Symbol *id);
-
-/// Creates a new local variable or raise a fail is 'id' is local-duplicate.
-void machine_create_varx (Machine *this, Symbol *id, Token *value);
-
 /// Run a process. The new process shares stack with the calling process.
 ///   source   : Source of 'prg'. Programatic 'prg's have as souce "".
 ///   pmachines: List<Machine> Parent machines.
@@ -850,7 +965,8 @@ Machine *machine_process (char *source, List *pmachines, Token *prg);
 ///   return   : A new machine creates by this function.
 Machine *machine_isolate_process (char *source, List *pmachines, Token *prg);
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Array structure.
@@ -1009,7 +1125,8 @@ Js *arr_to_js (Arr *this, Js *(*to)(void *e));
 /// Parses a Js to an element of 'this'.
 Arr *arr_from_js (Js *js, void *(*from)(Js *jse));
 
-#endif// Copyright 29-May-2018 ºDeme
+#endif
+// Copyright 29-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities to manage exceptions.
@@ -1107,7 +1224,8 @@ char *exc_illegal_state (char *cause);
 ///   cause: Description of problem.
 char *exc_io (char *cause);
 
-#endif// Copyright 16-Oct-2018 ºDeme
+#endif
+// Copyright 16-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Structure for working with bytes. Example:
@@ -1159,7 +1277,8 @@ Js *bytes_to_js(Bytes *this);
 ///
 Bytes *bytes_from_js(Js *js);
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Array of doubles.
@@ -1252,7 +1371,8 @@ Js *darr_to_js(Darr *this);
 ///
 Darr *darr_from_js(Js *js);
 
-#endif// Copyright 23-Apr-2019 ºDeme
+#endif
+// Copyright 23-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Hash (immutable) structure.
@@ -1314,7 +1434,8 @@ Js *hash_to_js(Hash *this, Js *(*to)(void *e));
 ///   from: Value converter.
 Hash *hash_from_js(Js *js, void *(*from)(Js *jse));
 
-#endif// Copyright 23-Apr-2019 ºDeme
+#endif
+// Copyright 23-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Pair key - value.
@@ -1334,7 +1455,8 @@ char *kv_key(Kv *this);
 ///
 void *kv_value(Kv *this);
 
-#endif// Copyright 17-Oct-2018 ºDeme
+#endif
+// Copyright 17-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Generator of random numbers.
@@ -1363,7 +1485,8 @@ Box *rnd_box_new(Arr *a);
 /// Returns the next element of 'this'.
 void *rnd_box_next(Box *this);
 
-#endif// Copyright 29-Apr-2019 ºDeme
+#endif
+// Copyright 29-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Management of multithread programs.
@@ -1430,7 +1553,8 @@ AsyncTimer *asyncTimer_new (void (*fn)(void *), void *value, int millis);
 /// Finalizes 'this'.
 void asyncTimer_end (AsyncTimer *this);
 
-#endif// Copyright 17-Oct-2018 ºDeme
+#endif
+// Copyright 17-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Cryptographic utilities.
@@ -1476,7 +1600,8 @@ char *cryp_encode (char *s, int nk, char *k);
 ///   k  : Key for encoding.
 char *cryp_decode (char *b64, char *k);
 
-#endif// Copyright 18-Oct-2018 ºDeme
+#endif
+// Copyright 18-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for HTML conections between client - server.
@@ -1606,7 +1731,8 @@ char *cgi_expired(void);
 ///                      - If 'fn' is running a Map with the only field
 ///                        {"longRunEnd"='false'}
 Map *cgi_long_run(Map *(*fn)(void *ctx, Map *rq), void *ctx, Map *rq);
-#endif// Copyright 30-May-2018 ºDeme
+#endif
+// Copyright 30-May-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Iterator.
@@ -1734,6 +1860,7 @@ Tp *it_duplicates (It *this, int (feq)(void *e1, void *e2));
 
 #endif
 
+
 // Copyright 18-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -1787,7 +1914,8 @@ void ext_zip(char *source, char *target);
 ///   target: A directory. It it does not exist, it is created.
 void ext_unzip(char *source, char *target);
 
-#endif// Copyright 23-Apr-2019 ºDeme
+#endif
+// Copyright 23-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Tuple of three values.
@@ -1810,7 +1938,8 @@ void *tp3_e2(Tp3 *this);
 ///
 void *tp3_e3(Tp3 *this);
 
-#endif// Copyright 17-Oct-2018 ºDeme
+#endif
+// Copyright 17-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for managing file paths.
@@ -1845,7 +1974,8 @@ char *path_cat (char *s, char *more, ...);
 ///   - Directories do not finish in '/'.
 Opt *path_canonical (char *s);
 
-#endif// Copyright 18-Oct-2018 ºDeme
+#endif
+// Copyright 18-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for managing dates.
@@ -2021,7 +2151,8 @@ DateTm *dateTm_add (DateTm *t, int millis);
 /// Returns t1 - t2 in milliseconds.
 int dateTm_df (DateTm *t1, DateTm *t2);
 
-#endif// Copyright 16-Oct-2018 ºDeme
+#endif
+// Copyright 16-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 ///String utilities.
@@ -2199,7 +2330,8 @@ char *str_to_escape (char *s);
 /// 'escape' the result is indefined.
 char *str_from_escape (char *s);
 
-#endif// Copyright 16-Oct-2018 ºDeme
+#endif
+// Copyright 16-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Map structure.
@@ -2264,7 +2396,8 @@ Js *map_to_js(Map *this, Js *(*to)(void *e));
 ///   from: Value converter.
 Map *map_from_js(Js *js, void *(*from)(Js *jse));
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Definitions.
@@ -2557,7 +2690,8 @@ typedef void (*FLOOP)(void *, SchdTask *);
 #define CGI_GET_MAP(var, map) \
   CGI_GET(Map *, var, js_ro, map)
 
-#endif// Copyright 16-Oct-2018 ºDeme
+#endif
+// Copyright 16-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for managing files.
@@ -2681,7 +2815,8 @@ void file_write_bin (FileLck *lck, Bytes *bs);
 /// Closes a file open with file_ropen, file_wopen or file_aopen.
 void file_close (FileLck *lck);
 
-#endif// Copyright 16-Oct-2018 ºDeme
+#endif
+// Copyright 16-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Strings constructor.
@@ -2723,7 +2858,8 @@ char *buf_to_str(Buf *this);
 /// Resets buffer (but does not reduce its size).
 void buf_reset(Buf *this);
 
-#endif// Copyright 22-Apr-2019 ºDeme
+#endif
+// Copyright 22-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Option.
@@ -2757,7 +2893,8 @@ void *opt_oget (Opt *this, void *value);
 /// Returns NULL if 'this' is empty.
 void *opt_nget (Opt *this);
 
-#endif// Copyright 17-Oct-2018 ºDeme
+#endif
+// Copyright 17-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for managing json strings.
@@ -2819,7 +2956,8 @@ Js *js_wa(Arr *a);
 /// Write a Map<Js>.
 Js *js_wo(Map *m);
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Array of ints.
@@ -2912,7 +3050,8 @@ Js *iarr_to_js(Iarr *this);
 ///
 Iarr *iarr_from_js(Js *js);
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Standard files of dmc.
@@ -2941,7 +3080,8 @@ Iarr *iarr_from_js(Js *js);
 #include "file.h"
 #include "Js.h"
 
-#endif// Copyright 1-Jun-2018 ºDeme
+#endif
+// Copyright 1-Jun-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// List (immutable) structure.
@@ -3005,7 +3145,8 @@ Js *list_to_js(List *this, Js *(*to)(void *));
 /// list_from_json restores a serialized List using 'from' to convert elements.
 List *list_from_js(Js *js, void *(*from)(Js *));
 
-#endif// Copyright 15-Oct-2018 ºDeme
+#endif
+// Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Utilities for managing globals values.
@@ -3029,6 +3170,9 @@ char *sys_home (void);
 ///
 char *sys_uname (void);
 
+///
+char *sys_udir (void);
+
 /// Sets LC_ALL, for example:
 ///   sys_set_locale("es_ES.utf8")
 void sys_set_locale (char *language);
@@ -3044,7 +3188,8 @@ Opt *sys_cmd(char *command);
 /// Stops the current thread.
 void sys_sleep (int millis);
 
-#endif// Copyright 01-May-2019 ºDeme
+#endif
+// Copyright 01-May-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Inet server.
@@ -3085,7 +3230,8 @@ IserverRq *iserver_read (Iserver *this);
 ///
 void iserver_close (Iserver *this);
 
-#endif// Copyright 18-Oct-2018 ºDeme
+#endif
+// Copyright 18-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Decimal number and numeric utilities.
@@ -3143,7 +3289,8 @@ Js *dec_to_js(Dec *this);
 ///
 Dec *dec_from_js(Js *js);
 
-#endif// Copyright 23-Apr-2019 ºDeme
+#endif
+// Copyright 23-Apr-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// Pair of two values.
@@ -3163,7 +3310,8 @@ void *tp_e1(Tp *this);
 ///
 void *tp_e2(Tp *this);
 
-#endif// Copyright 17-Oct-2018 ºDeme
+#endif
+// Copyright 17-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 /// B64 encoder - decoder

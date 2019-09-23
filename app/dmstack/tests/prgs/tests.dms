@@ -1,6 +1,8 @@
 // Copyright 07-Sep-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+"systemTests" sys,init
+
 ("./float", fl) import
 "./int" import
 "logic" import

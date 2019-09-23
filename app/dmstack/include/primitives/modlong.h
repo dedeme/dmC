@@ -18,4 +18,10 @@ long modlong_to_long (Machine *m, Token *tk);
 ///
 Token *modlong_from_long (long n);
 
+///
+void *modlong_to_pointer (Machine *m, char *type, Token *tk);
+
+///
+Token *modlong_from_pointer (char *type, void *p);
+
 #endif

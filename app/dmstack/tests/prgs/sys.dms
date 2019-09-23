@@ -4,6 +4,12 @@
 "c" s0 =
 
 (
+  ("systemTests" sys,init) (sys,init? !) if
+  sys,home path,name "systemTests" == assert
+  sys,udir path,canonical
+    sys,home path,parent path,parent path,parent path canonical
+    == assert
+
   /*
   "ab" sys,print "c" sys,println
   "€\n¶" sys,println
@@ -20,5 +26,8 @@
     (s2 s1 + sys,println) (1) if
     s1 sys,println
   ) run
+
+  sys,args (sys,println) lst,each
+
   empty? assert
 ) run

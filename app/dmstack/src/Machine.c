@@ -51,7 +51,7 @@ Token *machine_prg (Machine *this) {
 
 static void eval (Machine *this) {
   char *p = token_string(machine_pop_exc(this, token_STRING));
-  Reader *r = reader_new("[EVAL]", p, 1, 0);
+  Reader *r = reader_new(0, "[EVAL]", p);
   machine_process("", this->pmachines, reader_process(r));
 }
 
@@ -66,6 +66,14 @@ static void mrun (Machine *this) {
   primitives_Fn fn = opt_nget(primitives_get(module, fnc));
   if (fn) fn(this);
   else machine_fail(this, str_f("Symbol '%s.%s' not found", module, fnc));
+}
+
+static pthread_mutex_t mutex;
+static void sync (Machine *this) {
+  Token *prg = machine_pop_exc(this, token_LIST);
+  pthread_mutex_lock(&mutex);
+  machine_process("", this->pmachines, prg);
+  pthread_mutex_unlock(&mutex);
 }
 
 static void sif (Machine *this) {
@@ -220,7 +228,7 @@ static void import (Machine *this) {
   if (!imports_is_on_way(ssource) && !imports_get(ssource)) {
     imports_put_on_way(ssource);
 
-    Reader *r = reader_new(fid, file_read(fc), 1, 0);
+    Reader *r = reader_new(1, fid, file_read(fc));
     machine_isolate_process(
       fc, this->pmachines, reader_process(r)
     );
@@ -450,6 +458,7 @@ static Machine *cprocess (Machine *m) {
       if (str_eq(name, "nop")) continue;
       else if (str_eq(name, "eval")) eval(m);
       else if (str_eq(name, "run")) run(m);
+      else if (str_eq(name, "sync")) sync(m);
       else if (str_eq(name, "mrun")) mrun(m);
       else if (str_eq(name, "else") || str_eq(name, "elif"))
         machine_push(m, tk);

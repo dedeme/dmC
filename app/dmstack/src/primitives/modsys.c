@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include "Machine.h"
+#include "args.h"
 
 static struct {
   char *home;
@@ -17,31 +18,41 @@ static void init (Machine *m) {
   uid_t uid = getuid();
   struct passwd *udata = getpwuid(uid);
 
-  sys.home = path_cat(udata->pw_dir, ".dmCApp", path, NULL);
+  if (sys.home)
+    machine_fail(m, "sys init already has been called");
+
+  sys.home = path_cat(udata->pw_dir, ".dmStack/apps", path, NULL);
   sys.uname = str_new(udata->pw_name);
   sys.udir = str_new(udata->pw_dir);
   file_mkdir(sys.home);
 }
 
+static void isinit (Machine *m) {
+  machine_push(m, token_new_int(0, sys.home != 0));
+}
+
 static void home (Machine *m) {
-  if (sys.home) {
-    machine_push(m, token_new_string(0, sys.home));
-  }
-  machine_fail(m, "sys init was not called");
+  if (sys.home) machine_push(m, token_new_string(0, sys.home));
+  else machine_fail(m, "sys init was not called");
 }
 
 static void uname (Machine *m) {
-  if (sys.uname) {
-    machine_push(m, token_new_string(0, sys.uname));
-  }
-  machine_fail(m, "sys init was not called");
+  if (sys.uname) machine_push(m, token_new_string(0, sys.uname));
+  else machine_fail(m, "sys init was not called");
 }
 
 static void udir (Machine *m) {
-  if (sys.udir) {
-    machine_push(m, token_new_string(0, sys.udir));
-  }
-  machine_fail(m, "sys init was not called");
+  if (sys.udir) machine_push(m, token_new_string(0, sys.udir));
+  else machine_fail(m, "sys init was not called");
+}
+
+static void args (Machine *m) {
+  // Arr<Token>
+  Arr *a = arr_new();
+  EACH(args_dms_params(), char, p) {
+    arr_push(a, token_new_string(0, p));
+  }_EACH
+  machine_push(m, token_new_list(0, a));
 }
 
 static void locale (Machine *m) {
@@ -156,9 +167,11 @@ Map *modsys_mk (void) {
   Map *r = map_new();
 
   map_put(r, "init", init); // STRING - []
+  map_put(r, "init?", isinit); // [] - INT
   map_put(r, "home", home); // [] - STRING
   map_put(r, "uname", uname); // [] - STRING
   map_put(r, "udir", udir); // [] - STRING
+  map_put(r, "args", args); // [] - LIST
 
   map_put(r, "locale", locale); // STRING - STRING
   map_put(r, "setLocale", setlocale); // STRING - BLOB

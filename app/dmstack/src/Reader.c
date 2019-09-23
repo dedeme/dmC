@@ -7,6 +7,7 @@
 #include "imports.h"
 
 struct reader_Reader {
+  int is_file;
   char *source;
   int nline;
   char *prg;
@@ -16,12 +17,13 @@ struct reader_Reader {
   Arr *syms;
 };
 
-Reader *reader_new (char *source, char *prg, int nline, int prg_ix) {
+Reader *reader_new (int is_file, char *source, char *prg) {
   Reader *this = MALLOC(Reader);
+  this->is_file = is_file;
   this->source = source;
-  this->nline = nline;
+  this->nline = 1;
   this->prg = prg;
-  this->prg_ix = prg_ix;
+  this->prg_ix = 0;
   this->next_tk = NULL;
   this->syms = arr_new();
   return this;
@@ -76,6 +78,10 @@ Token *reader_process (Reader *this) {
     tk = opt_nget(tkreader_next(this));
   }
   return token_new_list(nline, r);
+}
+
+int reader_is_file (Reader *this) {
+  return this->is_file;
 }
 
 char *reader_source (Reader *this) {

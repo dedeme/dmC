@@ -10,7 +10,7 @@ class Includes {
         add(path);
       } else {
         if (path.endsWith(".h"))
-          Std.append(output, Std.read(path));
+          Std.append(output, Std.read(path) + "\n");
       }
     }
   }
