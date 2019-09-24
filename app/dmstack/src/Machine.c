@@ -51,7 +51,7 @@ Token *machine_prg (Machine *this) {
 
 static void eval (Machine *this) {
   char *p = token_string(machine_pop_exc(this, token_STRING));
-  Reader *r = reader_new(0, "[EVAL]", p);
+  Reader *r = reader_new("[EVAL]", p, 0);
   machine_process("", this->pmachines, reader_process(r));
 }
 
@@ -228,7 +228,7 @@ static void import (Machine *this) {
   if (!imports_is_on_way(ssource) && !imports_get(ssource)) {
     imports_put_on_way(ssource);
 
-    Reader *r = reader_new(1, fid, file_read(fc));
+    Reader *r = reader_new_from_file(fid, file_read(fc));
     machine_isolate_process(
       fc, this->pmachines, reader_process(r)
     );
@@ -354,7 +354,7 @@ static Machine *cprocess (Machine *m) {
           if (token_type(tk) == token_SYMBOL) {
             char *symbol = symbol_name(token_symbol(tk));
             if (str_eq(symbol, "="))
-              machine_fail(m, "Import symbols can not be set");
+              machine_fail(m, "Imported symbols can not be set");
             if (str_eq(symbol, "&")) {
               arr_push(m->stack, t);
               module = NULL;

@@ -276,9 +276,9 @@ Opt *tkreader_next(Reader *reader) {
       }
 
       Reader *subr = reader_new(
-        0,
         reader_source(reader),
-        str_sub(lstart, 0, p - lstart)
+        str_sub(lstart, 0, p - lstart),
+        nline
       );
 
       // Arr<Token>

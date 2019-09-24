@@ -118,6 +118,7 @@ Map *modglobal_mk (void) {
   map_put(r, "size", modglobal2_size);
   map_put(r, "get", modglobal2_get);
   map_put(r, "set", modglobal2_set);
+  map_put(r, "set+", modglobal2_setplus);
 
   return r;
 }

@@ -6,17 +6,17 @@
 (
   map,new M =
 
-  M map,sort () == assert
+  M dup map,sort () == assert
   M map,keys () == assert
   M map,values () == assert
 
-  M "b" 2 map,put; "c" 33 map,put; "a" 1 map,put; "c" 3 map,put; pop
+  M "b" 2 map,put+; "c" 33 map,put+; "a" 1 map,put+; "c" 3 map,put
   M "a" map,get (1) == assert
   M "b" map,get (2) == assert
   M "c" map,get (3) == assert
 
   M {("b": 2), ("c": 3), ("a": 1)} == assert
-  M map,sort
+  M dup map,sort
     {
       ("a": 1)
       ("b": 2)
@@ -26,7 +26,7 @@
   M map,keys ("a", "b", "c") == assert
   M map,values (1, 2, 3) == assert
 
-  M "c" map,remove;pop
+  M "c" map,remove
   M "a" map,get (1) == assert
   M "b" map,get (2) == assert
   M size 2 == assert

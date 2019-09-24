@@ -5,7 +5,7 @@
 #include "Reader.h"
 
 static Token *read (char *id, char *prg) {
-  return reader_process(reader_new(0, str_f("IT-%s", id), prg));
+  return reader_process(reader_new(str_f("IT-%s", id), prg, 0));
 }
 
 static Token *new () {
@@ -31,7 +31,7 @@ static Token *from () {
     "dup size 0 tp,new3 "
     "( Ob =; Ob; Ob 1 get; Ob 2 get " // Ob sz i
     "  (pop; pop; ()) else "
-    "  (i =; Ob =; Ob 0 get i get lst,unary; Ob 2 i 1 + set; pop;) "
+    "  (i =; Ob =; Ob 0 get i get lst,unary; Ob 2 i 1 + set) "
     "  (i =; sz =; i; i sz <) if ) "
     "it,new"
   );
@@ -42,7 +42,7 @@ static Token *range () {
    "tp,new2 "
    "( (pop; ()) "
    "  else "
-   "  (Ob =; Ob 0 get r =; Ob 0 r 1 + set; pop; r lst,unary) "
+   "  (Ob =; Ob 0 get r =; Ob 0 r 1 + set; r lst,unary) "
    "  (Ob = Ob; Ob 0 get Ob 1 get <) "
    "  if) "
    "it,new"
@@ -70,7 +70,7 @@ static Token *peek () {
 static Token *next () {
   return read("NEXT",
     "(\"Iterator is empty\" fail) else "
-    "(It =; It 1 get 0 get; It 1 :It 0 get It 2 get run: set; pop) "
+    "(It =; It 1 get 0 get; It 1 :It 0 get It 2 get run: set) "
     "(dup it,has?) if"
   );
 }
@@ -162,7 +162,7 @@ static Token *take () {
     "0 tp,new3 " // It n i
     "( (pop; ()) "
     "  else "
-    "  (Ob =; Ob 2 :: Ob 2 get 1 + :: set; 0 get it,next lst,unary) "
+    "  (Ob =; Ob 2 :: Ob 2 get 1 + :: set+; 0 get it,next lst,unary) "
     "  (Ob = Ob; Ob 2 get Ob 1 get < Ob 0 get it,has? &&) "
     "  if) "
     "it,new"
@@ -245,10 +245,10 @@ static Token *count () {
 static Token *duplicates () {
   return read("DUPLICATES",
     "lst,new lst,new tp,new2 tp,new3 (0) + " // (It fn (Dup Res) ie) Ob =
-    "( dup; Ob =; 3 Ob 0 get it,next set; "
-    "  ( ( dup; Ob =; Ob 2 get 1 get; Ob 3 get; lst,push; pop) "
+    "( dup; Ob =; 3 Ob 0 get it,next set+; "
+    "  ( ( dup; Ob =; Ob 2 get 1 get; Ob 3 get; lst,push) "
     "    else "
-    "    ( dup; Ob =; Ob 2 get 0 get; Ob 3 get; lst,push; pop) "
+    "    ( dup; Ob =; Ob 2 get 0 get; Ob 3 get; lst,push) "
     "    ( dup 2 get 1 get " // Res
     "      (e =; dup; Ob =; e; Ob 3 get; Ob 1 get; run) " // (e ie fn)
     "      lst,any? "
@@ -375,34 +375,34 @@ static Token *reduce () {
 
 static Token *to () {
   return read("TO",
-    "lst,new (lst,push) it,reduce"
+    "lst,new (lst,push+) it,reduce"
   );
 }
 
 static Token *shuffle () {
   return read("SUFFLE",
-    "it,to lst,shuffle it,from"
+    "it,to dup lst,shuffle it,from"
   );
 }
 
 static Token *reverse () {
   return read("REVERSE",
-    "it,to lst,reverse it,from"
+    "it,to dup lst,reverse it,from"
   );
 }
 
 static Token *sort () {
   return read("SORT",
-    "swap it,to swap lst,sort it,from"
+    "(f =; it,to dup (f) lst,sort it,from) run"
   );
 }
 
 static Token *box () {
   return read("BOX",
-    "dup lst,shuffle it,from tp,new2 " // List It
+    "dup dup lst,shuffle it,from tp,new2 " // List It
     "( "
     "  ( Ob = "
-    "    Ob 1 Ob 0 get lst,shuffle it,from set "
+    "    Ob 1 Ob 0 get dup lst,shuffle it,from set+ "
     "      1 get it,next lst,unary) "
     "  else "
     "  (1 get it,next lst,unary) "

@@ -55,6 +55,10 @@ static void args (Machine *m) {
   machine_push(m, token_new_list(0, a));
 }
 
+static void sexit (Machine *m) {
+  exit(token_int(machine_pop_exc(m, token_INT)));
+}
+
 static void locale (Machine *m) {
   machine_push(m, token_new_string(0, sys_locale()));
 }
@@ -128,6 +132,11 @@ static void println (Machine *m) {
   puts(token_string(tk));
 }
 
+static void error (Machine *m) {
+  Token *tk = machine_pop_exc(m, token_STRING);
+  fputs(token_string(tk), stderr);
+}
+
 static void sgetline (Machine *m) {
   Buf *bf = buf_new();
   char ch;
@@ -172,6 +181,7 @@ Map *modsys_mk (void) {
   map_put(r, "uname", uname); // [] - STRING
   map_put(r, "udir", udir); // [] - STRING
   map_put(r, "args", args); // [] - LIST
+  map_put(r, "exit", sexit); // INT - []
 
   map_put(r, "locale", locale); // STRING - STRING
   map_put(r, "setLocale", setlocale); // STRING - BLOB
@@ -185,6 +195,7 @@ Map *modsys_mk (void) {
 
   map_put(r, "print", print); // STRING - []
   map_put(r, "println", println); // STRING - []
+  map_put(r, "error", error); // STRING - []
   map_put(r, "getline", sgetline); // [] - STRING (read until enter)
   map_put(r, "gettext", sgettext); // STRING - STRING (read until text)
   map_put(r, "getpass", sgetpass); // STRING - STRING

@@ -6,21 +6,21 @@
 (
   // starts-ends
 
-  "ab" "" str,starts assert
-  "" "" str,starts assert
-  "ab" "a" str,starts assert
-  "ab" "ab" str,starts assert
-  "" "b" str,starts ! assert
-  "ab" "b" str,starts ! assert
-  "ab" "abc" str,starts ! assert
+  "ab" "" str,starts? assert
+  "" "" str,starts? assert
+  "ab" "a" str,starts? assert
+  "ab" "ab" str,starts? assert
+  "" "b" str,starts? ! assert
+  "ab" "b" str,starts? ! assert
+  "ab" "abc" str,starts? ! assert
 
-  "ab" "" str,ends assert
-  "" "" str,ends assert
-  "ab" "a" str,ends ! assert
-  "ab" "ab" str,ends assert
-  "" "b" str,ends ! assert
-  "ab" "b" str,ends assert
-  "ab" "cba" str,ends ! assert
+  "ab" "" str,ends? assert
+  "" "" str,ends? assert
+  "ab" "a" str,ends? ! assert
+  "ab" "ab" str,ends? assert
+  "" "b" str,ends? ! assert
+  "ab" "b" str,ends? assert
+  "ab" "cba" str,ends? ! assert
 
   // index - lastIndex
 
@@ -219,20 +219,20 @@
   "cañón" str,toUpper "CAÑÓN" != assert
   "é" "f" > assert
   "é" "f" str,cmp 0 < ! assert
-  "é" "f" str,greater assert
+  "é" "f" str,greater? assert
   "es_ES.utf8" sys,setLocale
   sys,locale "es_ES.utf8" == assert
   "cañón" str,toUpper "CAÑÓN" == assert
   "CAÑÓN" str,toLower "cañón" == assert
   "é" "f" > assert
   "é" "f" str,cmp 0 < assert
-  "é" "f" str,greater ! assert
+  "é" "f" str,greater? ! assert
   "C" sys,setLocale
   sys,locale "C" == assert
   "CAÑÓN" str,toLower "cañón" != assert
   "é" "f" > assert
   "é" "f" str,cmp 0 < ! assert
-  "é" "f" str,greater assert
+  "é" "f" str,greater? assert
 
   empty? assert
 ) run

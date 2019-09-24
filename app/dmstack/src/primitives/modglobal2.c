@@ -46,11 +46,14 @@ void modglobal2_get (Machine *m) {
   fails_types(m, 2, (enum token_Type[]){token_BLOB, token_LIST});
 }
 
-void modglobal2_set (Machine *m) {
+static void setboth (Machine *m, int isplus) {
   Token *tk3 = machine_pop(m);
   Token *tk2 = machine_pop_exc(m, token_INT);
   int ix = token_int(tk2);
-  Token *tk1 = machine_peek_opt(m, token_BLOB);
+  Token *tk1 = isplus
+    ? machine_peek_opt(m, token_BLOB)
+    : machine_pop_opt(m, token_BLOB)
+  ;
   if (tk1) {
     if (token_type(tk3) != token_INT) {
       machine_push(m, tk2);
@@ -63,7 +66,10 @@ void modglobal2_set (Machine *m) {
     bytes_bs(bs)[ix] = token_int(tk3);
     return;
   }
-  tk1 = machine_peek_opt(m, token_LIST);
+  tk1 = isplus
+    ? machine_peek_opt(m, token_LIST)
+    : machine_pop_opt(m, token_LIST)
+  ;
   if (tk1) {
     // Arr<Token>
     Arr *a = token_list(tk1);
@@ -74,4 +80,12 @@ void modglobal2_set (Machine *m) {
     return;
   }
   fails_types(m, 2, (enum token_Type[]){token_BLOB, token_LIST});
+}
+
+void modglobal2_set (Machine *m) {
+  setboth(m, 0);
+}
+
+void modglobal2_setplus (Machine *m) {
+  setboth(m, 1);
 }

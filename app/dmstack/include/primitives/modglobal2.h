@@ -15,11 +15,12 @@ void modglobal2_size (Machine *m);
 /// Return an element of container and removes the container.
 void modglobal2_get (Machine *m);
 
-/// Return an element of container and keeps the container.
-void modglobal2_getplus (Machine *m);
-
 /// Sets an element of container and removes the container.
 /// Stack has: container - index - value.
 void modglobal2_set (Machine *m);
+
+/// Sets an element of container and keeps the container.
+/// Stack has: container - index - value.
+void modglobal2_setplus (Machine *m);
 
 #endif

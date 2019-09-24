@@ -182,11 +182,11 @@
   0 (1, 2, 3) it,from (+) it,each; 6 == assert
   0 () it,from (+) it,each; 0 == assert
 
-  () () it,from (i = e =; e i toStr + lst,push) it,eachIx
+  () () it,from (i = e =; e i toStr + lst,push+) it,eachIx
     () == assert
-  () ("a") it,from (i = e =; e i toStr + lst,push) it,eachIx
+  () ("a") it,from (i = e =; e i toStr + lst,push+) it,eachIx
     ("a0") == assert
-  () ("a", "b", "c") it,from (i = e =; e i toStr + lst,push) it,eachIx
+  () ("a", "b", "c") it,from (i = e =; e i toStr + lst,push+) it,eachIx
     ("a0", "b1", "c2") == assert
 
   // == - eq?
@@ -234,9 +234,9 @@
 
   // reduce
 
-  () it,from () (lst,push) it,reduce () == assert
-  (1) it,from () (lst,push) it,reduce (1) == assert
-  (4, "a", ()) it,from () (lst,push) it,reduce (4, "a", ()) == assert
+  () it,from () (lst,push+) it,reduce () == assert
+  (1) it,from () (lst,push+) it,reduce (1) == assert
+  (4, "a", ()) it,from () (lst,push+) it,reduce (4, "a", ()) == assert
 
   // shuffle - reverse - sort
 

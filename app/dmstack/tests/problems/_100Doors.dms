@@ -4,7 +4,7 @@
 clock,now C =
 
 // Initialization
-100 blob,new (0 set) ((100)) for Doors =
+100 blob,new (0 set+) ((100)) for Doors =
 
 // Calculus
 Doors
@@ -12,7 +12,7 @@ Doors
   ( i =
     i
       (1) else (0) (this,Doors i get) if
-    set
+    set+
   )
   ((dup) (100) (1 +)) for
 )

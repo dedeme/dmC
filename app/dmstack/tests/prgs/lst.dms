@@ -22,18 +22,18 @@
 
   // clear
 
-  L0 lst,clear L0 == assert
-  L1 lst,clear L0 == assert
-  L2 lst,clear L0 == assert
+  L0 clone dup lst,clear L0 == assert
+  L1 clone dup lst,clear L0 == assert
+  L2 clone dup lst,clear L0 == assert
 
   // push - push0 - pop - pop0 - peek - peek0
 
-  () 23 lst,push L1 == assert
-  (1) 2 lst,push (1, 2) == assert
-  (1, 2, 3) 4 lst,push (1, 2, 3, 4) == assert
-  () 23 lst,push0 L1 == assert
-  (1) 2 lst,push0 (2, 1) == assert
-  (1, 2, 3) 4 lst,push0 (4, 1, 2, 3) == assert
+  () 23 lst,push+ L1 == assert
+  (1) dup 2 lst,push (1, 2) == assert
+  (1, 2, 3) 4 lst,push+ (1, 2, 3, 4) == assert
+  () 23 lst,push0+ L1 == assert
+  (1) 2 lst,push0+ (2, 1) == assert
+  (1, 2, 3) dup 4 lst,push0 (4, 1, 2, 3) == assert
   (1) L =
   L lst,pop 1 == assert; L () == assert
   (1, 2, 3) L =
@@ -53,60 +53,60 @@
 
   // insert - insertList
 
-  () 0 1 lst,insert (1) == assert
-  (23) 0 1 lst,insert (1, 23) == assert
-  (23) 1 1 lst,insert (23, 1) == assert
-  (1, 2, 3) 0 99 lst,insert (99, 1, 2, 3) == assert
-  (1, 2, 3) 2 99 lst,insert (1, 2, 99, 3) == assert
-  (1, 2, 3) 3 99 lst,insert (1, 2, 3, 99) == assert
-  () 0 () lst,insertList () == assert
-  (23) 0 () lst,insertList (23) == assert
-  (23) 1 () lst,insertList (23) == assert
-  (1, 2, 3) 0 () lst,insertList (1, 2, 3) == assert
-  (1, 2, 3) 2 () lst,insertList (1, 2, 3) == assert
-  (1, 2, 3) 3 () lst,insertList (1, 2, 3) == assert
-  () 0 (99) lst,insertList (99) == assert
-  (23) 0 (99) lst,insertList (99, 23) == assert
-  (23) 1 (99) lst,insertList (23, 99) == assert
-  (1, 2, 3) 0 (99) lst,insertList (99, 1, 2, 3) == assert
-  (1, 2, 3) 2 (99) lst,insertList (1, 2, 99, 3) == assert
-  (1, 2, 3) 3 (99) lst,insertList (1, 2, 3, 99) == assert
-  () 0 (77, 88, 99) lst,insertList (77, 88, 99) == assert
-  (23) 0 (77, 88, 99) lst,insertList (77, 88, 99, 23) == assert
-  (23) 1 (77, 88, 99) lst,insertList (23, 77, 88, 99) == assert
-  (1, 2, 3) 0 (77, 88, 99) lst,insertList (77, 88, 99, 1, 2, 3) == assert
-  (1, 2, 3) 2 (77, 88, 99) lst,insertList (1, 2, 77, 88, 99, 3) == assert
-  (1, 2, 3) 3 (77, 88, 99) lst,insertList (1, 2, 3, 77, 88, 99) == assert
+  () dup 0 1 lst,insert (1) == assert
+  (23) dup 0 1 lst,insert (1, 23) == assert
+  (23) dup 1 1 lst,insert (23, 1) == assert
+  (1, 2, 3) dup 0 99 lst,insert (99, 1, 2, 3) == assert
+  (1, 2, 3) dup 2 99 lst,insert (1, 2, 99, 3) == assert
+  (1, 2, 3) dup 3 99 lst,insert (1, 2, 3, 99) == assert
+  () dup 0 () lst,insertList () == assert
+  (23) dup 0 () lst,insertList (23) == assert
+  (23) dup 1 () lst,insertList (23) == assert
+  (1, 2, 3) dup 0 () lst,insertList (1, 2, 3) == assert
+  (1, 2, 3) dup 2 () lst,insertList (1, 2, 3) == assert
+  (1, 2, 3) dup 3 () lst,insertList (1, 2, 3) == assert
+  () dup 0 (99) lst,insertList (99) == assert
+  (23) dup 0 (99) lst,insertList (99, 23) == assert
+  (23) dup 1 (99) lst,insertList (23, 99) == assert
+  (1, 2, 3) dup 0 (99) lst,insertList (99, 1, 2, 3) == assert
+  (1, 2, 3) dup 2 (99) lst,insertList (1, 2, 99, 3) == assert
+  (1, 2, 3) dup 3 (99) lst,insertList (1, 2, 3, 99) == assert
+  () dup 0 (77, 88, 99) lst,insertList (77, 88, 99) == assert
+  (23) dup 0 (77, 88, 99) lst,insertList (77, 88, 99, 23) == assert
+  (23) dup 1 (77, 88, 99) lst,insertList (23, 77, 88, 99) == assert
+  (1, 2, 3) dup 0 (77, 88, 99) lst,insertList (77, 88, 99, 1, 2, 3) == assert
+  (1, 2, 3) dup 2 (77, 88, 99) lst,insertList (1, 2, 77, 88, 99, 3) == assert
+  (1, 2, 3) dup 3 (77, 88, 99) lst,insertList (1, 2, 3, 77, 88, 99) == assert
 
   // remove - removeRange
 
-  (23) 0 lst,remove () == assert
-  (1, 2, 3) 0 lst,remove (2, 3) == assert
-  (1, 2, 3) 1 lst,remove (1, 3) == assert
-  (1, 2, 3) 2 lst,remove (1, 2) == assert
-  (23) 0, 1 lst,removeRange () == assert
-  (1, 2, 3) 0, 1 lst,removeRange (2, 3) == assert
-  (1, 2, 3) 1, 2 lst,removeRange (1, 3) == assert
-  (1, 2, 3) 2, 3 lst,removeRange (1, 2) == assert
-  (1, 2, 3) 0, 2 lst,removeRange (3) == assert
-  (1, 2, 3) 1, 3 lst,removeRange (1) == assert
-  (1, 2, 3) 0, 3 lst,removeRange () == assert
+  (23) dup 0 lst,remove () == assert
+  (1, 2, 3) dup 0 lst,remove (2, 3) == assert
+  (1, 2, 3) dup 1 lst,remove (1, 3) == assert
+  (1, 2, 3) dup 2 lst,remove (1, 2) == assert
+  (23) dup 0, 1 lst,removeRange () == assert
+  (1, 2, 3) dup 0, 1 lst,removeRange (2, 3) == assert
+  (1, 2, 3) dup 1, 2 lst,removeRange (1, 3) == assert
+  (1, 2, 3) dup 2, 3 lst,removeRange (1, 2) == assert
+  (1, 2, 3) dup 0, 2 lst,removeRange (3) == assert
+  (1, 2, 3) dup 1, 3 lst,removeRange (1) == assert
+  (1, 2, 3) dup 0, 3 lst,removeRange () == assert
 
   // reverse - shuffle
 
-  () lst,reverse () == assert
-  (23) lst,reverse (23) == assert
-  (1, 2, 3) lst,reverse (3, 2, 1) == assert
+  () dup lst,reverse () == assert
+  (23) dup lst,reverse (23) == assert
+  (1, 2, 3) dup lst,reverse (3, 2, 1) == assert
 
-  () lst,shuffle () == assert
-  (23) lst,shuffle (23) == assert
-  // (1, 2, 3) lst,shuffle Ls = (Ls i get print) (i, (3)) for
+  () dup lst,shuffle () == assert
+  (23) dup lst,shuffle (23) == assert
+  // (1, 2, 3) dup lst,shuffle Ls = (i =; Ls i get puts) ((3)) for
 
   // sort
 
-  () (>) lst,sort () == assert
-  (23) (>) lst,sort (23) == assert
-  (1, 3, 2) (>) lst,sort (1, 2, 3) == assert
+  () dup (>) lst,sort () == assert
+  (23) dup (>) lst,sort (23) == assert
+  (1, 3, 2) dup (>) lst,sort (1, 2, 3) == assert
 
   // duplicates
 

@@ -39,6 +39,13 @@ static void unary (Machine *m) {
 static void push (Machine *m) {
   Token *tk = machine_pop(m);
   // Arr<Token>
+  Arr *a = getlist(m);
+  arr_push(a, tk);
+}
+
+static void pushplus (Machine *m) {
+  Token *tk = machine_pop(m);
+  // Arr<Token>
   Arr *a = peeklist(m);
   arr_push(a, tk);
 }
@@ -58,6 +65,13 @@ static void peek (Machine *m) {
 }
 
 static void push0 (Machine *m) {
+  Token *tk = machine_pop(m);
+  // Arr<Token>
+  Arr *a = getlist(m);
+  arr_insert(a, 0, tk);
+}
+
+static void push0plus (Machine *m) {
   Token *tk = machine_pop(m);
   // Arr<Token>
   Arr *a = peeklist(m);
@@ -84,7 +98,7 @@ static void insert (Machine *m) {
   Token *tk = machine_pop(m);
   int ix = getint(m);
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   fails_check_range(m, 0, arr_size(a), ix);
   arr_insert(a, ix, tk);
 }
@@ -94,7 +108,7 @@ static void insertList (Machine *m) {
   Arr *add = getlist(m);
   int ix = getint(m);
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   fails_check_range(m, 0, arr_size(a), ix);
   arr_insert_arr(a, ix, add);
 }
@@ -102,7 +116,7 @@ static void insertList (Machine *m) {
 static void lremove (Machine *m) {
   int ix = getint(m);
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   fails_check_range(m, 0, arr_size(a) - 1, ix);
   arr_remove(a, ix);
 }
@@ -111,21 +125,25 @@ static void removeRange (Machine *m) {
   int end = getint(m);
   int begin = getint(m);
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   fails_check_range(m, 0, arr_size(a), begin);
   fails_check_range(m, begin, arr_size(a), end);
   arr_remove_range(a, begin, end);
 }
 
+static void clear (Machine *m) {
+  arr_clear(getlist(m));
+}
+
 static void reverse (Machine *m) {
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   arr_reverse(a);
 }
 
 static void shuffle (Machine *m) {
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   arr_shuffle(a);
 }
 
@@ -139,7 +157,7 @@ static void sort (Machine *m) {
     return getint(m);
   }
   // Arr<Token>
-  Arr *a = peeklist(m);
+  Arr *a = getlist(m);
   arr_sort(a, (FCMP)fn);
 }
 
@@ -302,11 +320,6 @@ static void reduce (Machine *m) {
     seed = fn(seed, e);
   }_EACH
   machine_push(m, seed);
-}
-
-static void clear (Machine *m) {
-  getlist(m);
-  pushlist(m, arr_new());
 }
 
 static void drop (Machine *m) {
@@ -510,9 +523,11 @@ Map *modlist_mk (void) {
   map_put(r, "unary", unary); // [] - LIST
 
   map_put(r, "push", push); // [LIST, *] - LIST
+  map_put(r, "push+", pushplus); // [LIST, *] - []
   map_put(r, "pop", pop); // LIST - *
   map_put(r, "peek", peek); // LIST - *
-  map_put(r, "push0", push0); // [LIST, *] - LIST
+  map_put(r, "push0", push0); // [LIST, *] - []
+  map_put(r, "push0+", push0plus); // [LIST, *] - LIST
   map_put(r, "pop0", pop0); // LIST - *
   map_put(r, "peek0", peek0); // LIST - *
   map_put(r, "insert", insert);

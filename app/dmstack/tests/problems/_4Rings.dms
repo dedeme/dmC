@@ -21,9 +21,9 @@
       (
         dup i =
         Row i get 1 + value =
-        Row i value set; pop
+        Row i value set
         (
-          (1 + i1 =; (Row i1 mn 1 - set; pop) (i1 sz <) if; i1)
+          (1 + i1 =; (Row i1 mn 1 - set) (i1 sz <) if; i1)
           (Row i value this,newDigit?)
           if
         )
@@ -70,7 +70,7 @@ It (this,filter) it,filter
 (3, 4, 5, 6, 7, 8, 8) blob,from 3 9 mkIt It =
 It (this,filter) it,filter
   (this,printRow) it,each
-
+/*
 0
 ( a =
   ( b =
@@ -93,4 +93,4 @@ It (this,filter) it,filter
   ) ((10)) for
 ) ((10)) for
 puts
-
+*/

@@ -15,7 +15,7 @@
   b3:& a =; a:& clone b =; a:& b:& == assert
   () A =; A:& clone B =; A:& B:& == assert
   [1, 1.56, (23 ()) "abc"] A =; A:& clone B =; A:& B:& == assert
-  A:& 3 "four" set 0 "zero" set pop
+  A:& 3 "four" set+ 0 "zero" set
   A:& 0 get "zero" == assert
   A:& 3 get "four" == assert
 
@@ -31,7 +31,7 @@
   b3 blob,to size 3 == assert
   b3 blob,to 1 get 2 == assert
   b3 blob,to dup 2 get swap 0 get; assert; 3 == assert
-  b3 0 10 set 2 12 set pop
+  b3 0 10 set+ 2 12 set
   b3 0 get 10 == assert
   b3 2 get 12 == assert
 

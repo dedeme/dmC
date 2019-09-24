@@ -23,12 +23,15 @@ static void get (Machine *m) {
   machine_fail(m, str_f("Key '%s' not found", key));
 }
 
-static void put (Machine *m) {
+static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
   Token *keytk = machine_pop_exc(m, token_STRING);
   char *key = token_string(keytk);
   // Arr<Token>
-  Arr *a = token_list(machine_peek_exc(m, token_LIST));
+  Arr *a = isplus
+    ? token_list(machine_peek_exc(m, token_LIST))
+    : token_list(machine_pop_exc(m, token_LIST))
+  ;
   int sz = arr_size(a);
   if (sz & 1) fails_size_list(m, a, sz + 1);
   for (int i = 0; i < sz; i +=2)
@@ -38,6 +41,14 @@ static void put (Machine *m) {
     }
   arr_push(a, keytk);
   arr_push(a, tk);
+}
+
+static void put (Machine *m, int isplus) {
+  putboth(m, 0);
+}
+
+static void putplus (Machine *m, int isplus) {
+  putboth(m, 1);
 }
 
 static void frommap (Machine *m) {
@@ -83,7 +94,8 @@ Map *modobj_mk (void) {
 
   map_put(r, "new", new); // [] - OBJ
   map_put(r, "get", get); // [OBJ, STRING] - *
-  map_put(r, "put", put); // [OBJ - STRING - *] - OBJ
+  map_put(r, "put", put); // [OBJ - STRING - *] - []
+  map_put(r, "put+", putplus); // [OBJ - STRING - *] - OBJ
   map_put(r, "fromMap", frommap); // MAP - OBJ
   map_put(r, "toMap", tomap); // OBJ - MAP
 

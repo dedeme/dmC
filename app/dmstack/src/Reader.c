@@ -17,9 +17,21 @@ struct reader_Reader {
   Arr *syms;
 };
 
-Reader *reader_new (int is_file, char *source, char *prg) {
+Reader *reader_new (char *source, char *prg, int nline) {
   Reader *this = MALLOC(Reader);
-  this->is_file = is_file;
+  this->is_file = 0;
+  this->source = source;
+  this->nline = nline;
+  this->prg = prg;
+  this->prg_ix = 0;
+  this->next_tk = NULL;
+  this->syms = arr_new();
+  return this;
+}
+
+Reader *reader_new_from_file (char *source, char *prg) {
+  Reader *this = MALLOC(Reader);
+  this->is_file = 1;
   this->source = source;
   this->nline = 1;
   this->prg = prg;

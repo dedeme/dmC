@@ -11,7 +11,7 @@
 
   (
     len =; len blob,new;
-    len (i =; i i 10 + set) ((nop)) for
+    len (i =; i i 10 + set+) ((nop)) for
   )
   ((120) (130)) for
 

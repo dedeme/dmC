@@ -43,11 +43,14 @@ static void haskey (Machine *m) {
   machine_push(m, token_new_int(0, arr_index(a, (FPRED)fn) != -1));
 }
 
-static void put (Machine *m) {
+static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
   char *key = token_string(machine_pop_exc(m, token_STRING));
   // Arr<Token>
-  Arr *a = token_list(machine_peek_exc(m, token_LIST));
+  Arr *a = isplus
+    ? token_list(machine_peek_exc(m, token_LIST))
+    : token_list(machine_pop_exc(m, token_LIST))
+  ;
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
   Token *t = opt_nget(it_find(it_from(a), (FPRED)fn));
   if (t)
@@ -58,10 +61,18 @@ static void put (Machine *m) {
     )));
 }
 
+static void put (Machine *m) {
+  putboth(m, 0);
+}
+
+static void putplus (Machine *m) {
+  putboth(m, 1);
+}
+
 static void mremove (Machine *m) {
   char *key = token_string(machine_pop_exc(m, token_STRING));
   // Arr<Token>
-  Arr *a = token_list(machine_peek_exc(m, token_LIST));
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
   int fn (Token *tk) { return !str_eq(kvk(m, tk), key); }
   arr_filter_in(a, (FPRED)fn);
 }
@@ -90,7 +101,7 @@ static void values (Machine *m) {
 
 static void sortboth (Machine *m, int (*greater)(Token *e1, Token *e2)) {
   // Arr<Token>
-  Arr *a = token_list(machine_peek_exc(m, token_LIST));
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
   arr_sort(a, (FCMP)greater);
 }
 
@@ -117,12 +128,13 @@ Map *modmap_mk (void) {
   map_put(r, "get", get); // [MAP, STRING] - LIST
                           // ([map, key] - [unary list] or [empty list])
   map_put(r, "hasKey", haskey); // [MAP, STRING] - INT
-  map_put(r, "put", put); // [MAP - STRING - *] - MAP
-  map_put(r, "remove", mremove); // [MAP, STRING] - MAP
+  map_put(r, "put", put); // [MAP - STRING - *] - []
+  map_put(r, "put+", putplus); // [MAP - STRING - *] - MAP
+  map_put(r, "remove", mremove); // [MAP, STRING] - []
   map_put(r, "keys", keys); // MAP - LIST
   map_put(r, "values", values); // MAP - LIST
-  map_put(r, "sort", sort); // MAP - MAP
-  map_put(r, "sortLocale", sortlocale); // MAP - MAP
+  map_put(r, "sort", sort); // MAP - []
+  map_put(r, "sortLocale", sortlocale); // MAP - []
 
   return r;
 }

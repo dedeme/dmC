@@ -14,10 +14,15 @@
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   is_file: Set to '1' if source came from a file.
 ///   source : Program source (file name, *string* or other identifier)
 ///   prg    : Program to process.
-Reader *reader_new (int is_file, char *source, char *prg);
+///   nline  : Current line number.
+Reader *reader_new (char *source, char *prg, int nline);
+
+/// Creates a new stack machine
+///   source : Program source (file name, *string* or other identifier)
+///   prg    : Program to process.
+Reader *reader_new_from_file (char *source, char *prg);
 
 /// Returns a token type token_LIST.
 Token *reader_process (Reader *this);
