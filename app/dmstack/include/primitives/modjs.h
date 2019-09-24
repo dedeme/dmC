@@ -12,4 +12,16 @@
 /// Returns Map<primitives_Fn>
 Map *modjs_mk (void);
 
+///
+void modjs_from_list (Machine *m);
+
+///
+void modjs_to_list (Machine *m);
+
+///
+void modjs_from_map (Machine *m);
+
+///
+void modjs_to_map (Machine *m);
+
 #endif

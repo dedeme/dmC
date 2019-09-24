@@ -78,6 +78,16 @@ static void right (Machine *m) {
   subaux(m, cut, 0, 1);
 }
 
+static void fromjs (Machine *m) {
+  char *js = token_string(machine_pop_exc(m, token_STRING));
+  machine_push(m, token_new_blob(0, bytes_from_js((Js *)js)));
+}
+
+static void tojs (Machine *m) {
+  Bytes *bs = token_blob(machine_pop_exc(m, token_BLOB));
+  machine_push(m, token_new_string(0, (char *)bytes_to_js(bs)));
+}
+
 // Resturns Map<primitives_Fn>
 Map *modblob_mk (void) {
   // Map<primitives_Fn>
@@ -86,9 +96,12 @@ Map *modblob_mk (void) {
   map_put(r, "new", new); // INT - BLOB
   map_put(r, "from", from); // LIST - BLOB
   map_put(r, "to", to); // BLOB - LIST
-  map_put(r, "sub", sub);
-  map_put(r, "left", left);
-  map_put(r, "right", right);
+  map_put(r, "sub", sub); // [BLOB, INT, INT] - [BLOB]
+  map_put(r, "left", left); // [BLOB, INT] - [BLOB]
+  map_put(r, "right", right); // [BLOB, INT] - [BLOB]
+
+  map_put(r, "fromJs", fromjs); // STRING - BLOB
+  map_put(r, "toJs", tojs); // BLOB - STRING
 
   return r;
 }

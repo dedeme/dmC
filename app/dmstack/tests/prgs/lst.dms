@@ -20,12 +20,6 @@
   1 2 tp,new2 (1, 2) == assert
   "a" 1 "b" tp,new3 ["a", 1, "b"] == assert
 
-  // clear
-
-  L0 clone dup lst,clear L0 == assert
-  L1 clone dup lst,clear L0 == assert
-  L2 clone dup lst,clear L0 == assert
-
   // push - push0 - pop - pop0 - peek - peek0
 
   () 23 lst,push+ L1 == assert
@@ -91,6 +85,12 @@
   (1, 2, 3) dup 0, 2 lst,removeRange (3) == assert
   (1, 2, 3) dup 1, 3 lst,removeRange (1) == assert
   (1, 2, 3) dup 0, 3 lst,removeRange () == assert
+
+  // clear
+
+  L0 clone dup lst,clear L0 == assert
+  L1 clone dup lst,clear L0 == assert
+  L2 clone dup lst,clear L0 == assert
 
   // reverse - shuffle
 
@@ -280,6 +280,16 @@
   ["a", "b", "c"] 0 lst,right ["a", "b", "c"] == assert
   ["a", "b", "c"] 1 lst,right ["b", "c"] == assert
   ["a", "b", "c"] 3 lst,right [] == assert
+
+  // fromJs - toJs
+
+  [] (js,ws) lst,toJs "[]" == assert
+  ["a"] (js,ws) lst,toJs "[\"a\"]" == assert
+  ["a", "b", "c"] (js,ws) lst,toJs "[\"a\",\"b\",\"c\"]" == assert
+
+  [] (js,ws) lst,toJs (js,rs) lst,fromJs [] == assert
+  ["a"] (js,ws) lst,toJs (js,rs) lst,fromJs ["a"] == assert
+  ["a", "b", "c"] (js,ws) lst,toJs (js,rs) lst,fromJs ["a", "b", "c"] == assert
 
   empty? assert
 ) run

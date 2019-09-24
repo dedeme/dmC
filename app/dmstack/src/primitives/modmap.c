@@ -4,6 +4,7 @@
 #include "primitives/modmap.h"
 #include "fails.h"
 #include "Machine.h"
+#include "primitives/modjs.h"
 
 // Tp<Token>
 static char *kvk (Machine *m, Token *tk) {
@@ -119,6 +120,14 @@ static void sortlocale (Machine *m) {
   sortboth(m, greater);
 }
 
+static void fromjs (Machine *m) {
+  modjs_to_map(m);
+}
+
+static void tojs (Machine *m) {
+  modjs_from_map(m);
+}
+
 // Resturns Map<primitives_Fn>
 Map *modmap_mk (void) {
   // Map<primitives_Fn>
@@ -135,6 +144,9 @@ Map *modmap_mk (void) {
   map_put(r, "values", values); // MAP - LIST
   map_put(r, "sort", sort); // MAP - []
   map_put(r, "sortLocale", sortlocale); // MAP - []
+
+  map_put(r, "fromJs", fromjs);
+  map_put(r, "toJs", tojs);
 
   return r;
 }

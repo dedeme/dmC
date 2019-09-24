@@ -182,10 +182,15 @@ void fails_check_range (Machine *m, int min, int max, int ix);
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   is_file: Set to '1' if source came from a file.
 ///   source : Program source (file name, *string* or other identifier)
 ///   prg    : Program to process.
-Reader *reader_new (int is_file, char *source, char *prg);
+///   nline  : Current line number.
+Reader *reader_new (char *source, char *prg, int nline);
+
+/// Creates a new stack machine
+///   source : Program source (file name, *string* or other identifier)
+///   prg    : Program to process.
+Reader *reader_new_from_file (char *source, char *prg);
 
 /// Returns a token type token_LIST.
 Token *reader_process (Reader *this);
@@ -518,6 +523,18 @@ Map *modobj_mk (void);
 /// Returns Map<primitives_Fn>
 Map *modjs_mk (void);
 
+///
+void modjs_from_list (Machine *m);
+
+///
+void modjs_to_list (Machine *m);
+
+///
+void modjs_from_map (Machine *m);
+
+///
+void modjs_to_map (Machine *m);
+
 #endif
 // Copyright 07-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -536,12 +553,13 @@ void modglobal2_size (Machine *m);
 /// Return an element of container and removes the container.
 void modglobal2_get (Machine *m);
 
-/// Return an element of container and keeps the container.
-void modglobal2_getplus (Machine *m);
-
 /// Sets an element of container and removes the container.
 /// Stack has: container - index - value.
 void modglobal2_set (Machine *m);
+
+/// Sets an element of container and keeps the container.
+/// Stack has: container - index - value.
+void modglobal2_setplus (Machine *m);
 
 #endif
 // Copyright 20-Sept-2019 ºDeme
@@ -688,6 +706,8 @@ Map *modtp_mk (void);
   #define DEFS_H
 
 #include "dmc/async.h"
+
+#define VERSION "201909"
 
 #endif
 // Copyright 23-Sept-2019 ºDeme

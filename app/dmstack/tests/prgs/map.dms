@@ -31,5 +31,17 @@
   M "b" map,get (2) == assert
   M size 2 == assert
 
+  // fromJs - toJs
+
+  {} (js,wi) map,toJs "{}" == assert
+  {("a": 1)} (js,wi) map,toJs "{\"a\":1}" == assert
+  {("a": 1), ("b": 2), ("c", 3)} (js,wi) map,toJs
+    "{\"a\":1,\"b\":2,\"c\":3}" == assert
+
+  {} (js,wi) map,toJs (js,ri) map,fromJs {} == assert
+  {("a": 1)} (js,wi) map,toJs (js,ri) map,fromJs {("a": 1)} == assert
+  {("a": 1), ("b": 2), ("c", 3)} (js,wi) map,toJs (js,ri) map,fromJs
+    {("a": 1), ("b": 2), ("c", 3)} == assert
+
   empty? assert
 )run

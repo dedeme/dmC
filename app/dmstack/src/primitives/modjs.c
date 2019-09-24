@@ -37,11 +37,9 @@ static void rs (Machine *m) {
 
 static void ra (Machine *m) {
   Token *fn (char *js) { return token_new_string(0, js); }
-  machine_push(m, token_new_list(0,
-    arr_map(
-      js_ra((Js *)token_string(machine_pop_exc(m, token_STRING))), (FCOPY)fn
-    )
-  ));
+  machine_push(m, token_new_list(0, arr_map(
+    js_ra((Js *)token_string(machine_pop_exc(m, token_STRING))), (FCOPY)fn
+  )));
 }
 
 static void ro (Machine *m) {
@@ -114,7 +112,7 @@ static void wo (Machine *m) {
   machine_push(m, token_new_string(0, (char *)js_wo(r)));
 }
 
-static void fromlist (Machine *m) {
+void modjs_from_list (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
   // Arr<Token>
   Arr *r = arr_new();
@@ -127,7 +125,7 @@ static void fromlist (Machine *m) {
   wa(m);
 }
 
-static void tolist (Machine *m) {
+void modjs_to_list (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
   ra(m);
   // Arr<Token>
@@ -140,7 +138,7 @@ static void tolist (Machine *m) {
   machine_push(m, token_new_list(0, r));
 }
 
-static void frommap (Machine *m) {
+void modjs_from_map (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
   // Arr<Token>
   Arr *r = arr_new();
@@ -158,7 +156,7 @@ static void frommap (Machine *m) {
   wo(m);
 }
 
-static void tomap (Machine *m) {
+void modjs_to_map (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
   ro(m);
   // Arr<Token>
@@ -201,10 +199,10 @@ Map *modjs_mk (void) {
   map_put(r, "wa", wa); // LIST - STRING
   map_put(r, "wo", wo); // OBJ- STRING
 
-  map_put(r, "fromList", fromlist); // LIST - STRING
-  map_put(r, "toList", tolist); // STRING - LIST
-  map_put(r, "fromMap", frommap); // MAP - STRING
-  map_put(r, "toMap", tomap); // STRING - MAP
+  map_put(r, "fromList", modjs_from_list); // LIST - STRING
+  map_put(r, "toList", modjs_to_list); // STRING - LIST
+  map_put(r, "fromMap", modjs_from_map); // MAP - STRING
+  map_put(r, "toMap", modjs_to_map); // STRING - MAP
 
 
   return r;

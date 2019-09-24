@@ -4,6 +4,7 @@
 #include "primitives/modlist.h"
 #include "fails.h"
 #include "Machine.h"
+#include "primitives/modjs.h"
 #include "DEFS.h"
 
 // Returns Arr<Token>
@@ -514,6 +515,14 @@ static void right (Machine *m) {
   subaux(m, cut, 0, 1);
 }
 
+static void fromjs (Machine *m) {
+  modjs_to_list(m);
+}
+
+static void tojs (Machine *m) {
+  modjs_from_list(m);
+}
+
 // Resturns Map<primitives_Fn>
 Map *modlist_mk (void) {
   // Map<primitives_Fn>
@@ -534,6 +543,7 @@ Map *modlist_mk (void) {
   map_put(r, "insertList", insertList);
   map_put(r, "remove", lremove);
   map_put(r, "removeRange", removeRange);
+  map_put(r, "clear", clear);
   map_put(r, "reverse", reverse);
   map_put(r, "shuffle", shuffle);
   map_put(r, "sort", sort);
@@ -550,7 +560,6 @@ Map *modlist_mk (void) {
   map_put(r, "find", find);
   map_put(r, "reduce", reduce);
 
-  map_put(r, "clear", clear);
   map_put(r, "drop", drop);
   map_put(r, "dropf", dropf);
   map_put(r, "filter", filter);
@@ -566,6 +575,8 @@ Map *modlist_mk (void) {
   map_put(r, "left", left);
   map_put(r, "right", right);
 
+  map_put(r, "fromJs", fromjs);
+  map_put(r, "toJs", tojs);
 
   return r;
 }

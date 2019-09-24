@@ -138,7 +138,7 @@ lib/liblocalcompilation/obj/primitives/modmath.o : include/primitives/modmath.h 
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modlist.o : include/primitives/modlist.h src/primitives/modlist.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/DEFS.h src/DEFS.c include/primitives.h src/primitives.c
+lib/liblocalcompilation/obj/primitives/modlist.o : include/primitives/modlist.h src/primitives/modlist.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives/modjs.h src/primitives/modjs.c include/DEFS.h src/DEFS.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modlist.c -o lib/liblocalcompilation/obj/primitives/modlist.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -148,7 +148,7 @@ lib/liblocalcompilation/obj/primitives/modtp.o : include/primitives/modtp.h src/
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modmap.o : include/primitives/modmap.h src/primitives/modmap.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives.h src/primitives.c
+lib/liblocalcompilation/obj/primitives/modmap.o : include/primitives/modmap.h src/primitives/modmap.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives/modjs.h src/primitives/modjs.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modmap.c -o lib/liblocalcompilation/obj/primitives/modmap.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -212,4 +212,3 @@ lib/liblocalcompilation/obj/Lib.o : include/Lib.h src/Lib.c include/Heap.h src/H
 	gcc $(CFLAGS) -c src/Lib.c -o lib/liblocalcompilation/obj/Lib.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
-
