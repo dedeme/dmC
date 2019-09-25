@@ -51,6 +51,30 @@ static void putplus (Machine *m, int isplus) {
   putboth(m, 1);
 }
 
+static void upboth (Machine *m, int isplus) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Token *tk2 = machine_pop(m);
+  Token *tk1 = machine_peek(m);
+  machine_push(m, tk2);
+  get(m);
+
+  machine_process("", machine_pmachines(m), prg);
+
+  Token *tk3 = machine_pop(m);
+  machine_push(m, tk1);
+  machine_push(m, tk2);
+  machine_push(m, tk3);
+  putboth(m, isplus);
+}
+
+static void up (Machine *m, int isplus) {
+  upboth(m, 0);
+}
+
+static void upplus (Machine *m, int isplus) {
+  upboth(m, 1);
+}
+
 static void frommap (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
@@ -96,6 +120,8 @@ Map *modobj_mk (void) {
   map_put(r, "get", get); // [OBJ, STRING] - *
   map_put(r, "put", put); // [OBJ - STRING - *] - []
   map_put(r, "put+", putplus); // [OBJ - STRING - *] - OBJ
+  map_put(r, "up", up); // [OBJ - STRING - LIST] - []
+  map_put(r, "up+", upplus); // [OBJ - STRING - LIST] - OBJ
   map_put(r, "fromMap", frommap); // MAP - OBJ
   map_put(r, "toMap", tomap); // OBJ - MAP
 

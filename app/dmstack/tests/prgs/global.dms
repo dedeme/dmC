@@ -4,15 +4,15 @@
 /// Sys tests.
 
 (
-  () blob,from .b0 =
-  (1, 2, 3) blob,from b3 =
+  () blob,from B0 =
+  (1, 2, 3) blob,from B3 =
 
   1 a =; a clone b =; a b == assert
   1.6 a =; a clone b =; a b == assert
   "" a =; a clone b =; a b == assert
   "abc" a =; a clone b =; a b == assert
-  .b0:& a =; a:& clone b =; a:& b:& == assert
-  b3:& a =; a:& clone b =; a:& b:& == assert
+  B0:& A =; A:& clone B =; A:& B == assert
+  B3:& A =; A:& clone B =; A:& B:& == assert
   () A =; A:& clone B =; A:& B:& == assert
   [1, 1.56, (23 ()) "abc"] A =; A:& clone B =; A:& B:& == assert
   A:& 3 "four" set+ 0 "zero" set
@@ -22,18 +22,23 @@
   "" size ! assert
   "abc" size 3 == assert
 
-  .b0:& size ! assert
-  b3:& size 3 == assert
-  b3:& 1 get 2 == assert
-  b3:& dup 2 get swap 0 get; assert; 3 == assert
+  B0:& size ! assert
+  B3:& size 3 == assert
+  B3:& 1 get 2 == assert
+  B3:& dup 2 get swap 0 get; assert; 3 == assert
 
-  .b0 blob,to size ! assert
-  b3 blob,to size 3 == assert
-  b3 blob,to 1 get 2 == assert
-  b3 blob,to dup 2 get swap 0 get; assert; 3 == assert
-  b3 0 10 set+ 2 12 set
-  b3 0 get 10 == assert
-  b3 2 get 12 == assert
+  B0:& blob,to size ! assert
+  B3 blob,to size 3 == assert
+  B3 blob,to 1 get 2 == assert
+  B3 blob,to dup 2 get swap 0 get; assert; 3 == assert
+  B3 0 10 set+ 2 12 set
+  B3 0 get 10 == assert
+  B3 2 get 12 == assert
+  B3 2 (1 +) up+ 0 (1 -) up
+  B3 0 get 9 == assert
+  B3 2 get 13 == assert
+  B3 blob,to 2 (12 +) up+ 2 get 25 == assert
+
 
   () size ! assert
   [1, 1.5, "a", []] Ls =
@@ -47,6 +52,22 @@
   "4 3 +" eval 7 == assert
   "(4 3 +) run" eval 7 == assert
   "\"(4, 3, +)\" eval run" eval 7 == assert
+
+  8 n =
+  ("a") A =
+  (4 + 2 -) fn =
+  [ 4, 3 n +, A "b" lst,push+, 7 fn ] data
+    (4, 11, ("a", "b"), 9) == assert
+
+  { ("1": 4), ("2": 3 n +) data, ("3": 7 fn) data } data
+    (("1", 4), ("2", 11), ("3", 9)) == assert
+
+  [4] data Ref =
+  Ref >> 4 == assert
+  Ref 2 <<+; >> 2 == assert
+  Ref 10 <<; Ref >> 10 == assert
+  Ref (2 *) ^^+; >> 20 == assert
+  Ref (2 +) ^^; Ref >> 22 == assert
 
   empty? assert
 ) run

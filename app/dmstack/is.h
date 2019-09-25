@@ -561,6 +561,14 @@ void modglobal2_set (Machine *m);
 /// Stack has: container - index - value.
 void modglobal2_setplus (Machine *m);
 
+/// Sets an element of container using its value and removes the container.
+/// Stack has: container - index - function.
+void modglobal2_up (Machine *m);
+
+/// Sets an element of container using its value and keeps the container.
+/// Stack has: container - index - function.
+void modglobal2_upplus (Machine *m);
+
 #endif
 // Copyright 20-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>

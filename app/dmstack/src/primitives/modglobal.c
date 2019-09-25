@@ -119,6 +119,13 @@ Map *modglobal_mk (void) {
   map_put(r, "get", modglobal2_get);
   map_put(r, "set", modglobal2_set);
   map_put(r, "set+", modglobal2_setplus);
+  map_put(r, "up", modglobal2_up);
+  map_put(r, "up+", modglobal2_upplus);
+  map_put(r, ">>", modglobal2_ref_get);
+  map_put(r, "<<", modglobal2_ref_set);
+  map_put(r, "<<+", modglobal2_ref_setplus);
+  map_put(r, "^^", modglobal2_ref_up);
+  map_put(r, "^^+", modglobal2_ref_upplus);
 
   return r;
 }

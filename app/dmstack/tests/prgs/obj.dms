@@ -32,6 +32,7 @@
   {} "a": 10 sum1 put+; "b": 20 sum2 put+; O =
   O "a" obj,get 110 == assert
   O "b" obj,get 220 == assert
+  O "a" (10 -) obj,up+ "b" (20 -) obj,up O ("a", 100, "b", 200) == assert
 
   {} obj,toMap {} == assert
 

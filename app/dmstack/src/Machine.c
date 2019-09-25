@@ -68,6 +68,12 @@ static void mrun (Machine *this) {
   else machine_fail(this, str_f("Symbol '%s.%s' not found", module, fnc));
 }
 
+static void data (Machine *this) {
+  Token *prg = machine_pop_exc(this, token_LIST);
+  Machine *m = machine_isolate_process("", this->pmachines, prg);
+  machine_push(this, token_new_list(0, m->stack));
+}
+
 static pthread_mutex_t mutex;
 static void sync (Machine *this) {
   Token *prg = machine_pop_exc(this, token_LIST);
@@ -458,6 +464,8 @@ static Machine *cprocess (Machine *m) {
       if (str_eq(name, "nop")) continue;
       else if (str_eq(name, "eval")) eval(m);
       else if (str_eq(name, "run")) run(m);
+      else if (str_eq(name, "mrun")) mrun(m);
+      else if (str_eq(name, "data")) data(m);
       else if (str_eq(name, "sync")) sync(m);
       else if (str_eq(name, "mrun")) mrun(m);
       else if (str_eq(name, "else") || str_eq(name, "elif"))

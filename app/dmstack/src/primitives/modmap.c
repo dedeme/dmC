@@ -70,6 +70,35 @@ static void putplus (Machine *m) {
   putboth(m, 1);
 }
 
+static void upboth (Machine *m, int isplus) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Token *tk2 = machine_pop(m);
+  Token *tk1 = machine_peek(m);
+  machine_push(m, tk2);
+  get(m);
+  // Arr<Token>
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  if (!arr_size(a))
+    machine_fail(m, str_f("Key '%s' not found", token_string(tk2)));
+  machine_push(m, *arr_start(a));
+
+  machine_process("", machine_pmachines(m), prg);
+
+  Token *tk3 = machine_pop(m);
+  machine_push(m, tk1);
+  machine_push(m, tk2);
+  machine_push(m, tk3);
+  putboth(m, isplus);
+}
+
+static void up (Machine *m, int isplus) {
+  upboth(m, 0);
+}
+
+static void upplus (Machine *m, int isplus) {
+  upboth(m, 1);
+}
+
 static void mremove (Machine *m) {
   char *key = token_string(machine_pop_exc(m, token_STRING));
   // Arr<Token>
@@ -139,6 +168,8 @@ Map *modmap_mk (void) {
   map_put(r, "hasKey", haskey); // [MAP, STRING] - INT
   map_put(r, "put", put); // [MAP - STRING - *] - []
   map_put(r, "put+", putplus); // [MAP - STRING - *] - MAP
+  map_put(r, "up", up); // [MAP - STRING - LIST] - []
+  map_put(r, "up+", upplus); // [MAP - STRING - LIST] - MAP
   map_put(r, "remove", mremove); // [MAP, STRING] - []
   map_put(r, "keys", keys); // MAP - LIST
   map_put(r, "values", values); // MAP - LIST

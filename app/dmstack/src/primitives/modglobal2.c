@@ -89,3 +89,80 @@ void modglobal2_set (Machine *m) {
 void modglobal2_setplus (Machine *m) {
   setboth(m, 1);
 }
+
+static void upboth (Machine *m, int isplus) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Token *tk2 = machine_pop(m);
+  Token *tk1 = machine_peek(m);
+  machine_push(m, tk2);
+  modglobal2_get(m);
+
+  machine_process("", machine_pmachines(m), prg);
+
+  Token *tk3 = machine_pop(m);
+  machine_push(m, tk1);
+  machine_push(m, tk2);
+  machine_push(m, tk3);
+  setboth(m, isplus);
+}
+
+void modglobal2_up (Machine *m) {
+  upboth(m, 0);
+}
+
+void modglobal2_upplus (Machine *m) {
+  upboth(m, 1);
+}
+
+void modglobal2_ref_get (Machine *m) {
+  Token *tk = machine_pop_exc(m, token_LIST);
+  // Arr<Token>
+  Arr *a = token_list(tk);
+  if (arr_size(a) != 1)
+    fails_range(m, 1, 1, arr_size(a));
+
+  machine_push(m, *arr_start(a));
+}
+
+static void refsetboth (Machine *m, int isplus) {
+  Token *tk2 = machine_pop(m);
+  Token *tk1 = isplus
+    ? machine_peek_opt(m, token_LIST)
+    : machine_pop_opt(m, token_LIST)
+  ;
+  // Arr<Token>
+  Arr *a = token_list(tk1);
+  if (arr_size(a) != 1)
+    fails_range(m, 1, 1, arr_size(a));
+
+  *arr_start(a) = tk2;
+}
+
+void modglobal2_ref_set (Machine *m) {
+  refsetboth(m, 0);
+}
+
+void modglobal2_ref_setplus (Machine *m) {
+  refsetboth(m, 1);
+}
+
+static void refupboth (Machine *m, int isplus) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Token *tk1 = machine_peek(m);
+  modglobal2_ref_get(m);
+
+  machine_process("", machine_pmachines(m), prg);
+
+  Token *tk2 = machine_pop(m);
+  machine_push(m, tk1);
+  machine_push(m, tk2);
+  refsetboth(m, isplus);
+}
+
+void modglobal2_ref_up (Machine *m) {
+  refupboth(m, 0);
+}
+
+void modglobal2_ref_upplus (Machine *m) {
+  refupboth(m, 1);
+}
