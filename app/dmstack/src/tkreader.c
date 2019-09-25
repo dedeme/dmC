@@ -275,16 +275,16 @@ Opt *tkreader_next(Reader *reader) {
         ));
       }
 
-      Reader *subr = reader_new(
-        reader_source(reader),
-        str_sub(lstart, 0, p - lstart),
-        nline
+      Reader *subr = reader_new_from_reader(
+        reader, str_sub(lstart, 0, p - lstart), nline
       );
 
       // Arr<Token>
       Arr *a = arr_new();
       Token *tk = opt_nget(tkreader_next(subr));
       while (tk) {
+        if (token_type(tk) == token_SYMBOL)
+          tk = reader_symbol_id(subr, a, tk);
         arr_push(a, tk);
         tk = opt_nget(tkreader_next(subr));
       }

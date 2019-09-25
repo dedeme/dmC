@@ -51,13 +51,21 @@ Token *machine_prg (Machine *this) {
 
 static void eval (Machine *this) {
   char *p = token_string(machine_pop_exc(this, token_STRING));
-  Reader *r = reader_new("[EVAL]", p, 0);
+  Reader *r = reader_new("[EVAL]", p);
   machine_process("", this->pmachines, reader_process(r));
 }
 
 static void run (Machine *this) {
   Token *prg = machine_pop_exc(this, token_LIST);
   machine_process("", this->pmachines, prg);
+}
+
+static void runmod (Machine *this, char *module) {
+  Token *prg = machine_pop_exc(this, token_LIST);
+  Token *runner = token_new_list(0, arr_new_from(
+    prg, token_new_symbol(0, symbol_new("run")), NULL
+  ));
+  machine_process(str_cat(module, ".dms", NULL), this->pmachines, runner);
 }
 
 static void mrun (Machine *this) {
@@ -234,10 +242,12 @@ static void import (Machine *this) {
   if (!imports_is_on_way(ssource) && !imports_get(ssource)) {
     imports_put_on_way(ssource);
 
-    Reader *r = reader_new_from_file(fid, file_read(fc));
-    machine_isolate_process(
+    Reader *r = reader_new(fid, file_read(fc));
+    Machine *m = machine_isolate_process(
       fc, this->pmachines, reader_process(r)
     );
+
+    imports_add(ssource, m->heap);
 
     imports_quit_on_way(ssource);
   }
@@ -441,7 +451,8 @@ static Machine *cprocess (Machine *m) {
         (sname > 'Z' || sname < 'A')
       ) {
         m->ix--;
-        run(m);
+        if (module) runmod(m, symbol_id(module));
+        else run(m);
         m->ix++;
       }
       module = NULL;

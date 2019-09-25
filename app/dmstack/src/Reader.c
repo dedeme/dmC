@@ -13,23 +13,11 @@ struct reader_Reader {
   char *prg;
   int prg_ix;
   Token *next_tk;
-  // Arr<Symbol>
-  Arr *syms;
+  // List<Symbol>
+  List *syms;
 };
 
-Reader *reader_new (char *source, char *prg, int nline) {
-  Reader *this = MALLOC(Reader);
-  this->is_file = 0;
-  this->source = source;
-  this->nline = nline;
-  this->prg = prg;
-  this->prg_ix = 0;
-  this->next_tk = NULL;
-  this->syms = arr_new();
-  return this;
-}
-
-Reader *reader_new_from_file (char *source, char *prg) {
+Reader *reader_new (char *source, char *prg) {
   Reader *this = MALLOC(Reader);
   this->is_file = 1;
   this->source = source;
@@ -37,7 +25,19 @@ Reader *reader_new_from_file (char *source, char *prg) {
   this->prg = prg;
   this->prg_ix = 0;
   this->next_tk = NULL;
-  this->syms = arr_new();
+  this->syms = list_new();
+  return this;
+}
+
+Reader *reader_new_from_reader (Reader *parent, char *prg, int nline) {
+  Reader *this = MALLOC(Reader);
+  this->is_file = 0;
+  this->source = parent->source;
+  this->nline = nline;
+  this->prg = prg;
+  this->prg_ix = 0;
+  this->next_tk = NULL;
+  this->syms = parent->syms;
   return this;
 }
 
@@ -47,45 +47,7 @@ Token *reader_process (Reader *this) {
   Arr *r = arr_new();
   Token *tk = opt_nget(tkreader_next(this));
   while (tk) {
-    if (token_type(tk) == token_SYMBOL) {
-      char *id = symbol_id(token_symbol(tk));
-      if (str_eq(id, "this")) {
-        tk = token_new_symbol(
-          token_line(tk), symbol_new_id(this->source, "this")
-        );
-      } else if (str_eq(id, "import")) {
-        if (!arr_size(r)) reader_fail(this, "Import source is missing");
-
-        Token *t = arr_peek(r);
-        // Kv<Symbol>
-        Kv *esym = imports_read_symbol(t);
-        if (*kv_key(esym)) reader_fail(this, kv_key(esym));
-        Symbol *sym = kv_value(esym);
-        char *fc = opt_nget(path_canonical(path_cat(
-          path_parent(this->source),
-          str_cat(symbol_id(sym), ".dms", NULL),
-          NULL
-        )));
-        if (!fc)
-          reader_fail(this, str_f(
-            "Import file '%s' not found %s", str_cat(symbol_id(sym), ".dms", NULL)
-            , path_cat(
-          this->source, str_cat(symbol_id(sym), ".dms", NULL), NULL
-        )
-          ));
-        arr_push(this->syms, symbol_new_id(
-          str_left(fc, -4), symbol_name(sym)
-        ));
-      } else {
-        char *name = symbol_name(token_symbol(tk));
-        int fn (Symbol *sym) { return str_eq(name, symbol_name(sym)); }
-        Symbol *sym = opt_nget(it_find(it_from(this->syms), (FPRED)fn));
-        if (sym) {
-          tk = token_new_symbol(token_line(tk), sym);
-        }
-      }
-    }
-
+    if (token_type(tk) == token_SYMBOL) tk = reader_symbol_id(this, r, tk);
     arr_push(r, tk);
     tk = opt_nget(tkreader_next(this));
   }
@@ -126,6 +88,42 @@ int reader_nline (Reader *this) {
 
 void reader_set_nline (Reader *this, int value) {
   this->nline = value;
+}
+
+Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
+  char *name = symbol_name(token_symbol(tk));
+  if (str_eq(name, "import")) {
+    if (!arr_size(prg)) reader_fail(this, "Import source is missing");
+
+    Token *t = arr_peek(prg);
+    // Kv<Symbol>
+    Kv *esym = imports_read_symbol(t);
+    if (*kv_key(esym)) reader_fail(this, kv_key(esym));
+
+    Symbol *sym = kv_value(esym);
+    char *fc = opt_nget(path_canonical(path_cat(
+      path_parent(this->source),
+      str_cat(symbol_id(sym), ".dms", NULL),
+      NULL
+    )));
+    if (!fc)
+      reader_fail(this, str_f(
+        "Import file '%s' not found %s", str_cat(symbol_id(sym), ".dms", NULL)
+        , path_cat(
+            this->source, str_cat(symbol_id(sym), ".dms", NULL), NULL
+          )
+      ));
+    this->syms = list_cons(this->syms, symbol_new_id(
+      str_left(fc, -4), symbol_name(sym)
+    ));
+  } else if (str_eq(name, "this")) {
+    return token_new_symbol(token_line(tk), symbol_new_id(this->source, name));
+  } else {
+    int fn (Symbol *sym) { return str_eq(name, symbol_name(sym)); }
+    Symbol *sym = opt_nget(it_find(list_to_it(this->syms), (FPRED)fn));
+    if (sym) return token_new_symbol(token_line(tk), sym);
+  }
+  return tk;
 }
 
 void reader_fail (Reader *this, char *msg) {

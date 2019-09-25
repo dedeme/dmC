@@ -5,7 +5,7 @@
 #include "Reader.h"
 
 static Token *read (char *id, char *prg) {
-  return reader_process(reader_new(str_f("IT-%s", id), prg, 0));
+  return reader_process(reader_new(str_f("IT-%s", id), prg));
 }
 
 static Token *new () {

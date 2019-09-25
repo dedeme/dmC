@@ -14,15 +14,16 @@
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   source : Program source (file name, *string* or other identifier)
+///   source : Identifier (File without extension or 'ad hoc' identifier).
 ///   prg    : Program to process.
 ///   nline  : Current line number.
-Reader *reader_new (char *source, char *prg, int nline);
+Reader *reader_new (char *source, char *prg);
 
 /// Creates a new stack machine
-///   source : Program source (file name, *string* or other identifier)
+///   parent : Reader parent.
 ///   prg    : Program to process.
-Reader *reader_new_from_file (char *source, char *prg);
+///   nline  : Current line number.
+Reader *reader_new_from_reader (Reader *parent, char *prg, int nline);
 
 /// Returns a token type token_LIST.
 Token *reader_process (Reader *this);
@@ -54,6 +55,12 @@ int reader_nline (Reader *this);
 
 ///
 void reader_set_nline (Reader *this, int value);
+
+/// Calculate symbol id of 'tk'. 'tk' is a token_SYMBOL.
+///   this: The reader.
+///   prg : Arr<Token> symbols read until now.
+///   tk  : Token type token_SYMBOL.
+Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
 
 ///
 void reader_fail (Reader *this, char *msg);

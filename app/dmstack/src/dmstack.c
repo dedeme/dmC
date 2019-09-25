@@ -35,7 +35,7 @@ int main (int argc, char *argv[]) {
   imports_put_on_way(ssource);
 
   TRY {
-    Reader *r = reader_new_from_file(fid, file_read(fc));
+    Reader *r = reader_new(fid, file_read(fc));
     machine_isolate_process(fc, list_new(), reader_process(r));
   } CATCH (e) {
     fails_from_exception(e);
