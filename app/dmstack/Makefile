@@ -10,10 +10,10 @@ bin/dmstack : src/dmstack.c include/dmstack.h lib/liblocalcompilation/liblocalco
 		-L$(LIB_PATH_dmc) -ldmc \
 		-lgc -lpthread -lm
 
-lib/liblocalcompilation/liblocalcompilation.a : lib/liblocalcompilation/obj/dmstack.o lib/liblocalcompilation/obj/args.o lib/liblocalcompilation/obj/DEFS.o lib/liblocalcompilation/obj/imports.o lib/liblocalcompilation/obj/primitives.o lib/liblocalcompilation/obj/primitives/modglobal.o lib/liblocalcompilation/obj/fails.o lib/liblocalcompilation/obj/Machine.o lib/liblocalcompilation/obj/Reader.o lib/liblocalcompilation/obj/tkreader.o lib/liblocalcompilation/obj/Token.o lib/liblocalcompilation/obj/Symbol.o lib/liblocalcompilation/obj/modules.o lib/liblocalcompilation/obj/modules/modit.o lib/liblocalcompilation/obj/Heap.o lib/liblocalcompilation/obj/primitives/modglobal0.o lib/liblocalcompilation/obj/primitives/modglobal1.o lib/liblocalcompilation/obj/primitives/modglobal2.o lib/liblocalcompilation/obj/primitives/modstk.o lib/liblocalcompilation/obj/primitives/modblob.o lib/liblocalcompilation/obj/primitives/modint.o lib/liblocalcompilation/obj/primitives/modfloat.o lib/liblocalcompilation/obj/primitives/modlong.o lib/liblocalcompilation/obj/primitives/moddec.o lib/liblocalcompilation/obj/primitives/modmath.o lib/liblocalcompilation/obj/primitives/modlist.o lib/liblocalcompilation/obj/primitives/modjs.o lib/liblocalcompilation/obj/primitives/modtp.o lib/liblocalcompilation/obj/primitives/modmap.o lib/liblocalcompilation/obj/primitives/modobj.o lib/liblocalcompilation/obj/primitives/modstr.o lib/liblocalcompilation/obj/primitives/modsys.o lib/liblocalcompilation/obj/primitives/modb64.o lib/liblocalcompilation/obj/primitives/modcryp.o lib/liblocalcompilation/obj/primitives/modtime.o lib/liblocalcompilation/obj/primitives/modclock.o lib/liblocalcompilation/obj/primitives/modpath.o lib/liblocalcompilation/obj/primitives/modfile.o lib/liblocalcompilation/obj/primitives/modiserver.o lib/liblocalcompilation/obj/Lib.o
-	ar rcs lib/liblocalcompilation/liblocalcompilation.a lib/liblocalcompilation/obj/dmstack.o lib/liblocalcompilation/obj/args.o lib/liblocalcompilation/obj/DEFS.o lib/liblocalcompilation/obj/imports.o lib/liblocalcompilation/obj/primitives.o lib/liblocalcompilation/obj/primitives/modglobal.o lib/liblocalcompilation/obj/fails.o lib/liblocalcompilation/obj/Machine.o lib/liblocalcompilation/obj/Reader.o lib/liblocalcompilation/obj/tkreader.o lib/liblocalcompilation/obj/Token.o lib/liblocalcompilation/obj/Symbol.o lib/liblocalcompilation/obj/modules.o lib/liblocalcompilation/obj/modules/modit.o lib/liblocalcompilation/obj/Heap.o lib/liblocalcompilation/obj/primitives/modglobal0.o lib/liblocalcompilation/obj/primitives/modglobal1.o lib/liblocalcompilation/obj/primitives/modglobal2.o lib/liblocalcompilation/obj/primitives/modstk.o lib/liblocalcompilation/obj/primitives/modblob.o lib/liblocalcompilation/obj/primitives/modint.o lib/liblocalcompilation/obj/primitives/modfloat.o lib/liblocalcompilation/obj/primitives/modlong.o lib/liblocalcompilation/obj/primitives/moddec.o lib/liblocalcompilation/obj/primitives/modmath.o lib/liblocalcompilation/obj/primitives/modlist.o lib/liblocalcompilation/obj/primitives/modjs.o lib/liblocalcompilation/obj/primitives/modtp.o lib/liblocalcompilation/obj/primitives/modmap.o lib/liblocalcompilation/obj/primitives/modobj.o lib/liblocalcompilation/obj/primitives/modstr.o lib/liblocalcompilation/obj/primitives/modsys.o lib/liblocalcompilation/obj/primitives/modb64.o lib/liblocalcompilation/obj/primitives/modcryp.o lib/liblocalcompilation/obj/primitives/modtime.o lib/liblocalcompilation/obj/primitives/modclock.o lib/liblocalcompilation/obj/primitives/modpath.o lib/liblocalcompilation/obj/primitives/modfile.o lib/liblocalcompilation/obj/primitives/modiserver.o lib/liblocalcompilation/obj/Lib.o
+lib/liblocalcompilation/liblocalcompilation.a : lib/liblocalcompilation/obj/dmstack.o lib/liblocalcompilation/obj/args.o lib/liblocalcompilation/obj/DEFS.o lib/liblocalcompilation/obj/imports.o lib/liblocalcompilation/obj/primitives.o lib/liblocalcompilation/obj/primitives/modglobal.o lib/liblocalcompilation/obj/fails.o lib/liblocalcompilation/obj/Machine.o lib/liblocalcompilation/obj/Reader.o lib/liblocalcompilation/obj/tkreader.o lib/liblocalcompilation/obj/Token.o lib/liblocalcompilation/obj/Symbol.o lib/liblocalcompilation/obj/Heap.o lib/liblocalcompilation/obj/primitives/modglobal0.o lib/liblocalcompilation/obj/primitives/modglobal1.o lib/liblocalcompilation/obj/primitives/modglobal2.o lib/liblocalcompilation/obj/primitives/modstk.o lib/liblocalcompilation/obj/primitives/modblob.o lib/liblocalcompilation/obj/primitives/modint.o lib/liblocalcompilation/obj/primitives/modfloat.o lib/liblocalcompilation/obj/primitives/modmath.o lib/liblocalcompilation/obj/primitives/modlist.o lib/liblocalcompilation/obj/primitives/modjs.o lib/liblocalcompilation/obj/primitives/modwrap.o lib/liblocalcompilation/obj/primitives/modmap.o lib/liblocalcompilation/obj/primitives/modobj.o lib/liblocalcompilation/obj/primitives/modstr.o lib/liblocalcompilation/obj/primitives/modsys.o lib/liblocalcompilation/obj/primitives/modb64.o lib/liblocalcompilation/obj/primitives/modcryp.o lib/liblocalcompilation/obj/primitives/modtime.o lib/liblocalcompilation/obj/primitives/modclock.o lib/liblocalcompilation/obj/primitives/modpath.o lib/liblocalcompilation/obj/primitives/modit.o lib/liblocalcompilation/obj/primitives/modfile.o lib/liblocalcompilation/obj/primitives/modiserver.o lib/liblocalcompilation/obj/Lib.o
+	ar rcs lib/liblocalcompilation/liblocalcompilation.a lib/liblocalcompilation/obj/dmstack.o lib/liblocalcompilation/obj/args.o lib/liblocalcompilation/obj/DEFS.o lib/liblocalcompilation/obj/imports.o lib/liblocalcompilation/obj/primitives.o lib/liblocalcompilation/obj/primitives/modglobal.o lib/liblocalcompilation/obj/fails.o lib/liblocalcompilation/obj/Machine.o lib/liblocalcompilation/obj/Reader.o lib/liblocalcompilation/obj/tkreader.o lib/liblocalcompilation/obj/Token.o lib/liblocalcompilation/obj/Symbol.o lib/liblocalcompilation/obj/Heap.o lib/liblocalcompilation/obj/primitives/modglobal0.o lib/liblocalcompilation/obj/primitives/modglobal1.o lib/liblocalcompilation/obj/primitives/modglobal2.o lib/liblocalcompilation/obj/primitives/modstk.o lib/liblocalcompilation/obj/primitives/modblob.o lib/liblocalcompilation/obj/primitives/modint.o lib/liblocalcompilation/obj/primitives/modfloat.o lib/liblocalcompilation/obj/primitives/modmath.o lib/liblocalcompilation/obj/primitives/modlist.o lib/liblocalcompilation/obj/primitives/modjs.o lib/liblocalcompilation/obj/primitives/modwrap.o lib/liblocalcompilation/obj/primitives/modmap.o lib/liblocalcompilation/obj/primitives/modobj.o lib/liblocalcompilation/obj/primitives/modstr.o lib/liblocalcompilation/obj/primitives/modsys.o lib/liblocalcompilation/obj/primitives/modb64.o lib/liblocalcompilation/obj/primitives/modcryp.o lib/liblocalcompilation/obj/primitives/modtime.o lib/liblocalcompilation/obj/primitives/modclock.o lib/liblocalcompilation/obj/primitives/modpath.o lib/liblocalcompilation/obj/primitives/modit.o lib/liblocalcompilation/obj/primitives/modfile.o lib/liblocalcompilation/obj/primitives/modiserver.o lib/liblocalcompilation/obj/Lib.o
 
-lib/liblocalcompilation/obj/dmstack.o : include/dmstack.h src/dmstack.c include/args.h src/args.c include/imports.h src/imports.c include/primitives.h src/primitives.c include/modules.h src/modules.c include/Reader.h src/Reader.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/DEFS.h src/DEFS.c
+lib/liblocalcompilation/obj/dmstack.o : include/dmstack.h src/dmstack.c include/args.h src/args.c include/imports.h src/imports.c include/primitives.h src/primitives.c include/Reader.h src/Reader.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/DEFS.h src/DEFS.c
 	gcc $(CFLAGS) -c src/dmstack.c -o lib/liblocalcompilation/obj/dmstack.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -28,12 +28,12 @@ lib/liblocalcompilation/obj/DEFS.o : include/DEFS.h src/DEFS.c
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/imports.o : include/imports.h src/imports.c include/primitives.h src/primitives.c include/modules.h src/modules.c include/Machine.h src/Machine.c include/Lib.h src/Lib.c
+lib/liblocalcompilation/obj/imports.o : include/imports.h src/imports.c include/primitives.h src/primitives.c include/Machine.h src/Machine.c include/Lib.h src/Lib.c
 	gcc $(CFLAGS) -c src/imports.c -o lib/liblocalcompilation/obj/imports.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives.o : include/primitives.h src/primitives.c include/primitives/modglobal.h src/primitives/modglobal.c include/primitives/modstk.h src/primitives/modstk.c include/primitives/modblob.h src/primitives/modblob.c include/primitives/modint.h src/primitives/modint.c include/primitives/modfloat.h src/primitives/modfloat.c include/primitives/modlong.h src/primitives/modlong.c include/primitives/moddec.h src/primitives/moddec.c include/primitives/modmath.h src/primitives/modmath.c include/primitives/modlist.h src/primitives/modlist.c include/primitives/modtp.h src/primitives/modtp.c include/primitives/modmap.h src/primitives/modmap.c include/primitives/modobj.h src/primitives/modobj.c include/primitives/modstr.h src/primitives/modstr.c include/primitives/modsys.h src/primitives/modsys.c include/primitives/modjs.h src/primitives/modjs.c include/primitives/modb64.h src/primitives/modb64.c include/primitives/modcryp.h src/primitives/modcryp.c include/primitives/modtime.h src/primitives/modtime.c include/primitives/modclock.h src/primitives/modclock.c include/primitives/modpath.h src/primitives/modpath.c include/primitives/modfile.h src/primitives/modfile.c include/primitives/modiserver.h src/primitives/modiserver.c include/Machine.h src/Machine.c
+lib/liblocalcompilation/obj/primitives.o : include/primitives.h src/primitives.c include/primitives/modglobal.h src/primitives/modglobal.c include/primitives/modstk.h src/primitives/modstk.c include/primitives/modblob.h src/primitives/modblob.c include/primitives/modint.h src/primitives/modint.c include/primitives/modfloat.h src/primitives/modfloat.c include/primitives/modmath.h src/primitives/modmath.c include/primitives/modlist.h src/primitives/modlist.c include/primitives/modwrap.h src/primitives/modwrap.c include/primitives/modmap.h src/primitives/modmap.c include/primitives/modobj.h src/primitives/modobj.c include/primitives/modstr.h src/primitives/modstr.c include/primitives/modsys.h src/primitives/modsys.c include/primitives/modjs.h src/primitives/modjs.c include/primitives/modb64.h src/primitives/modb64.c include/primitives/modcryp.h src/primitives/modcryp.c include/primitives/modtime.h src/primitives/modtime.c include/primitives/modclock.h src/primitives/modclock.c include/primitives/modpath.h src/primitives/modpath.c include/primitives/modit.h src/primitives/modit.c include/primitives/modfile.h src/primitives/modfile.c include/primitives/modiserver.h src/primitives/modiserver.c include/Machine.h src/Machine.c
 	gcc $(CFLAGS) -c src/primitives.c -o lib/liblocalcompilation/obj/primitives.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -48,7 +48,7 @@ lib/liblocalcompilation/obj/fails.o : include/fails.h src/fails.c include/Machin
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/Machine.o : include/Machine.h src/Machine.c include/Reader.h src/Reader.c include/imports.h src/imports.c include/primitives.h src/primitives.c include/modules.h src/modules.c include/fails.h src/fails.c include/Heap.h src/Heap.c include/DEFS.h src/DEFS.c
+lib/liblocalcompilation/obj/Machine.o : include/Machine.h src/Machine.c include/Reader.h src/Reader.c include/imports.h src/imports.c include/primitives.h src/primitives.c include/fails.h src/fails.c include/Heap.h src/Heap.c include/DEFS.h src/DEFS.c
 	gcc $(CFLAGS) -c src/Machine.c -o lib/liblocalcompilation/obj/Machine.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -63,23 +63,13 @@ lib/liblocalcompilation/obj/tkreader.o : include/tkreader.h src/tkreader.c inclu
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/Token.o : include/Token.h src/Token.c include/Symbol.h src/Symbol.c
+lib/liblocalcompilation/obj/Token.o : include/Token.h src/Token.c include/DEFS.h src/DEFS.c include/Symbol.h src/Symbol.c
 	gcc $(CFLAGS) -c src/Token.c -o lib/liblocalcompilation/obj/Token.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
 lib/liblocalcompilation/obj/Symbol.o : include/Symbol.h src/Symbol.c
 	gcc $(CFLAGS) -c src/Symbol.c -o lib/liblocalcompilation/obj/Symbol.o \
-		-Iinclude \
-		-I$(LIB_INCLUDE_dmc)
-
-lib/liblocalcompilation/obj/modules.o : include/modules.h src/modules.c include/modules/modit.h src/modules/modit.c
-	gcc $(CFLAGS) -c src/modules.c -o lib/liblocalcompilation/obj/modules.o \
-		-Iinclude \
-		-I$(LIB_INCLUDE_dmc)
-
-lib/liblocalcompilation/obj/modules/modit.o : include/modules/modit.h src/modules/modit.c include/Reader.h src/Reader.c
-	gcc $(CFLAGS) -c src/modules/modit.c -o lib/liblocalcompilation/obj/modules/modit.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
@@ -123,16 +113,6 @@ lib/liblocalcompilation/obj/primitives/modfloat.o : include/primitives/modfloat.
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modlong.o : include/primitives/modlong.h src/primitives/modlong.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/primitives.h src/primitives.c
-	gcc $(CFLAGS) -c src/primitives/modlong.c -o lib/liblocalcompilation/obj/primitives/modlong.o \
-		-Iinclude \
-		-I$(LIB_INCLUDE_dmc)
-
-lib/liblocalcompilation/obj/primitives/moddec.o : include/primitives/moddec.h src/primitives/moddec.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives/modlong.h src/primitives/modlong.c include/primitives.h src/primitives.c
-	gcc $(CFLAGS) -c src/primitives/moddec.c -o lib/liblocalcompilation/obj/primitives/moddec.o \
-		-Iinclude \
-		-I$(LIB_INCLUDE_dmc)
-
 lib/liblocalcompilation/obj/primitives/modmath.o : include/primitives/modmath.h src/primitives/modmath.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modmath.c -o lib/liblocalcompilation/obj/primitives/modmath.o \
 		-Iinclude \
@@ -148,8 +128,8 @@ lib/liblocalcompilation/obj/primitives/modjs.o : include/primitives/modjs.h src/
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modtp.o : include/primitives/modtp.h src/primitives/modtp.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/primitives.h src/primitives.c
-	gcc $(CFLAGS) -c src/primitives/modtp.c -o lib/liblocalcompilation/obj/primitives/modtp.o \
+lib/liblocalcompilation/obj/primitives/modwrap.o : include/primitives/modwrap.h src/primitives/modwrap.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/primitives.h src/primitives.c
+	gcc $(CFLAGS) -c src/primitives/modwrap.c -o lib/liblocalcompilation/obj/primitives/modwrap.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
@@ -188,7 +168,7 @@ lib/liblocalcompilation/obj/primitives/modtime.o : include/primitives/modtime.h 
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modclock.o : include/primitives/modclock.h src/primitives/modclock.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives/modlong.h src/primitives/modlong.c include/primitives.h src/primitives.c
+lib/liblocalcompilation/obj/primitives/modclock.o : include/primitives/modclock.h src/primitives/modclock.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modclock.c -o lib/liblocalcompilation/obj/primitives/modclock.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -198,12 +178,17 @@ lib/liblocalcompilation/obj/primitives/modpath.o : include/primitives/modpath.h 
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modfile.o : include/primitives/modfile.h src/primitives/modfile.c include/Machine.h src/Machine.c include/primitives/modlong.h src/primitives/modlong.c include/primitives.h src/primitives.c
+lib/liblocalcompilation/obj/primitives/modit.o : include/primitives/modit.h src/primitives/modit.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/primitives/modlist.h src/primitives/modlist.c include/primitives.h src/primitives.c
+	gcc $(CFLAGS) -c src/primitives/modit.c -o lib/liblocalcompilation/obj/primitives/modit.o \
+		-Iinclude \
+		-I$(LIB_INCLUDE_dmc)
+
+lib/liblocalcompilation/obj/primitives/modfile.o : include/primitives/modfile.h src/primitives/modfile.c include/Machine.h src/Machine.c include/fails.h src/fails.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modfile.c -o lib/liblocalcompilation/obj/primitives/modfile.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modiserver.o : include/primitives/modiserver.h src/primitives/modiserver.c include/primitives/modlong.h src/primitives/modlong.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives.h src/primitives.c
+lib/liblocalcompilation/obj/primitives/modiserver.o : include/primitives/modiserver.h src/primitives/modiserver.c include/fails.h src/fails.c include/Machine.h src/Machine.c include/primitives.h src/primitives.c
 	gcc $(CFLAGS) -c src/primitives/modiserver.c -o lib/liblocalcompilation/obj/primitives/modiserver.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)

@@ -305,6 +305,27 @@ static void find (Machine *m) {
   pushlist(m, r);
 }
 
+static void lastindex (Machine *m) {
+  Token *tk = machine_pop(m);
+  int fn (Token *t) { return token_eq(t, tk); }
+  // Arr<Token>
+  Arr *a = getlist(m);
+  machine_push(m, token_new_int(0, arr_last_index(a, (FPRED)fn)));
+}
+
+static void lastindexf (Machine *m) {
+  // Arr<Token>
+  Token *prg = machine_pop_exc(m, token_LIST);
+  int fn (Token *e) {
+    machine_push(m, e);
+    machine_process("", machine_pmachines(m), prg);
+    return getint(m);
+  }
+  // Arr<Token>
+  Arr *a = getlist(m);
+  machine_push(m, token_new_int(0, arr_last_index(a, (FPRED)fn)));
+}
+
 static void reduce (Machine *m) {
   // Arr<Token>
   Token *prg = machine_pop_exc(m, token_LIST);
@@ -558,6 +579,8 @@ Map *modlist_mk (void) {
   map_put(r, "index", lindex);
   map_put(r, "indexf", indexf);
   map_put(r, "find", find);
+  map_put(r, "lastIndex", lastindex);
+  map_put(r, "lastIndexf", lastindexf);
   map_put(r, "reduce", reduce);
 
   map_put(r, "drop", drop);

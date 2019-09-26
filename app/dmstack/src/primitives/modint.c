@@ -14,7 +14,7 @@ static void fn2 (Machine *m, int (*f)(int, int)) {
 
 static void fromStr (Machine *m) {
   machine_push(m, token_new_int(
-    0, js_ri((Js *)token_string(machine_pop_exc(m, token_STRING)))
+    0, js_rl((Js *)token_string(machine_pop_exc(m, token_STRING)))
   ));
 }
 

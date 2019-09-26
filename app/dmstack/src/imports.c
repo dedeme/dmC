@@ -3,7 +3,6 @@
 
 #include "imports.h"
 #include "primitives.h"
-#include "modules.h"
 #include "Machine.h"
 #include "Lib.h"
 
@@ -13,12 +12,9 @@ static Lib *imports = NULL;
 static Arr *onway = NULL;
 static Heap *base = NULL;
 static char *mprimitives[] = {
-  "str", "lst", "stk", "tp", "sys", "map", "obj", "js", "path", "file",
-  "time", "dec", "long", "cryp", "b64", "float", "int", "math",
+  "str", "lst", "stk", "wrap", "sys", "map", "obj", "js", "path", "file",
+  "time", "cryp", "b64", "it", "float", "int", "math",
   "blob", "iserver", "clock", NULL
-};
-static char *mmemory[] = {
-  "it", NULL
 };
 
 void imports_init () {
@@ -38,18 +34,9 @@ void imports_init () {
     }_EACH
     lib_add(imports, symbol_new(module), h);
   }
-  void loadm (char *module) {
-    Heap *h = heap_new();
-    EACH(opt_get(modules_module(module)), Kv, kv) {
-      heap_add(h, symbol_new(kv_key(kv)), kv_value(kv));
-    }_EACH
-    lib_add(imports, symbol_new(module), h);
-  }
 
   char **p = mprimitives;
   while (*p) loadp(*p++);
-  p = mmemory;
-  while (*p) loadm(*p++);
 }
 
 void imports_put_on_way (Symbol *key) {

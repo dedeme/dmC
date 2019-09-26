@@ -27,6 +27,9 @@ Lib *lib_new (void) {
 }
 
 void lib_add (Lib *this, Symbol *s, Heap *heap) {
+  EACH((Arr *)this, LibEntry, e) {
+    if (symbol_eq(e->s, s)) return;
+  }_EACH
   arr_push((Arr *)this, entry_new(s, heap));
 }
 

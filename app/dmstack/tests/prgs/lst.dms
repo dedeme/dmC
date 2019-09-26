@@ -17,8 +17,8 @@
 
   lst,new () == assert
   "a" lst,unary ("a") == assert
-  1 2 tp,new2 (1, 2) == assert
-  "a" 1 "b" tp,new3 ["a", 1, "b"] == assert
+  1 2 wrap,tp (1, 2) == assert
+  "a" 1 "b" wrap,tp3 ["a", 1, "b"] == assert
 
   // push - push0 - pop - pop0 - peek - peek0
 
@@ -105,8 +105,9 @@
   // sort
 
   () dup (>) lst,sort () == assert
-  (23) dup (>) lst,sort (23) == assert
-  (1, 3, 2) dup (>) lst,sort (1, 2, 3) == assert
+  >:& f =
+  (23) dup (f) lst,sort (23) == assert
+  (1, 3, 2) dup (f) lst,sort (1, 2, 3) == assert
 
   // duplicates
 
@@ -142,7 +143,7 @@
   ("a" 1 "b") ("a" 1 "a") (==) lst,neq? assert
   ("a" 1 "b") ("a" 1 "b" "c") (==) lst,neq? assert
 
-  // index - indexf
+  // index - indexf - lastIndex - lastIndexf
 
   () 23 lst,index -1 == assert
   (23) 23 lst,index 0 == assert
@@ -156,6 +157,21 @@
   (1, 2, 3) (1 ==) lst,indexf 0 == assert
   (1, 2, 3) (2 ==) lst,indexf 1 == assert
   (1, 2, 3) (3 ==) lst,indexf 2 == assert
+
+  () 23 lst,lastIndex -1 == assert
+  (23) 23 lst,lastIndex 0 == assert
+  (1, 2, 3) 23 lst,lastIndex -1 == assert
+  (1, 2, 3) 1 lst,lastIndex 0 == assert
+  (1, 2, 1) 1 lst,lastIndex 2 == assert
+  (1, 2, 3) 2 lst,lastIndex 1 == assert
+  (1, 3, 2, 3, 4) 3 lst,lastIndex 3 == assert
+  () (23 ==) lst,lastIndexf -1 == assert
+  (23) (23 ==) lst,lastIndexf 0 == assert
+  (1, 2, 3) (23 ==) lst,lastIndexf -1 == assert
+  (1, 2, 3) (1 ==) lst,lastIndexf 0 == assert
+  (1, 2, 1) (1 ==) lst,lastIndexf 2 == assert
+  (1, 2, 3) (2 ==) lst,lastIndexf 1 == assert
+  (1, 3, 2, 3, 4) (3 ==) lst,lastIndexf 3 == assert
 
   // find
 

@@ -76,6 +76,7 @@
         A (1) else (0) (1 get js,null?) if lst,push+
       lst,push+
     [1, 2, [], 3.5, {}, {"a": 11}, [1, 0]] == assert
+
   {} js,wo js,ro {} == assert
   {}
     "a" 1 js,wi obj,put+; "b" [] js,wa obj,put+; "c" {} js,wo obj,put+
@@ -107,6 +108,39 @@
           obj,put+
       obj,put+
     {"a": 1, "b": [], "c": {}, "d": [1, 0], "e": {"a2": "", "b2": 0}} == assert
+
+  {} js,wm js,rm {} == assert
+  {}
+    "a" 1 js,wi map,put+; "b" [] js,wa map,put+; "c" {} js,wo map,put+
+    "d"
+      [] 1 js,wi lst,push+; 0 js,wb lst,push+
+      js,wa map,put+
+    "e"
+      {} "a2" "" js,ws obj,put+; "b2" js,wn obj,put+
+      js,wo map,put+
+    js,wm Js =
+  Js js,rm Jss =
+  {}
+    "a" Jss "a" map,get >> js,ri map,put+
+    "b" Jss "b" map,get >> js,ra map,put+
+    "c" Jss "c" map,get >> js,ro map,put+
+    "d"
+      []
+        Jss "d" map,get >> js,ra A =
+        A 0 get js,ri lst,push+; A 1 get js,rb lst,push+
+      map,put+
+    "e"
+      {}
+        Jss "e" map,get >> js,ro O =
+        "a2"
+          O "a2" obj,get js,rs
+          obj,put+
+        "b2"
+          O (1) else (0) ("b2" obj,get js,null?) if
+          obj,put+
+      map,put+
+    {("a": 1), ("b": []), ("c": {}), ("d": [1, 0]),
+      ("e": {"a2": "", "b2": 0})} == assert
 
   [] (js,ws) js,fromList (js,rs) js,toList [] == assert
   ["a", "b"] (js,ws) js,fromList (js,rs) js,toList ["a", "b"] == assert

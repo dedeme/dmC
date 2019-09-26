@@ -5,13 +5,12 @@
 #include "Reader.h"
 #include "imports.h"
 #include "primitives.h"
-#include "modules.h"
 #include "fails.h"
 #include "Heap.h"
 #include "DEFS.h"
 
 struct machine_Machine {
-  char *sourcex;
+  char *source;
   // List<Machine>
   List *pmachines;
   // Arr<Token>
@@ -22,11 +21,11 @@ struct machine_Machine {
 };
 
 static char *machine_source (Machine *this) {
-  if (*this->sourcex) return this->sourcex;
+  if (*this->source) return this->source;
   // List<Machine>
   List *pms = this->pmachines;
-  while (!*((Machine *)list_head(pms))->sourcex) pms = list_tail(pms);
-  return ((Machine *)list_head(pms))->sourcex;
+  while (!*((Machine *)list_head(pms))->source) pms = list_tail(pms);
+  return ((Machine *)list_head(pms))->source;
 }
 
 // List<Machine>
@@ -412,8 +411,8 @@ static Machine *cprocess (Machine *m) {
           // List<Machine>
           List *pms = m->pmachines;
           for (;;) {
+            if (list_empty(pms)) break;
             Machine *mch = list_head(pms);
-            if (*mch->sourcex) break;
             t = heap_get(mch->heap, sym);
             if (t) break;
             pms = list_tail(pms);
@@ -432,11 +431,12 @@ static Machine *cprocess (Machine *m) {
           } else {
             // List <Machines>
             List *pms = m->pmachines;
-            while (!*((Machine *)list_head(pms))->sourcex) pms = list_tail(pms);
+            while (!*((Machine *)list_head(pms))->source) pms = list_tail(pms);
             char *msg = "";
             if (heap_get(((Machine *)list_head(pms))->heap, sym))
               msg = "\n(Top symbols can no be referenced out of top scope. "
                     "Use 'this'.)";
+            m->ix--;
             machine_fail(m, str_f(
               "Symbol '%s' not found%s", symbol_name(sym), msg
             ));
@@ -523,14 +523,15 @@ static Machine *cprocess (Machine *m) {
         // List<Machine>
         List *pms = m->pmachines;
         for (;;) {
+          if (list_empty(pms)) break;
           Machine *mch = list_head(pms);
-          if (*mch->sourcex) break;
           t = heap_get(mch->heap, sym);
           if (t) break;
           pms = list_tail(pms);
         }
       }
       if (!t) {
+        m->ix--;
         machine_fail(m, str_f(
           "Symbol '%s' not found", symbol_name(sym)
         ));
@@ -557,7 +558,7 @@ static Machine *cprocess (Machine *m) {
 // pmachines is List<Machine>
 Machine *machine_process (char *source, List *pmachines, Token *prg) {
   Machine *m = MALLOC(Machine);
-  m->sourcex = source;
+  m->source = source;
   m->pmachines = list_cons(pmachines, m);
   m->stack = list_empty(pmachines)
     ? arr_new()
@@ -573,7 +574,7 @@ Machine *machine_process (char *source, List *pmachines, Token *prg) {
 // pmachines is List<Machine>
 Machine *machine_isolate_process (char *source, List *pmachines, Token *prg) {
   Machine *m = MALLOC(Machine);
-  m->sourcex = source;
+  m->source = source;
   m->pmachines = list_cons(pmachines, m);
   m->stack = arr_new();
   m->heap = heap_new();

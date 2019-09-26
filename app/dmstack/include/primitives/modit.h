@@ -1,15 +1,15 @@
-// Copyright 20-Sept-2019 ºDeme
+// Copyright 26-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Floats with a fix number of decimals.
+/// Iterator module.
 
-#ifndef PRIMITIVES_MODDEC_H
-  #define PRIMITIVES_MODDEC_H
+#ifndef PRIMITIVES_MODIT_H
+  #define PRIMITIVES_MODIT_H
 
 #include "dmc/async.h"
 #include "primitives.h"
 
 /// Returns Map<primitives_Fn>
-Map *moddec_mk (void);
+Map *modit_mk (void);
 
 #endif

@@ -6,8 +6,11 @@
 #ifndef DEFS_H
   #define DEFS_H
 
+#include <stdint.h>
 #include "dmc/async.h"
 
 #define VERSION "201909"
+
+typedef intptr_t Int;
 
 #endif

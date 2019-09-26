@@ -127,3 +127,21 @@ void fails_range (Machine *m, int min, int max, int ix) {
 void fails_check_range (Machine *m, int min, int max, int ix) {
   if (ix < min || ix > max) fails_range(m, min, max, ix);
 }
+
+void *fails_read_pointer (Machine *m, char *id, Token *pointer) {
+  if (token_type(pointer) != token_LIST) fails_type_in(m, token_LIST, pointer);
+  // Arr<Token>
+  Arr *a = token_list(pointer);
+  if (arr_size(a) != 2) fails_size_list(m, a, 2);
+  Token *sym = *arr_start(a);
+  if (token_type(sym) != token_SYMBOL) fails_type_in(m, token_SYMBOL, sym);
+  if (!str_eq(id, symbol_name(token_symbol(sym))))
+    machine_fail(m, str_f(
+      "Expected pointer of type '%s', found one of type '%s",
+      id, symbol_name(token_symbol(sym))
+    ));
+  Token *p = *(arr_start(a) + 1);
+  if (token_type(p) != token_INT) fails_type_in(m, token_INT, p);
+
+  return (void *)token_int(p);
+}

@@ -1,34 +1,3 @@
-// Copyright 11-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Iterator module.
-
-#ifndef MODULES_MODIT_H
-  #define MODULES_MODIT_H
-
-#include "dmc/async.h"
-
-// Map<Token>
-Map *modit_mk (void);
-
-#endif
-// Copyright 11-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Momory modules
-
-#ifndef MODULES_H
-  #define MODULES_H
-
-#include "dmc/async.h"
-
-///
-void modules_init (void);
-
-/// Returns Opt<Map<Token>> - Functions from a module.
-Opt *modules_module (char *module);
-
-#endif
 // Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -165,6 +134,9 @@ void fails_range (Machine *m, int min, int max, int ix);
 ///   ix : Value out of range.
 void fails_check_range (Machine *m, int min, int max, int ix);
 
+///
+void *fails_read_pointer (Machine *m, char *id, Token *pointer);
+
 #endif
 // Copyright 25-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -182,15 +154,16 @@ void fails_check_range (Machine *m, int min, int max, int ix);
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   source : Program source (file name, *string* or other identifier)
+///   source : Identifier (File without extension or 'ad hoc' identifier).
 ///   prg    : Program to process.
 ///   nline  : Current line number.
-Reader *reader_new (char *source, char *prg, int nline);
+Reader *reader_new (char *source, char *prg);
 
 /// Creates a new stack machine
-///   source : Program source (file name, *string* or other identifier)
+///   parent : Reader parent.
 ///   prg    : Program to process.
-Reader *reader_new_from_file (char *source, char *prg);
+///   nline  : Current line number.
+Reader *reader_new_from_reader (Reader *parent, char *prg, int nline);
 
 /// Returns a token type token_LIST.
 Token *reader_process (Reader *this);
@@ -222,6 +195,12 @@ int reader_nline (Reader *this);
 
 ///
 void reader_set_nline (Reader *this, int value);
+
+/// Calculate symbol id of 'tk'. 'tk' is a token_SYMBOL.
+///   this: The reader.
+///   prg : Arr<Token> symbols read until now.
+///   tk  : Token type token_SYMBOL.
+Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
 
 ///
 void reader_fail (Reader *this, char *msg);
@@ -327,6 +306,21 @@ void modglobal1_less_eq (Machine *m);
 
 /// Returns Map<primitives_Fn>
 Map *modiserver_mk (void);
+
+#endif
+// Copyright 26-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Iterator module.
+
+#ifndef PRIMITIVES_MODIT_H
+  #define PRIMITIVES_MODIT_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modit_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -479,21 +473,6 @@ Map *modcryp_mk (void);
 Map *modb64_mk (void);
 
 #endif
-// Copyright 20-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Floats with a fix number of decimals.
-
-#ifndef PRIMITIVES_MODDEC_H
-  #define PRIMITIVES_MODDEC_H
-
-#include "dmc/async.h"
-#include "primitives.h"
-
-/// Returns Map<primitives_Fn>
-Map *moddec_mk (void);
-
-#endif
 // Copyright 17-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -569,32 +548,24 @@ void modglobal2_up (Machine *m);
 /// Stack has: container - index - function.
 void modglobal2_upplus (Machine *m);
 
-#endif
-// Copyright 20-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+/// Return its element from a reference and removes the reference.
+void modglobal2_ref_get (Machine *m);
 
-/// Long numbers module.
+/// Sets a element in a reference and removes the reference.
+/// Stack has: container - value.
+void modglobal2_ref_set (Machine *m);
 
-#ifndef PRIMITIVES_MODLONG_H
-  #define PRIMITIVES_MODLONG_H
+/// Sets a element in a reference and keeps the reference.
+/// Stack has: container - value.
+void modglobal2_ref_setplus (Machine *m);
 
-#include "dmc/async.h"
-#include "primitives.h"
+/// Sets a element in a reference using its value and removes the reference.
+/// Stack has: container - function.
+void modglobal2_ref_up (Machine *m);
 
-/// Returns Map<primitives_Fn>
-Map *modlong_mk (void);
-
-///
-long modlong_to_long (Machine *m, Token *tk);
-
-///
-Token *modlong_from_long (long n);
-
-///
-void *modlong_to_pointer (Machine *m, char *type, Token *tk);
-
-///
-Token *modlong_from_pointer (char *type, void *p);
+/// Sets a element in a reference using its value and keeps the reference.
+/// Stack has: container - function.
+void modglobal2_ref_upplus (Machine *m);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -610,6 +581,21 @@ Token *modlong_from_pointer (char *type, void *p);
 
 /// Returns Map<primitives_Fn>
 Map *modstr_mk (void);
+
+#endif
+// Copyright 18-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Wrappers.
+
+#ifndef PRIMITIVES_MODWRAP_H
+  #define PRIMITIVES_MODWRAP_H
+
+#include "dmc/async.h"
+#include "primitives.h"
+
+/// Returns Map<primitives_Fn>
+Map *modwrap_mk (void);
 
 #endif
 // Copyright 30-Aug-2019 ºDeme
@@ -690,21 +676,6 @@ Map *modint_mk (void);
 Map *modsys_mk (void);
 
 #endif
-// Copyright 18-Sept-2019 ºDeme
-// GNU General Public License - V3 <http://www.gnu.org/licenses/>
-
-/// Tuples and assimilate objectes.
-
-#ifndef PRIMITIVES_MODTP_H
-  #define PRIMITIVES_MODTP_H
-
-#include "dmc/async.h"
-#include "primitives.h"
-
-/// Returns Map<primitives_Fn>
-Map *modtp_mk (void);
-
-#endif
 // Copyright 26-Aug-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -713,9 +684,12 @@ Map *modtp_mk (void);
 #ifndef DEFS_H
   #define DEFS_H
 
+#include <stdint.h>
 #include "dmc/async.h"
 
 #define VERSION "201909"
+
+typedef intptr_t Int;
 
 #endif
 // Copyright 23-Sept-2019 ºDeme
@@ -824,7 +798,10 @@ char *symbol_to_str (Symbol *this);
   #define TOKEN_H
 
 #include "dmc/async.h"
+#include "DEFS.h"
 #include "Symbol.h"
+
+// typedef struct machine_Machine Machine;
 
 ///
 enum token_Type {
@@ -835,7 +812,7 @@ enum token_Type {
 typedef struct token_Token Token;
 
 ///
-Token *token_new_int (int line, int value);
+Token *token_new_int (int line, Int value);
 
 ///
 Token *token_new_float (int line, double value);
@@ -859,7 +836,7 @@ enum token_Type token_type (Token *this);
 int token_line (Token *this);
 
 ///
-int token_int (Token *this);
+Int token_int (Token *this);
 
 ///
 double token_float (Token *this);
@@ -887,6 +864,9 @@ char *token_to_str (Token *this);
 
 ///
 char *token_type_to_str (enum token_Type type);
+
+///
+Token *token_from_pointer (char *id, void *pointer);
 
 #endif
 // Copyright 12-Sept-2019 ºDeme
@@ -1095,9 +1075,13 @@ int arr_all (Arr *this, int (*pred)(void *e));
 /// Returns '1' if some element of 'this' yields '1' with 'pred'.
 int arr_any (Arr *this, int (*pred)(void *e));
 
-/// arr_index returns the index of the first elements which returns 'true'
+/// Returns the index of the first elements which returns 'true'
 /// with 'pred', or -1 if such element does not exist.
 int arr_index (Arr *this, int (*pred)(void *e));
+
+/// Returns the index of the last elements which returns 'true'
+/// with 'pred', or -1 if such element does not exist.
+int arr_last_index (Arr *this, int (*pred)(void *e));
 
 /// arr_filter_in removes every element which returns 'false' with 'pred'.
 void arr_filter_in (Arr *this, int (*pred)(void *e));

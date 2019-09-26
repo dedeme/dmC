@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "Machine.h"
-#include "primitives/modlong.h"
+#include "fails.h"
 
 static void cwd (Machine *m) {
   machine_push(m, token_new_string(0, file_cwd()));
@@ -69,12 +69,12 @@ static void islink (Machine *m) {
 
 static void modified (Machine *m) {
   char *path = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, modlong_from_long(file_modified(path)));
+  machine_push(m, token_new_int(0, file_modified(path)));
 }
 
 static void size (Machine *m) {
   char *path = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, modlong_from_long(file_size(path)));
+  machine_push(m, token_new_int(0, file_size(path)));
 }
 
 static void swrite (Machine *m) {
@@ -94,42 +94,42 @@ static void sread (Machine *m) {
 
 static void aopen (Machine *m) {
   char *path = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, modlong_from_pointer("= __File", file_aopen(path)));
+  machine_push(m, token_from_pointer("= __File", file_aopen(path)));
 }
 
 static void ropen (Machine *m) {
   char *path = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, modlong_from_pointer("= __File", file_ropen(path)));
+  machine_push(m, token_from_pointer("= __File", file_ropen(path)));
 }
 
 static void wopen (Machine *m) {
   char *path = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, modlong_from_pointer("= __File", file_wopen(path)));
+  machine_push(m, token_from_pointer("= __File", file_wopen(path)));
 }
 
 static void sclose (Machine *m) {
-  file_close((FileLck *)modlong_to_pointer(m, "= __File", machine_pop(m)));
+  file_close((FileLck *)fails_read_pointer(m, "= __File", machine_pop(m)));
 }
 
 static void readbin (Machine *m) {
-  FileLck *f = modlong_to_pointer(m, "= __File", machine_pop(m));
+  FileLck *f = fails_read_pointer(m, "= __File", machine_pop(m));
   machine_push(m, token_new_blob(0, file_read_bin(f)));
 }
 
 static void readline (Machine *m) {
-  FileLck *f = modlong_to_pointer(m, "= __File", machine_pop(m));
+  FileLck *f = fails_read_pointer(m, "= __File", machine_pop(m));
   machine_push(m, token_new_string(0, file_read_line(f)));
 }
 
 static void writebin (Machine *m) {
   Bytes *bs = token_blob(machine_pop_exc(m, token_BLOB));
-  FileLck *f = modlong_to_pointer(m, "= __File", machine_pop(m));
+  FileLck *f = fails_read_pointer(m, "= __File", machine_pop(m));
   file_write_bin(f, bs);
 }
 
 static void writetext (Machine *m) {
   char *s = token_string(machine_pop_exc(m, token_STRING));
-  FileLck *f = modlong_to_pointer(m, "= __File", machine_pop(m));
+  FileLck *f = fails_read_pointer(m, "= __File", machine_pop(m));
   file_write_text(f, s);
 }
 

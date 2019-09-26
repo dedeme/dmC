@@ -10,25 +10,25 @@ static Token *read (char *id, char *prg) {
 
 static Token *new () {
   return read("NEW",
-    "prg =; dup prg; prg:& tp,new3"
+    "prg =; dup prg; prg:& wrap,tp3"
   );
 }
 
 static Token *empty () {
   return read("EMPTY",
-    "0 () 0 tp,new3"
+    "0 () 0 wrap,tp3"
   );
 }
 
 static Token *unary () {
   return read("UNARY",
-   "() swap lst,unary () tp,new3"
+   "() swap lst,unary () wrap,tp3"
   );
 }
 
 static Token *from () {
   return read("FROM",
-    "dup size 0 tp,new3 "
+    "dup size 0 wrap,tp3 "
     "( Ob =; Ob; Ob 1 get; Ob 2 get " // Ob sz i
     "  (pop; pop; ()) else "
     "  (i =; Ob =; Ob 0 get i get lst,unary; Ob 2 i 1 + set) "
@@ -39,7 +39,7 @@ static Token *from () {
 
 static Token *range () {
   return read("RANGE",
-   "tp,new2 "
+   "wrap,tp "
    "( (pop; ()) "
    "  else "
    "  (Ob =; Ob 0 get r =; Ob 0 r 1 + set; r lst,unary) "
@@ -77,7 +77,7 @@ static Token *next () {
 
 static Token *plus () {
   return read("PLUS",
-    "tp,new2 "
+    "wrap,tp "
     "( Its =; Its 1 get; Its 0 get" // It2 It1
     "  ( pop; "
     "    (pop; ()) else "
@@ -110,7 +110,7 @@ static Token *dropf () {
 
 static Token *filter () {
   return read("FILTER",
-    "tp,new2 "
+    "wrap,tp "
     "( Tp =; Tp 1 get; Tp 0 get "  // fn It
     "  (dup it,next; pop) "
     "  ( (0) else "
@@ -124,7 +124,7 @@ static Token *filter () {
 
 static Token *map () {
   return read("MAP",
-    "tp,new2 " // It fn
+    "wrap,tp " // It fn
     "( "
     "  (pop; ()) "
     "  else "
@@ -159,7 +159,7 @@ static Token *push0 () {
 
 static Token *take () {
   return read("TAKE",
-    "0 tp,new3 " // It n i
+    "0 wrap,tp3 " // It n i
     "( (pop; ()) "
     "  else "
     "  (Ob =; Ob 2 :: Ob 2 get 1 + :: set+; 0 get it,next lst,unary) "
@@ -171,7 +171,7 @@ static Token *take () {
 
 static Token *takef () {
   return read("TAKEF",
-    "tp,new2 " // It fn
+    "wrap,tp " // It fn
     "( (pop; ()) "
     "  else "
     "  (Ob =; Ob 0 get it,next lst,unary) "
@@ -187,10 +187,10 @@ static Token *takef () {
 
 static Token *zip () {
   return read("ZIP",
-    "tp,new2 " // It1 It2
+    "wrap,tp " // It1 It2
     "( (pop; ())"
     "  else"
-    "  (Ob =; Ob 0 get it,next; Ob 1 get it,next; tp,new2; lst,unary)"
+    "  (Ob =; Ob 0 get it,next; Ob 1 get it,next; wrap,tp; lst,unary)"
     "  (Ob =; Ob; Ob 0 get it,has? Ob 1 get it,has? &&)"
     "  if)"
     "it,new "
@@ -199,11 +199,11 @@ static Token *zip () {
 
 static Token *zip3 () {
   return read("ZIP3",
-    "tp,new3 " // It1 It2 It3
+    "wrap,tp3 " // It1 It2 It3
     "( (pop; ())"
     "  else"
     "  ( Ob =; Ob 0 get it,next; Ob 1 get it,next; Ob 2 get it,next; "
-    "    tp,new3; lst,unary)"
+    "    wrap,tp3; lst,unary)"
     "  (Ob =; Ob; Ob 0 get it,has? Ob 1 get it,has? && Ob 2 get it,has? &&)"
     "  if)"
     "it,new "
@@ -244,7 +244,7 @@ static Token *count () {
 
 static Token *duplicates () {
   return read("DUPLICATES",
-    "lst,new lst,new tp,new2 tp,new3 (0) + " // (It fn (Dup Res) ie) Ob =
+    "lst,new lst,new wrap,tp wrap,tp3 (0) + " // (It fn (Dup Res) ie) Ob =
     "( dup; Ob =; 3 Ob 0 get it,next set+; "
     "  ( ( dup; Ob =; Ob 2 get 1 get; Ob 3 get; lst,push) "
     "    else "
@@ -393,13 +393,13 @@ static Token *reverse () {
 
 static Token *sort () {
   return read("SORT",
-    "(f =; it,to dup (f) lst,sort it,from) run"
+    "f =; it,to dup (f) lst,sort it,from"
   );
 }
 
 static Token *box () {
   return read("BOX",
-    "dup dup lst,shuffle it,from tp,new2 " // List It
+    "dup dup lst,shuffle it,from wrap,tp " // List It
     "( "
     "  ( Ob = "
     "    Ob 1 Ob 0 get dup lst,shuffle it,from set+ "

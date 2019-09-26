@@ -118,8 +118,7 @@ void modglobal2_ref_get (Machine *m) {
   Token *tk = machine_pop_exc(m, token_LIST);
   // Arr<Token>
   Arr *a = token_list(tk);
-  if (arr_size(a) != 1)
-    fails_range(m, 1, 1, arr_size(a));
+  if (arr_size(a) != 1) fails_size_list(m, a, 1);
 
   machine_push(m, *arr_start(a));
 }
@@ -132,8 +131,7 @@ static void refsetboth (Machine *m, int isplus) {
   ;
   // Arr<Token>
   Arr *a = token_list(tk1);
-  if (arr_size(a) != 1)
-    fails_range(m, 1, 1, arr_size(a));
+  if (arr_size(a) != 1) fails_size_list(m, a, 1);
 
   *arr_start(a) = tk2;
 }

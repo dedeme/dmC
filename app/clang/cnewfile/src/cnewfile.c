@@ -5,6 +5,9 @@
 #include "dmc/std.h"
 #include "dmc/date.h"
 
+#include <limits.h>
+#include <stdint.h>
+
 static char *months[] = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sept", "Oct", "Nov","Dec"

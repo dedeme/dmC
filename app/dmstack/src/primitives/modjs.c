@@ -19,7 +19,7 @@ static void rb (Machine *m) {
 
 static void ri (Machine *m) {
   machine_push(m, token_new_int(0,
-    js_ri((Js *)token_string(machine_pop_exc(m, token_STRING)))
+    js_rl((Js *)token_string(machine_pop_exc(m, token_STRING)))
   ));
 }
 
@@ -54,6 +54,21 @@ static void ro (Machine *m) {
   machine_push(m, token_new_list(0, r));
 }
 
+static void rm (Machine *m) {
+  // Map<Js>
+  Map *jsm = js_ro((Js *)token_string(machine_pop_exc(m, token_STRING)));
+  // Arr<Token>
+  Arr *r = arr_new();
+  EACH(jsm, Kv, kv) {
+    // Arr<Token>
+    Arr *e = arr_new();
+    arr_push(e, token_new_string(0, kv_key(kv)));
+    arr_push(e, token_new_string(0, kv_value(kv)));
+    arr_push(r, token_new_list(0, e));
+  }_EACH
+  machine_push(m, token_new_list(0, r));
+}
+
 static void wn (Machine *m) {
   machine_push(m, token_new_string(0, (char *)js_wn()));
 }
@@ -65,7 +80,7 @@ static void wb (Machine *m) {
 }
 
 static void wi (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_wi(
+  machine_push(m, token_new_string(0, (char *)js_wl(
     token_int(machine_pop_exc(m, token_INT))
   )));
 }
@@ -109,6 +124,27 @@ static void wo (Machine *m) {
     }
   }_EACH
   if (key) fails_size_list(m, a, arr_size(a) + 1);
+  machine_push(m, token_new_string(0, (char *)js_wo(r)));
+}
+
+static void wm (Machine *m) {
+  // Arr<Token>
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  // Map<char>
+  Map *r = map_new();
+  EACH(a, Token, tk) {
+    if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
+    // Arr<Token>
+    Arr *e = token_list(tk);
+    if (arr_size(e) != 2) fails_size_list(m, e, 2);
+    Token *tkkey = *arr_start(e);
+    if (token_type(tkkey) != token_STRING)
+      fails_type_in(m, token_STRING, tkkey);
+    Token *tkval = *(arr_start(e) + 1);
+    if (token_type(tkval) != token_STRING)
+      fails_type_in(m, token_STRING, tkval);
+    map_put(r, token_string(tkkey), token_string(tkval));
+  }_EACH
   machine_push(m, token_new_string(0, (char *)js_wo(r)));
 }
 
@@ -190,6 +226,7 @@ Map *modjs_mk (void) {
   map_put(r, "rs", rs); // STRING - STRING
   map_put(r, "ra", ra); // STRING - LIST
   map_put(r, "ro", ro); // STRING - OBJ
+  map_put(r, "rm", rm); // STRING - MAP
 
   map_put(r, "wn", wn); // INT - STRING
   map_put(r, "wb", wb); // INT - STRING
@@ -198,6 +235,7 @@ Map *modjs_mk (void) {
   map_put(r, "ws", ws); // STRING - STRING
   map_put(r, "wa", wa); // LIST - STRING
   map_put(r, "wo", wo); // OBJ- STRING
+  map_put(r, "wm", wm); // MAP- STRING
 
   map_put(r, "fromList", modjs_from_list); // LIST - STRING
   map_put(r, "toList", modjs_to_list); // STRING - LIST

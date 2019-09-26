@@ -13,9 +13,9 @@
   /*
   "ab" sys,print "c" sys,println
   "€\n¶" sys,println
-  "<<<" sys,gettext puts    // Try only from console
-  "abc: " sys,getpass puts  // Try only from console
-  sys,getline puts          // Try only from console
+  "<<<" sys,getText puts    // Try only from console
+  "abc: " sys,getPass puts  // Try only from console
+  sys,getLine puts          // Try only from console
   */
 
   this,s0 sys,println

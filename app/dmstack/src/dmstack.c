@@ -8,7 +8,6 @@
 #include "args.h"
 #include "imports.h"
 #include "primitives.h"
-#include "modules.h"
 #include "Reader.h"
 #include "Machine.h"
 #include "fails.h"
@@ -18,7 +17,6 @@ int main (int argc, char *argv[]) {
   exc_init();
   rnd_init();
   primitives_init();
-  modules_init();
   imports_init();
   fails_init();
 

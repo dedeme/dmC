@@ -7,11 +7,9 @@
 #include "primitives/modblob.h"
 #include "primitives/modint.h"
 #include "primitives/modfloat.h"
-#include "primitives/modlong.h"
-#include "primitives/moddec.h"
 #include "primitives/modmath.h"
 #include "primitives/modlist.h"
-#include "primitives/modtp.h"
+#include "primitives/modwrap.h"
 #include "primitives/modmap.h"
 #include "primitives/modobj.h"
 #include "primitives/modstr.h"
@@ -22,6 +20,7 @@
 #include "primitives/modtime.h"
 #include "primitives/modclock.h"
 #include "primitives/modpath.h"
+#include "primitives/modit.h"
 #include "primitives/modfile.h"
 #include "primitives/modiserver.h"
 
@@ -35,11 +34,9 @@ void primitives_init (void) {
   map_put(modules, "blob", modblob_mk());
   map_put(modules, "int", modint_mk());
   map_put(modules, "float", modfloat_mk());
-  map_put(modules, "long", modlong_mk());
-  map_put(modules, "dec", moddec_mk());
   map_put(modules, "math", modmath_mk());
   map_put(modules, "lst", modlist_mk());
-  map_put(modules, "tp", modtp_mk());
+  map_put(modules, "wrap", modwrap_mk());
   map_put(modules, "map", modmap_mk());
   map_put(modules, "obj", modobj_mk());
   map_put(modules, "str", modstr_mk());
@@ -50,6 +47,7 @@ void primitives_init (void) {
   map_put(modules, "time", modtime_mk());
   map_put(modules, "clock", modclock_mk());
   map_put(modules, "path", modpath_mk());
+  map_put(modules, "it", modit_mk());
   map_put(modules, "file", modfile_mk());
   map_put(modules, "iserver", modiserver_mk());
 }

@@ -5,22 +5,26 @@
 #include "dmc/date.h"
 #include "fails.h"
 #include "Machine.h"
-#include "primitives/modlong.h"
 
 static struct timeval *totimeval (Machine *m, Token *tk) {
   if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
   // Arr<Token>
   Arr *a = token_list(tk);
   if (arr_size(a) != 2) fails_size_list(m, a, 2);
+  Token *sec = *arr_start(a);
+  if (token_type(sec) != token_INT) fails_type_in(m, token_INT, sec);
+  Token *usec = *(arr_start(a)+ 1);
+  if (token_type(usec) != token_INT) fails_type_in(m, token_INT, usec);
+
   struct timeval *tv = MALLOC(struct timeval);
-  tv->tv_sec = modlong_to_long(m, *arr_start(a));
-  tv->tv_usec = modlong_to_long(m, *(arr_start(a) + 1));
+  tv->tv_sec = token_int(sec);
+  tv->tv_usec = token_int(usec);
   return tv;
 }
 
 static Token *fromtimeval (struct timeval *tv) {
   return token_new_list(0, arr_new_from(
-    modlong_from_long(tv->tv_sec), modlong_from_long(tv->tv_usec), NULL
+    token_new_int(0, tv->tv_sec), token_new_int(0, tv->tv_usec), NULL
   ));
 }
 

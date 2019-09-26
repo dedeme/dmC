@@ -1,7 +1,7 @@
 // Copyright 18-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "primitives/modtp.h"
+#include "primitives/modwrap.h"
 #include "Machine.h"
 #include "fails.h"
 
@@ -90,12 +90,12 @@ static void either (Machine *m) {
   }
 }
 
-static void new2 (Machine *m) {
+static void tp (Machine *m) {
   Token *tk = machine_pop(m);
   machine_push(m, token_new_list(0, arr_new_from(machine_pop(m), tk, NULL)));
 }
 
-static void new3 (Machine *m) {
+static void tp3 (Machine *m) {
   Token *tk3 = machine_pop(m);
   Token *tk2 = machine_pop(m);
   machine_push(m, token_new_list(
@@ -104,7 +104,7 @@ static void new3 (Machine *m) {
 }
 
 // Resturns Map<primitives_Fn>
-Map *modtp_mk (void) {
+Map *modwrap_mk (void) {
   // Map<primitives_Fn>
   Map *r = map_new();
 
@@ -119,8 +119,8 @@ Map *modtp_mk (void) {
   map_put(r, "right?", isright); // EITHER - INT
   map_put(r, "either", either);
     // [(LEFT->B?), (RIGHT->B?), (->EITHER)] - B?
-  map_put(r, "new2", new2); // [A, B] -> [(A, B)]
-  map_put(r, "new3", new3); // [A, B, C] -> [(A, B, C)]
+  map_put(r, "tp", tp); // [A, B] -> [(A, B)]
+  map_put(r, "tp3", tp3); // [A, B, C] -> [(A, B, C)]
 
   return r;
 }

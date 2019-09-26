@@ -67,4 +67,7 @@ void fails_range (Machine *m, int min, int max, int ix);
 ///   ix : Value out of range.
 void fails_check_range (Machine *m, int min, int max, int ix);
 
+///
+void *fails_read_pointer (Machine *m, char *id, Token *pointer);
+
 #endif

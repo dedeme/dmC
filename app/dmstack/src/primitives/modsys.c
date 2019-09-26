@@ -196,9 +196,9 @@ Map *modsys_mk (void) {
   map_put(r, "print", print); // STRING - []
   map_put(r, "println", println); // STRING - []
   map_put(r, "error", error); // STRING - []
-  map_put(r, "getline", sgetline); // [] - STRING (read until enter)
-  map_put(r, "gettext", sgettext); // STRING - STRING (read until text)
-  map_put(r, "getpass", sgetpass); // STRING - STRING
+  map_put(r, "getLine", sgetline); // [] - STRING (read until enter)
+  map_put(r, "getText", sgettext); // STRING - STRING (read until text)
+  map_put(r, "getPass", sgetpass); // STRING - STRING
 
   return r;
 }

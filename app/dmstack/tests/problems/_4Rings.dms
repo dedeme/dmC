@@ -11,7 +11,7 @@
   1 (i =; (pop 0 break) (Row i get value ==) if) ((ix)) for
 ) newDigit? =
 
-(  tp,new3  // Row min max - min & max inclusive
+(  wrap,tp3  // Row min max - min & max inclusive
   ( dup dup 0 get Row =
     1 get mn =
     2 get mx =

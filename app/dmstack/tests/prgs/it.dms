@@ -107,14 +107,11 @@
   (2, 4, 8, 1) it,from even:& it,filter it,to (2, 4, 8) == assert
   (2, 4, 8, 10) it,from even:& it,filter it,to (2, 4, 8, 10) == assert
 
-  // map - map2
+  // map
 
   L0 it,from (2 *) it,map it,to L0 == assert;
   L1 it,from (2 *) it,map it,to (46) == assert;
   L2 it,from (2 *) it,map it,to (2, 4, 6, 8, 10, 12) == assert;
-  L0 it,from (10 +) (2 *) it,map2 it,to L0 == assert;
-  L1 it,from (10 +) (2 *) it,map2 it,to (33) == assert;
-  L2 it,from (10 +) (2 *) it,map2 it,to (11, 4, 6, 8, 10, 12) == assert;
 
   // take - takef
 
@@ -216,21 +213,33 @@
 
   // index - lastIndex
 
-  () it,from (3 ==) it,index -1 == assert
-  (2) it,from (3 ==) it,index -1 == assert
-  (3) it,from (3 ==) it,index 0 == assert
-  (1, 2, 3) it,from (3 ==) it,index 2 == assert
-  (3, 2, 1) it,from (3 ==) it,index 0 == assert
-  (3, 3, 1) it,from (3 ==) it,index 0 == assert
-  (1, 3, 3) it,from (3 ==) it,index 1 == assert
+  () it,from 23 it,index -1 == assert
+  (23) it,from 23 it,index 0 == assert
+  (1, 2, 3) it,from 23 it,index -1 == assert
+  (1, 2, 3) it,from 1 it,index 0 == assert
+  (1, 2, 3) it,from 2 it,index 1 == assert
+  (1, 2, 3) it,from 3 it,index 2 == assert
+  () it,from (23 ==) it,indexf -1 == assert
+  (23) it,from (23 ==) it,indexf 0 == assert
+  (1, 2, 3) it,from (23 ==) it,indexf -1 == assert
+  (1, 2, 3) it,from (1 ==) it,indexf 0 == assert
+  (1, 2, 3) it,from (2 ==) it,indexf 1 == assert
+  (1, 2, 3) it,from (3 ==) it,indexf 2 == assert
 
-  () it,from (3 ==) it,lastIndex -1 == assert
-  (2) it,from (3 ==) it,lastIndex -1 == assert
-  (3) it,from (3 ==) it,lastIndex 0 == assert
-  (1, 2, 3) it,from (3 ==) it,lastIndex 2 == assert
-  (3, 2, 1) it,from (3 ==) it,lastIndex 0 == assert
-  (3, 3, 1) it,from (3 ==) it,lastIndex 1 == assert
-  (1, 3, 3) it,from (3 ==) it,lastIndex 2 == assert
+  () it,from 23 it,lastIndex -1 == assert
+  (23) it,from 23 it,lastIndex 0 == assert
+  (1, 2, 3) it,from 23 it,lastIndex -1 == assert
+  (1, 2, 3) it,from 1 it,lastIndex 0 == assert
+  (1, 2, 1) it,from 1 it,lastIndex 2 == assert
+  (1, 2, 3) it,from 2 it,lastIndex 1 == assert
+  (1, 3, 2, 3, 4) it,from 3 it,lastIndex 3 == assert
+  () it,from (23 ==) it,lastIndexf -1 == assert
+  (23) it,from (23 ==) it,lastIndexf 0 == assert
+  (1, 2, 3) it,from (23 ==) it,lastIndexf -1 == assert
+  (1, 2, 3) it,from (1 ==) it,lastIndexf 0 == assert
+  (1, 2, 1) it,from (1 ==) it,lastIndexf 2 == assert
+  (1, 2, 3) it,from (2 ==) it,lastIndexf 1 == assert
+  (1, 3, 2, 3, 4) it,from (3 ==) it,lastIndexf 3 == assert
 
   // reduce
 
@@ -248,7 +257,7 @@
   // box
 
   //("a", "b", "c") it,box
-  //  (i =; dup it,next puts) ((5)) for; pop
+  //  (pop; dup it,next puts) ((5)) for; pop
 
   empty? assert
 ) run

@@ -3,13 +3,15 @@
 
 #include "Token.h"
 
+
 union token_Value {
-  int i;
+  Int i;
   double f;
   char *s;
   Bytes *bs;
   Arr *a; // Arr<Token>
   Symbol *sym;
+  void *pointer;
 };
 
 struct token_Token {
@@ -18,7 +20,7 @@ struct token_Token {
   int line;
 };
 
-Token *token_new_int (int line, int value) {
+Token *token_new_int (int line, Int value) {
   union token_Value *v = MALLOC(union token_Value);
   v->i = value;
   Token *this = MALLOC(Token);
@@ -87,7 +89,7 @@ int token_line (Token *this) {
   return this->line;
 }
 
-int token_int (Token *this) {
+Int token_int (Token *this) {
   return this->value->i;
 }
 
@@ -177,7 +179,7 @@ int token_eq (Token *this, Token *other) {
 
 char *token_to_str (Token *this) {
   switch (this->type) {
-    case token_INT: return (char *)js_wi(this->value->i);
+    case token_INT: return (char *)js_wl(this->value->i);
     case token_FLOAT: return (char *)js_wd(this->value->f);
     case token_STRING: return (char *)js_ws(this->value->s);
     case token_SYMBOL: return symbol_to_str(this->value->sym);
@@ -209,4 +211,10 @@ char *token_type_to_str (enum token_Type type) {
   return NULL; // not reachable.
 }
 
-
+Token *token_from_pointer (char *id, void *pointer) {
+  Token *p = token_new_int(0, 0);
+  p->value->pointer = pointer;
+  return token_new_list(0, arr_new_from(
+    token_new_symbol(0, symbol_new(id)), p, NULL
+  ));
+}
