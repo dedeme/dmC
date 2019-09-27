@@ -2,34 +2,52 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 (
+  (
+    ("No more") else (dup toStr) (dup) if
+    swap (" bottles") else (" bottle") (1 ==) if
+    +
+  ) bs =
+
   ( i =
-    i toStr
-    " bottles of beer on the wall\n"
-    i toStr
-    " bottles of beer\nTake one down, and pass it around\n"
-    i 1 - toStr
-    " bottles of beer on the wall\n"
+    i bs " bottles of beer on the wall\n"
+    i bs " bottles of beer\nTake one down, and pass it around\n"
+    i 1 - bs " bottles of beer on the wall\n"
     + + + + +
     sys,println
-  )
-  ((99) (2) (-1))
-  for
-
-  "2 bottles of beer on the wall\n"
-  "2 bottles of beer\n"
-  "Take one down, and pass it around\n"
-  "1 bottle of beer on the wall\n\n"
-
-  "1 bottle of beer on the wall\n"
-  "1 bottle of beer\n"
-  "Take one down, and pass it around\n"
-  "No more bottles of beer on the wall\n\n"
+  ) ((99) (0) (-1)) for
 
   "No more bottles of beer on the wall\n"
   "No more bottles of beer\n"
   "Go to the store and buy some more\n"
   "99 bottles of beer on the wall.\n"
-  + + + + + + + + + + +
+  + + +
   sys,println
-
 ) run
+
+/*
+(
+  (
+    ("No more") else (dup toStr) (dup) if
+    swap (" bottles") else (" bottle") (1 ==) if
+    +
+  ) bs =
+
+  ( i =
+    `
+    ${i bs} bottles of beer on the wall
+    ${i bs} bottles of beer
+    Take one down, and pass it around
+    ${i 1 - bs} bottles of beer on the wall
+
+    `
+    sys,println
+  ) ((99) (0) (-1)) for
+
+  "No more bottles of beer on the wall\n"
+  "No more bottles of beer\n"
+  "Go to the store and buy some more\n"
+  "99 bottles of beer on the wall.\n"
+  + + +
+  sys,println
+) run
+*/

@@ -770,6 +770,10 @@ Symbol *symbol_new_id (char *id, char *name);
 /// Creates a new Symbol with equals id and name.
 Symbol *symbol_new (char *name);
 
+/// Creates a new Symbol with equals id and name and hash == 0. This
+/// constructor is intended only to use with pointers.
+Symbol *symbol_new_pointer (char *name);
+
 /// Returns the name of 'this'
 char *symbol_name (Symbol *this);
 

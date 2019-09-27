@@ -9,6 +9,18 @@ static void new (Machine *m) {
   machine_push(m, token_new_list(0, arr_new()));
 }
 
+static void has (Machine *m) {
+  char *key = token_string(machine_pop_exc(m, token_STRING));
+  // Arr<Token>
+  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  for (int i = 0; i < arr_size(a); i +=2)
+    if (str_eq(key, token_string(arr_get(a, i)))) {
+      machine_push(m, token_new_int(0, 1));
+      return;
+    }
+  machine_push(m, token_new_int(0, 0));
+}
+
 static void get (Machine *m) {
   char *key = token_string(machine_pop_exc(m, token_STRING));
   // Arr<Token>
@@ -117,6 +129,7 @@ Map *modobj_mk (void) {
   Map *r = map_new();
 
   map_put(r, "new", new); // [] - OBJ
+  map_put(r, "has?", has); // [OBJ, STRING] - INT
   map_put(r, "get", get); // [OBJ, STRING] - *
   map_put(r, "put", put); // [OBJ - STRING - *] - []
   map_put(r, "put+", putplus); // [OBJ - STRING - *] - OBJ

@@ -269,7 +269,7 @@ static void sexit (Machine *this) {
   puts("  Stack:");
   stack();
 
-  EACHL(list_reverse(this->pmachines), Machine, m) {
+  EACHL(this->pmachines, Machine, m) {
     Token *tk = arr_get(token_list(m->prg), m->ix);
     printf(
       "%s:%d:%s\n",
@@ -451,7 +451,7 @@ static Machine *cprocess (Machine *m) {
         (sname > 'Z' || sname < 'A')
       ) {
         m->ix--;
-        if (module) runmod(m, symbol_id(module));
+        if (module && *symbol_id(module) == '/') runmod(m, symbol_id(module));
         else run(m);
         m->ix++;
       }
@@ -515,7 +515,6 @@ static Machine *cprocess (Machine *m) {
           "Symbol '%s %s' not found", symbol_name(module), symbol_name(sym)
         ));
       }
-      module = NULL;
     } else {
       t = heap_get(m->heap, sym);
       if (!t) t = heap_get(imports_base(), sym);
@@ -540,11 +539,15 @@ static Machine *cprocess (Machine *m) {
 
     arr_push(m->stack, t);
     char sname = *symbol_name(sym);
-    sym = NULL;
     if (
       token_type(t) == token_LIST &&
       (sname > 'Z' || sname < 'A')
-    ) run(m);
+    ) {
+      if (module && *symbol_id(module) == '/') runmod(m, symbol_id(module));
+      else run(m);
+    }
+    module = NULL;
+    sym = NULL;
   } else if (module) {
     machine_fail(m, str_f(
       "Expected symbol of module '%s'", symbol_name(module)

@@ -28,6 +28,14 @@ Symbol *symbol_new (char *name) {
   return symbol_new_id(name, name);
 }
 
+Symbol *symbol_new_pointer (char *name) {
+  Symbol *this = MALLOC(Symbol);
+  this->id = name;
+  this->name = name;
+  this->hash = 0;
+  return this;
+}
+
 char *symbol_name (Symbol *this) {
   return this->name;
 }

@@ -215,6 +215,6 @@ Token *token_from_pointer (char *id, void *pointer) {
   Token *p = token_new_int(0, 0);
   p->value->pointer = pointer;
   return token_new_list(0, arr_new_from(
-    token_new_symbol(0, symbol_new(id)), p, NULL
+    token_new_symbol(0, symbol_new_pointer(id)), p, NULL
   ));
 }
