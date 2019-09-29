@@ -91,31 +91,32 @@ static void scbrt (Machine *m) {
   fn1(m, cbrt);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modmath_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modmath_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "pi", pi);
-  map_put(r, "sin", ssin);
-  map_put(r, "cos", scos);
-  map_put(r, "tan", stan);
-  map_put(r, "asin", sasin);
-  map_put(r, "acos", sacos);
-  map_put(r, "atan", satan);
-  map_put(r, "atan2", satan2);
+  add("pi", pi);
+  add("sin", ssin);
+  add("cos", scos);
+  add("tan", stan);
+  add("asin", sasin);
+  add("acos", sacos);
+  add("atan", satan);
+  add("atan2", satan2);
 
-  map_put(r, "e", e);
-  map_put(r, "exp", sexp);
-  map_put(r, "exp2", sexp2);
-  map_put(r, "exp10", sexp10);
-  map_put(r, "log", slog);
-  map_put(r, "log2", slog2);
-  map_put(r, "log10", slog10);
+  add("e", e);
+  add("exp", sexp);
+  add("exp2", sexp2);
+  add("exp10", sexp10);
+  add("log", slog);
+  add("log2", slog2);
+  add("log10", slog10);
 
-  map_put(r, "pow", spow);
-  map_put(r, "sqrt", ssqrt);
-  map_put(r, "cbrt", scbrt);
+  add("pow", spow);
+  add("sqrt", ssqrt);
+  add("cbrt", scbrt);
 
   return r;
 }

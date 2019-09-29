@@ -13,19 +13,19 @@
 void imports_init ();
 
 /// Annotation of an import on way.
-void imports_put_on_way (Symbol *key);
+void imports_put_on_way (Symbol key);
 
 /// Removes nnotation of an import on way.
-void imports_quit_on_way (Symbol *key);
+void imports_quit_on_way (Symbol key);
 
 /// Returns if an import is on way.
-int imports_is_on_way (Symbol *key);
+int imports_is_on_way (Symbol key);
 
 ///
-void imports_add (Symbol *key, Heap *heap);
+void imports_add (Symbol key, Heap *heap);
 
 /// Returns an import from library or NULL.
-Heap *imports_get (Symbol *key);
+Heap *imports_get (Symbol key);
 
 /// Returns system heap.
 Heap *imports_base (void);

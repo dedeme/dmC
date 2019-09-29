@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODTIME_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modtime_mk (void);
+///
+Pmodule *modtime_mk (void);
 
 #endif

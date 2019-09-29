@@ -22,23 +22,18 @@
   "" size ! assert
   "abc" size 3 == assert
 
-  B0:& size ! assert
-  B3:& size 3 == assert
-  B3:& 1 get 2 == assert
-  B3:& dup 2 get swap 0 get; assert; 3 == assert
+  B0:& blob,size ! assert
+  B3:& blob,size 3 == assert
+  B3:& 1 blob,get 2 == assert
+  B3:& dup 2 blob,get swap 0 blob,get; assert; 3 == assert
 
   B0:& blob,to size ! assert
   B3 blob,to size 3 == assert
   B3 blob,to 1 get 2 == assert
   B3 blob,to dup 2 get swap 0 get; assert; 3 == assert
-  B3 0 10 set+ 2 12 set
-  B3 0 get 10 == assert
-  B3 2 get 12 == assert
-  B3 2 (1 +) up+ 0 (1 -) up
-  B3 0 get 9 == assert
-  B3 2 get 13 == assert
-  B3 blob,to 2 (12 +) up+ 2 get 25 == assert
-
+  B3 0 10 blob,set+ 2 12 blob,set
+  B3 0 blob,get 10 == assert
+  B3 2 blob,get 12 == assert
 
   () size ! assert
   [1, 1.5, "a", []] Ls =

@@ -34,7 +34,7 @@ static char *rdg (int *dg, int n, char *p) {
 
 // Admits Y y m (1-12) d (1-31) H M S
 // Opt<Token>
-static Opt *from (char *tpl, char *time, char *tplout) {
+static Opt *from (char *tpl, char *time) {
   struct tm tp;
   memset(&tp, 0, sizeof(struct tm));
 
@@ -90,7 +90,7 @@ static Opt *from (char *tpl, char *time, char *tplout) {
     }
   }
 
-  return opt_new(to(tplout, &tp));
+  return opt_new(token_new_int(0, mktime(&tp)));
 }
 
 static void new (Machine *m) {
@@ -110,7 +110,7 @@ static void new (Machine *m) {
   tp.tm_min = minute;
   tp.tm_sec = second;
 
-  machine_push(m, to("%Y%m%d%H%M%S", &tp));
+  machine_push(m, token_new_int(0, mktime(&tp)));
 }
 
 static void newdate (Machine *m) {
@@ -125,13 +125,13 @@ static void newdate (Machine *m) {
   tp.tm_mday = day;
   tp.tm_hour = 12;
 
-  machine_push(m, to("%Y%m%d%H%M%S", &tp));
+  machine_push(m, token_new_int(0, mktime(&tp)));
 }
 
 static void fromstr (Machine *m) {
   char *time = token_string(machine_pop_exc(m, token_STRING));
   char *tpl = token_string(machine_pop_exc(m, token_STRING));
-  Token *r = opt_nget(from(tpl, time, "%Y%m%d%H%M%S"));
+  Token *r = opt_nget(from(tpl, time));
   if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
   else machine_push(m, token_new_list(0, arr_new()));
 }
@@ -139,41 +139,39 @@ static void fromstr (Machine *m) {
 static void fromdate (Machine *m) {
   char *time = token_string(machine_pop_exc(m, token_STRING));
   time = str_f("%s:12", time);
-  Token *r = opt_nget(from("%Y%m%d%H", time, "%Y%m%d%H%M%S"));
+  Token *r = opt_nget(from("%Y%m%d%H", time));
   if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
   else machine_push(m, token_new_list(0, arr_new()));
 }
 
 static void todate (Machine *m) {
-  machine_push(m, token_new_string(
-    0, str_left(token_string(machine_pop_exc(m, token_STRING)),8)
-  ));
+  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  machine_push(m, to("%Y%m%d", localtime(&tm)));
 }
 
 static void totime (Machine *m) {
-  char *t = str_right(token_string(machine_pop_exc(m, token_STRING)),8);
-  machine_push(m, token_new_string(
-    0, str_f("%s:%s:%s", str_left(t, 2), str_sub(t, 2, 4), str_right(t, 4))
-  ));
+  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  machine_push(m, to("%H:%M:%S", localtime(&tm)));
+}
+
+static void todatetime (Machine *m) {
+  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  machine_push(m, to("%Y%m%d%H%M%S", localtime(&tm)));
 }
 
 static void format (Machine *m) {
-  char *time = token_string(machine_pop_exc(m, token_STRING));
+  time_t tm = token_int(machine_pop_exc(m, token_INT));
   char *tpl = token_string(machine_pop_exc(m, token_STRING));
-  Token *tk = opt_nget(from("%Y%m%d%H%M%S", time, tpl));
-  if (tk) machine_push(m, tk);
-  else machine_fail(m, str_f("Bad time: '%s'", time));
+  machine_push(m, to(tpl, localtime(&tm)));
 }
 
 static void now (Machine *m) {
-  time_t t = time(NULL);
-  machine_push(m, to("%Y%m%d%H%M%S", localtime(&t)));
+  machine_push(m, token_new_int(0, time(NULL)));
 }
 
 static void broke (Machine *m) {
-  char *t = token_string(machine_pop_exc(m, token_STRING));
-
-  void fail (void) { machine_fail(m, str_f("Bad time: '%s'", t)); }
+  time_t t = token_int(machine_pop_exc(m, token_INT));
+  struct tm *tm = localtime(&t);
 
   // Arr<Token>
   Arr *a = arr_new();
@@ -183,99 +181,71 @@ static void broke (Machine *m) {
     arr_push(a, token_new_int(0, v));
   }
 
-  int v;
-  char *p = t;
-  p = rdg(&v, 4, p);
-  if (v == INT_MAX) fail();
-  add("year", v);
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  add("month", v);
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  add("day", v);
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  add("hour", v);
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  add("minute", v);
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  add("second", v);
+  add("year", tm->tm_year + 1900);
+  add("month", tm->tm_mon + 1);
+  add("day", tm->tm_mday);
+  add("hour", tm->tm_hour);
+  add("minute", tm->tm_min);
+  add("second", tm->tm_sec);
 
   machine_push(m, token_new_list(0, a));
 }
 
-static struct tm *to_broken_date (Machine *m, char *t) {
-  void fail (void) { machine_fail(m, str_f("Bad time: '%s'", t)); }
+static void tadd (Machine *m) {
+  Int n = token_int(machine_pop_exc(m, token_INT));
+  time_t t = token_int(machine_pop_exc(m, token_INT));
 
-  struct tm *tp = MALLOC(struct tm);
-  memset(tp, 0, sizeof(struct tm));
-
-  int v;
-  char *p = t;
-  p = rdg(&v, 4, p);
-  if (v == INT_MAX) fail();
-  tp->tm_year = v - 1900;
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  tp->tm_mon = v - 1;
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  tp->tm_mday = v;
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  tp->tm_hour = v;
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  tp->tm_min = v;
-  p = rdg(&v, 2, p);
-  if (v == INT_MAX) fail();
-  tp->tm_sec = v;
-
-  return tp;
-}
-
-static void add (Machine *m) {
-  int n = token_int(machine_pop_exc(m, token_INT));
-  char *t = token_string(machine_pop_exc(m, token_STRING));
-
-  time_t tt = mktime(to_broken_date(m, t)) + n * 86400;
-  machine_push(m, to("%Y%m%d%H%M%S", localtime(&tt)));
+  machine_push(m, token_new_int(0, t + n));
 }
 
 static void df (Machine *m) {
-  char *t2 = token_string(machine_pop_exc(m, token_STRING));
-  char *t1 = token_string(machine_pop_exc(m, token_STRING));
+  time_t t2 = token_int(machine_pop_exc(m, token_INT));
+  time_t t1 = token_int(machine_pop_exc(m, token_INT));
 
-  time_t tt1 = mktime(to_broken_date(m, t1));
-  time_t tt2 = mktime(to_broken_date(m, t2));
-  double tmp = difftime(tt1, tt2) / 86400;
-  int r  = (int)(tmp >= 0 ? tmp + 0.5 : tmp - 0.5);
+  machine_push(m, token_new_int(0, t1 - t2));
+}
+
+static void addd (Machine *m) {
+  Int n = token_int(machine_pop_exc(m, token_INT));
+  time_t t = token_int(machine_pop_exc(m, token_INT));
+
+  machine_push(m, token_new_int(0, t + n * 86400));
+}
+
+static void dfd (Machine *m) {
+  time_t t2 = token_int(machine_pop_exc(m, token_INT));
+  time_t t1 = token_int(machine_pop_exc(m, token_INT));
+
+  double tmp = ((double)t1 - t2) / 86400.;
+  Int r  = (Int)(tmp >= 0 ? tmp + 0.5 : tmp - 0.5);
   machine_push(m, token_new_int(0, r));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modtime_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modtime_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "new", new); // [INT, INT, INT, INT, INT, INT] - STRING
+  add("new", new); // [INT, INT, INT, INT, INT, INT] - STRING
                           // [year, month, day, hour, min, sec] - date
-  map_put(r, "newDate", newdate); // [INT, INT, INT] - STRING
+                          // Note: hour is without daylight saving
+  add("newDate", newdate); // [INT, INT, INT] - STRING
                                   // [year, month, day] - date
-  map_put(r, "fromStr", fromstr); // [STRING, STRING] - OPT<STRING>
+  add("fromStr", fromstr); // [STRING, STRING] - OPT<STRING>
                                   // [template, date] - option of date
-  map_put(r, "fromDate", fromdate); // STRING - STRING
-  map_put(r, "toDate", todate); // STRING - STRING
-  map_put(r, "toTime", totime); // STRING - STRING
-  map_put(r, "format", format); // [STRING - STRING] - STRING
+  add("fromDate", fromdate); // STRING - STRING
+  add("toDate", todate); // STRING - STRING
+  add("toTime", totime); // STRING - STRING
+  add("toDateTime", todatetime); // STRING - STRING
+  add("format", format); // [STRING - STRING] - STRING
                                // [template, date] - date
-  map_put(r, "now", now); // [] - STRING
-  map_put(r, "broke", broke); // STRING - OBJ
-  map_put(r, "add", add); // [STRING - INT] - STRING
-  map_put(r, "df", df); // [STRING - STRING] - INT
+  add("now", now); // [] - STRING
+  add("broke", broke); // STRING - OBJ
+  add("add", tadd); // [STRING - INT] - STRING  - In seconds
+  add("df", df); // [STRING - STRING] - INT  - In seconds
+  add("addDays", addd); // [STRING - INT] - STRING
+  add("dfDays", dfd); // [STRING - STRING] - INT
 
   return r;
 }

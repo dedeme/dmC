@@ -7,9 +7,9 @@
   #define MODULES_MODMAP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modmap_mk (void);
+///
+Pmodule *modmap_mk (void);
 
 #endif

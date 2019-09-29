@@ -4,27 +4,27 @@
 clock,now C =
 
 // Initialization
-100 blob,new (0 set+) ((100)) for Doors =
+100 blob,new (0 blob,set+) (100) for Doors =
 
 // Calculus
 Doors
-(
+( i =
   ( i =
     i
-      (1) else (0) (this,Doors i get) if
-    set+
+      (1) else (0) (this,Doors i blob,get) if
+    blob,set+
   )
-  ((dup) (100) (1 +)) for
+  (i 100 i 1 +) for
 )
-((100)) for
+(100) for
 pop
 
 // Show
 ( i =
   "Door " 1 i + toStr " is "
-    ("closed") else ("open") (this,Doors i get) if + + + sys,println
+    ("closed") else ("open") (this,Doors i blob,get) if + + + sys,println
 )
-((100)) for
+(100) for
 
 clock,now C clock,- 1 get 1000. / toStr " millis." + sys,println
 

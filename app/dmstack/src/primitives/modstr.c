@@ -32,7 +32,7 @@ static void from_iso (Machine *m) {
 }
 
 static void from_unicode (Machine *m) {
-  Bytes *bs = token_blob(machine_pop_exc(m, token_BLOB));
+  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
   int len = bytes_len(bs);
   if (len % 2) machine_fail(m, "Blob is not an Unicode string");
   unsigned *u = (unsigned *)bytes_bs(bs);
@@ -157,7 +157,7 @@ static void to_unicode (Machine *m) {
     int len = size * 4 + 4;
     Bytes *bs = bytes_bf_new(len);
     memcpy(bytes_bs(bs), u, len);
-    machine_push(m, token_new_blob(0, bs));
+    machine_push(m, token_from_pointer(symbol_BYTES_, bs));
     return;
   }
   machine_fail(m, "String is no a valid UTF-8 one");
@@ -223,41 +223,42 @@ static void rus (Machine *m) {
   machine_push(m, token_new_string(0, dec_regularize_us(s)));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modstr_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modstr_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "cmp", cmp); // in locale
-  map_put(r, "ends?", ends);
-  map_put(r, "fromIso", from_iso);
-  map_put(r, "fromUnicode", from_unicode);
-  map_put(r, "greater?", greater); // in locale
-  map_put(r, "index", sindex);
-  map_put(r, "indexFrom", index_from);
-  map_put(r, "lastIndex", last_index);
-  map_put(r, "join", join);
-  map_put(r, "replace", replace);
-  map_put(r, "nextRune", next_rune);
-  map_put(r, "runes", runes);
-  map_put(r, "split", split);
-  map_put(r, "splitTrim", split_trim);
-  map_put(r, "starts?", starts);
-  map_put(r, "trim", trim);
-  map_put(r, "ltrim", ltrim);
-  map_put(r, "rtrim", rtrim);
-  map_put(r, "toLower", to_lower);
-  map_put(r, "toUnicode", to_unicode);
-  map_put(r, "toUpper", to_upper);
+  add("cmp", cmp); // in locale
+  add("ends?", ends);
+  add("fromIso", from_iso);
+  add("fromUnicode", from_unicode);
+  add("greater?", greater); // in locale
+  add("index", sindex);
+  add("indexFrom", index_from);
+  add("lastIndex", last_index);
+  add("join", join);
+  add("replace", replace);
+  add("nextRune", next_rune);
+  add("runes", runes);
+  add("split", split);
+  add("splitTrim", split_trim);
+  add("starts?", starts);
+  add("trim", trim);
+  add("ltrim", ltrim);
+  add("rtrim", rtrim);
+  add("toLower", to_lower);
+  add("toUnicode", to_unicode);
+  add("toUpper", to_upper);
 
-  map_put(r, "sub", sub);
-  map_put(r, "left", left);
-  map_put(r, "right", right);
+  add("sub", sub);
+  add("left", left);
+  add("right", right);
 
-  map_put(r, "digits?", isdigits);
-  map_put(r, "number?", isnumber);
-  map_put(r, "regularizeIso", riso);
-  map_put(r, "regularizeUs", rus);
+  add("digits?", isdigits);
+  add("number?", isnumber);
+  add("regularizeIso", riso);
+  add("regularizeUs", rus);
 
   return r;
 }

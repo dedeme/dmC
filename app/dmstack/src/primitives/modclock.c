@@ -40,7 +40,7 @@ static void sub (Machine *m) {
   ));
 }
 
-static void add (Machine *m) {
+static void sadd (Machine *m) {
   int millis = token_int(machine_pop_exc(m, token_INT));
   Token *v = machine_pop(m);
   machine_push(m, fromtimeval(
@@ -56,15 +56,16 @@ static void df (Machine *m) {
   ));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modclock_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modclock_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "now", now); // [] - LIST   (() - list (LONG, LONG)
-  map_put(r, "-", sub); // [LIST - LIST] - LIST   lists ar list (LONG, LONG)
-  map_put(r, "add", add); // [LIST- INT] - LIST   lists ar list (LONG, LONG)
-  map_put(r, "df", df); // [LIST - LIST] - INT   lists ar list (LONG, LONG)
+  add("now", now); // [] - LIST   (() - list (LONG, LONG)
+  add("-", sub); // [LIST - LIST] - LIST   lists ar list (LONG, LONG)
+  add("add", sadd); // [LIST- INT] - LIST   lists ar list (LONG, LONG)
+  add("df", df); // [LIST - LIST] - INT   lists ar list (LONG, LONG)
 
   return r;
 }

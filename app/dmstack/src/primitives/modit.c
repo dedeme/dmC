@@ -8,11 +8,11 @@
 #include "primitives/modlist.h"
 
 static It *getIt (Machine *m) {
-  return fails_read_pointer(m, "= Iterator", machine_pop(m));
+  return fails_read_pointer(m, symbol_ITERATOR_, machine_pop(m));
 }
 
 static void setIt (Machine *m, It *it) {
-  machine_push(m, token_from_pointer("= Iterator", it));
+  machine_push(m, token_from_pointer(symbol_ITERATOR_, it));
 }
 
 static void asList (Machine *m, char *fn) {
@@ -20,7 +20,7 @@ static void asList (Machine *m, char *fn) {
   It *it = getIt(m);
   machine_push(m, token_new_list(0, it_to(it)));
   machine_push(m, prg);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), fn)))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new(fn))))(m);
 }
 
 // m_o_fn is Tp3<Machine, Token, Token>. Returns i Opt<Token>.
@@ -201,7 +201,7 @@ static void eq (Machine *m) {
   machine_push(m, token_new_list(0, it_to(it1)));
   machine_push(m, token_new_list(0, it_to(it2)));
   machine_push(m, prg);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), "eq?")))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("eq?"))))(m);
 }
 
 static void neq (Machine *m) {
@@ -211,7 +211,7 @@ static void neq (Machine *m) {
   machine_push(m, token_new_list(0, it_to(it1)));
   machine_push(m, token_new_list(0, it_to(it2)));
   machine_push(m, prg);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), "neq?")))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("neq?"))))(m);
 }
 
 static void equals (Machine *m) {
@@ -263,7 +263,7 @@ static void reduce (Machine *m) {
   machine_push(m, token_new_list(0, it_to(it)));
   machine_push(m, seed);
   machine_push(m, prg);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), "reduce")))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("reduce"))))(m);
 }
 
 static void to (Machine *m) {
@@ -275,7 +275,7 @@ static void shuffle (Machine *m) {
   It *it = getIt(m);
   Token *tk = token_new_list(0, it_to(it));
   machine_push(m, tk);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), "shuffle")))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("shuffle"))))(m);
   // Arr<Token>
   Arr *ls =token_list(tk);
   setIt(m, it_from(ls));
@@ -292,7 +292,7 @@ static void sort (Machine *m) {
   Token *tk = token_new_list(0, it_to(it));
   machine_push(m, tk);
   machine_push(m, prg);
-  ((primitives_Fn)opt_get(map_get(modlist_mk(), "sort")))(m);
+  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("sort"))))(m);
   // Arr<Token>
   Arr *ls =token_list(tk);
   setIt(m, it_from(ls));
@@ -308,56 +308,57 @@ static void box (Machine *m) {
   setIt(m, it);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modit_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modit_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "new", new);
-  map_put(r, "empty", empty);
-  map_put(r, "unary", unary);
-  map_put(r, "from", from);
-  map_put(r, "range", range);
-  map_put(r, "range0", range0);
-  map_put(r, "has?", has);
-  map_put(r, "peek", peek);
-  map_put(r, "next", next);
+  add("new", new);
+  add("empty", empty);
+  add("unary", unary);
+  add("from", from);
+  add("range", range);
+  add("range0", range0);
+  add("has?", has);
+  add("peek", peek);
+  add("next", next);
 
-  map_put(r, "+", plus);
-  map_put(r, "drop", drop);
-  map_put(r, "dropf", dropf);
-  map_put(r, "filter", filter);
-  map_put(r, "map", map);
-  map_put(r, "push", push);
-  map_put(r, "push0", push0);
-  map_put(r, "take", take);
-  map_put(r, "takef", takef);
-  map_put(r, "zip", zip);
-  map_put(r, "zip3", zip3);
+  add("+", plus);
+  add("drop", drop);
+  add("dropf", dropf);
+  add("filter", filter);
+  add("map", map);
+  add("push", push);
+  add("push0", push0);
+  add("take", take);
+  add("takef", takef);
+  add("zip", zip);
+  add("zip3", zip3);
 
-  map_put(r, "all?", all);
-  map_put(r, "any?", any);
-  map_put(r, "count", count);
-  map_put(r, "duplicates", duplicates);
-  map_put(r, "each", each);
-  map_put(r, "eachIx", eachix);
-  map_put(r, "eq?", eq);
-  map_put(r, "neq?", neq);
-  map_put(r, "==", equals);
-  map_put(r, "!=", notequals);
-  map_put(r, "find", find);
-  map_put(r, "index", iindex);
-  map_put(r, "indexf", indexf);
-  map_put(r, "lastIndex", lastindex);
-  map_put(r, "lastIndexf", lastindexf);
-  map_put(r, "reduce", reduce);
-  map_put(r, "to", to);
+  add("all?", all);
+  add("any?", any);
+  add("count", count);
+  add("duplicates", duplicates);
+  add("each", each);
+  add("eachIx", eachix);
+  add("eq?", eq);
+  add("neq?", neq);
+  add("==", equals);
+  add("!=", notequals);
+  add("find", find);
+  add("index", iindex);
+  add("indexf", indexf);
+  add("lastIndex", lastindex);
+  add("lastIndexf", lastindexf);
+  add("reduce", reduce);
+  add("to", to);
 
-  map_put(r, "shuffle", shuffle);
-  map_put(r, "reverse", reverse);
-  map_put(r, "sort", sort);
+  add("shuffle", shuffle);
+  add("reverse", reverse);
+  add("sort", sort);
 
-  map_put(r, "box", box);
+  add("box", box);
 
   return r;
 }

@@ -53,20 +53,21 @@ static void decode (Machine *m) {
   machine_push(m, token_new_string(0, cryp_decode(tx, k)));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modcryp_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modcryp_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "genk", genk); // INT - STRING
-  map_put(r, "key", key); // [STRING, INT] - STRING
-  map_put(r, "cryp", cryp); // [STRING, STRING] - STRING ([tx, key] - tx)
-  map_put(r, "decryp", decryp); // [STRING, STRING] - STRING ([tx, key] - tx)
-  map_put(r, "autoCryp", autocryp); // [STRING, INT] - STRING
-  map_put(r, "autoDecryp", autodecryp); // STRING - STRING
-  map_put(r, "encode", encode); // [STRING, INT, STRING] - STRING
+  add("genk", genk); // INT - STRING
+  add("key", key); // [STRING, INT] - STRING
+  add("cryp", cryp); // [STRING, STRING] - STRING ([tx, key] - tx)
+  add("decryp", decryp); // [STRING, STRING] - STRING ([tx, key] - tx)
+  add("autoCryp", autocryp); // [STRING, INT] - STRING
+  add("autoDecryp", autodecryp); // STRING - STRING
+  add("encode", encode); // [STRING, INT, STRING] - STRING
                                 // ([tx, len, key] - tx)
-  map_put(r, "decode", decode); // [STRING, STRING] - STRING ([tx, key] - tx)
+  add("decode", decode); // [STRING, STRING] - STRING ([tx, key] - tx)
 
   return r;
 }

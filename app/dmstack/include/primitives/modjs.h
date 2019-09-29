@@ -7,10 +7,10 @@
   #define PRIMITIVES_MODJS_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modjs_mk (void);
+///
+Pmodule *modjs_mk (void);
 
 ///
 void modjs_from_list (Machine *m);

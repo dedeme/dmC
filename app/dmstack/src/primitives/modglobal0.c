@@ -54,18 +54,8 @@ void modglobal0_add (Machine *m) {
     return;
   }
 
-  tk = machine_pop_opt(m, token_BLOB);
-  if (tk) {
-    Token *tk2 = machine_pop_exc(m, token_BLOB);
-    Bytes *bs = bytes_new();
-    bytes_add(bs, token_blob(tk2));
-    bytes_add(bs, token_blob(tk));
-    machine_push(m, token_new_blob(0, bs));
-    return;
-  }
-
   fails_types(m, 4, (enum token_Type[]){
-    token_INT, token_FLOAT, token_STRING, token_LIST, token_BLOB
+    token_INT, token_FLOAT, token_STRING, token_LIST
   });
 }
 

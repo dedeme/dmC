@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODIT_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modit_mk (void);
+///
+Pmodule *modit_mk (void);
 
 #endif

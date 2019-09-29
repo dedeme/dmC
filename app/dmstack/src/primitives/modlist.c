@@ -544,62 +544,63 @@ static void tojs (Machine *m) {
   modjs_from_list(m);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modlist_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modlist_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "new", new); // [] - LIST
-  map_put(r, "unary", unary); // [] - LIST
+  add("new", new); // [] - LIST
+  add("unary", unary); // [] - LIST
 
-  map_put(r, "push", push); // [LIST, *] - LIST
-  map_put(r, "push+", pushplus); // [LIST, *] - []
-  map_put(r, "pop", pop); // LIST - *
-  map_put(r, "peek", peek); // LIST - *
-  map_put(r, "push0", push0); // [LIST, *] - []
-  map_put(r, "push0+", push0plus); // [LIST, *] - LIST
-  map_put(r, "pop0", pop0); // LIST - *
-  map_put(r, "peek0", peek0); // LIST - *
-  map_put(r, "insert", insert);
-  map_put(r, "insertList", insertList);
-  map_put(r, "remove", lremove);
-  map_put(r, "removeRange", removeRange);
-  map_put(r, "clear", clear);
-  map_put(r, "reverse", reverse);
-  map_put(r, "shuffle", shuffle);
-  map_put(r, "sort", sort);
+  add("push", push); // [LIST, *] - LIST
+  add("push+", pushplus); // [LIST, *] - []
+  add("pop", pop); // LIST - *
+  add("peek", peek); // LIST - *
+  add("push0", push0); // [LIST, *] - []
+  add("push0+", push0plus); // [LIST, *] - LIST
+  add("pop0", pop0); // LIST - *
+  add("peek0", peek0); // LIST - *
+  add("insert", insert);
+  add("insertList", insertList);
+  add("remove", lremove);
+  add("removeRange", removeRange);
+  add("clear", clear);
+  add("reverse", reverse);
+  add("shuffle", shuffle);
+  add("sort", sort);
 
-  map_put(r, "duplicates", duplicates);
-  map_put(r, "all?", all);
-  map_put(r, "any?", any);
-  map_put(r, "each", each);
-  map_put(r, "eachIx", eachix);
-  map_put(r, "eq?", eq);
-  map_put(r, "neq?", neq);
-  map_put(r, "index", lindex);
-  map_put(r, "indexf", indexf);
-  map_put(r, "find", find);
-  map_put(r, "lastIndex", lastindex);
-  map_put(r, "lastIndexf", lastindexf);
-  map_put(r, "reduce", reduce);
+  add("duplicates", duplicates);
+  add("all?", all);
+  add("any?", any);
+  add("each", each);
+  add("eachIx", eachix);
+  add("eq?", eq);
+  add("neq?", neq);
+  add("index", lindex);
+  add("indexf", indexf);
+  add("find", find);
+  add("lastIndex", lastindex);
+  add("lastIndexf", lastindexf);
+  add("reduce", reduce);
 
-  map_put(r, "drop", drop);
-  map_put(r, "dropf", dropf);
-  map_put(r, "filter", filter);
-  map_put(r, "map", map);
-  map_put(r, "take", take);
-  map_put(r, "takef", takef);
-  map_put(r, "zip", zip);
-  map_put(r, "zip3", zip3);
-  map_put(r, "unzip", unzip);
-  map_put(r, "unzip3", unzip3);
+  add("drop", drop);
+  add("dropf", dropf);
+  add("filter", filter);
+  add("map", map);
+  add("take", take);
+  add("takef", takef);
+  add("zip", zip);
+  add("zip3", zip3);
+  add("unzip", unzip);
+  add("unzip3", unzip3);
 
-  map_put(r, "sub", sub);
-  map_put(r, "left", left);
-  map_put(r, "right", right);
+  add("sub", sub);
+  add("left", left);
+  add("right", right);
 
-  map_put(r, "fromJs", fromjs);
-  map_put(r, "toJs", tojs);
+  add("fromJs", fromjs);
+  add("toJs", tojs);
 
   return r;
 }

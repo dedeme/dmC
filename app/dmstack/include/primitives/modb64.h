@@ -6,9 +6,9 @@
   #define PRIMITIVES_MODB64_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modb64_mk (void);
+///
+Pmodule *modb64_mk (void);
 
 #endif

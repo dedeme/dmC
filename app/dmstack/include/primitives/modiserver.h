@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODISERVER_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modiserver_mk (void);
+///
+Pmodule *modiserver_mk (void);
 
 #endif

@@ -47,18 +47,19 @@ static void min (Machine *m) {
   fn2(m, mn);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modint_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modint_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "fromStr", fromStr); // STRING - INT
-  map_put(r, "abs", sabs); // INT - INT
-  map_put(r, "rnd", rnd); // [] - INT
-  map_put(r, "div", sdiv); // [INT, INT] - [INT, INT]
+  add("fromStr", fromStr); // STRING - INT
+  add("abs", sabs); // INT - INT
+  add("rnd", rnd); // [] - INT
+  add("div", sdiv); // [INT, INT] - [INT, INT]
                                // (num, den) - [quot, rem]
-  map_put(r, "max", max); // [INT, INT] - INT
-  map_put(r, "min", min); // [INT, INT] - INT
+  add("max", max); // [INT, INT] - INT
+  add("min", min); // [INT, INT] - INT
 
   return r;
 }

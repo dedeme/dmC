@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODWRAP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modwrap_mk (void);
+///
+Pmodule *modwrap_mk (void);
 
 #endif

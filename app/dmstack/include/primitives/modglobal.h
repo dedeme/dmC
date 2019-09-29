@@ -7,9 +7,9 @@
   #define MODULES_MODGLOBAL_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modglobal_mk (void);
+///
+Pmodule *modglobal_mk (void);
 
 #endif

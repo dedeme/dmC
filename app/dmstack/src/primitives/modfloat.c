@@ -63,20 +63,21 @@ static void eq (Machine *m) {
   machine_push(m, token_new_int(0, n2 < n1 + gap && n2 > n1 - gap));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modfloat_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modfloat_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "fromStr", fromStr); // STRING - FLOAT
-  map_put(r, "abs", sabs); // FLOAT - FLOAT
-  map_put(r, "rnd", rnd); //  [] - FLOAT
-  map_put(r, "max", max); // [FLOAT, FLOAT] - FLOAT
-  map_put(r, "min", min); // [FLOAT, FLOAT] - FLOAT
+  add("fromStr", fromStr); // STRING - FLOAT
+  add("abs", sabs); // FLOAT - FLOAT
+  add("rnd", rnd); //  [] - FLOAT
+  add("max", max); // [FLOAT, FLOAT] - FLOAT
+  add("min", min); // [FLOAT, FLOAT] - FLOAT
 
-  map_put(r, "round", sround);
-  map_put(r, "roundn", roundn);
-  map_put(r, "==", eq);
+  add("round", sround);
+  add("roundn", roundn);
+  add("==", eq);
 
   return r;
 }

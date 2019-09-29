@@ -7,9 +7,9 @@
   #define MODULES_MODBLOB_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modblob_mk (void);
+///
+Pmodule *modblob_mk (void);
 
 #endif

@@ -299,9 +299,7 @@ Opt *tkreader_next(Reader *reader) {
     reader_set_prg_ix(reader, prg_ix + p - prg);
     char *name = str_sub(prgd, 0, p - prgd);
     char *id = str_eq(name, "this") ? reader_source(reader) : name;
-    return opt_new(token_new_symbol(
-      nline, symbol_new_id(id, name)
-    ));
+    return opt_new(token_new_symbol(nline, symbol_new(id)));
   }
 
   return opt_empty();

@@ -7,9 +7,9 @@
   #define MODULES_MODSTK_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modstk_mk (void);
+///
+Pmodule *modstk_mk (void);
 
 #endif

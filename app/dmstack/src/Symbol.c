@@ -3,63 +3,74 @@
 
 #include "Symbol.h"
 
-struct symbol_Symbol {
-  char *name;
-  char *id;
-  int hash;
+struct symbol_SymbolKv {
+  Symbol key;
+  Symbol value;
 };
 
-Symbol *symbol_new_id (char *id, char *name) {
-  Symbol *this = MALLOC(Symbol);
-  this->id = id;
-  this->name = name;
-  int hash = 0;
-  int base = 0;
-  char *p = id;
-  while (*p) {
-    hash += base + *p++;
-    base += 75;
-  }
-  this->hash = hash;
+// Arr<char>
+Arr *syms = NULL;
+
+void symbol_init (void) {
+  syms = arr_new();
+  REPEAT(symbol_SYSTEM_COUNT) {
+    arr_push(syms, "");
+  }_REPEAT
+
+  arr_set(syms, symbol_IMPORT, "import");
+  arr_set(syms, symbol_IF, "if");
+  arr_set(syms, symbol_ELIF, "elif");
+  arr_set(syms, symbol_ELSE, "else");
+  arr_set(syms, symbol_BREAK, "break");
+  arr_set(syms, symbol_EQUALS, "=");
+  arr_set(syms, symbol_AMPERSAND, "&");
+  arr_set(syms, symbol_NOP, "nop");
+  arr_set(syms, symbol_EVAL, "eval");
+  arr_set(syms, symbol_RUN, "run");
+  arr_set(syms, symbol_MRUN, "mrun");
+  arr_set(syms, symbol_DATA, "data");
+  arr_set(syms, symbol_SYNC, "sync");
+  arr_set(syms, symbol_LOOP, "loop");
+  arr_set(syms, symbol_WHILE, "while");
+  arr_set(syms, symbol_FOR, "for");
+  arr_set(syms, symbol_ASSERT, "assert");
+  arr_set(syms, symbol_THIS, "this");
+
+  arr_set(syms, symbol_BYTES_, "= Bytes");
+  arr_set(syms, symbol_THREAD_, "= Thread");
+  arr_set(syms, symbol_ITERATOR_, "= Iterator");
+  arr_set(syms, symbol_FILE_, "= File");
+  arr_set(syms, symbol_ISERVER_, "= Iserver");
+  arr_set(syms, symbol_ISERVER_RQ_, "= IserverRq");
+}
+
+Symbol symbol_new (char *name) {
+  EACH_IX(syms, char, s, ix) {
+    if (str_eq(s, name)) return ix;
+  }_EACH
+  arr_push(syms, name);
+  return arr_size(syms) - 1;
+}
+
+int symbol_eq (Symbol this, Symbol other) {
+  return this == other;
+}
+
+char *symbol_to_str (Symbol this) {
+  return arr_get(syms, this);
+}
+
+SymbolKv *symbolKv_new (Symbol key, Symbol value) {
+  SymbolKv *this = MALLOC(SymbolKv);
+  this->key = key;
+  this->value = value;
   return this;
 }
 
-Symbol *symbol_new (char *name) {
-  return symbol_new_id(name, name);
+Symbol symbolKv_key (SymbolKv *this) {
+  return this->key;
 }
 
-Symbol *symbol_new_pointer (char *name) {
-  Symbol *this = MALLOC(Symbol);
-  this->id = name;
-  this->name = name;
-  this->hash = 0;
-  return this;
-}
-
-char *symbol_name (Symbol *this) {
-  return this->name;
-}
-
-char *symbol_id (Symbol *this) {
-  return this->id;
-}
-
-int symbol_hash (Symbol *this) {
-  return this->hash;
-}
-
-Symbol *symbol_clone (Symbol *this) {
-  Symbol *r = MALLOC(Symbol);
-  r->id = this->id;
-  r->name = this->name;
-  r->hash = this->hash;
-  return r;
-}
-
-int symbol_eq (Symbol *this, Symbol *other) {
-  return this->hash == other->hash && str_eq(this->id, other->id);
-}
-
-char *symbol_to_str (Symbol *this) {
-  return this->name;
+Symbol symbolKv_value (SymbolKv *this) {
+  return this->value;
 }

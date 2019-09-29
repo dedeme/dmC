@@ -22,13 +22,14 @@ static void show (Machine *m) {
   puts("]");
 }
 
-// Resturns Map<primitives_Fn>
-Map *modstk_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modstk_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "clear", clear);
-  map_put(r, "show", show);
+  add("clear", clear);
+  add("show", show);
 
   return r;
 }

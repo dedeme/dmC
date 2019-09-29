@@ -11,16 +11,16 @@
 
   (
     len =; len blob,new;
-    len (i =; i i 10 + set+) ((nop)) for
+    (i =; i i 10 + blob,set+) (len) for
   )
-  ((120) (130)) for
+  (120 130) for
 
   ( i =; B =; B b64,encodeBytes; b64,decodeBytes
-    B B size
-    (i =; B1 =; B2 =; B1 i get B2 i get == assert; B2; B1)
-    ((nop)) for
+    B
+    (i =; B1 =; B2 =; B1 i blob,get B2 i blob,get == assert; B2; B1)
+    (B size) for
     pop; pop)
-  ((10)) for
+  (10) for
 
   empty? assert
 ) run

@@ -8,17 +8,19 @@
 
 #include "dmc/async.h"
 #include "Machine.h"
-
-///
-typedef void (*primitives_Fn) (Machine *m);
+#include "Pmodule.h"
+#include "Lib.h"
 
 ///
 void primitives_init (void);
 
-/// Returns Opt<primitives_Fn>
-Opt *primitives_get (char *module, char *id);
+/// Returns Opt<pmodule_Fn>. Called at run time.
+Opt *primitives_get (Symbol module, Symbol id);
 
-/// Returns Opt<Map[Token]> - Functions from a module.
-Opt *primitives_module (char *module);
+///
+void primitives_add_base (Heap *heap);
+
+///
+void primitives_add_lib (Lib *lib);
 
 #endif

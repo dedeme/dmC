@@ -13,7 +13,7 @@ struct reader_Reader {
   char *prg;
   int prg_ix;
   Token *next_tk;
-  // List<Symbol>
+  // List<SymbolKv>
   List *syms;
 };
 
@@ -43,6 +43,7 @@ Reader *reader_new_from_reader (Reader *parent, char *prg, int nline) {
 
 Token *reader_process (Reader *this) {
   int nline = this->nline;
+
   // Arr<Token>
   Arr *r = arr_new();
   Token *tk = opt_nget(tkreader_next(this));
@@ -91,37 +92,43 @@ void reader_set_nline (Reader *this, int value) {
 }
 
 Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
-  char *name = symbol_name(token_symbol(tk));
-  if (str_eq(name, "import")) {
+  Symbol sym = token_symbol(tk);
+  if (sym == symbol_IMPORT) {
     if (!arr_size(prg)) reader_fail(this, "Import source is missing");
 
     Token *t = arr_peek(prg);
-    // Kv<Symbol>
-    Kv *esym = imports_read_symbol(t);
-    if (*kv_key(esym)) reader_fail(this, kv_key(esym));
+    // Kv<SymbolKv>
+    Kv *esymkv = imports_read_symbol(t);
+    if (*kv_key(esymkv)) reader_fail(this, kv_key(esymkv));
 
-    Symbol *sym = kv_value(esym);
+    SymbolKv *symkv = kv_value(esymkv);
+    Symbol sym = symbolKv_value(symkv);
+    char *f = symbol_to_str(sym);
     char *fc = opt_nget(path_canonical(path_cat(
       path_parent(this->source),
-      str_cat(symbol_id(sym), ".dms", NULL),
+      str_cat(f, ".dms", NULL),
       NULL
     )));
     if (!fc)
       reader_fail(this, str_f(
-        "Import file '%s' not found %s", str_cat(symbol_id(sym), ".dms", NULL)
-        , path_cat(
-            this->source, str_cat(symbol_id(sym), ".dms", NULL), NULL
-          )
+        "Import file '%s' not found", symbol_to_str(sym)
       ));
-    this->syms = list_cons(this->syms, symbol_new_id(
-      str_left(fc, -4), symbol_name(sym)
-    ));
-  } else if (str_eq(name, "this")) {
-    return token_new_symbol(token_line(tk), symbol_new_id(this->source, name));
+
+    Symbol newsym = symbol_new(str_left(fc, -4));
+    Symbol key = symbolKv_key(symkv);
+    if (key == -1) key = symbol_new(path_name(f));
+    this->syms = list_cons(
+      this->syms, symbolKv_new(key, newsym)
+    );
+  } else if (sym == symbol_THIS) {
+    return token_new_symbol(token_line(tk), symbol_new(this->source));
   } else {
-    int fn (Symbol *sym) { return str_eq(name, symbol_name(sym)); }
-    Symbol *sym = opt_nget(it_find(list_to_it(this->syms), (FPRED)fn));
-    if (sym) return token_new_symbol(token_line(tk), sym);
+    EACHL(this->syms, SymbolKv, e) {
+      if (symbolKv_key(e) == sym) {
+//printf("%ld, %s\n", sym, symbol_to_str(sym));
+        return token_new_symbol(token_line(tk), symbolKv_value(e));
+      }
+    }_EACH
   }
   return tk;
 }

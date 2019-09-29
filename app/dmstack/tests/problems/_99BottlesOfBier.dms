@@ -14,7 +14,7 @@
     i 1 - bs " bottles of beer on the wall\n"
     + + + + +
     sys,println
-  ) ((99) (0) (-1)) for
+  ) (99 0 -1) for
 
   "No more bottles of beer on the wall\n"
   "No more bottles of beer\n"

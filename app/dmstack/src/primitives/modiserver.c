@@ -8,17 +8,17 @@
 
 static void open (Machine *m) {
   int port = token_int(machine_pop_exc(m, token_INT));
-  machine_push(m, token_from_pointer("= __Iserver", iserver_new(port)));
+  machine_push(m, token_from_pointer(symbol_ISERVER_, iserver_new(port)));
 }
 
 static void close (Machine *m) {
 
-  Iserver *s = (Iserver *)fails_read_pointer(m, "= __Iserver", machine_pop(m));
+  Iserver *s = (Iserver *)fails_read_pointer(m, symbol_ISERVER_, machine_pop(m));
   iserver_close(s);
 }
 
 static void getrq (Machine *m) {
-  Iserver *s = (Iserver *)fails_read_pointer(m, "= __Iserver", machine_pop(m));
+  Iserver *s = (Iserver *)fails_read_pointer(m, symbol_ISERVER_, machine_pop(m));
   IserverRq *rq = iserver_read(s);
   char *err = iserverRq_error(rq);
   if (*err) {
@@ -27,7 +27,7 @@ static void getrq (Machine *m) {
     )));
   } else {
     machine_push(m, token_new_list(0, arr_new_from(
-      token_from_pointer("= __IserveRq", rq),
+      token_from_pointer(symbol_ISERVER_RQ_, rq),
       NULL
     )));
   }
@@ -35,7 +35,7 @@ static void getrq (Machine *m) {
 
 static void readrq (Machine *m) {
   IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, "= __IserverRq", machine_pop(m)
+    m, symbol_ISERVER_RQ_, machine_pop(m)
   );
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
@@ -49,7 +49,7 @@ static void readrq (Machine *m) {
 
 static void rqhost (Machine *m) {
   IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, "= __IserverRq", machine_pop(m)
+    m, symbol_ISERVER_RQ_, machine_pop(m)
   );
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
@@ -63,23 +63,24 @@ static void rqhost (Machine *m) {
 
 static void writerq (Machine *m) {
   IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, "= __IserverRq", machine_pop(m)
+    m, symbol_ISERVER_RQ_, machine_pop(m)
   );
   char *msg = token_string(machine_pop_exc(m, token_STRING));
   iserverRq_write(rq, msg);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modiserver_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modiserver_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "open", open); // [] - ISERVER
-  map_put(r, "close", close); // ISERVER - []
-  map_put(r, "getRq", getrq); // ISERVER - OPT<ISERVER_RQ>
-  map_put(r, "readRq", readrq); // ISERVER_RQ - OPT<STRING>
-  map_put(r, "rqHost", rqhost); // ISERVER_RQ - OPT<STRING>
-  map_put(r, "writeRq", writerq); // ISERVER_RQ - []
+  add("open", open); // [] - ISERVER
+  add("close", close); // ISERVER - []
+  add("getRq", getrq); // ISERVER - OPT<ISERVER_RQ>
+  add("readRq", readrq); // ISERVER_RQ - OPT<STRING>
+  add("rqHost", rqhost); // ISERVER_RQ - OPT<STRING>
+  add("writeRq", writerq); // ISERVER_RQ - []
 
   return r;
 }

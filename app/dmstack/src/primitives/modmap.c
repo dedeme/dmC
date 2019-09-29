@@ -91,11 +91,11 @@ static void upboth (Machine *m, int isplus) {
   putboth(m, isplus);
 }
 
-static void up (Machine *m, int isplus) {
+static void up (Machine *m) {
   upboth(m, 0);
 }
 
-static void upplus (Machine *m, int isplus) {
+static void upplus (Machine *m) {
   upboth(m, 1);
 }
 
@@ -157,27 +157,28 @@ static void tojs (Machine *m) {
   modjs_from_map(m);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modmap_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modmap_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "new", new); // [] - MAP
-  map_put(r, "get", get); // [MAP, STRING] - LIST
+  add("new", new); // [] - MAP
+  add("get", get); // [MAP, STRING] - LIST
                           // ([map, key] - [unary list] or [empty list])
-  map_put(r, "hasKey", haskey); // [MAP, STRING] - INT
-  map_put(r, "put", put); // [MAP - STRING - *] - []
-  map_put(r, "put+", putplus); // [MAP - STRING - *] - MAP
-  map_put(r, "up", up); // [MAP - STRING - LIST] - []
-  map_put(r, "up+", upplus); // [MAP - STRING - LIST] - MAP
-  map_put(r, "remove", mremove); // [MAP, STRING] - []
-  map_put(r, "keys", keys); // MAP - LIST
-  map_put(r, "values", values); // MAP - LIST
-  map_put(r, "sort", sort); // MAP - []
-  map_put(r, "sortLocale", sortlocale); // MAP - []
+  add("hasKey", haskey); // [MAP, STRING] - INT
+  add("put", put); // [MAP - STRING - *] - []
+  add("put+", putplus); // [MAP - STRING - *] - MAP
+  add("up", up); // [MAP - STRING - LIST] - []
+  add("up+", upplus); // [MAP - STRING - LIST] - MAP
+  add("remove", mremove); // [MAP, STRING] - []
+  add("keys", keys); // MAP - LIST
+  add("values", values); // MAP - LIST
+  add("sort", sort); // MAP - []
+  add("sortLocale", sortlocale); // MAP - []
 
-  map_put(r, "fromJs", fromjs);
-  map_put(r, "toJs", tojs);
+  add("fromJs", fromjs);
+  add("toJs", tojs);
 
   return r;
 }

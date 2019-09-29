@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include "Machine.h"
+#include "fails.h"
 #include "args.h"
 
 static struct {
@@ -93,28 +94,15 @@ static void freethread (Machine *m) {
 
 static void thread (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
-  char *th = (char *)async_thread2(
+  pthread_t *th = async_thread2(
     (FPROC)threadfn, tp_new(m, prg)
   );
-  // Arr<Token>
-  Arr *a = arr_new();
-  arr_push(a, token_new_symbol(0, symbol_new(".thread_to_join.")));
-  arr_push(a, token_new_string(0, th));
-  arr_push(machine_stack(m), token_new_list(0, a));
+  arr_push(machine_stack(m), token_from_pointer(symbol_THREAD_, th));
 }
 
 static void join (Machine *m) {
-  Token *thread = machine_pop_exc(m, token_LIST);
-  // Arr<Token>
-  Arr *a = token_list(thread);
-  if (
-    arr_size(a) != 2 ||
-    (token_type(arr_get(a, 0)) != token_SYMBOL &&
-      !str_eq(symbol_name(token_symbol(arr_get(a, 0))), ".thread_to_join.")
-    )
-  )
-    machine_fail(m, "Expected a thread value");
-  async_join((pthread_t *)token_string(arr_get(a, 1)));
+  pthread_t *th = fails_read_pointer(m, symbol_THREAD_, machine_pop(m));
+  async_join(th);
 }
 
 static void ssleep (Machine *m) {
@@ -170,35 +158,36 @@ static void sgetpass (Machine *m) {
   getc(stdin);
 }
 
-// Resturns Map<primitives_Fn>
-Map *modsys_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modsys_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "init", init); // STRING - []
-  map_put(r, "init?", isinit); // [] - INT
-  map_put(r, "home", home); // [] - STRING
-  map_put(r, "uname", uname); // [] - STRING
-  map_put(r, "udir", udir); // [] - STRING
-  map_put(r, "args", args); // [] - LIST
-  map_put(r, "exit", sexit); // INT - []
+  add("init", init); // STRING - []
+  add("init?", isinit); // [] - INT
+  add("home", home); // [] - STRING
+  add("uname", uname); // [] - STRING
+  add("udir", udir); // [] - STRING
+  add("args", args); // [] - LIST
+  add("exit", sexit); // INT - []
 
-  map_put(r, "locale", locale); // STRING - STRING
-  map_put(r, "setLocale", setlocale); // STRING - BLOB
+  add("locale", locale); // STRING - STRING
+  add("setLocale", setlocale); // STRING - BLOB
 
-  map_put(r, "cmd", cmd); // STRING - OPT<STRING> (command - Option<response>)
+  add("cmd", cmd); // STRING - OPT<STRING> (command - Option<response>)
 
-  map_put(r, "freeThread", freethread); // LIST - []  (program - [])
-  map_put(r, "thread", thread); // LIST - LIST  (program - threadId)
-  map_put(r, "join", join); // LIST- [] (threadId - [])
-  map_put(r, "sleep", ssleep); // INT - []
+  add("freeThread", freethread); // LIST - []  (program - [])
+  add("thread", thread); // LIST - LIST  (program - threadId)
+  add("join", join); // LIST- [] (threadId - [])
+  add("sleep", ssleep); // INT - []
 
-  map_put(r, "print", print); // STRING - []
-  map_put(r, "println", println); // STRING - []
-  map_put(r, "error", error); // STRING - []
-  map_put(r, "getLine", sgetline); // [] - STRING (read until enter)
-  map_put(r, "getText", sgettext); // STRING - STRING (read until text)
-  map_put(r, "getPass", sgetpass); // STRING - STRING
+  add("print", print); // STRING - []
+  add("println", println); // STRING - []
+  add("error", error); // STRING - []
+  add("getLine", sgetline); // [] - STRING (read until enter)
+  add("getText", sgettext); // STRING - STRING (read until text)
+  add("getPass", sgetpass); // STRING - STRING
 
   return r;
 }

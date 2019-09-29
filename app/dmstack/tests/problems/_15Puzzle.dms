@@ -20,7 +20,7 @@ mkBoard =
     ((4)) for
     "" sys,println
   ) pRow =
-  (i =; Board i get pRow) ((4)) for
+  (i =; Board i get pRow) (4) for
   "" sys,println
 )
 print =
@@ -32,8 +32,8 @@ cell =
   ( r =
     ( c =
       (r c tp,new2 break break) (Board r get c get !) if
-    ) ((4)) for
-  ) ((4)) for
+    ) (4) for
+  ) (4) for
 ) find0 =
 
 mkBoard find0 puts

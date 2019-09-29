@@ -7,9 +7,9 @@
   #define MODULES_MODMATH_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modmath_mk (void);
+///
+Pmodule *modmath_mk (void);
 
 #endif

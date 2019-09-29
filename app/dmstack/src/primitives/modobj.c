@@ -55,11 +55,11 @@ static void putboth (Machine *m, int isplus) {
   arr_push(a, tk);
 }
 
-static void put (Machine *m, int isplus) {
+static void put (Machine *m) {
   putboth(m, 0);
 }
 
-static void putplus (Machine *m, int isplus) {
+static void putplus (Machine *m) {
   putboth(m, 1);
 }
 
@@ -79,11 +79,11 @@ static void upboth (Machine *m, int isplus) {
   putboth(m, isplus);
 }
 
-static void up (Machine *m, int isplus) {
+static void up (Machine *m) {
   upboth(m, 0);
 }
 
-static void upplus (Machine *m, int isplus) {
+static void upplus (Machine *m) {
   upboth(m, 1);
 }
 
@@ -123,20 +123,21 @@ static void tomap (Machine *m) {
   machine_push(m, token_new_list(0, r));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modobj_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modobj_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "new", new); // [] - OBJ
-  map_put(r, "has?", has); // [OBJ, STRING] - INT
-  map_put(r, "get", get); // [OBJ, STRING] - *
-  map_put(r, "put", put); // [OBJ - STRING - *] - []
-  map_put(r, "put+", putplus); // [OBJ - STRING - *] - OBJ
-  map_put(r, "up", up); // [OBJ - STRING - LIST] - []
-  map_put(r, "up+", upplus); // [OBJ - STRING - LIST] - OBJ
-  map_put(r, "fromMap", frommap); // MAP - OBJ
-  map_put(r, "toMap", tomap); // OBJ - MAP
+  add("new", new); // [] - OBJ
+  add("has?", has); // [OBJ, STRING] - INT
+  add("get", get); // [OBJ, STRING] - *
+  add("put", put); // [OBJ - STRING - *] - []
+  add("put+", putplus); // [OBJ - STRING - *] - OBJ
+  add("up", up); // [OBJ - STRING - LIST] - []
+  add("up+", upplus); // [OBJ - STRING - LIST] - OBJ
+  add("fromMap", frommap); // MAP - OBJ
+  add("toMap", tomap); // OBJ - MAP
 
   return r;
 }

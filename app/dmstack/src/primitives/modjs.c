@@ -214,33 +214,34 @@ void modjs_to_map (Machine *m) {
   machine_push(m, token_new_list(0, r));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modjs_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modjs_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "null?", isnull); // STRING - INT
-  map_put(r, "rb", rb); // STRING - INT
-  map_put(r, "ri", ri); // STRING - INT
-  map_put(r, "rf", rf); // STRING - FLOAT
-  map_put(r, "rs", rs); // STRING - STRING
-  map_put(r, "ra", ra); // STRING - LIST
-  map_put(r, "ro", ro); // STRING - OBJ
-  map_put(r, "rm", rm); // STRING - MAP
+  add("null?", isnull); // STRING - INT
+  add("rb", rb); // STRING - INT
+  add("ri", ri); // STRING - INT
+  add("rf", rf); // STRING - FLOAT
+  add("rs", rs); // STRING - STRING
+  add("ra", ra); // STRING - LIST
+  add("ro", ro); // STRING - OBJ
+  add("rm", rm); // STRING - MAP
 
-  map_put(r, "wn", wn); // INT - STRING
-  map_put(r, "wb", wb); // INT - STRING
-  map_put(r, "wi", wi); // INT - STRING
-  map_put(r, "wf", wf); // FLOAT - STRING
-  map_put(r, "ws", ws); // STRING - STRING
-  map_put(r, "wa", wa); // LIST - STRING
-  map_put(r, "wo", wo); // OBJ- STRING
-  map_put(r, "wm", wm); // MAP- STRING
+  add("wn", wn); // INT - STRING
+  add("wb", wb); // INT - STRING
+  add("wi", wi); // INT - STRING
+  add("wf", wf); // FLOAT - STRING
+  add("ws", ws); // STRING - STRING
+  add("wa", wa); // LIST - STRING
+  add("wo", wo); // OBJ- STRING
+  add("wm", wm); // MAP- STRING
 
-  map_put(r, "fromList", modjs_from_list); // LIST - STRING
-  map_put(r, "toList", modjs_to_list); // STRING - LIST
-  map_put(r, "fromMap", modjs_from_map); // MAP - STRING
-  map_put(r, "toMap", modjs_to_map); // STRING - MAP
+  add("fromList", modjs_from_list); // LIST - STRING
+  add("toList", modjs_to_list); // STRING - LIST
+  add("fromMap", modjs_from_map); // MAP - STRING
+  add("toMap", modjs_to_map); // STRING - MAP
 
 
   return r;

@@ -103,24 +103,25 @@ static void tp3 (Machine *m) {
   ));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modwrap_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modwrap_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "none", none); // [] - OPT ([] -> empty list)
-  map_put(r, "none?", isnone); // OPT - INT
-  map_put(r, "some", some); // * - OPT (* -> (*))
-  map_put(r, "some?", issome); // OPT - INT
-  map_put(r, "option", option); // [(->B?), (OPT->B?), (->OPT)] - B?
-  map_put(r, "left", left); // STRING -> EITHER (s -> (s, 0))
-  map_put(r, "left?", isleft); // EITHER - INT
-  map_put(r, "right", some); // * -> EITHER (* -> (*)) -some is ok-
-  map_put(r, "right?", isright); // EITHER - INT
-  map_put(r, "either", either);
+  add("none", none); // [] - OPT ([] -> empty list)
+  add("none?", isnone); // OPT - INT
+  add("some", some); // * - OPT (* -> (*))
+  add("some?", issome); // OPT - INT
+  add("option", option); // [(->B?), (OPT->B?), (->OPT)] - B?
+  add("left", left); // STRING -> EITHER (s -> (s, 0))
+  add("left?", isleft); // EITHER - INT
+  add("right", some); // * -> EITHER (* -> (*)) -some is ok-
+  add("right?", isright); // EITHER - INT
+  add("either", either);
     // [(LEFT->B?), (RIGHT->B?), (->EITHER)] - B?
-  map_put(r, "tp", tp); // [A, B] -> [(A, B)]
-  map_put(r, "tp3", tp3); // [A, B, C] -> [(A, B, C)]
+  add("tp", tp); // [A, B] -> [(A, B)]
+  add("tp3", tp3); // [A, B, C] -> [(A, B, C)]
 
   return r;
 }

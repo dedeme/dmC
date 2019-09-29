@@ -7,9 +7,9 @@
   #define MODULES_MODFLOAT_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modfloat_mk (void);
+///
+Pmodule *modfloat_mk (void);
 
 #endif

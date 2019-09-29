@@ -25,5 +25,3 @@
 "time" import
 "clock" import
 "path" import
-
-empty? assert

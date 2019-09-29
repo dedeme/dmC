@@ -7,10 +7,10 @@
   #define PRIMITIVES_MODCRYP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modcryp_mk (void);
+///
+Pmodule *modcryp_mk (void);
 
 
 #endif

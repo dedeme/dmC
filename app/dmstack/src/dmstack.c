@@ -16,6 +16,7 @@
 int main (int argc, char *argv[]) {
   exc_init();
   rnd_init();
+  symbol_init();
   primitives_init();
   imports_init();
   fails_init();
@@ -29,7 +30,7 @@ int main (int argc, char *argv[]) {
     EXC_IO(str_f("File '%s' not found.", f));
 
   char *fid = str_left(fc, -4);
-  Symbol *ssource = symbol_new_id(fid, f);
+  Symbol ssource = symbol_new(fid);
   imports_put_on_way(ssource);
 
   TRY {

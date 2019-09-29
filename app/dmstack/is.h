@@ -30,7 +30,7 @@ Opt *tkreader_next(Reader *reader);
 typedef struct heap_Entry HeapEntry;
 
 ///
-Symbol *heapEntry_symbol (HeapEntry *this);
+Symbol heapEntry_symbol (HeapEntry *this);
 
 ///
 Token *heapEntry_token (HeapEntry *this);
@@ -42,10 +42,10 @@ typedef struct heap_Heap Heap;
 Heap *heap_new (void);
 
 /// Adds a new element to 'this'
-void heap_add (Heap *this, Symbol *s, Token *tk);
+void heap_add (Heap *this, Symbol s, Token *tk);
 
 /// Returns a token o NULL
-Token *heap_get (Heap *this, Symbol *s);
+Token *heap_get (Heap *this, Symbol s);
 
 /// Arr<HeapEntry>
 Arr *heap_entries (Heap *this);
@@ -135,7 +135,46 @@ void fails_range (Machine *m, int min, int max, int ix);
 void fails_check_range (Machine *m, int min, int max, int ix);
 
 ///
-void *fails_read_pointer (Machine *m, char *id, Token *pointer);
+void *fails_read_pointer (Machine *m, Symbol sym, Token *pointer);
+
+#endif
+// Copyright 29-Sept-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Primitives module.
+
+#ifndef PMODULE_H
+  #define PMODULE_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+typedef void (*pmodule_Fn) (Machine *m);
+
+///
+typedef struct pmodule_Entry PmoduleEntry;
+
+///
+Symbol pmoduleEntry_id (PmoduleEntry *e);
+
+///
+pmodule_Fn pmoduleEntry_fn (PmoduleEntry *e);
+
+///
+typedef struct pmodule_Pmodule Pmodule;
+
+///
+Pmodule *pmodule_new (void);
+
+///
+void pmodule_add (Pmodule *pm, Symbol id, pmodule_Fn fn);
+
+/// Opt<pmodule_Fn>
+Opt *pmodule_get (Pmodule *pm, Symbol id);
+
+/// Arr<PmoduleEntry>
+Arr *pmodule_list (Pmodule *pm);
 
 #endif
 // Copyright 25-Aug-2019 ºDeme
@@ -216,18 +255,20 @@ void reader_fail (Reader *this, char *msg);
 
 #include "dmc/async.h"
 #include "Machine.h"
-
-///
-typedef void (*primitives_Fn) (Machine *m);
+#include "Pmodule.h"
+#include "Lib.h"
 
 ///
 void primitives_init (void);
 
-/// Returns Opt<primitives_Fn>
-Opt *primitives_get (char *module, char *id);
+/// Returns Opt<pmodule_Fn>. Called at run time.
+Opt *primitives_get (Symbol module, Symbol id);
 
-/// Returns Opt<Map[Token]> - Functions from a module.
-Opt *primitives_module (char *module);
+///
+void primitives_add_base (Heap *heap);
+
+///
+void primitives_add_lib (Lib *lib);
 
 #endif
 // Copyright 22-Sept-2019 ºDeme
@@ -239,10 +280,10 @@ Opt *primitives_module (char *module);
   #define PRIMITIVES_MODFILE_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modfile_mk (void);
+///
+Pmodule *modfile_mk (void);
 
 #endif
 // Copyright 19-Sept-2019 ºDeme
@@ -254,10 +295,10 @@ Map *modfile_mk (void);
   #define PRIMITIVES_MODTIME_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modtime_mk (void);
+///
+Pmodule *modtime_mk (void);
 
 #endif
 // Copyright 31-Aug-2019 ºDeme
@@ -302,10 +343,10 @@ void modglobal1_less_eq (Machine *m);
   #define PRIMITIVES_MODISERVER_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modiserver_mk (void);
+///
+Pmodule *modiserver_mk (void);
 
 #endif
 // Copyright 26-Sept-2019 ºDeme
@@ -317,10 +358,10 @@ Map *modiserver_mk (void);
   #define PRIMITIVES_MODIT_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modit_mk (void);
+///
+Pmodule *modit_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -332,10 +373,10 @@ Map *modit_mk (void);
   #define MODULES_MODMATH_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modmath_mk (void);
+///
+Pmodule *modmath_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -347,10 +388,10 @@ Map *modmath_mk (void);
   #define MODULES_MODLIST_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modlist_mk (void);
+///
+Pmodule *modlist_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -362,10 +403,10 @@ Map *modlist_mk (void);
   #define MODULES_MODMAP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modmap_mk (void);
+///
+Pmodule *modmap_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -377,10 +418,10 @@ Map *modmap_mk (void);
   #define MODULES_MODFLOAT_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modfloat_mk (void);
+///
+Pmodule *modfloat_mk (void);
 
 #endif
 // Copyright 03-Sept-2019 ºDeme
@@ -392,10 +433,10 @@ Map *modfloat_mk (void);
   #define MODULES_MODBLOB_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modblob_mk (void);
+///
+Pmodule *modblob_mk (void);
 
 #endif
 // Copyright 02-Sept-2019 ºDeme
@@ -407,10 +448,10 @@ Map *modblob_mk (void);
   #define MODULES_MODSTK_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modstk_mk (void);
+///
+Pmodule *modstk_mk (void);
 
 #endif
 // Copyright 28-Aug-2019 ºDeme
@@ -422,10 +463,10 @@ Map *modstk_mk (void);
   #define MODULES_MODGLOBAL_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modglobal_mk (void);
+///
+Pmodule *modglobal_mk (void);
 
 #endif
 // Copyright 22-Sept-2019 ºDeme
@@ -437,10 +478,10 @@ Map *modglobal_mk (void);
   #define PRIMITIVES_MODPATH_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modpath_mk (void);
+///
+Pmodule *modpath_mk (void);
 
 #endif
 // Copyright 18-Sept-2019 ºDeme
@@ -452,10 +493,10 @@ Map *modpath_mk (void);
   #define PRIMITIVES_MODCRYP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modcryp_mk (void);
+///
+Pmodule *modcryp_mk (void);
 
 
 #endif
@@ -467,10 +508,10 @@ Map *modcryp_mk (void);
   #define PRIMITIVES_MODB64_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modb64_mk (void);
+///
+Pmodule *modb64_mk (void);
 
 #endif
 // Copyright 17-Sept-2019 ºDeme
@@ -482,10 +523,10 @@ Map *modb64_mk (void);
   #define PRIMITIVES_MODOBJ_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modobj_mk (void);
+///
+Pmodule *modobj_mk (void);
 
 #endif
 // Copyright 17-Sept-2019 ºDeme
@@ -497,10 +538,10 @@ Map *modobj_mk (void);
   #define PRIMITIVES_MODJS_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modjs_mk (void);
+///
+Pmodule *modjs_mk (void);
 
 ///
 void modjs_from_list (Machine *m);
@@ -577,10 +618,10 @@ void modglobal2_ref_upplus (Machine *m);
   #define MODULES_MODSTR_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modstr_mk (void);
+///
+Pmodule *modstr_mk (void);
 
 #endif
 // Copyright 18-Sept-2019 ºDeme
@@ -592,10 +633,10 @@ Map *modstr_mk (void);
   #define PRIMITIVES_MODWRAP_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modwrap_mk (void);
+///
+Pmodule *modwrap_mk (void);
 
 #endif
 // Copyright 30-Aug-2019 ºDeme
@@ -640,10 +681,10 @@ void modglobal0_decr (Machine *m);
   #define PRIMITIVES_MODCLOCK_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modclock_mk (void);
+///
+Pmodule *modclock_mk (void);
 
 #endif
 // Copyright 04-Sept-2019 ºDeme
@@ -655,10 +696,10 @@ Map *modclock_mk (void);
   #define MODULES_MODINT_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modint_mk (void);
+///
+Pmodule *modint_mk (void);
 
 #endif
 // Copyright 18-Sept-2019 ºDeme
@@ -670,10 +711,10 @@ Map *modint_mk (void);
   #define PRIMITIVES_MODSYS_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modsys_mk (void);
+///
+Pmodule *modsys_mk (void);
 
 #endif
 // Copyright 26-Aug-2019 ºDeme
@@ -729,7 +770,7 @@ Arr *args_dms_params (void);
 typedef struct lib_Entry LibEntry;
 
 ///
-Symbol *libEntry_symbol (LibEntry *this);
+Symbol libEntry_symbol (LibEntry *this);
 
 ///
 Heap *libEntry_heap (LibEntry *this);
@@ -741,10 +782,10 @@ typedef struct lib_Lib Lib;
 Lib *lib_new (void);
 
 /// Adds a new element to 'this'
-void lib_add (Lib *this, Symbol *s, Heap *heap);
+void lib_add (Lib *this, Symbol s, Heap *heap);
 
 /// Returns a Heap o NULL
-Heap *lib_get (Lib *this, Symbol *s);
+Heap *lib_get (Lib *this, Symbol s);
 
 /// Arr<LibEntry>
 Arr *lib_entries (Lib *this);
@@ -760,37 +801,35 @@ Arr *lib_entries (Lib *this);
   #define SYMBOL_H
 
 #include "dmc/async.h"
+#include "DEFS.h"
+
+enum symbol_SYSTEM {
+  symbol_IMPORT, symbol_IF, symbol_ELIF, symbol_ELSE, symbol_BREAK,
+  symbol_EQUALS, symbol_AMPERSAND, symbol_NOP, symbol_EVAL, symbol_RUN,
+  symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP, symbol_WHILE,
+  symbol_FOR, symbol_ASSERT, symbol_THIS,
+
+  symbol_BYTES_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
+  symbol_ISERVER_, symbol_ISERVER_RQ_,
+
+  symbol_SYSTEM_COUNT
+};
 
 ///
-typedef struct symbol_Symbol Symbol;
+typedef Int Symbol;
 
-/// Creates a new Symbol with an id different to name.
-Symbol *symbol_new_id (char *id, char *name);
+///
+void symbol_init (void);
 
 /// Creates a new Symbol with equals id and name.
-Symbol *symbol_new (char *name);
-
-/// Creates a new Symbol with equals id and name and hash == 0. This
-/// constructor is intended only to use with pointers.
-Symbol *symbol_new_pointer (char *name);
-
-/// Returns the name of 'this'
-char *symbol_name (Symbol *this);
-
-/// Returns the id of 'this'
-char *symbol_id (Symbol *this);
-
-/// Returns the symbol hash.
-int symbol_hash (Symbol *this);
+Symbol symbol_new (char *name);
 
 ///
-Symbol *symbol_clone (Symbol *this);
+int symbol_eq (Symbol this, Symbol other);
 
 ///
-int symbol_eq (Symbol *this, Symbol *other);
+char *symbol_to_str (Symbol this);
 
-///
-char *symbol_to_str (Symbol *this);
 
 #endif
 // Copyright 25-Aug-2019 ºDeme
@@ -809,7 +848,8 @@ char *symbol_to_str (Symbol *this);
 
 ///
 enum token_Type {
-  token_INT, token_FLOAT, token_STRING, token_BLOB, token_LIST, token_SYMBOL
+  token_INT, token_FLOAT, token_STRING, token_LIST, token_SYMBOL,
+  token_POINTER
 };
 
 ///
@@ -824,14 +864,14 @@ Token *token_new_float (int line, double value);
 ///
 Token *token_new_string (int line, char *value);
 
-///
-Token *token_new_blob (int line, Bytes *bs);
-
 /// 'value' is Arr<Token>
 Token *token_new_list (int line, Arr *value);
 
 ///
-Token *token_new_symbol (int line, Symbol *value);
+Token *token_new_symbol (int line, Symbol value);
+
+///
+Token *token_from_pointer (Symbol sym, void *pointer);
 
 ///
 enum token_Type token_type (Token *this);
@@ -848,14 +888,14 @@ double token_float (Token *this);
 ///
 char *token_string (Token *this);
 
-///
-Bytes *token_blob (Token *this);
-
 /// Returns Arr<Token>
 Arr *token_list (Token *this);
 
 ///
-Symbol *token_symbol (Token *this);
+Symbol token_symbol (Token *this);
+
+///
+void *token_pointer (Token *this);
 
 /// Returns a new token equals to 'this'
 Token *token_clone (Token *this);
@@ -868,9 +908,6 @@ char *token_to_str (Token *this);
 
 ///
 char *token_type_to_str (enum token_Type type);
-
-///
-Token *token_from_pointer (char *id, void *pointer);
 
 #endif
 // Copyright 12-Sept-2019 ºDeme
@@ -888,19 +925,19 @@ Token *token_from_pointer (char *id, void *pointer);
 void imports_init ();
 
 /// Annotation of an import on way.
-void imports_put_on_way (Symbol *key);
+void imports_put_on_way (Symbol key);
 
 /// Removes nnotation of an import on way.
-void imports_quit_on_way (Symbol *key);
+void imports_quit_on_way (Symbol key);
 
 /// Returns if an import is on way.
-int imports_is_on_way (Symbol *key);
+int imports_is_on_way (Symbol key);
 
 ///
-void imports_add (Symbol *key, Heap *heap);
+void imports_add (Symbol key, Heap *heap);
 
 /// Returns an import from library or NULL.
-Heap *imports_get (Symbol *key);
+Heap *imports_get (Symbol key);
 
 /// Returns system heap.
 Heap *imports_base (void);

@@ -4,17 +4,17 @@
 #include "Heap.h"
 
 struct heap_Entry {
-  Symbol *s;
+  Symbol s;
   Token *tk;
 };
-static HeapEntry *entry_new (Symbol *s, Token *tk) {
+static HeapEntry *entry_new (Symbol s, Token *tk) {
   HeapEntry *this = MALLOC(HeapEntry);
   this->s = s;
   this->tk = tk;
   return this;
 }
 
-Symbol *heapEntry_symbol (HeapEntry *this) {
+Symbol heapEntry_symbol (HeapEntry *this) {
   return this->s;
 }
 
@@ -26,11 +26,11 @@ Heap *heap_new (void) {
   return (Heap *)arr_new();
 }
 
-void heap_add (Heap *this, Symbol *s, Token *tk) {
+void heap_add (Heap *this, Symbol s, Token *tk) {
   arr_push((Arr *)this, entry_new(s, tk));
 }
 
-Token *heap_get (Heap *this, Symbol *s) {
+Token *heap_get (Heap *this, Symbol s) {
   EACHR((Arr *)this, HeapEntry, e) {
     if (symbol_eq(e->s, s)) return e->tk;
   }_EACH

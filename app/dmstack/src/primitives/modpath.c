@@ -47,17 +47,18 @@ static void parent (Machine *m) {
   ));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modpath_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modpath_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "canonical", canonical); // STRING - OPT<STRING>
-  map_put(r, "+", plus); // STRING - STRING
-  map_put(r, "extension", extension); // STRING - STRING
-  map_put(r, "name", name); // STRING - STRING
-  map_put(r, "onlyName", only_name); // STRING - STRING
-  map_put(r, "parent", parent); // STRING - STRING
+  add("canonical", canonical); // STRING - OPT<STRING>
+  add("+", plus); // STRING - STRING
+  add("extension", extension); // STRING - STRING
+  add("name", name); // STRING - STRING
+  add("onlyName", only_name); // STRING - STRING
+  add("parent", parent); // STRING - STRING
 
   return r;
 }

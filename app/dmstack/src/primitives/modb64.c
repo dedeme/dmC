@@ -4,6 +4,7 @@
 #include "primitives/modb64.h"
 #include "dmc/b64.h"
 #include "Machine.h"
+#include "fails.h"
 
 static void decode (Machine *m) {
   machine_push(m, token_new_string(0, b64_decode(
@@ -12,7 +13,7 @@ static void decode (Machine *m) {
 }
 
 static void decode_bytes (Machine *m) {
-  machine_push(m, token_new_blob(0, b64_decode_bytes(
+  machine_push(m, token_from_pointer(symbol_BYTES_, b64_decode_bytes(
     token_string(machine_pop_exc(m, token_STRING))
   )));
 }
@@ -25,19 +26,21 @@ static void encode (Machine *m) {
 
 static void encode_bytes (Machine *m) {
   machine_push(m, token_new_string(0, b64_encode_bytes(
-    token_blob(machine_pop_exc(m, token_BLOB))
+    fails_read_pointer(m, symbol_BYTES_, machine_pop(m))
   )));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modb64_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
 
-  map_put(r, "decode", decode); // STRING - STRING
-  map_put(r, "decodeBytes", decode_bytes); // STRING - BLOB
-  map_put(r, "encode", encode); // STRING - STRING
-  map_put(r, "encodeBytes", encode_bytes); // BLOB - STRING
+Pmodule *modb64_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
+
+  add("decode", decode); // STRING - STRING
+  add("decodeBytes", decode_bytes); // STRING - BLOB
+  add("encode", encode); // STRING - STRING
+  add("encodeBytes", encode_bytes); // BLOB - STRING
 
   return r;
 }

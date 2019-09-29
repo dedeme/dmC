@@ -68,11 +68,22 @@ static void runmod (Machine *this, char *module) {
 }
 
 static void mrun (Machine *this) {
-  char *fnc = token_string(machine_pop_exc(this, token_STRING));
-  char *module = token_string(machine_pop_exc(this, token_STRING));
-  primitives_Fn fn = opt_nget(primitives_get(module, fnc));
+  // Arr<Token>
+  Arr *a = token_list(machine_pop_exc(this, token_LIST));
+  Token *module = *arr_start(a);
+  if (token_type(module) != token_SYMBOL)
+    fails_type_in(this, token_SYMBOL, module);
+  Symbol modules = token_symbol(module);
+  Token *fnc = *(arr_start(a) + 1);
+  if (token_type(fnc) != token_SYMBOL)
+    fails_type_in(this, token_SYMBOL, fnc);
+  Symbol fncs = token_symbol(fnc);
+
+  pmodule_Fn fn = opt_nget(primitives_get(modules, fncs));
   if (fn) fn(this);
-  else machine_fail(this, str_f("Symbol '%s.%s' not found", module, fnc));
+  else machine_fail(this, str_f(
+    "Symbol '%s.%s' not found", symbol_to_str(modules), symbol_to_str(fncs)
+  ));
 }
 
 static void data (Machine *this) {
@@ -99,12 +110,12 @@ static void sif (Machine *this) {
     if (!arr_size(this->stack)) break;
     Token *tk = machine_pop_opt(this, token_SYMBOL);
     if (tk) {
-      char *name = symbol_name(token_symbol(tk));
-      if (str_eq(name, "elif")) {
+      Symbol sym = token_symbol(tk);
+      if (sym == symbol_ELIF) {
         arr_push(a, machine_pop_exc(this, token_LIST));
         arr_push(a, machine_pop_exc(this, token_LIST));
         continue;
-      } else if (str_eq(name, "else")) {
+      } else if (sym == symbol_ELSE) {
         last = machine_pop_exc(this, token_LIST);
       } else {
         machine_fail(this, "Expected 'else' or condition");
@@ -132,7 +143,7 @@ static void loop (Machine *this) {
     if (arr_size(this->stack)) {
       Token *tk = machine_peek_opt(this, token_SYMBOL);
       if (tk) {
-        if (str_eq(symbol_name(token_symbol(tk)), "break")) {
+        if (token_symbol(tk) == symbol_BREAK) {
           machine_pop(this);
           break;
         }
@@ -152,7 +163,7 @@ static void swhile (Machine *this) {
       if (arr_size(this->stack)) {
         Token *tk = machine_peek_opt(this, token_SYMBOL);
         if (tk) {
-          if (str_eq(symbol_name(token_symbol(tk)), "break")) {
+          if (token_symbol(tk) == symbol_BREAK) {
             machine_pop(this);
             break;
           }
@@ -168,8 +179,10 @@ static void sfor (Machine *this) {
   Token *cond = machine_pop_exc(this, token_LIST);
   Token *prg = machine_pop_exc(this, token_LIST);
 
+  Machine *m2 = machine_isolate_process("", this->pmachines, cond);
+
   // Arr<Token>
-  Arr *a = token_list(cond);
+  Arr *a = m2->stack;
   int size = arr_size(a);
   if (size < 1)
     machine_fail(this,
@@ -178,26 +191,26 @@ static void sfor (Machine *this) {
     machine_fail(this,
       "Expected as much three values in 'for'");
 
-  if (token_type(arr_get(a, 0)) != token_LIST)
-    machine_fail(this, "Expected a list as first value in 'for'");
+  Token *tk = arr_get(a, 0);
+  if (token_type(tk) != token_INT)
+    machine_fail(this, "Expected an Int as first value in 'for'");
 
-  machine_process("", this->pmachines, arr_get(a, 0));
-  int begin = token_int(machine_pop_exc(this, token_INT));
+  int begin = token_int(tk);
   int end = begin;
   if (size > 1) {
-    if (token_type(arr_get(a, 1)) != token_LIST)
-      machine_fail(this, "Expected a list as second value in 'for'");
-    machine_process("", this->pmachines, arr_get(a, 1));
-    end = token_int(machine_pop_exc(this, token_INT));
+    Token *tk = arr_get(a, 1);
+    if (token_type(tk) != token_INT)
+      machine_fail(this, "Expected an Int as second value in 'for'");
+    end = token_int(tk);
   } else {
     begin = 0;
   }
   int step = 1;
   if (size == 3) {
-    if (token_type(arr_get(a, 2)) != token_LIST)
-      machine_fail(this, "Expected a list as third value in 'for'");
-    machine_process("", this->pmachines, arr_get(a, 2));
-    step = token_int(machine_pop_exc(this, token_INT));
+    Token *tk = arr_get(a, 2);
+    if (token_type(tk) != token_INT)
+      machine_fail(this, "Expected an Int as third value in 'for'");
+    step = token_int(tk);
     if (step == 0)
       machine_fail(this, "No valid '0' value as step in 'for'");
   }
@@ -210,7 +223,7 @@ static void sfor (Machine *this) {
     if (arr_size(this->stack)) {
       Token *tk = machine_peek_opt(this, token_SYMBOL);
       if (tk) {
-        if (str_eq(symbol_name(token_symbol(tk)), "break")) {
+        if (token_symbol(tk) == symbol_BREAK) {
           machine_pop(this);
           break;
         }
@@ -222,11 +235,12 @@ static void sfor (Machine *this) {
 
 static void import (Machine *this) {
   Token *tk = machine_pop(this);
-  Kv *errorsym = imports_read_symbol(tk);
-  if (*kv_key(errorsym)) machine_fail(this, kv_key(errorsym));
-  Symbol *source = kv_value(errorsym);
+  // Kv<SymbolKv>
+  Kv *errorsymkv = imports_read_symbol(tk);
+  if (*kv_key(errorsymkv)) machine_fail(this, kv_key(errorsymkv));
+  Symbol source = symbolKv_value(kv_value(errorsymkv));
 
-  char *sid = symbol_id(source);
+  char *sid = symbol_to_str(source);
   char *f = str_cat(sid, ".dms", NULL);
   if (*sid != '/')
     f = path_cat(path_parent(machine_source(this)), f, NULL);
@@ -236,7 +250,7 @@ static void import (Machine *this) {
     machine_fail(this, str_f("Import file '%s' not found.", f));
 
   char *fid = str_left(fc, -4);
-  Symbol *ssource = symbol_new_id(fid, symbol_name(source));
+  Symbol ssource = symbol_new(fid);
 
   if (!imports_is_on_way(ssource) && !imports_get(ssource)) {
     imports_put_on_way(ssource);
@@ -355,31 +369,32 @@ Token *machine_pop_opt (Machine *this, enum token_Type type) {
 static Machine *cprocess (Machine *m) {
   fails_register_machine(m);
 
-  Symbol *module = NULL;
+  Symbol module = -1;
   Heap *moduleh = NULL;
-  Symbol *sym = NULL;
+  Symbol sym = -1;
   EACH_IX(token_list(m->prg), Token, tk, ix) {
     m->ix = ix;
 
     Token *t;
-    if (sym) {
-      if (module) {
+    if (sym != -1) {
+      if (module != -1) {
         t = heap_get(moduleh, sym);
         if (t) {
           if (token_type(tk) == token_SYMBOL) {
-            char *symbol = symbol_name(token_symbol(tk));
-            if (str_eq(symbol, "="))
+            Symbol symbol = token_symbol(tk);
+            if (symbol == symbol_EQUALS)
               machine_fail(m, "Imported symbols can not be set");
-            if (str_eq(symbol, "&")) {
+            if (symbol == symbol_AMPERSAND) {
               arr_push(m->stack, t);
-              module = NULL;
-              sym = NULL;
+              module = -1;
+              sym = -1;
               continue;
             }
           }
         } else {
           machine_fail(m, str_f(
-            "Symbol '%s %s' not found", symbol_name(module), symbol_name(sym)
+            "Symbol '%s %s' not found",
+            symbol_to_str(module), symbol_to_str(sym)
           ));
         }
       } else {
@@ -387,24 +402,24 @@ static Machine *cprocess (Machine *m) {
         if (!t) t = heap_get(imports_base(), sym);
         if (t) {
           if (token_type(tk) == token_SYMBOL) {
-            char *symbol = symbol_name(token_symbol(tk));
-            if (str_eq(symbol, "=")) {
+            Symbol symbol = token_symbol(tk);
+            if (symbol == symbol_EQUALS) {
               heap_add(m->heap, sym, machine_pop(m));
-              sym = NULL;
+              sym = -1;
               continue;
             }
-            if (str_eq(symbol, "&")) {
+            if (symbol == symbol_AMPERSAND) {
               arr_push(m->stack, t);
-              sym = NULL;
+              sym = -1;
               continue;
             }
           }
         } else {
           if (token_type(tk) == token_SYMBOL) {
-            char *symbol = symbol_name(token_symbol(tk));
-            if (str_eq(symbol, "=")) {
+            Symbol symbol = token_symbol(tk);
+            if (symbol == symbol_EQUALS) {
               heap_add(m->heap, sym, machine_pop(m));
-              sym = NULL;
+              sym = -1;
               continue;
             }
           }
@@ -420,11 +435,11 @@ static Machine *cprocess (Machine *m) {
 
           if (t) {
             if (token_type(tk) == token_SYMBOL) {
-              char *symbol = symbol_name(token_symbol(tk));
-              if (str_eq(symbol, "&")) {
+              Symbol symbol = token_symbol(tk);
+              if (symbol == symbol_AMPERSAND) {
                 arr_push(m->stack, t);
-                module = NULL;
-                sym = NULL;
+                module = -1;
+                sym = -1;
                 continue;
               }
             }
@@ -438,60 +453,60 @@ static Machine *cprocess (Machine *m) {
                     "Use 'this'.)";
             m->ix--;
             machine_fail(m, str_f(
-              "Symbol '%s' not found%s", symbol_name(sym), msg
+              "Symbol '%s' not found%s", symbol_to_str(sym), msg
             ));
           }
         }
       }
 
-      char sname = *symbol_name(sym);
+      char sname = *symbol_to_str(sym);
       arr_push(m->stack, t);
       if (
         token_type(t) == token_LIST &&
         (sname > 'Z' || sname < 'A')
       ) {
         m->ix--;
-        if (module && *symbol_id(module) == '/') runmod(m, symbol_id(module));
+        if (
+          module != -1 && *symbol_to_str(module) == '/'
+        ) runmod(m, symbol_to_str(module));
         else run(m);
         m->ix++;
       }
-      module = NULL;
-      sym = NULL;
+      module = -1;
+      sym = -1;
     }
 
-    if (module) {
+    if (module != -1) {
       if (token_type(tk) != token_SYMBOL)
         machine_fail(m, str_f(
-          "Expected symbol of module '%s'", symbol_name(module)
+          "Expected symbol of module '%s'", symbol_to_str(module)
         ));
       sym = token_symbol(tk);
       continue;
     }
 
     if (token_type(tk) == token_SYMBOL) {
-      Symbol *symbol = token_symbol(tk);
-      char *name = symbol_name(symbol);
+      Symbol symbol = token_symbol(tk);
 
-      if (str_eq(name, "nop")) continue;
-      else if (str_eq(name, "eval")) eval(m);
-      else if (str_eq(name, "run")) run(m);
-      else if (str_eq(name, "mrun")) mrun(m);
-      else if (str_eq(name, "data")) data(m);
-      else if (str_eq(name, "sync")) sync(m);
-      else if (str_eq(name, "mrun")) mrun(m);
-      else if (str_eq(name, "else") || str_eq(name, "elif"))
+      if (symbol == symbol_NOP) continue;
+      else if (symbol == symbol_EVAL) eval(m);
+      else if (symbol == symbol_RUN) run(m);
+      else if (symbol == symbol_MRUN) mrun(m);
+      else if (symbol == symbol_DATA) data(m);
+      else if (symbol == symbol_SYNC) sync(m);
+      else if (symbol == symbol_ELSE || symbol == symbol_ELIF)
         machine_push(m, tk);
-      else if (str_eq(name, "if")) sif(m);
-      else if (str_eq(name, "break")) {
+      else if (symbol == symbol_IF) sif(m);
+      else if (symbol == symbol_BREAK) {
         arr_push(m->stack, tk);
         fails_unregister_machine();
         return m;
       }
-      else if (str_eq(name, "loop")) loop(m);
-      else if (str_eq(name, "while")) swhile(m);
-      else if (str_eq(name, "for")) sfor(m);
-      else if (str_eq(name, "import")) import(m);
-      else if (str_eq(name, "assert")) sassert(m);
+      else if (symbol == symbol_LOOP) loop(m);
+      else if (symbol == symbol_WHILE) swhile(m);
+      else if (symbol == symbol_FOR) sfor(m);
+      else if (symbol == symbol_IMPORT) import(m);
+      else if (symbol == symbol_ASSERT) sassert(m);
       else  {
         Heap *h = imports_get(symbol);
         if (h) {
@@ -506,13 +521,13 @@ static Machine *cprocess (Machine *m) {
     }
   }_EACH
 
-  if (sym) {
+  if (sym != -1) {
     Token *t;
-    if (module) {
+    if (module != -1) {
       t = heap_get(moduleh, sym);
       if (!t) {
         machine_fail(m, str_f(
-          "Symbol '%s %s' not found", symbol_name(module), symbol_name(sym)
+          "Symbol '%s %s' not found", symbol_to_str(module), symbol_to_str(sym)
         ));
       }
     } else {
@@ -532,25 +547,27 @@ static Machine *cprocess (Machine *m) {
       if (!t) {
         m->ix--;
         machine_fail(m, str_f(
-          "Symbol '%s' not found", symbol_name(sym)
+          "Symbol '%s' not found", symbol_to_str(sym)
         ));
       }
     }
 
     arr_push(m->stack, t);
-    char sname = *symbol_name(sym);
+    char sname = *symbol_to_str(sym);
     if (
       token_type(t) == token_LIST &&
       (sname > 'Z' || sname < 'A')
     ) {
-      if (module && *symbol_id(module) == '/') runmod(m, symbol_id(module));
+      if (
+        module != -1 && *symbol_to_str(module) == '/'
+      ) runmod(m, symbol_to_str(module));
       else run(m);
     }
-    module = NULL;
-    sym = NULL;
-  } else if (module) {
+    module = -1;
+    sym = -1;
+  } else if (module != -1) {
     machine_fail(m, str_f(
-      "Expected symbol of module '%s'", symbol_name(module)
+      "Expected symbol of module '%s'", symbol_to_str(module)
     ));
   }
 
@@ -585,7 +602,7 @@ Machine *machine_isolate_process (char *source, List *pmachines, Token *prg) {
   m->ix = 0;
 
   if (*source)
-    imports_add(symbol_new_id(str_left(source, -4), "this"), m->heap);
+    imports_add(symbol_new(str_left(source, -4)), m->heap);
 
   return cprocess(m);
 }

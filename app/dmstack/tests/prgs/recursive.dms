@@ -39,7 +39,7 @@
   // "Range" print
   6 sum 21 == assert
 
-  (n =; 0 n 1 + (i =; i +) (()) for) sum =
+  (n =; 0 (i =; i +) (n 1 +) for) sum =
   // "for" print
   6  sum 21 == assert
 

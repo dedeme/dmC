@@ -7,36 +7,45 @@
   #define SYMBOL_H
 
 #include "dmc/async.h"
+#include "DEFS.h"
+
+enum symbol_SYSTEM {
+  symbol_IMPORT, symbol_IF, symbol_ELIF, symbol_ELSE, symbol_BREAK,
+  symbol_EQUALS, symbol_AMPERSAND, symbol_NOP, symbol_EVAL, symbol_RUN,
+  symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP, symbol_WHILE,
+  symbol_FOR, symbol_ASSERT, symbol_THIS,
+
+  symbol_BYTES_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
+  symbol_ISERVER_, symbol_ISERVER_RQ_,
+
+  symbol_SYSTEM_COUNT
+};
 
 ///
-typedef struct symbol_Symbol Symbol;
+typedef Int Symbol;
 
-/// Creates a new Symbol with an id different to name.
-Symbol *symbol_new_id (char *id, char *name);
+///
+void symbol_init (void);
 
 /// Creates a new Symbol with equals id and name.
-Symbol *symbol_new (char *name);
-
-/// Creates a new Symbol with equals id and name and hash == 0. This
-/// constructor is intended only to use with pointers.
-Symbol *symbol_new_pointer (char *name);
-
-/// Returns the name of 'this'
-char *symbol_name (Symbol *this);
-
-/// Returns the id of 'this'
-char *symbol_id (Symbol *this);
-
-/// Returns the symbol hash.
-int symbol_hash (Symbol *this);
+Symbol symbol_new (char *name);
 
 ///
-Symbol *symbol_clone (Symbol *this);
+int symbol_eq (Symbol this, Symbol other);
 
 ///
-int symbol_eq (Symbol *this, Symbol *other);
+char *symbol_to_str (Symbol this);
 
 ///
-char *symbol_to_str (Symbol *this);
+typedef struct symbol_SymbolKv SymbolKv;
+
+///
+SymbolKv *symbolKv_new (Symbol key, Symbol value);
+
+///
+Symbol symbolKv_key (SymbolKv *this);
+
+///
+Symbol symbolKv_value (SymbolKv *this);
 
 #endif

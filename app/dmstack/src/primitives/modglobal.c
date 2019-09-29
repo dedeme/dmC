@@ -80,52 +80,53 @@ static void empty (Machine *m) {
   arr_push(stack, token_new_int(0, arr_size(stack) == 0));
 }
 
-// Resturns Map<primitives_Fn>
-Map *modglobal_mk (void) {
-  // Map<primitives_Fn>
-  Map *r = map_new();
+Pmodule *modglobal_mk (void) {
+  Pmodule *r = pmodule_new();
+  void add (char *name, pmodule_Fn fn) {
+    pmodule_add(r, symbol_new(name), fn);
+  }
 
-  map_put(r, "puts", sputs);
-  map_put(r, "toStr", to_str);
-  map_put(r, "clone", clone);
-  map_put(r, "==", eq);
-  map_put(r, "!=", neq);
-  map_put(r, "fail", fail);
-  map_put(r, "swap", swap);
-  map_put(r, "pop", pop);
-  map_put(r, "dup", dup);
-  map_put(r, "empty?", empty);
+  add("puts", sputs);
+  add("toStr", to_str);
+  add("clone", clone);
+  add("==", eq);
+  add("!=", neq);
+  add("fail", fail);
+  add("swap", swap);
+  add("pop", pop);
+  add("dup", dup);
+  add("empty?", empty);
 
   // modglobal0 -------------------------------------
-  map_put(r, "+", modglobal0_add);
-  map_put(r, "-", modglobal0_sub);
-  map_put(r, "*", modglobal0_mul);
-  map_put(r, "/", modglobal0_div);
-  map_put(r, "%", modglobal0_mod);
-  map_put(r, "++", modglobal0_incr);
-  map_put(r, "--", modglobal0_decr);
+  add("+", modglobal0_add);
+  add("-", modglobal0_sub);
+  add("*", modglobal0_mul);
+  add("/", modglobal0_div);
+  add("%", modglobal0_mod);
+  add("++", modglobal0_incr);
+  add("--", modglobal0_decr);
 
   // modglobal1 -------------------------------------
-  map_put(r, "&&", modglobal1_and);
-  map_put(r, "||", modglobal1_or);
-  map_put(r, "!", modglobal1_not);
-  map_put(r, ">", modglobal1_greater);
-  map_put(r, ">=", modglobal1_greater_eq);
-  map_put(r, "<", modglobal1_less);
-  map_put(r, "<=", modglobal1_less_eq);
+  add("&&", modglobal1_and);
+  add("||", modglobal1_or);
+  add("!", modglobal1_not);
+  add(">", modglobal1_greater);
+  add(">=", modglobal1_greater_eq);
+  add("<", modglobal1_less);
+  add("<=", modglobal1_less_eq);
 
   // modglobal2 -------------------------------------
-  map_put(r, "size", modglobal2_size);
-  map_put(r, "get", modglobal2_get);
-  map_put(r, "set", modglobal2_set);
-  map_put(r, "set+", modglobal2_setplus);
-  map_put(r, "up", modglobal2_up);
-  map_put(r, "up+", modglobal2_upplus);
-  map_put(r, ">>", modglobal2_ref_get);
-  map_put(r, "<<", modglobal2_ref_set);
-  map_put(r, "<<+", modglobal2_ref_setplus);
-  map_put(r, "^^", modglobal2_ref_up);
-  map_put(r, "^^+", modglobal2_ref_upplus);
+  add("size", modglobal2_size);
+  add("get", modglobal2_get);
+  add("set", modglobal2_set);
+  add("set+", modglobal2_setplus);
+  add("up", modglobal2_up);
+  add("up+", modglobal2_upplus);
+  add(">>", modglobal2_ref_get);
+  add("<<", modglobal2_ref_set);
+  add("<<+", modglobal2_ref_setplus);
+  add("^^", modglobal2_ref_up);
+  add("^^+", modglobal2_ref_upplus);
 
   return r;
 }

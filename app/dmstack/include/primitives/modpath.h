@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODPATH_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modpath_mk (void);
+///
+Pmodule *modpath_mk (void);
 
 #endif

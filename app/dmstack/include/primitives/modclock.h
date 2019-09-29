@@ -7,9 +7,9 @@
   #define PRIMITIVES_MODCLOCK_H
 
 #include "dmc/async.h"
-#include "primitives.h"
+#include "Pmodule.h"
 
-/// Returns Map<primitives_Fn>
-Map *modclock_mk (void);
+///
+Pmodule *modclock_mk (void);
 
 #endif
