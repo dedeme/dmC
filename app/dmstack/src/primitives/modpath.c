@@ -2,11 +2,11 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "primitives/modpath.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void canonical (Machine *m) {
   char *path = opt_nget(
-    path_canonical(token_string(machine_pop_exc(m, token_STRING)))
+    path_canonical(tk_pop_string(m))
   );
   if (path)
     machine_push(
@@ -17,33 +17,33 @@ static void canonical (Machine *m) {
 }
 
 static void plus (Machine *m) {
-  char *s = token_string(machine_pop_exc(m, token_STRING));
+  char *s = tk_pop_string(m);
   machine_push(m, token_new_string(
-    0, path_cat(token_string(machine_pop_exc(m, token_STRING)), s , NULL)
+    0, path_cat(tk_pop_string(m), s , NULL)
   ));
 }
 
 static void extension (Machine *m) {
   machine_push(m, token_new_string(
-    0, path_extension(token_string(machine_pop_exc(m, token_STRING)))
+    0, path_extension(tk_pop_string(m))
   ));
 }
 
 static void name (Machine *m) {
   machine_push(m, token_new_string(
-    0, path_name(token_string(machine_pop_exc(m, token_STRING)))
+    0, path_name(tk_pop_string(m))
   ));
 }
 
 static void only_name (Machine *m) {
   machine_push(m, token_new_string(
-    0, path_only_name(token_string(machine_pop_exc(m, token_STRING)))
+    0, path_only_name(tk_pop_string(m))
   ));
 }
 
 static void parent (Machine *m) {
   machine_push(m, token_new_string(
-    0, path_parent(token_string(machine_pop_exc(m, token_STRING)))
+    0, path_parent(tk_pop_string(m))
   ));
 }
 

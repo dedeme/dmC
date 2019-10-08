@@ -4,21 +4,16 @@
 #include "primitives/modclock.h"
 #include "dmc/date.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static struct timeval *totimeval (Machine *m, Token *tk) {
-  if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
   // Arr<Token>
-  Arr *a = token_list(tk);
+  Arr *a = tk_list(m, tk);
   if (arr_size(a) != 2) fails_size_list(m, a, 2);
-  Token *sec = *arr_start(a);
-  if (token_type(sec) != token_INT) fails_type_in(m, token_INT, sec);
-  Token *usec = *(arr_start(a)+ 1);
-  if (token_type(usec) != token_INT) fails_type_in(m, token_INT, usec);
 
   struct timeval *tv = MALLOC(struct timeval);
-  tv->tv_sec = token_int(sec);
-  tv->tv_usec = token_int(usec);
+  tv->tv_sec = tk_int(m, *arr_start(a));
+  tv->tv_usec = tk_int(m, *(arr_start(a)+ 1));
   return tv;
 }
 
@@ -41,7 +36,7 @@ static void sub (Machine *m) {
 }
 
 static void sadd (Machine *m) {
-  int millis = token_int(machine_pop_exc(m, token_INT));
+  Int millis = tk_pop_int(m);
   Token *v = machine_pop(m);
   machine_push(m, fromtimeval(
     dateTm_add(totimeval(m, v), millis)

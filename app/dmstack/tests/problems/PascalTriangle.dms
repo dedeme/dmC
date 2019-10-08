@@ -1,0 +1,24 @@
+// Copyright 20-Sep-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( @i
+  n =
+  (n toStr ": value not allowed" + sys,println, 1 sys,exit) (n 1 <) if
+
+  [[]] : Row =
+  ( pop
+    [0] data : Pv =
+
+    Row >>
+    lst,new
+    ( e =; Seed =; Seed Pv >> e + lst,push+; Pv e <<)
+    lst,reduce; 1 lst,push+ dup
+
+    Row swap <<
+    (toStr) lst,map; " " str,join sys,println
+  )
+  (n)
+  for
+@ ) pascal =>
+
+100 pascal

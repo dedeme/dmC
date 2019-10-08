@@ -1,0 +1,75 @@
+// Copyright 01-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(
+  lst,new
+  ( @l
+    L =
+    (
+      L L size 1 - get 1 + wrap,ref : Next =
+      ( Next (++) ^^)
+      ( Next >> pp =; pp int,toFloat math,sqrt float,toInt : lim =;
+        0
+        ( L swap get : p =;
+          ( pop 1 break)
+          ( pp p % !)
+          elif
+          ( break)
+          ( p lim >)
+          if
+        )
+        ( L size)
+        for
+      )
+      while
+      L Next >> lst,push
+      Next
+    )
+    else
+    (L 2 lst,push; 2 wrap,some)
+    (L () ==)
+    if
+    @l
+  )
+  it,new
+@<Iterator> ) primes =>
+
+( @l
+  fn =>
+  primes : P =
+  P it,next wrap,ref : Pv =
+  [P, Pv] data
+  ( @L<lL<i>>
+    O =;
+    O 0 get : P =
+    O 1 get : Pv =
+
+    P it,next wrap,ref : Current =
+    (Pv Current >> <<; Current P it,next <<)
+    (Pv >> : P it,peek : + 2. / :: Current >> :: fn )
+    while
+    Pv Current >> <<
+    Current
+  @L<i> )
+  it,new
+@<Iterator> ) strWeak =>
+
+( >=:& strWeak @<Iterator> )
+strongs =>
+
+( <=:& strWeak @<Iterator> )
+weaks =>
+
+"First 36 strong primes:" sys,println
+strongs 36 it,take (toStr " " + sys,print) it,each
+"" sys,println
+
+"Strong primes below 1,000,000: "
+  strongs (1000000 <) it,takef it,count toStr + sys,println
+
+"First 37 weak primes:" sys,println
+weaks 37 it,take (toStr " " + sys,print) it,each
+"" sys,println
+
+"Weaks primes below 1,000,000: "
+  weaks (1000000 <) it,takef it,count toStr + sys,println

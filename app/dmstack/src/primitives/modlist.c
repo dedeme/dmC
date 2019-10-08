@@ -3,18 +3,18 @@
 
 #include "primitives/modlist.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 #include "primitives/modjs.h"
 #include "DEFS.h"
 
 // Returns Arr<Token>
 static Arr *getlist (Machine *m) {
-  return token_list(machine_pop_exc(m, token_LIST));
+  return tk_pop_list(m);
 }
 
 // Returns Arr<Token>
 static Arr *peeklist (Machine *m) {
-  return token_list(machine_peek_exc(m, token_LIST));
+  return tk_peek_list(m);
 }
 
 // a is Arr<Tokeb>
@@ -23,7 +23,7 @@ static void pushlist (Machine *m, Arr *a) {
 }
 
 static int getint (Machine *m) {
-  return token_int(machine_pop_exc(m, token_INT));
+  return tk_pop_int(m);
 }
 
 static void new (Machine *m) {
@@ -183,7 +183,6 @@ static void duplicates (Machine *m) {
 }
 
 static void all (Machine *m) {
-
   // Arr<Token>
   Token *prg = machine_pop_exc(m, token_LIST);
   int fn (Token *e) {
@@ -497,9 +496,8 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
     if (end < 0 || end > size) fails_range(m, 0, size, end);
   }
 
-  Token *tk = machine_pop_exc(m, token_LIST);
   // Arr<Token>
-  Arr *a = token_list(tk);
+  Arr *a = tk_pop_list(m);
 
   bounds(arr_size(a));
   int df = end - begin;
@@ -517,22 +515,18 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
 }
 
 static void sub (Machine *m) {
-  Token *tk3 = machine_pop_opt(m, token_INT);
-  int end = token_int(tk3);
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int begin = token_int(tk2);
+  Int end = tk_pop_int(m);
+  Int begin = tk_pop_int(m);
   subaux(m, begin, end, 0);
 }
 
 static void left (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, 0, cut, 0);
 }
 
 static void right (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, cut, 0, 1);
 }
 

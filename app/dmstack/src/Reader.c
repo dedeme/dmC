@@ -5,6 +5,7 @@
 #include "DEFS.h"
 #include "tkreader.h"
 #include "imports.h"
+#include "args.h"
 
 struct reader_Reader {
   int is_file;
@@ -122,10 +123,25 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     );
   } else if (sym == symbol_THIS) {
     return token_new_symbol(token_line(tk), symbol_new(this->source));
+  } else if (*symbol_to_str(sym) == '@') {
+    int line = token_line(tk);
+    char *name = symbol_to_str(sym);
+    if (name[strlen(name) - 1] == '?') {
+      this->next_tk = token_new_symbol(line, symbol_STACK_CHECK);
+      Token *tk = token_new_symbol(line, symbol_new(str_sub(name, 1, -1)));
+      return token_new_list(line, arr_new_from(tk, NULL));
+    } else {
+      if (args_is_production()) {
+        return token_new_symbol(line, symbol_NOP);
+      } else {
+        this->next_tk = token_new_symbol(line, symbol_STACK);
+        Token *tk = token_new_symbol(line, symbol_new(str_right(name, 1)));
+        return token_new_list(line, arr_new_from(tk, NULL));
+      }
+    }
   } else {
     EACHL(this->syms, SymbolKv, e) {
       if (symbolKv_key(e) == sym) {
-//printf("%ld, %s\n", sym, symbol_to_str(sym));
         return token_new_symbol(token_line(tk), symbolKv_value(e));
       }
     }_EACH
@@ -134,6 +150,6 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
 }
 
 void reader_fail (Reader *this, char *msg) {
-  printf("%s:%d: %s\n", this->source, this->nline, msg);
+  printf("%s.dms:%d: %s\n", this->source, this->nline, msg);
   exit(1);
 }

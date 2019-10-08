@@ -7,7 +7,7 @@
   T1 time,toDateTime "20190215124515" == assert
   T1 time,toDate "20190215" == assert
   T1 time,toTime "12:45:15" == assert
-  "%d/%m/%Y - %H:%M:%S" T1 time,format "15/02/2019 - 12:45:15" == assert
+  T1 "%d/%m/%Y - %H:%M:%S" time,format "15/02/2019 - 12:45:15" == assert
 
   T1
     "%d/%m/%Y - %H:%M:%S" "15/02/2019 - 12:45:15" time,fromStr

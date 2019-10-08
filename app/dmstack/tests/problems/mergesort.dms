@@ -1,0 +1,31 @@
+// Copyright 01-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( L =
+  (
+    L size 2 / : mid =
+    L mid lst,left mergeSort : L mid lst,right mergeSort : merge
+  )
+  else
+  ( L)
+  ( L size 2 <)
+  if
+) mergeSort =>
+
+( it,from I2 =; it,from I1 =
+  lst,new : R =
+  (
+    (R I2 it,next lst,push) else
+    (R I1 it,next lst,push) (I1 it,peek I2 it,peek < ) if
+  )
+  (I1 it,has? I2 it,has? &&)
+  while
+  (R I1 it,next lst,push) (I1 it,has?) while
+  (R I2 it,next lst,push) (I2 it,has?) while
+  R
+) merge =>
+
+{4, 65, 2, -31, 0, 99, 2, 83, 782, 1} : Ls =
+Ls (js,wi) lst,map js,wa sys,println
+Ls mergeSort (js,wi) lst,map js,wa sys,println
+

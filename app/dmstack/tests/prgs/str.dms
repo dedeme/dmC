@@ -234,5 +234,16 @@
   "é" "f" str,cmp 0 < ! assert
   "é" "f" str,greater? assert
 
+  `
+  abc
+   deñ
+fg \n
+  ` "abc\n deñ\nfg \\n\n" == assert
+  `
+  abc` "abc" == assert
+  `|
+  `abc`
+  |` "`abc`\n" == assert
+
   empty? assert
 ) run

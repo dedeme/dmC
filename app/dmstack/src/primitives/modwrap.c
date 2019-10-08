@@ -2,8 +2,13 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "primitives/modwrap.h"
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
+
+static Token *poplist (Machine *m) {
+  Token *r = machine_pop_exc(m, token_LIST);
+  return r;
+}
 
 static void none (Machine *m) {
   machine_push(m, token_new_list(0, arr_new()));
@@ -11,7 +16,7 @@ static void none (Machine *m) {
 
 static void isnone (Machine *m) {
   machine_push(m, token_new_int(
-    0, !arr_size(token_list(machine_pop_exc(m, token_LIST)))
+    0, !arr_size(tk_pop_list(m))
   ));
 }
 
@@ -21,7 +26,7 @@ static void some (Machine *m) {
 
 static void issome (Machine *m) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz > 1) fails_size_list(m, a, 1);
   machine_push(m, token_new_int(0, sz));
@@ -30,12 +35,12 @@ static void issome (Machine *m) {
 static void option (Machine *m) {
   // List<Machine>
   List *pmachines = machine_pmachines(m);
-  Token *cond = machine_pop_exc(m, token_LIST);
-  Token *prg2 = machine_pop_exc(m, token_LIST);
-  Token *prg1 = machine_pop_exc(m, token_LIST);
+  Token *cond = poplist(m);
+  Token *prg2 = poplist(m);
+  Token *prg1 = poplist(m);
   machine_process("", pmachines, cond);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (!sz) {
     machine_process("", pmachines, prg1);
@@ -48,14 +53,15 @@ static void option (Machine *m) {
 }
 
 static void left (Machine *m) {
+  Token *s = machine_pop_exc(m, token_STRING);
   machine_push(m, token_new_list(
-    0, arr_new_from(machine_pop_exc(m, token_STRING), token_new_int(0, 0), NULL)
+    0, arr_new_from(s, token_new_int(0, 0), NULL)
   ));
 }
 
 static void isleft (Machine *m) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz != 1 && sz != 2) fails_size_list(m, a, 2);
   machine_push(m, token_new_int(0, sz == 2));
@@ -63,7 +69,7 @@ static void isleft (Machine *m) {
 
 static void isright (Machine *m) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz != 1 && sz != 2) fails_size_list(m, a, 2);
   machine_push(m, token_new_int(0, sz == 1));
@@ -72,12 +78,12 @@ static void isright (Machine *m) {
 static void either (Machine *m) {
   // List<Machine>
   List *pmachines = machine_pmachines(m);
-  Token *cond = machine_pop_exc(m, token_LIST);
-  Token *prg2 = machine_pop_exc(m, token_LIST);
-  Token *prg1 = machine_pop_exc(m, token_LIST);
+  Token *cond = poplist(m);
+  Token *prg2 = poplist(m);
+  Token *prg1 = poplist(m);
   machine_process("", pmachines, cond);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz == 1) {
     machine_push(m, *arr_start(a));
@@ -114,6 +120,7 @@ Pmodule *modwrap_mk (void) {
   add("some", some); // * - OPT (* -> (*))
   add("some?", issome); // OPT - INT
   add("option", option); // [(->B?), (OPT->B?), (->OPT)] - B?
+  add("ref", some); // * - REF (* -> (*))
   add("left", left); // STRING -> EITHER (s -> (s, 0))
   add("left?", isleft); // EITHER - INT
   add("right", some); // * -> EITHER (* -> (*)) -some is ok-

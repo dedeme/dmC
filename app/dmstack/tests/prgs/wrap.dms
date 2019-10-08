@@ -2,7 +2,7 @@
 // GNU General Public License - V3 <htwrap://www.gnu.org/licenses/>
 
 (
-  ((0) () () wrap,option) op =
+  ((0) () () wrap,option) op =>
   wrap,none op 0 == assert
   wrap,none wrap,none? assert
   wrap,none wrap,some? ! assert
@@ -10,7 +10,7 @@
   "a" wrap,some wrap,none? ! assert
   "a" wrap,some wrap,some? assert
 
-  (() () () wrap,either) op =
+  (() () () wrap,either) op =>
   "fail" wrap,left op "fail" == assert
   "fail" wrap,left wrap,left? assert
   "fail" wrap,left wrap,right? ! assert

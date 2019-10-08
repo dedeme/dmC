@@ -4,7 +4,7 @@
 #include "primitives/modtime.h"
 #include <time.h>
 #include <limits.h>
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
 
 static Token *to (char *tpl, struct tm *tp) {
@@ -94,12 +94,12 @@ static Opt *from (char *tpl, char *time) {
 }
 
 static void new (Machine *m) {
-  int second = token_int(machine_pop_exc(m, token_INT));
-  int minute = token_int(machine_pop_exc(m, token_INT));
-  int hour = token_int(machine_pop_exc(m, token_INT));
-  int day = token_int(machine_pop_exc(m, token_INT));
-  int month = token_int(machine_pop_exc(m, token_INT));
-  int year = token_int(machine_pop_exc(m, token_INT));
+  Int second = tk_pop_int(m);
+  Int minute = tk_pop_int(m);
+  Int hour = tk_pop_int(m);
+  Int day = tk_pop_int(m);
+  Int month = tk_pop_int(m);
+  Int year = tk_pop_int(m);
 
   struct tm tp;
   memset(&tp, 0, sizeof(struct tm));
@@ -114,9 +114,9 @@ static void new (Machine *m) {
 }
 
 static void newdate (Machine *m) {
-  int day = token_int(machine_pop_exc(m, token_INT));
-  int year = token_int(machine_pop_exc(m, token_INT));
-  int month = token_int(machine_pop_exc(m, token_INT));
+  int day = tk_pop_int(m);
+  int year = tk_pop_int(m);
+  int month = tk_pop_int(m);
 
   struct tm tp;
   memset(&tp, 0, sizeof(struct tm));
@@ -129,15 +129,15 @@ static void newdate (Machine *m) {
 }
 
 static void fromstr (Machine *m) {
-  char *time = token_string(machine_pop_exc(m, token_STRING));
-  char *tpl = token_string(machine_pop_exc(m, token_STRING));
+  char *time = tk_pop_string(m);
+  char *tpl = tk_pop_string(m);
   Token *r = opt_nget(from(tpl, time));
   if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
   else machine_push(m, token_new_list(0, arr_new()));
 }
 
 static void fromdate (Machine *m) {
-  char *time = token_string(machine_pop_exc(m, token_STRING));
+  char *time = tk_pop_string(m);
   time = str_f("%s:12", time);
   Token *r = opt_nget(from("%Y%m%d%H", time));
   if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
@@ -145,23 +145,23 @@ static void fromdate (Machine *m) {
 }
 
 static void todate (Machine *m) {
-  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  time_t tm = tk_pop_int(m);
   machine_push(m, to("%Y%m%d", localtime(&tm)));
 }
 
 static void totime (Machine *m) {
-  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  time_t tm = tk_pop_int(m);
   machine_push(m, to("%H:%M:%S", localtime(&tm)));
 }
 
 static void todatetime (Machine *m) {
-  time_t tm = token_int(machine_pop_exc(m, token_INT));
+  time_t tm = tk_pop_int(m);
   machine_push(m, to("%Y%m%d%H%M%S", localtime(&tm)));
 }
 
 static void format (Machine *m) {
-  time_t tm = token_int(machine_pop_exc(m, token_INT));
-  char *tpl = token_string(machine_pop_exc(m, token_STRING));
+  char *tpl = tk_pop_string(m);
+  time_t tm = tk_pop_int(m);
   machine_push(m, to(tpl, localtime(&tm)));
 }
 
@@ -170,7 +170,7 @@ static void now (Machine *m) {
 }
 
 static void broke (Machine *m) {
-  time_t t = token_int(machine_pop_exc(m, token_INT));
+  time_t t = tk_pop_int(m);
   struct tm *tm = localtime(&t);
 
   // Arr<Token>
@@ -192,29 +192,29 @@ static void broke (Machine *m) {
 }
 
 static void tadd (Machine *m) {
-  Int n = token_int(machine_pop_exc(m, token_INT));
-  time_t t = token_int(machine_pop_exc(m, token_INT));
+  Int n = tk_pop_int(m);
+  time_t t = tk_pop_int(m);
 
   machine_push(m, token_new_int(0, t + n));
 }
 
 static void df (Machine *m) {
-  time_t t2 = token_int(machine_pop_exc(m, token_INT));
-  time_t t1 = token_int(machine_pop_exc(m, token_INT));
+  time_t t2 = tk_pop_int(m);
+  time_t t1 = tk_pop_int(m);
 
   machine_push(m, token_new_int(0, t1 - t2));
 }
 
 static void addd (Machine *m) {
-  Int n = token_int(machine_pop_exc(m, token_INT));
-  time_t t = token_int(machine_pop_exc(m, token_INT));
+  Int n = tk_pop_int(m);
+  time_t t = tk_pop_int(m);
 
   machine_push(m, token_new_int(0, t + n * 86400));
 }
 
 static void dfd (Machine *m) {
-  time_t t2 = token_int(machine_pop_exc(m, token_INT));
-  time_t t1 = token_int(machine_pop_exc(m, token_INT));
+  time_t t2 = tk_pop_int(m);
+  time_t t1 = tk_pop_int(m);
 
   double tmp = ((double)t1 - t2) / 86400.;
   Int r  = (Int)(tmp >= 0 ? tmp + 0.5 : tmp - 0.5);
@@ -227,25 +227,25 @@ Pmodule *modtime_mk (void) {
     pmodule_add(r, symbol_new(name), fn);
   }
 
-  add("new", new); // [INT, INT, INT, INT, INT, INT] - STRING
+  add("new", new); // [INT, INT, INT, INT, INT, INT] - INT
                           // [year, month, day, hour, min, sec] - date
                           // Note: hour is without daylight saving
-  add("newDate", newdate); // [INT, INT, INT] - STRING
+  add("newDate", newdate); // [INT, INT, INT] - INT
                                   // [year, month, day] - date
-  add("fromStr", fromstr); // [STRING, STRING] - OPT<STRING>
+  add("fromStr", fromstr); // [STRING, STRING] - OPT<INT>
                                   // [template, date] - option of date
-  add("fromDate", fromdate); // STRING - STRING
-  add("toDate", todate); // STRING - STRING
-  add("toTime", totime); // STRING - STRING
-  add("toDateTime", todatetime); // STRING - STRING
-  add("format", format); // [STRING - STRING] - STRING
-                               // [template, date] - date
-  add("now", now); // [] - STRING
-  add("broke", broke); // STRING - OBJ
-  add("add", tadd); // [STRING - INT] - STRING  - In seconds
-  add("df", df); // [STRING - STRING] - INT  - In seconds
-  add("addDays", addd); // [STRING - INT] - STRING
-  add("dfDays", dfd); // [STRING - STRING] - INT
+  add("fromDate", fromdate); // STRING - INT
+  add("toDate", todate); // INT - STRING
+  add("toTime", totime); // INT - STRING
+  add("toDateTime", todatetime); // INT - STRING
+  add("format", format); // [INT - STRING] - STRING
+                               // [date, template] - date
+  add("now", now); // [] - INT
+  add("broke", broke); // INT - OBJ
+  add("add", tadd); // [INT - INT] - INT  - In seconds (date + secs.)
+  add("df", df); // [INT - INT] - INT  - In seconds (date - date) = secs.
+  add("addDays", addd); // [INT - INT] - INT (date + days)
+  add("dfDays", dfd); // [INT - INT] - INT (date - date) = days
 
   return r;
 }

@@ -9,9 +9,8 @@
 #include "dmc/async.h"
 #include "Reader.h"
 
-/// Returns Opt<Token> - Reads one token from machine_prg(). If there are no
+/// Returns Opt<Token> - Reads one token. If there are no
 /// more tokens, returns 'opt_empty()'.
-/// Throw 'ST_EXC' if fails.
 Opt *tkreader_next(Reader *reader);
 
 #endif

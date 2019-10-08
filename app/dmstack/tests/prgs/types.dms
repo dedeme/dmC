@@ -1,0 +1,27 @@
+// Copyright 02-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(@i 3 == assert @) fn =>
+3 fn
+
+(@f 3. == assert @) fn =>
+3. fn
+
+(@ffi n3 =; n2 =; n1 =; n1 n2 + n3 == assert @) fn =>
+2 3. 5. fn
+
+(@i<Blob> ix =; ix blob,get 10 == assert @) fn =>
+[10] blob,from 0 fn
+
+(@so key =; key obj,get 10 == assert @) fn =>
+{"a", 10, "b", 4} data "a" fn
+
+(@sm key =; key map,get (10) == assert @) fn =>
+{("a", 10), ("b", 4)} data "a" fn
+
+(@iL<s<Blob>i>f ix =; ix get "10" == assert pop @) fn =>
+5. ["10", 2 blob,new, 3] data 0 fn
+
+5. ("Other") else ("Int") (@f?) if "Int" == assert pop
+
+@

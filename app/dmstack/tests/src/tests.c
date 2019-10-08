@@ -8,6 +8,7 @@
 
 int main (int argc, char *argv[]) {
   exc_init();
+  symbol_init();
   primitives_init();
 
   reader_tests();

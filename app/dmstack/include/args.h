@@ -19,4 +19,7 @@ Opt *args_param (char *key);
 /// Returns Arr<char>. Argumentes of dms file.
 Arr *args_dms_params (void);
 
+/// Returns 0 if dmstack was called with the option '-d'
+int args_is_production (void);
+
 #endif

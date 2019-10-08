@@ -23,6 +23,7 @@ void symbol_init (void) {
   arr_set(syms, symbol_ELSE, "else");
   arr_set(syms, symbol_BREAK, "break");
   arr_set(syms, symbol_EQUALS, "=");
+  arr_set(syms, symbol_FUNCTION, "=>");
   arr_set(syms, symbol_AMPERSAND, "&");
   arr_set(syms, symbol_NOP, "nop");
   arr_set(syms, symbol_EVAL, "eval");
@@ -34,9 +35,13 @@ void symbol_init (void) {
   arr_set(syms, symbol_WHILE, "while");
   arr_set(syms, symbol_FOR, "for");
   arr_set(syms, symbol_ASSERT, "assert");
+  arr_set(syms, symbol_EXPECT, "expect");
   arr_set(syms, symbol_THIS, "this");
 
-  arr_set(syms, symbol_BYTES_, "= Bytes");
+  arr_set(syms, symbol_STACK, "= @");
+  arr_set(syms, symbol_STACK_CHECK, "= @?");
+
+  arr_set(syms, symbol_BLOB_, "= Blob");
   arr_set(syms, symbol_THREAD_, "= Thread");
   arr_set(syms, symbol_ITERATOR_, "= Iterator");
   arr_set(syms, symbol_FILE_, "= File");

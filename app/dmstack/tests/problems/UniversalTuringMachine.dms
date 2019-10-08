@@ -1,0 +1,132 @@
+// Copyright 07-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+(1 +) right =>
+
+(1 -) left =>
+
+() stay =>
+
+( M =
+  M "title" obj,get sys,println
+
+  M "initialState" obj,get : wrap,ref : State =
+  M "initialTape" obj,get : Tape =
+  0 wrap,ref : Ix =
+  M "blank" obj,get : mark0 =
+  M "end" obj,get : end =
+  M "rules" obj,get : Rules =
+
+  (
+    Ix >> ix =
+    State >> " - " + sys,print
+    ( i =;
+      Tape i get
+      ( " " + sys,print) else ("[" swap + "] " + sys,print) (i ix ==) if
+    )
+    (Tape size)
+    for
+    "" sys,println
+  ) print =>
+
+
+  ( f =>; mark =
+    Tape : Ix >> mark :: set
+    Ix (f) ^^
+    Ix >>
+
+    ( Tape mark0 lst,push)
+    ( Tape size ==)
+    elif
+    ( pop; Tape mark0 lst,push0; Ix 0 <<)
+    ( dup -1 ==)
+    if
+  ) step =>
+
+  print
+  (
+    0
+    (
+      Rules swap get : Rule =
+
+      (
+        Rule 2 get : Rule 3 get :: step
+        State : Rule 4 get :: <<
+        pop; 1
+        break;
+      )
+      (
+        State >> : Rule 0 get :: ==
+        Tape Ix >> get : Rule 1 get :: ==
+        &&
+      )
+      if
+    )
+    (Rules size)
+    for
+
+    ( "No rule applicable" sys,println; break)
+    else
+    ( print)
+    ()
+    if
+  )
+  (State >> end !=)
+  while
+) mRun =>
+
+// -----------------------------------------------------------------------------
+
+{
+  "title": "Simple incrementer"
+  "initialState": "q0"
+  "initialTape": ["1", "1", "1"]
+  "blank": "B"
+  "end": "qf"
+  "rules": [
+      ["q0", "1", "1", (right), "q0"]
+      ["q0", "B", "1", (stay), "qf"]
+    ]
+} mRun
+
+"" sys,println // --------------------------------
+
+{
+  "title": "Three-state busy beaver"
+  "initialState": "a"
+  "initialTape": ["0"]
+  "blank": "0"
+  "end": "halt"
+  "rules": [
+      ["a", "0", "1", (right), "b"]
+      ["a", "1", "1", (left), "c"]
+      ["b", "0", "1", (left), "a"]
+      ["b", "1", "1", (right), "b"]
+      ["c", "0", "1", (left), "b"]
+      ["c", "1", "1", (stay), "halt"]
+    ]
+} mRun
+
+"" sys,println // --------------------------------
+/*
+{
+  "title": "Three-state busy beaver"
+  "initialState": "A"
+  "initialTape": ["0"]
+  "blank": "0"
+  "end": "H"
+  "rules": [
+      ["A", "0", "1", (right), "B"]
+      ["A", "1", "1", (left), "C"]
+      ["B", "0", "1", (right), "C"]
+      ["B", "1", "1", (right), "B"]
+      ["C", "0", "1", (right), "D"]
+      ["C", "1", "0", (left), "E"]
+      ["D", "0", "1", (left), "A"]
+      ["D", "1", "1", (left), "D"]
+      ["E", "0", "1", (stay), "H"]
+      ["E", "1", "0", (left), "A"]
+    ]
+} mRun
+*/
+

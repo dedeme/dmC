@@ -50,7 +50,7 @@
 
   8 n =
   ("a") A =
-  (4 + 2 -) fn =
+  (4 + 2 -) fn =>
   [ 4, 3 n +, A "b" lst,push+, 7 fn ] data
     (4, 11, ("a", "b"), 9) == assert
 

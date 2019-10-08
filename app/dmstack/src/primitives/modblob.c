@@ -3,16 +3,16 @@
 
 #include "primitives/modblob.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void new (Machine *m) {
-  Int sz = token_int(machine_pop_exc(m, token_INT));
-  machine_push(m, token_from_pointer(symbol_BYTES_, bytes_bf_new(sz)));
+  Int sz = tk_pop_int(m);
+  machine_push(m, token_from_pointer(symbol_BLOB_, bytes_bf_new(sz)));
 }
 
 static void from (Machine *m) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int size = arr_size(a);
   Bytes *r = bytes_bf_new(size);
   unsigned char *p = bytes_bs(r);
@@ -21,12 +21,12 @@ static void from (Machine *m) {
       fails_type(m, token_INT);
     *p++ = token_int(tk);
   }_EACH;
-  machine_push(m, token_from_pointer(symbol_BYTES_, r));
+  machine_push(m, token_from_pointer(symbol_BLOB_, r));
 }
 
 static void get (Machine *m) {
-  Int ix = token_int(machine_pop_exc(m, token_INT));
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Int ix = tk_pop_int(m);
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   if (ix < 0 || ix >= bytes_len(bs))
     fails_range(m, 0, bytes_len(bs) - 1, ix);
 
@@ -34,12 +34,12 @@ static void get (Machine *m) {
 }
 
 static void setboth (Machine *m, int isplus) {
-  Int value = token_int(machine_pop_exc(m, token_INT));
-  Int ix = token_int(machine_pop_exc(m, token_INT));
-  Bytes *bs = fails_read_pointer(
-    m, symbol_BYTES_,
-    isplus ? machine_peek(m) : machine_pop(m)
-  );
+  Int value = tk_pop_int(m);
+  Int ix = tk_pop_int(m);
+  Bytes *bs = isplus
+    ? tk_peek_pointer(m, symbol_BLOB_)
+    : tk_pop_pointer(m, symbol_BLOB_)
+  ;
   if (ix < 0 || ix >= bytes_len(bs))
     fails_range(m, 0, bytes_len(bs) - 1, ix);
 
@@ -79,7 +79,7 @@ static void upplus (Machine *m) {
 }
 
 static void size (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   machine_push(m, token_new_int(0, bytes_len(bs)));
 }
 
@@ -89,19 +89,19 @@ static int bseq (Bytes *b1, Bytes *b2) {
 }
 
 static void equals (Machine *m) {
-  Bytes *bs2 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
-  Bytes *bs1 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs2 = tk_pop_pointer(m, symbol_BLOB_);
+  Bytes *bs1 = tk_pop_pointer(m, symbol_BLOB_);
   machine_push(m, token_new_int(0, bseq(bs1, bs2)));
 }
 
 static void notequals (Machine *m) {
-  Bytes *bs2 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
-  Bytes *bs1 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs2 = tk_pop_pointer(m, symbol_BLOB_);
+  Bytes *bs1 = tk_pop_pointer(m, symbol_BLOB_);
   machine_push(m, token_new_int(0, !bseq(bs1, bs2)));
 }
 
 static void to (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   int size = bytes_len(bs);
   unsigned char *pbs = bytes_bs(bs);
   Token **tks = GC_MALLOC(size * sizeof(Token *));
@@ -121,7 +121,7 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
     if (end < 0 || end > size) fails_range(m, 0, size, end);
   }
 
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
 
   bounds(bytes_len(bs));
   int df = end - begin;
@@ -129,39 +129,35 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
   if (df < 0) df = 0;
   Bytes *r = bytes_bf_new(df);
   memcpy(bytes_bs(r), bytes_bs(bs) + begin, df);
-  machine_push(m, token_from_pointer(symbol_BYTES_, r));
+  machine_push(m, token_from_pointer(symbol_BLOB_, r));
 }
 
 static void sub (Machine *m) {
-  Token *tk3 = machine_pop_opt(m, token_INT);
-  int end = token_int(tk3);
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int begin = token_int(tk2);
+  Int end = tk_pop_int(m);
+  Int begin = tk_pop_int(m);
   subaux(m, begin, end, 0);
 }
 
 static void left (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, 0, cut, 0);
 }
 
 static void right (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, cut, 0, 1);
 }
 
 static void copy (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   machine_push(m, token_from_pointer(
-    symbol_BYTES_, bytes_from_bytes(bytes_bs(bs), bytes_len(bs))
+    symbol_BLOB_, bytes_from_bytes(bytes_bs(bs), bytes_len(bs))
   ));
 }
 
 static void plus (Machine *m) {
-  Bytes *bs2 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
-  Bytes *bs1 = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs2 = tk_pop_pointer(m, symbol_BLOB_);
+  Bytes *bs1 = tk_pop_pointer(m, symbol_BLOB_);
 
   int len1 = bytes_len(bs1);
   int len2 = bytes_len(bs2);
@@ -169,16 +165,16 @@ static void plus (Machine *m) {
   memcpy(bytes_bs(r), bytes_bs(bs1), len1);
   memcpy(bytes_bs(r) + len1, bytes_bs(bs2), len2);
 
-  machine_push(m, token_from_pointer(symbol_BYTES_, r));
+  machine_push(m, token_from_pointer(symbol_BLOB_, r));
 }
 
 static void fromjs (Machine *m) {
-  char *js = token_string(machine_pop_exc(m, token_STRING));
-  machine_push(m, token_from_pointer(symbol_BYTES_, bytes_from_js((Js *)js)));
+  char *js = tk_pop_string(m);
+  machine_push(m, token_from_pointer(symbol_BLOB_, bytes_from_js((Js *)js)));
 }
 
 static void tojs (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   machine_push(m, token_new_string(0, (char *)bytes_to_js(bs)));
 }
 

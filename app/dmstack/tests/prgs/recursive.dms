@@ -6,22 +6,16 @@
 (
   // "start" print
 
-  ( (pop; pop; 0)
-    else
-    (n =; fn =; n fn:& n 1 - fn +)
-    (dup 0 >)
-    if
-  ) sum =
+  ((dup 1 - sum +) ( dup) if)
+  sum =>
   // "Recursive not tail function" print
-  sum:& 6 sum 21 == assert
+  6 sum 21 == assert
 
-  ( ( (pop; r =; pop; r)
-      else
-      (n =; r =; fn =; fn:&, r n +, n 1 - : fn)
-      (dup 1 >) if
-    ) sum1 =
-    n =; sum1:&, 1, n : sum1
-  ) sum =
+  (
+    (( pop) else ( n =; n +, n 1 - : sum1) ( dup ) if)
+    sum1 =>
+    0 swap sum1
+  ) sum =>
   // "Recursive tail function" print
   6 sum 21 == assert
 
@@ -29,17 +23,17 @@
       else
       (n =; r =; r n +, n 1 -)
       (dup 1 >) if
-    ) sum1 =
+    ) sum1 =>
     n =; 1 n sum1:& loop
-  ) sum =
+  ) sum =>
   // "Recursive tail function to loop" print
   6 sum 21 == assert
 
-  (1 + it,range0 R =; 0 R (+) it,each) sum =
+  (1 + it,range0 R =; 0 R (+) it,each) sum =>
   // "Range" print
   6 sum 21 == assert
 
-  (n =; 0 (i =; i +) (n 1 +) for) sum =
+  (n =; 0 (i =; i +) (n 1 +) for) sum =>
   // "for" print
   6  sum 21 == assert
 
@@ -49,7 +43,7 @@
       (n =; n +; n 1 -)
       (dup 1 >) if
     ) loop
-  ) sum =
+  ) sum =>
   // "loop" print
   6  sum 21 == assert
 
@@ -58,7 +52,7 @@
     (n =; n +; n 1 -)
     (dup 1 >) while
     pop
-  ) sum =
+  ) sum =>
   // "while" print
   6  sum 21 == assert
 ) run

@@ -3,46 +3,43 @@
 
 /// Float tests.
 
-(
+"0." float,fromStr 0. expect
+"45.12" float,fromStr 45.12 expect
+"-452.11" float,fromStr -452.11 expect
 
-  "0." float,fromStr 0. == assert
-  "45.12" float,fromStr 45.12 == assert
-  "-452.11" float,fromStr -452.11 == assert
+-0. float,abs 0. expect
+45. float,abs 45. expect
+-452. float,abs 452. expect
 
-  -0. float,abs 0. == assert
-  45. float,abs 45. == assert
-  -452. float,abs 452. == assert
+// float,rnd println
+// float,rnd println
 
-  // float,rnd println
-  // float,rnd println
+5. 5. float,max 5. expect
+2. 5. float,max 5. expect
+5. 2. float,max 5. expect
 
-  5. 5. float,max 5. == assert
-  2. 5. float,max 5. == assert
-  5. 2. float,max 5. == assert
+5. 5. float,min 5. expect
+12. 5. float,min 5. expect
+5. 12. float,min 5. expect
 
-  5. 5. float,min 5. == assert
-  12. 5. float,min 5. == assert
-  5. 12. float,min 5. == assert
+math,pi 3.141592653589793 expect
+23. math,sin -0.8462204041751706 expect
+23. math,cos -0.5328330203333975 expect
+23. math,tan 1.5881530833912738 expect
+0.23 math,asin 0.23207768286271319 expect
+0.23 math,acos 1.3387186439321834 expect
+145.23 math,atan 1.5639108059212194 expect
+12. 0.23 math,atan2 1.5516320066403622 expect
 
-  math,pi 3.141592653589793 == assert
-  23. math,sin -0.8462204041751706 == assert
-  23. math,cos -0.5328330203333975 == assert
-  23. math,tan 1.5881530833912738 == assert
-  0.23 math,asin 0.23207768286271319 == assert
-  0.23 math,acos 1.3387186439321834 == assert
-  145.23 math,atan 1.5639108059212194 == assert
-  12. 0.23 math,atan2 1.5516320066403622 == assert
+math,e 2.718281828459045 expect
+7. math,exp 1096.6331584284585 expect
+7. math,exp2 128. expect
+7. math,exp10 10000000. expect
+7. math,log 1.9459101490553132 expect
+7. math,log2 2.807354922057604 expect
+7. math,log10 0.8450980400142568 expect
+7. 3.5 math,pow 907.4926996951546 expect
+7. math,sqrt 2.6457513110645907 expect
+7.5 math,cbrt 1.9574338205844317 expect
 
-  math,e 2.718281828459045 == assert
-  7. math,exp 1096.6331584284585 == assert
-  7. math,exp2 128. == assert
-  7. math,exp10 10000000. == assert
-  7. math,log 1.9459101490553132 == assert
-  7. math,log2 2.807354922057604 == assert
-  7. math,log10 0.8450980400142568 == assert
-  7. 3.5 math,pow 907.4926996951546 == assert
-  7. math,sqrt 2.6457513110645907 == assert
-  7.5 math,cbrt 1.9574338205844317 == assert
-
-  empty? assert
-) run
+empty? assert

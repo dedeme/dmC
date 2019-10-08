@@ -4,17 +4,17 @@
 #include "primitives/modmath.h"
 #include <math.h>
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void fn1 (Machine *m, double (*f)(double)) {
   machine_push(m, token_new_float(
-    0, f(token_float(machine_pop_exc(m, token_FLOAT)))
+    0, f(tk_pop_float(m))
   ));
 }
 
 static void fn2 (Machine *m, double (*f)(double, double)) {
-  double n2 = token_float(machine_pop_exc(m, token_FLOAT));
-  double n1 = token_float(machine_pop_exc(m, token_FLOAT));
+  double n2 = tk_pop_float(m);
+  double n1 = tk_pop_float(m);
   machine_push(m, token_new_float(0, f(n1, n2)));
 }
 

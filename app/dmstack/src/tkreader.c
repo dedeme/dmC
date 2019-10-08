@@ -34,15 +34,17 @@ static void to_unicode(Buf *bf, char *hexdigits) {
 }
 
 Opt *tkreader_next(Reader *reader) {
-  if (reader_is_file(reader)) {
-    if (reader_nline(reader) == 1 && reader_prg_ix(reader) == 0) {
-      char *prg = reader_prg(reader);
-      if (*prg && *prg == '#' && prg[1] == '!') {
-        int ix = str_cindex(prg, '\n');
-        if (ix == -1) ix = strlen(prg);
-        reader_set_nline(reader, 2);
-        reader_set_prg_ix(reader, ix + 1);
-      }
+  if (
+    reader_is_file(reader) &&
+    reader_nline(reader) == 1 &&
+    reader_prg_ix(reader) == 0
+  ) {
+    char *prg = reader_prg(reader);
+    if (*prg && *prg == '#' && prg[1] == '!') {
+      int ix = str_cindex(prg, '\n');
+      if (ix == -1) ix = strlen(prg) - 1;
+      reader_set_nline(reader, 2);
+      reader_set_prg_ix(reader, ix + 1);
     }
   }
   if (reader_next_tk(reader)) {
@@ -101,11 +103,9 @@ Opt *tkreader_next(Reader *reader) {
     // Minus sign --------------------------------------------------------------
     if (ch == '-') {
       ch = *++p;
-      if (ch < '0' || ch > '9') {
-        if (is_blank(ch)) {
-          reader_set_prg_ix(reader, prg_ix + p - prg);
-          return opt_new(token_new_symbol(nline, symbol_new("-")));
-        }
+      if (is_blank(ch)) {
+        reader_set_prg_ix(reader, prg_ix + p - prg);
+        return opt_new(token_new_symbol(nline, symbol_new("-")));
       }
     }
 
@@ -205,6 +205,49 @@ Opt *tkreader_next(Reader *reader) {
       return opt_new(token_new_string(nline, buf_to_str(bf)));
     }
 
+    // String multiline --------------------------------------------------------
+    if (ch == '`') {
+
+      ++p;
+      char *start = p;
+      int start_line = nline;
+      while (*p && !is_blank(*p)) ++p;
+      if (!*p) reader_fail(reader, "String multiline not closed");
+      char *id = str_cat(str_left(start, p - start), "`", NULL);
+
+      while (*p && is_blank(*p))
+        if (*p == '\n') break;
+        else ++p;
+      if (!*p) reader_fail(reader, "String multiline not closed");
+      if (*p != '\n')
+        reader_fail(reader, "String multiline open must be at end of line");
+      ++p;
+      ++nline;
+      start = p;
+      while (*p && is_blank(*p)) ++p;
+      if (!*p) reader_fail(reader, "String multiline not closed");
+      int blanks = p - start;
+
+      Buf *bf = buf_new();
+      while (*p && !str_starts(p, id)) {
+        if(*p == '\n') {
+          buf_cadd(bf, *p++);
+          ++nline;
+          for (int i = 0; i < blanks; ++i) {
+            if (*p && *p != '\n' && is_blank(*p)) ++p;
+            else break;
+          }
+        } else {
+          buf_cadd(bf, *p++);
+        }
+      }
+      if (!*p) reader_fail(reader, "String multiline not closed");
+
+      reader_set_nline(reader, nline);
+      reader_set_prg_ix(reader, prg_ix + p - prg + strlen(id));
+      return opt_new(token_new_string(start_line, buf_to_str(bf)));
+    }
+
     // List --------------------------------------------------------------------
     if (ch == '(' || ch == '[' || ch == '{') {
       char sign = ch;
@@ -297,8 +340,7 @@ Opt *tkreader_next(Reader *reader) {
     // Symbol ------------------------------------------------------------------
     while (!is_blank(*++p));
     reader_set_prg_ix(reader, prg_ix + p - prg);
-    char *name = str_sub(prgd, 0, p - prgd);
-    char *id = str_eq(name, "this") ? reader_source(reader) : name;
+    char *id = str_sub(prgd, 0, p - prgd);
     return opt_new(token_new_symbol(nline, symbol_new(id)));
   }
 

@@ -4,7 +4,7 @@
 #include "primitives/modsys.h"
 #include <unistd.h>
 #include <pwd.h>
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
 #include "args.h"
 
@@ -15,7 +15,7 @@ static struct {
 } sys = {.home = NULL, .udir = NULL, .uname = NULL};
 
 static void init (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   uid_t uid = getuid();
   struct passwd *udata = getpwuid(uid);
 
@@ -57,7 +57,7 @@ static void args (Machine *m) {
 }
 
 static void sexit (Machine *m) {
-  exit(token_int(machine_pop_exc(m, token_INT)));
+  exit(tk_pop_int(m));
 }
 
 static void locale (Machine *m) {
@@ -65,11 +65,11 @@ static void locale (Machine *m) {
 }
 
 static void setlocale (Machine *m) {
-  sys_set_locale(token_string(machine_pop_exc(m, token_STRING)));
+  sys_set_locale(tk_pop_string(m));
 }
 
 static void cmd (Machine *m) {
-  char *command = token_string(machine_pop_exc(m, token_STRING));
+  char *command = tk_pop_string(m);
   char *r = opt_nget(sys_cmd(command));
   if (r)
     machine_push(
@@ -101,28 +101,24 @@ static void thread (Machine *m) {
 }
 
 static void join (Machine *m) {
-  pthread_t *th = fails_read_pointer(m, symbol_THREAD_, machine_pop(m));
+  pthread_t *th = tk_pop_pointer(m, symbol_THREAD_);
   async_join(th);
 }
 
 static void ssleep (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_INT);
-  sys_sleep(token_int(tk));
+  sys_sleep(tk_pop_int(m));
 }
 
 static void print (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_STRING);
-  fputs(token_string(tk), stdout);
+  fputs(tk_pop_string(m), stdout);
 }
 
 static void println (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_STRING);
-  puts(token_string(tk));
+  puts(tk_pop_string(m));
 }
 
 static void error (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_STRING);
-  fputs(token_string(tk), stderr);
+  fputs(tk_pop_string(m), stderr);
 }
 
 static void sgetline (Machine *m) {
@@ -137,7 +133,7 @@ static void sgetline (Machine *m) {
 }
 
 static void sgettext (Machine *m) {
-  char *mark = token_string(machine_pop_exc(m, token_STRING));
+  char *mark = tk_pop_string(m);
   Buf *bf = buf_new();
   char ch;
   for (;;) {
@@ -151,7 +147,7 @@ static void sgettext (Machine *m) {
 }
 
 static void sgetpass (Machine *m) {
-  char *msg = token_string(machine_pop_exc(m, token_STRING));
+  char *msg = tk_pop_string(m);
   char *r = getpass(msg);
   machine_push(m, token_new_string(0, str_new(r)));
   free(r);

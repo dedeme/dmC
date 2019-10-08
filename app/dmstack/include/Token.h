@@ -7,6 +7,7 @@
   #define TOKEN_H
 
 #include "dmc/async.h"
+#include "dmc/List.h"
 #include "DEFS.h"
 #include "Symbol.h"
 
@@ -68,6 +69,12 @@ Token *token_clone (Token *this);
 
 ///
 int token_eq (Token *this, Token *other);
+
+/// Check a type against an stack.
+///   tokens: List<Token> stack.
+///   type  : Type to check.
+///   return: The actual type.
+char *token_check_type (List *tokens, char *type);
 
 ///
 char *token_to_str (Token *this);

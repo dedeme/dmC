@@ -3,24 +3,108 @@
 
 #include "primitives/modit.h"
 #include "dmc/rnd.h"
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
 #include "primitives/modlist.h"
 
+typedef struct {
+  Machine *m;
+  Token *prg;
+  Token *tk;
+} modIt_stkItElement;
+
+typedef struct {
+  Machine *m;
+  Token *prg;
+  It *it;
+} modIt_toStkIt_O;
+
+static Opt *toStkIt_next (modIt_toStkIt_O *o) {
+  if (it_has_next(o->it)) {
+    modIt_stkItElement *e = MALLOC(modIt_stkItElement);
+    e->m = o->m;
+    e->prg = o->prg;
+    e->tk = it_next(o->it);
+    return opt_new(e);
+  }
+  return opt_empty();
+}
+
+// It<modIt_stkItElement>
+static It *toStkIt (Machine *m, Token *prg, It *it) {
+  modIt_toStkIt_O *o = MALLOC(modIt_toStkIt_O);
+  o->m = m;
+  o->prg = prg;
+  o->it = it;
+  return it_new(o, (it_Next)toStkIt_next);
+}
+
+static Token *modIt_stkItElement_to_token (modIt_stkItElement *e) {
+  return e->tk;
+}
+
+// It<modIt_stkItElement>
+static void setStkIt (Machine *m, It *it) {
+  machine_push(m, token_from_pointer(
+    symbol_ITERATOR_,
+    it_map(it, (FCOPY)modIt_stkItElement_to_token)
+  ));
+}
+
+static void tofproc (void *value) {
+  modIt_stkItElement *e = value;
+  Machine *m = e->m;
+  machine_push(m, e->tk);
+  machine_process("", machine_pmachines(m), e->prg);
+}
+
+static void tofprocix (void *value, size_t ix) {
+  modIt_stkItElement *e = value;
+  Machine *m = e->m;
+  machine_push(m, e->tk);
+  machine_push(m, token_new_int(0, ix));
+  machine_process("", machine_pmachines(m), e->prg);
+}
+
+static int tofpred (void *value) {
+  modIt_stkItElement *e = value;
+  Machine *m = e->m;
+  machine_push(m, e->tk);
+  machine_process("", machine_pmachines(m), e->prg);
+  return tk_pop_int(m);
+}
+
+static int tofeq (void *v1, void *v2) {
+  modIt_stkItElement *e1 = v1;
+  modIt_stkItElement *e2 = v2;
+  Machine *m = e1->m;
+  machine_push(m, e1->tk);
+  machine_push(m, e2->tk);
+  machine_process("", machine_pmachines(m), e1->prg);
+  return tk_pop_int(m);
+}
+
+static void *tofcopy (void *value) {
+  modIt_stkItElement *e = value;
+  Machine *m = e->m;
+  Token *prg = e->prg;
+  machine_push(m, e->tk);
+  machine_process("", machine_pmachines(m), prg);
+  modIt_stkItElement *r = MALLOC(modIt_stkItElement);
+  r->m = m;
+  r->prg = prg;
+  r->tk = machine_pop(m);
+  return r;
+}
+
+// -----------------------------------------------------------------------------
+
 static It *getIt (Machine *m) {
-  return fails_read_pointer(m, symbol_ITERATOR_, machine_pop(m));
+  return tk_pop_pointer(m, symbol_ITERATOR_);
 }
 
 static void setIt (Machine *m, It *it) {
   machine_push(m, token_from_pointer(symbol_ITERATOR_, it));
-}
-
-static void asList (Machine *m, char *fn) {
-  Token *prg = machine_pop(m);
-  It *it = getIt(m);
-  machine_push(m, token_new_list(0, it_to(it)));
-  machine_push(m, prg);
-  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new(fn))))(m);
 }
 
 // m_o_fn is Tp3<Machine, Token, Token>. Returns i Opt<Token>.
@@ -29,7 +113,7 @@ static Opt *newf (Tp3 *m_o_fn) {
   machine_push(m, tp3_e2(m_o_fn));
   machine_process("", machine_pmachines(m), tp3_e3(m_o_fn));
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz > 1) fails_size_list(m, a, 1);
   return sz
@@ -39,7 +123,7 @@ static Opt *newf (Tp3 *m_o_fn) {
 }
 
 static void new (Machine *m) {
-  Token *prg =machine_pop_exc(m, token_LIST);
+  Token *prg = machine_pop_exc(m, token_LIST);
   Token *o = machine_pop(m);
   It *it = it_new(tp3_new(m, o, prg), (Opt *(*)(void *))newf);
   setIt(m, it);
@@ -56,20 +140,20 @@ static void unary (Machine *m) {
 
 static void from (Machine *m) {
   // Arr<Token>
-  Arr *ls =token_list(machine_pop_exc(m, token_LIST));
+  Arr *ls =tk_pop_list(m);
   setIt(m, it_from(ls));
 }
 
 Token *rangef (int *n) { return token_new_int(0, *n); }
 
 static void range (Machine *m) {
-  int end = token_int(machine_pop_exc(m, token_INT));
-  int begin = token_int(machine_pop_exc(m, token_INT));
+  int end = tk_pop_int(m);
+  int begin = tk_pop_int(m);
   setIt(m, it_map(it_range(begin, end), (FCOPY)rangef));
 }
 
 static void range0 (Machine *m) {
-  int end = token_int(machine_pop_exc(m, token_INT));
+  int end = tk_pop_int(m);
   setIt(m, it_map(it_range0(end), (FCOPY)rangef));
 }
 
@@ -95,30 +179,32 @@ static void plus (Machine *m) {
 }
 
 static void drop (Machine *m) {
-  int n = token_int(machine_pop_exc(m, token_INT));
+  int n = tk_pop_int(m);
   It *it = getIt(m);
   setIt(m, it_drop(it, n));
 }
 
 static void dropf (Machine *m) {
-  asList(m, "dropf");
-  // Arr<Token>
-  Arr *ls =token_list(machine_pop(m));
-  setIt(m, it_from(ls));
+  Token *prg = machine_pop_exc(m, token_LIST);
+  // It<Token>
+  It *it = getIt(m);
+  setStkIt(m, it_dropf(toStkIt(m, prg, it), tofpred));
 }
 
 static void filter (Machine *m) {
-  asList(m, "filter");
-  // Arr<Token>
-  Arr *ls =token_list(machine_pop(m));
-  setIt(m, it_from(ls));
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  setStkIt(m, it_filter(toStkIt(m, prg, it), tofpred));
 }
 
 static void map (Machine *m) {
-  asList(m, "map");
-  // Arr<Token>
-  Arr *ls =token_list(machine_pop(m));
-  setIt(m, it_from(ls));
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  setStkIt(m, it_map(toStkIt(m, prg, it), tofcopy));
 }
 
 static void zip (Machine *m) {
@@ -157,24 +243,42 @@ static void push0 (Machine *m) {
 }
 
 static void take (Machine *m) {
-  int n = token_int(machine_pop_exc(m, token_INT));
+  int n = tk_pop_int(m);
   It *it = getIt(m);
   setIt(m, it_take(it, n));
 }
 
 static void takef (Machine *m) {
-  asList(m, "takef");
   // Arr<Token>
-  Arr *ls =token_list(machine_pop(m));
-  setIt(m, it_from(ls));
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  setStkIt(m, it_takef(toStkIt(m, prg, it), tofpred));
 }
 
 static void all (Machine *m) {
-  asList(m, "all?");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  Token *prg2 = token_new_list(0, arr_new_from(
+    prg,
+    token_new_symbol(0, symbol_RUN),
+    token_new_symbol(0, symbol_new("!")),
+    NULL
+  ));
+  // It<Token>
+  It *it = getIt(m);
+  machine_push(m, token_new_int(
+    0, !it_contains(toStkIt(m, prg2, it), tofpred)
+  ));
 }
 
 static void any (Machine *m) {
-  asList(m, "any?");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  machine_push(m, token_new_int(0, it_contains(toStkIt(m, prg, it), tofpred)));
 }
 
 static void count (Machine *m) {
@@ -183,35 +287,63 @@ static void count (Machine *m) {
 }
 
 static void duplicates (Machine *m) {
-  asList(m, "duplicates");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  // Tp<Arr<modIt_stkItElement>>
+  Tp *dr = it_duplicates(toStkIt(m, prg, it), tofeq);
+  // Arr<Token>
+  Arr *l1 = arr_map(tp_e1(dr), (FCOPY)modIt_stkItElement_to_token);
+  // Arr<Token>
+  Arr *l2 = arr_map(tp_e2(dr), (FCOPY)modIt_stkItElement_to_token);
+  // Arr<Token>
+  Arr *r = arr_new();
+  arr_push(r, token_new_list(0, l1));
+  arr_push(r, token_new_list(0, l2));
+  machine_push(m, token_new_list(0, r));
 }
 
 static void each (Machine *m) {
-  asList(m, "each");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  it_each(toStkIt(m, prg, it), tofproc);
 }
 
 static void eachix (Machine *m) {
-  asList(m, "eachIx");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  it_each_ix(toStkIt(m, prg, it), tofprocix);
 }
 
 static void eq (Machine *m) {
-  Token *prg = machine_pop(m);
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
   It *it2 = getIt(m);
+  // It<Token>
   It *it1 = getIt(m);
-  machine_push(m, token_new_list(0, it_to(it1)));
-  machine_push(m, token_new_list(0, it_to(it2)));
-  machine_push(m, prg);
-  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("eq?"))))(m);
+  // Tp<Arr<modIt_stkItElement>>
+  machine_push(m, token_new_int(
+    0, it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
+  ));
 }
 
 static void neq (Machine *m) {
-  Token *prg = machine_pop(m);
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
   It *it2 = getIt(m);
+  // It<Token>
   It *it1 = getIt(m);
-  machine_push(m, token_new_list(0, it_to(it1)));
-  machine_push(m, token_new_list(0, it_to(it2)));
-  machine_push(m, prg);
-  ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("neq?"))))(m);
+  // Tp<Arr<modIt_stkItElement>>
+  machine_push(m, token_new_int(
+    0, !it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
+  ));
 }
 
 static void equals (Machine *m) {
@@ -229,7 +361,24 @@ static void notequals (Machine *m) {
 }
 
 static void find (Machine *m) {
-  asList(m, "find");
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  modIt_stkItElement *e = opt_nget(it_find(toStkIt(m, prg, it), tofpred));
+
+  // Arr<Token>
+  Arr *r = arr_new();
+  if (e) arr_push(r, e->tk);
+  machine_push(m, token_new_list(0, r));
+}
+
+static void indexf (Machine *m) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  machine_push(m, token_new_int(0, it_index(toStkIt(m, prg, it), tofpred)));
 }
 
 static void iindex (Machine *m) {
@@ -237,11 +386,17 @@ static void iindex (Machine *m) {
   machine_push(m, token_new_list(
     0, arr_new_from(tk, token_new_symbol(0, symbol_new("==")), NULL)
   ));
-  asList(m, "indexf");
+  indexf(m);
 }
 
-static void indexf (Machine *m) {
-  asList(m, "indexf");
+static void lastindexf (Machine *m) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+
+  // It<Token>
+  It *it = getIt(m);
+  machine_push(m, token_new_int(
+    0, it_last_index(toStkIt(m, prg, it), tofpred)
+  ));
 }
 
 static void lastindex (Machine *m) {
@@ -249,11 +404,7 @@ static void lastindex (Machine *m) {
   machine_push(m, token_new_list(
     0, arr_new_from(tk, token_new_symbol(0, symbol_new("==")), NULL)
   ));
-  asList(m, "lastIndexf");
-}
-
-static void lastindexf (Machine *m) {
-  asList(m, "lastIndexf");
+  lastindexf(m);
 }
 
 static void reduce (Machine *m) {
@@ -300,7 +451,7 @@ static void sort (Machine *m) {
 
 static void box (Machine *m) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   // Opt<Token>
   Opt *fn (Token *tk) { return opt_new(tk); }
   Box *bx = rnd_box_new(arr_map(a, (FCOPY)fn));

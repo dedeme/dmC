@@ -3,54 +3,58 @@
 
 #include "primitives/modobj.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void new (Machine *m) {
   machine_push(m, token_new_list(0, arr_new()));
 }
 
 static void has (Machine *m) {
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
-  for (int i = 0; i < arr_size(a); i +=2)
-    if (str_eq(key, token_string(arr_get(a, i)))) {
+  Arr *a = tk_pop_list(m);
+  for (int i = 0; i < arr_size(a); i +=2) {
+    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
       machine_push(m, token_new_int(0, 1));
       return;
     }
+  }
   machine_push(m, token_new_int(0, 0));
 }
 
 static void get (Machine *m) {
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz & 1) fails_size_list(m, a, sz + 1);
-  for (int i = 0; i < sz; i +=2)
-    if (str_eq(key, token_string(arr_get(a, i)))) {
+  for (int i = 0; i < sz; i +=2) {
+    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
       machine_push(m, arr_get(a, i + 1));
       return;
     }
+  }
   machine_fail(m, str_f("Key '%s' not found", key));
 }
 
 static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
-  Token *keytk = machine_pop_exc(m, token_STRING);
-  char *key = token_string(keytk);
+  Token *keytk = machine_pop(m);
+
+  char *key = tk_string(m, keytk);
   // Arr<Token>
   Arr *a = isplus
-    ? token_list(machine_peek_exc(m, token_LIST))
-    : token_list(machine_pop_exc(m, token_LIST))
+    ? tk_peek_list(m)
+    : tk_pop_list(m)
   ;
   int sz = arr_size(a);
   if (sz & 1) fails_size_list(m, a, sz + 1);
-  for (int i = 0; i < sz; i +=2)
-    if (str_eq(key, token_string(arr_get(a, i)))) {
+  for (int i = 0; i < sz; i +=2) {
+    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
       arr_set(a, i + 1, tk);
       return;
     }
+  }
   arr_push(a, keytk);
   arr_push(a, tk);
 }
@@ -90,10 +94,9 @@ static void upplus (Machine *m) {
 static void frommap (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
-  EACH(token_list(machine_pop_exc(m, token_LIST)), Token, tk) {
-    if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
+  EACH(tk_pop_list(m), Token, tk) {
     // Arr<Token>
-    Arr *a = token_list(tk);
+    Arr *a = tk_list(m, tk);
     if (arr_size(a) != 2) fails_size_list(m, a, 2);
     Token *tk1 = *arr_start(a);
     if (token_type(tk1) != token_STRING) fails_type_in(m, token_STRING, tk1);
@@ -107,7 +110,7 @@ static void tomap (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
   Token *tk1 = NULL;
-  EACH(token_list(machine_pop_exc(m, token_LIST)), Token, tk) {
+  EACH(tk_pop_list(m), Token, tk) {
     if (tk1) {
       arr_push(r, token_new_list(0, arr_new_from(tk1, tk, NULL)));
       tk1 = NULL;
@@ -117,7 +120,7 @@ static void tomap (Machine *m) {
     }
   }_EACH
   if (tk1) {
-    Arr *a = token_list(machine_pop_exc(m, token_LIST));
+    Arr *a = tk_pop_list(m);
     fails_size_list(m, a, arr_size(a) + 1);
   }
   machine_push(m, token_new_list(0, r));

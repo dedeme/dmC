@@ -6,7 +6,6 @@
 (
   "is.h" output =
 
-  () add = // Recursive
   ( dir =
     dir file,dir
     ( name =
@@ -22,7 +21,7 @@
       (f file,directory?)
       if
     ) lst,each
-  ) add =
+  ) add =>
   // (String directory) -> ()
 
   // Start ---------------------------------------------------------------------

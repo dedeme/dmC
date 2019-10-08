@@ -10,6 +10,8 @@ static Arr *args = NULL;
 // Map<char>
 static Map *stkargs = NULL;
 
+static int production = 1;
+
 static void help (void) {
   puts(
     "dmstack v. " VERSION ".\n"
@@ -17,10 +19,12 @@ static void help (void) {
     "GNU General Public License - V3 <http://www.gnu.org/licenses/>\n"
     "\n"
     "Use:\n"
-    "  dmstack dmsProgram [-- dmsProgramOptions]\n"
+    "  dmstack [Options] dmsProgram [-- dmsProgramOptions]\n"
     "or to show this message:\n"
     "  dmstack\n"
     "-----------------------\n"
+    "Options: They are\n"
+    "  -d : Execute in debug mode. \n"
     "dmsProgram: Path to .dms file, with or without extension .dms.\n"
     "dmsProgramOptions: Options to be passed to .dms program.\n"
   );
@@ -41,7 +45,13 @@ int args_init (int argc, char *argv[]) {
     char *a = argv[c];
 
     if (*a == '-') {
-      if (str_eq(a, "--")) break;
+      if (str_eq(a, "--")) {
+        break;
+      } else if (str_eq(a, "-d")) {
+        production = 0;
+        map_put(stkargs, "-d", "");
+        continue;
+      }
 
       printf ("Unkown option '%s'\n\n=======================\n", a);
       help();
@@ -85,4 +95,8 @@ Opt *args_param (char *key) {
 
 Arr *args_dms_params (void) {
   return args;
+}
+
+int args_is_production (void) {
+  return production;
 }

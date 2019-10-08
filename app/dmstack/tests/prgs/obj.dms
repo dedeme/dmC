@@ -22,13 +22,13 @@
   O "a" obj,get 31 == assert
   O "b" obj,get 32 == assert
 
-  (100 +) sum1 =
-  (200 +) sum2 =
+  (100 +) sum1 =>
+  (200 +) sum2 =>
   {} "a": 1 sum1 obj,put+; "b": 2 sum2 obj,put+; O =
   O "a" obj,get 101 == assert
   O "b" obj,get 202 == assert
 
-  (obj,put+) put+ =
+  (obj,put+) put+ =>
   {} "a": 10 sum1 put+; "b": 20 sum2 put+; O =
   O "a" obj,get 110 == assert
   O "b" obj,get 220 == assert

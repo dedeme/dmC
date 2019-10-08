@@ -7,6 +7,7 @@
 #include "primitives/modglobal1.h"
 #include "primitives/modglobal2.h"
 #include "Token.h"
+#include "tk.h"
 
 static void sputs (Machine *m) {
   puts(token_to_str(machine_pop(m)));
@@ -34,8 +35,7 @@ static void neq (Machine *m) {
 }
 
 static void fail (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_STRING);
-  machine_fail(m, token_string(tk));
+  machine_fail(m, tk_pop_string(m));
 }
 
 static void stkfail (Machine *m, char *fn, int min) {

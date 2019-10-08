@@ -4,21 +4,21 @@
 #include "primitives/modiserver.h"
 #include "dmc/Iserver.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void open (Machine *m) {
-  int port = token_int(machine_pop_exc(m, token_INT));
+  int port = tk_pop_int(m);
   machine_push(m, token_from_pointer(symbol_ISERVER_, iserver_new(port)));
 }
 
 static void close (Machine *m) {
 
-  Iserver *s = (Iserver *)fails_read_pointer(m, symbol_ISERVER_, machine_pop(m));
+  Iserver *s = (Iserver *)tk_pop_pointer(m, symbol_ISERVER_);
   iserver_close(s);
 }
 
 static void getrq (Machine *m) {
-  Iserver *s = (Iserver *)fails_read_pointer(m, symbol_ISERVER_, machine_pop(m));
+  Iserver *s = (Iserver *)tk_pop_pointer(m, symbol_ISERVER_);
   IserverRq *rq = iserver_read(s);
   char *err = iserverRq_error(rq);
   if (*err) {
@@ -34,9 +34,7 @@ static void getrq (Machine *m) {
 }
 
 static void readrq (Machine *m) {
-  IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, symbol_ISERVER_RQ_, machine_pop(m)
-  );
+  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
     machine_push(m, token_new_list(0, arr_new_from(
@@ -48,9 +46,7 @@ static void readrq (Machine *m) {
 }
 
 static void rqhost (Machine *m) {
-  IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, symbol_ISERVER_RQ_, machine_pop(m)
-  );
+  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
     machine_push(m, token_new_list(0, arr_new_from(
@@ -62,10 +58,8 @@ static void rqhost (Machine *m) {
 }
 
 static void writerq (Machine *m) {
-  IserverRq *rq = (IserverRq *)fails_read_pointer(
-    m, symbol_ISERVER_RQ_, machine_pop(m)
-  );
-  char *msg = token_string(machine_pop_exc(m, token_STRING));
+  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
+  char *msg = tk_pop_string(m);
   iserverRq_write(rq, msg);
 }
 

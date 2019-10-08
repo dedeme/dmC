@@ -5,22 +5,22 @@
 #include <math.h>
 #include "dmc/rnd.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void fn2 (Machine *m, double (*f)(double, double)) {
-  double n2 = token_float(machine_pop_exc(m, token_FLOAT));
-  double n1 = token_float(machine_pop_exc(m, token_FLOAT));
+  double n2 = tk_pop_float(m);
+  double n1 = tk_pop_float(m);
   machine_push(m, token_new_float(0, f(n1, n2)));
 }
 
 static void fromStr (Machine *m) {
   machine_push(m, token_new_float(
-    0, js_rd((Js *)token_string(machine_pop_exc(m, token_STRING)))
+    0, js_rd((Js *)tk_pop_string(m))
   ));
 }
 
 static void sabs (Machine *m) {
-  double d = token_float(machine_pop_exc(m, token_FLOAT));
+  double d = tk_pop_float(m);
   machine_push(m, token_new_float(0, d >= 0 ? d : -d));
 }
 
@@ -40,14 +40,14 @@ static void min (Machine *m) {
 
 static void sround (Machine *m) {
   machine_push(m, token_new_float(
-    0, round(token_float(machine_pop_exc(m, token_FLOAT)))
+    0, round(tk_pop_float(m))
   ));
 }
 
 static void roundn (Machine *m) {
-  int scale = token_float(machine_pop_exc(m, token_INT));
+  Int scale = tk_pop_int(m);
   fails_range(m, 0, 9, scale);
-  double n = token_float(machine_pop_exc(m, token_FLOAT));
+  double n = tk_pop_float(m);
   int mul = 1;
   REPEAT(scale) {
     mul *= 10;
@@ -57,10 +57,16 @@ static void roundn (Machine *m) {
 }
 
 static void eq (Machine *m) {
-  double gap = token_float(machine_pop_exc(m, token_FLOAT));
-  double n1 = token_float(machine_pop_exc(m, token_FLOAT));
-  double n2 = token_float(machine_pop_exc(m, token_FLOAT));
+  double gap = tk_pop_float(m);
+  double n1 = tk_pop_float(m);
+  double n2 = tk_pop_float(m);
   machine_push(m, token_new_int(0, n2 < n1 + gap && n2 > n1 - gap));
+}
+
+static void toint (Machine *m) {
+  machine_push(m, token_new_int(
+    0, (Int)tk_pop_float(m)
+  ));
 }
 
 Pmodule *modfloat_mk (void) {
@@ -72,13 +78,15 @@ Pmodule *modfloat_mk (void) {
   add("fromStr", fromStr); // STRING - FLOAT
   add("abs", sabs); // FLOAT - FLOAT
   add("rnd", rnd); //  [] - FLOAT
+
   add("max", max); // [FLOAT, FLOAT] - FLOAT
   add("min", min); // [FLOAT, FLOAT] - FLOAT
 
-  add("round", sround);
-  add("roundn", roundn);
+  add("round", sround); // FLOAT - FLOAT
+  add("roundn", roundn); // [FLOAT, INT] - FLOAT
   add("==", eq);
 
+  add("toInt", toint); // [FLOAT] - INT
   return r;
 }
 

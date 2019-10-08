@@ -4,7 +4,7 @@
 #include "primitives/modfile.h"
 #include <unistd.h>
 #include <sys/stat.h>
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
 
 static void cwd (Machine *m) {
@@ -12,124 +12,124 @@ static void cwd (Machine *m) {
 }
 
 static void cd (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   file_cd(path);
 }
 
 static void smkdir (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   file_mkdir(path);
 }
 
 static void dir (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   Token *fn (char *s) { return token_new_string(0, s); }
   machine_push(m, token_new_list(0, arr_map(file_dir(path), (FCOPY)fn)));
 }
 
 static void isdirectory (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_new_int(0, file_is_directory(path)));
 }
 
 static void exists (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_new_int(0, file_exists(path)));
 }
 
 static void del (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   file_del(path);
 }
 
 static void srename (Machine *m) {
-  char *new = token_string(machine_pop_exc(m, token_STRING));
-  file_rename(token_string(machine_pop_exc(m, token_STRING)), new);
+  char *new = tk_pop_string(m);
+  file_rename(tk_pop_string(m), new);
 }
 
 static void slink (Machine *m) {
-  char *new = token_string(machine_pop_exc(m, token_STRING));
-  file_link(token_string(machine_pop_exc(m, token_STRING)), new);
+  char *new = tk_pop_string(m);
+  file_link(tk_pop_string(m), new);
 }
 
 static void copy (Machine *m) {
-  char *new = token_string(machine_pop_exc(m, token_STRING));
-  file_copy(token_string(machine_pop_exc(m, token_STRING)), new);
+  char *new = tk_pop_string(m);
+  file_copy(tk_pop_string(m), new);
 }
 
 static void isregular (Machine *m) {
-  struct stat *st = file_info(token_string(machine_pop_exc(m, token_STRING)));
+  struct stat *st = file_info(tk_pop_string(m));
   machine_push(m, token_new_int(0, S_ISREG(st->st_mode)));
 }
 
 static void islink (Machine *m) {
-  struct stat *st = file_info(token_string(machine_pop_exc(m, token_STRING)));
+  struct stat *st = file_info(tk_pop_string(m));
   machine_push(m, token_new_int(0, S_ISLNK(st->st_mode)));
 }
 
 static void modified (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_new_int(0, file_modified(path)));
 }
 
 static void size (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_new_int(0, file_size(path)));
 }
 
 static void swrite (Machine *m) {
-  char *text = token_string(machine_pop_exc(m, token_STRING));
-  file_write(token_string(machine_pop_exc(m, token_STRING)), text);
+  char *text = tk_pop_string(m);
+  file_write(tk_pop_string(m), text);
 }
 
 static void append (Machine *m) {
-  char *text = token_string(machine_pop_exc(m, token_STRING));
-  file_append(token_string(machine_pop_exc(m, token_STRING)), text);
+  char *text = tk_pop_string(m);
+  file_append(tk_pop_string(m), text);
 }
 
 static void sread (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_new_string(0, file_read(path)));
 }
 
 static void aopen (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_from_pointer(symbol_FILE_, file_aopen(path)));
 }
 
 static void ropen (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_from_pointer(symbol_FILE_, file_ropen(path)));
 }
 
 static void wopen (Machine *m) {
-  char *path = token_string(machine_pop_exc(m, token_STRING));
+  char *path = tk_pop_string(m);
   machine_push(m, token_from_pointer(symbol_FILE_, file_wopen(path)));
 }
 
 static void sclose (Machine *m) {
-  file_close((FileLck *)fails_read_pointer(m, symbol_FILE_, machine_pop(m)));
+  file_close((FileLck *)tk_pop_pointer(m, symbol_FILE_));
 }
 
 static void readbin (Machine *m) {
-  FileLck *f = fails_read_pointer(m, symbol_FILE_, machine_pop(m));
-  machine_push(m, token_from_pointer(symbol_BYTES_, file_read_bin(f)));
+  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
+  machine_push(m, token_from_pointer(symbol_BLOB_, file_read_bin(f)));
 }
 
 static void readline (Machine *m) {
-  FileLck *f = fails_read_pointer(m, symbol_FILE_, machine_pop(m));
+  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
   machine_push(m, token_new_string(0, file_read_line(f)));
 }
 
 static void writebin (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
-  FileLck *f = fails_read_pointer(m, symbol_FILE_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
+  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
   file_write_bin(f, bs);
 }
 
 static void writetext (Machine *m) {
-  char *s = token_string(machine_pop_exc(m, token_STRING));
-  FileLck *f = fails_read_pointer(m, symbol_FILE_, machine_pop(m));
+  char *s = tk_pop_string(m);
+  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
   file_write_text(f, s);
 }
 

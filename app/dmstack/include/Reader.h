@@ -14,9 +14,8 @@
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   source : Identifier (File without extension or 'ad hoc' identifier).
+///   source : Identifier (File without extension or "").
 ///   prg    : Program to process.
-///   nline  : Current line number.
 Reader *reader_new (char *source, char *prg);
 
 /// Creates a new stack machine
@@ -43,7 +42,7 @@ int reader_prg_ix (Reader *this);
 ///
 void reader_set_prg_ix (Reader *this, int value);
 
-/// Used to pass an extra Tokebn.
+/// Used to pass an extra Token.
 /// Its return can be NULL.
 Token *reader_next_tk (Reader *this);
 

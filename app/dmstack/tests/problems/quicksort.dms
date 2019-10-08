@@ -1,0 +1,26 @@
+// Copyright 01-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( L =
+  (
+    lst,new : Less =
+    lst,new : Eq =
+    lst,new : Greater =
+    L 0 get : pivot =
+    L
+    ( e =;
+      (Greater e lst,push) else
+      (Less e lst,push) (e pivot <) elif
+      (Eq e lst,push) (e pivot ==) if
+    ) lst,each
+    Less quicksort Eq Greater quicksort + +
+  )
+  else
+  ( L)
+  ( L size 2 <)
+  if
+) quicksort =>
+
+{4, 65, 2, -31, 0, 99, 2, 83, 782, 1} : Ls =
+Ls (js,wi) lst,map js,wa sys,println
+Ls quicksort (js,wi) lst,map js,wa sys,println

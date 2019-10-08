@@ -1,0 +1,47 @@
+// Copyright 06-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+1000 blob,new (2 blob,set+) (1000) for Cache =
+
+((10 int,div; dup * swap sq +) (dup) if)
+sq =>
+
+(
+  sq
+
+  ( sum =
+    Cache sum blob,get : s89 =
+    (sum ssq) else (89) (s89 1 ==) elif (1) (s89 0 ==) if
+  )
+  else
+  ( nop)
+  ( dup dup 1 == swap 89 == ||)
+  if
+)
+ssq =>
+
+( n =
+  Cache
+    n
+      dup ssq; (0) else (1) (89 ==) if; r =; r blob,set; r
+)
+ssq89New =>
+
+(
+  sq : n =
+  Cache n blob,get
+  (pop n ssq89New) (dup 1 >) if
+)
+ssq89 =>
+
+clock,now Cl =
+
+0
+( ssq89 +) (2 99999) for
+1 +
+//85623 == assert
+puts
+
+@? assert
+
+clock,now Cl clock,df puts

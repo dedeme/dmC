@@ -3,6 +3,7 @@
 
 #include "primitives/modglobal2.h"
 #include "fails.h"
+#include "tk.h"
 
 void modglobal2_size (Machine *m) {
   Token *tk = machine_pop(m);
@@ -20,11 +21,9 @@ void modglobal2_size (Machine *m) {
 }
 
 void modglobal2_get (Machine *m) {
-  Token *tk2 = machine_pop_exc(m, token_INT);
-  Int ix = token_int(tk2);
-  Token *tk1 = machine_pop_exc(m, token_LIST);
+  Int ix = tk_pop_int(m);
   // Arr<Token>
-  Arr *a = token_list(tk1);
+  Arr *a = tk_pop_list(m);
   if (ix < 0 || ix >= arr_size(a))
     fails_range(m, 0, arr_size(a) - 1, ix);
 
@@ -33,14 +32,9 @@ void modglobal2_get (Machine *m) {
 
 static void setboth (Machine *m, int isplus) {
   Token *tk3 = machine_pop(m);
-  Token *tk2 = machine_pop_exc(m, token_INT);
-  int ix = token_int(tk2);
-  Token *tk1 = isplus
-    ? machine_peek_exc(m, token_LIST)
-    : machine_pop_exc(m, token_LIST)
-  ;
+  Int ix = tk_pop_int(m);
   // Arr<Token>
-  Arr *a = token_list(tk1);
+  Arr *a = isplus ? tk_peek_list(m) : tk_pop_list(m);
   if (ix < 0 || ix >= arr_size(a))
     fails_range(m, 0, arr_size(a) - 1, ix);
 
@@ -80,9 +74,8 @@ void modglobal2_upplus (Machine *m) {
 }
 
 void modglobal2_ref_get (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_LIST);
   // Arr<Token>
-  Arr *a = token_list(tk);
+  Arr *a = tk_pop_list(m);
   if (arr_size(a) != 1) fails_size_list(m, a, 1);
 
   machine_push(m, *arr_start(a));

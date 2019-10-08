@@ -8,13 +8,12 @@
   (23) L1 =
   (1, 2, 3, 4, 5, 6) L2 =
 
-  (2 %) odd =
-
-  (2 % !) even =
+  (2 %) odd =>
+  (2 % !) even =>
   4 even assert
   5 odd assert
 
-  (2 % swap 2 % ==) oddeq =
+  (2 % swap 2 % ==) oddeq =>
 
   // empty - unary - from
   it,empty It0 =

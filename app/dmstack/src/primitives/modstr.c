@@ -4,10 +4,10 @@
 #include "primitives/modstr.h"
 #include "dmc/Dec.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static char *getstr (Machine *m) {
-  return token_string(machine_pop_exc(m, token_STRING));
+  return tk_pop_string(m);
 }
 
 static void pushstr (Machine *m, char *s) {
@@ -32,7 +32,7 @@ static void from_iso (Machine *m) {
 }
 
 static void from_unicode (Machine *m) {
-  Bytes *bs = fails_read_pointer(m, symbol_BYTES_, machine_pop(m));
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
   int len = bytes_len(bs);
   if (len % 2) machine_fail(m, "Blob is not an Unicode string");
   unsigned *u = (unsigned *)bytes_bs(bs);
@@ -54,7 +54,7 @@ static void sindex (Machine *m) {
 }
 
 static void index_from (Machine *m) {
-  int ix = token_int(machine_pop_exc(m, token_INT));
+  Int ix = tk_pop_int(m);
   char *subs = getstr(m);
   char *s = getstr(m);
   machine_push(m, token_new_int(0, str_index_from(s, subs, ix)));
@@ -69,7 +69,7 @@ static void last_index (Machine *m) {
 static void join (Machine *m) {
   char *sep = getstr(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   Buf *bf = buf_new();
   int first = 1;
   EACH(a, Token, tk)
@@ -78,8 +78,7 @@ static void join (Machine *m) {
     } else {
       buf_add(bf, sep);
     }
-    if (token_type(tk) != token_STRING) fails_type(m, token_STRING);
-    buf_add(bf, token_string(tk));
+    buf_add(bf, tk_string(m, tk));
   _EACH
   pushstr(m, buf_to_str(bf));
 }
@@ -157,7 +156,7 @@ static void to_unicode (Machine *m) {
     int len = size * 4 + 4;
     Bytes *bs = bytes_bf_new(len);
     memcpy(bytes_bs(bs), u, len);
-    machine_push(m, token_from_pointer(symbol_BYTES_, bs));
+    machine_push(m, token_from_pointer(symbol_BLOB_, bs));
     return;
   }
   machine_fail(m, "String is no a valid UTF-8 one");
@@ -177,29 +176,24 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
     if (end < 0 || end > size) fails_range(m, 0, size, end);
   }
 
-  Token *tk = machine_pop_exc(m, token_STRING);
-  char *s = token_string(tk);
+  char *s = getstr(m);
   bounds(strlen(s));
   machine_push(m, token_new_string(0, str_sub(s, begin, end)));
 }
 
 static void sub (Machine *m) {
-  Token *tk3 = machine_pop_opt(m, token_INT);
-  int end = token_int(tk3);
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int begin = token_int(tk2);
+  Int end = tk_pop_int(m);
+  Int begin = tk_pop_int(m);
   subaux(m, begin, end, 0);
 }
 
 static void left (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, 0, cut, 0);
 }
 
 static void right (Machine *m) {
-  Token *tk2 = machine_pop_opt(m, token_INT);
-  int cut = token_int(tk2);
+  Int cut = tk_pop_int(m);
   subaux(m, cut, 0, 1);
 }
 

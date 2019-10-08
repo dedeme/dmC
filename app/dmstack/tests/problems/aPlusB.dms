@@ -1,34 +1,33 @@
 // Copyright 26-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-(
-  ( sys,println; 0 sys,exit)
-  error =
 
-  ( s =
-    ( s str,digits?)
-    else
-    ( (s 1 str,right str,digits?) else (0) (s size 1 ==) if)
-    ( s "-" str,starts?)
-    if
-  ) digits? =
+( sys,println; 0 sys,exit)
+error =>
 
-  sys,getLine str,trim : e =
-  ("No data was entered" error) (e "" ==) if
+( s =
+  ( s str,digits?)
+  else
+  ( (s 1 str,right str,digits?) else (0) (s size 1 ==) if)
+  ( s "-" str,starts?)
+  if
+) digits? =>
 
-  e " " str,index : ix =
-  ("Expected 2 and only 2 entries" error) (ix -1 ==) if
+sys,getLine str,trim : e =
+("No data was entered" error) (e "" ==) if
 
-  e ix str,left : n1 =
-  e : ix 1 + : str,right; str,trim ; n2 =
-  n2 " " str,index : ix =
-  ("Expected 2 and only 2 entries" error) (ix -1 !=) if
+e " " str,index : ix =
+("Expected 2 and only 2 entries" error) (ix -1 ==) if
 
-  ("First entry is not a valid integer" error) (n1 digits? !) if
-  ("Second entry is not a valid integer" error) (n2 digits? !) if
+e ix str,left : n1 =
+e : ix 1 + : str,right; str,trim ; n2 =
+n2 " " str,index : ix =
+("Expected 2 and only 2 entries" error) (ix -1 !=) if
 
-  n1 : " + " : n2 : " = "
-  n1 int,fromStr n2 int,fromStr + toStr
-  + + + +
-  sys,println
-) run
+("First entry is not a valid integer" error) (n1 digits? !) if
+("Second entry is not a valid integer" error) (n2 digits? !) if
+
+n1 : " + " : n2 : " = "
+n1 int,fromStr n2 int,fromStr + toStr
++ + + +
+sys,println

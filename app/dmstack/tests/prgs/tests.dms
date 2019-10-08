@@ -14,7 +14,7 @@
 "str" import
 "lst" import
 "blob" import
-"tp" import
+"wrap" import
 "it" import
 "recursive" import
 "obj" import
@@ -25,3 +25,4 @@
 "time" import
 "clock" import
 "path" import
+"types" import

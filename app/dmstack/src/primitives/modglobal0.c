@@ -3,6 +3,7 @@
 
 #include "primitives/modglobal0.h"
 #include "fails.h"
+#include "tk.h"
 
 void modglobal0_add (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
@@ -38,18 +39,16 @@ void modglobal0_add (Machine *m) {
 
   tk = machine_pop_opt(m, token_STRING);
   if (tk) {
-    Token *tk2 = machine_pop_exc(m, token_STRING);
     machine_push(m, token_new_string(0, str_cat(
-      token_string(tk2), token_string(tk), NULL
+      tk_pop_string(m), token_string(tk), NULL
     )));
     return;
   }
 
   tk = machine_pop_opt(m, token_LIST);
   if (tk) {
-    Token *tk2 = machine_pop_exc(m, token_LIST);
     machine_push(m, token_new_list(0, it_to(it_cat(
-      it_from(token_list(tk2)), it_from(token_list(tk))
+      it_from(tk_pop_list(m)), it_from(token_list(tk))
     ))));
     return;
   }
@@ -174,19 +173,15 @@ void modglobal0_div (Machine *m) {
 }
 
 void modglobal0_mod (Machine *m) {
-  Token *tk = machine_pop_exc(m, token_INT);
-  Token *tk2 = machine_pop_exc(m, token_INT);
-  machine_push(m, token_new_int(0, token_int(tk2) % token_int(tk)));
+  Int i = tk_pop_int(m);
+  Int i2 = tk_pop_int(m);
+  machine_push(m, token_new_int(0, i2 % i));
 }
 
 void modglobal0_incr (Machine *m) {
-  machine_push(m, token_new_int(
-    0, token_int(machine_pop_exc(m, token_INT)) + 1
-  ));
+  machine_push(m, token_new_int(0, tk_pop_int(m) + 1));
 }
 
 void modglobal0_decr (Machine *m) {
-  machine_push(m, token_new_int(
-    0, token_int(machine_pop_exc(m, token_INT)) - 1
-  ));
+  machine_push(m, token_new_int( 0, tk_pop_int(m) - 1));
 }

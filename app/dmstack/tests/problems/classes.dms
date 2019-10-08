@@ -1,0 +1,59 @@
+// Copyright 01-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+
+( v =;
+  {
+    "var": v
+    "incPrint": ("var" (1 +) obj,up+; "var" obj,get toStr sys,println)
+  } data
+) myClassNew =>
+
+3 myClassNew : Cl =
+
+Cl dup "incPrint" obj,get run
+Cl dup "incPrint" obj,get run
+Cl "var" obj,get toStr sys,println
+
+// Interface
+
+(dup "area" obj,get run)
+area =>
+
+// square class
+
+("side" obj,get dup *)
+squareArea =>
+
+( s =;
+  {
+    "side": s
+    "area": squareArea:&
+  } data
+) square =>
+
+// rect class
+
+(Self =; Self "hight" obj,get : Self "width" obj,get : *)
+rectArea =>
+
+( w =; h =;
+  {
+    "hight": h
+    "width": w
+    "area": rectArea:&
+  } data
+) rect =>
+
+// Test
+
+4 square : Sq =
+Sq area 16 == assert
+
+3 2 rect : Rc =
+Rc area 6 == assert
+
+// Output:
+// 4
+// 5
+// 5

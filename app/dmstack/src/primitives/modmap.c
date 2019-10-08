@@ -3,18 +3,15 @@
 
 #include "primitives/modmap.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 #include "primitives/modjs.h"
 
 // Tp<Token>
 static char *kvk (Machine *m, Token *tk) {
-  if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
   // Arr<Token>
-  Arr *a = token_list(tk);
+  Arr *a = tk_list(m, tk);
   if (arr_size(a) != 2) fails_size_list(m, a, 2);
-  Token *tkstr = *arr_start(a);
-  if (token_type(tkstr) != token_STRING) fails_type_in(m, token_STRING, tkstr);
-  return token_string(tkstr);
+  return tk_string(m, *arr_start(a));
 }
 
 static void new (Machine *m) {
@@ -22,9 +19,9 @@ static void new (Machine *m) {
 }
 
 static void get (Machine *m) {
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
   Token *tk = opt_nget(it_find(it_from(a), (FPRED)fn));
   if (tk) {
@@ -37,20 +34,20 @@ static void get (Machine *m) {
 }
 
 static void haskey (Machine *m) {
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
   machine_push(m, token_new_int(0, arr_index(a, (FPRED)fn) != -1));
 }
 
 static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
   Arr *a = isplus
-    ? token_list(machine_peek_exc(m, token_LIST))
-    : token_list(machine_pop_exc(m, token_LIST))
+    ? tk_peek_list(m)
+    : tk_pop_list(m)
   ;
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
   Token *t = opt_nget(it_find(it_from(a), (FPRED)fn));
@@ -77,7 +74,7 @@ static void upboth (Machine *m, int isplus) {
   machine_push(m, tk2);
   get(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a =tk_pop_list(m);
   if (!arr_size(a))
     machine_fail(m, str_f("Key '%s' not found", token_string(tk2)));
   machine_push(m, *arr_start(a));
@@ -100,9 +97,9 @@ static void upplus (Machine *m) {
 }
 
 static void mremove (Machine *m) {
-  char *key = token_string(machine_pop_exc(m, token_STRING));
+  char *key = tk_pop_string(m);
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   int fn (Token *tk) { return !str_eq(kvk(m, tk), key); }
   arr_filter_in(a, (FPRED)fn);
 }
@@ -110,7 +107,7 @@ static void mremove (Machine *m) {
 static void keys (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
-  EACH(token_list(machine_pop_exc(m, token_LIST)), Token, tk) {
+  EACH(tk_pop_list(m), Token, tk) {
     arr_push(r, token_new_string(0, kvk(m, tk)));
   }_EACH
   machine_push(m, token_new_list(0, r));
@@ -119,10 +116,9 @@ static void keys (Machine *m) {
 static void values (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
-  EACH(token_list(machine_pop_exc(m, token_LIST)), Token, tk) {
-    if (token_type(tk) != token_LIST) fails_type_in(m, token_LIST, tk);
+  EACH(tk_pop_list(m), Token, tk) {
     // Arr<Token>
-    Arr *a = token_list(tk);
+    Arr *a = tk_list(m, tk);
     if (arr_size(a) != 2) fails_size_list(m, a, 2);
     arr_push(r, arr_get(a, 1));
   }_EACH
@@ -131,7 +127,7 @@ static void values (Machine *m) {
 
 static void sortboth (Machine *m, int (*greater)(Token *e1, Token *e2)) {
   // Arr<Token>
-  Arr *a = token_list(machine_pop_exc(m, token_LIST));
+  Arr *a = tk_pop_list(m);
   arr_sort(a, (FCMP)greater);
 }
 

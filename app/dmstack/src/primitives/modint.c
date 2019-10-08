@@ -4,34 +4,34 @@
 #include "primitives/modint.h"
 #include "dmc/rnd.h"
 #include "fails.h"
-#include "Machine.h"
+#include "tk.h"
 
 static void fn2 (Machine *m, int (*f)(int, int)) {
-  int n2 = token_int(machine_pop_exc(m, token_INT));
-  int n1 = token_int(machine_pop_exc(m, token_INT));
+  Int n2 = tk_pop_int(m);
+  Int n1 = tk_pop_int(m);
   machine_push(m, token_new_int(0, f(n1, n2)));
 }
 
 static void fromStr (Machine *m) {
   machine_push(m, token_new_int(
-    0, js_rl((Js *)token_string(machine_pop_exc(m, token_STRING)))
+    0, js_rl((Js *)tk_pop_string(m))
   ));
 }
 
 static void sabs (Machine *m) {
-  int i = token_int(machine_pop_exc(m, token_INT));
+  Int i = tk_pop_int(m);
   machine_push(m, token_new_int(0, i >= 0 ? i : -i));
 }
 
 static void rnd (Machine *m) {
   machine_push(m, token_new_int(
-    0, rnd_i(token_int(machine_pop_exc(m, token_INT)))
+    0, rnd_i(tk_pop_int(m))
   ));
 }
 
 static void sdiv (Machine *m) {
-  int den = token_int(machine_pop_exc(m, token_INT));
-  int num = token_int(machine_pop_exc(m, token_INT));
+  Int den = tk_pop_int(m);
+  Int num = tk_pop_int(m);
   div_t r = div(num, den);
   machine_push(m, token_new_int(0, r.quot));
   machine_push(m, token_new_int(0, r.rem));
@@ -45,6 +45,12 @@ static void max (Machine *m) {
 static void min (Machine *m) {
   int mn (int n1, int n2) { return n1 <= n2 ? n1 : n2; }
   fn2(m, mn);
+}
+
+static void tofloat (Machine *m) {
+  machine_push(m, token_new_float(
+    0, (double)tk_pop_int(m)
+  ));
 }
 
 Pmodule *modint_mk (void) {
@@ -61,6 +67,7 @@ Pmodule *modint_mk (void) {
   add("max", max); // [INT, INT] - INT
   add("min", min); // [INT, INT] - INT
 
+  add("toFloat", tofloat); // INT - FLOAT
   return r;
 }
 

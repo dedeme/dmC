@@ -3,30 +3,28 @@
 
 #include "primitives/modb64.h"
 #include "dmc/b64.h"
-#include "Machine.h"
+#include "tk.h"
 #include "fails.h"
 
 static void decode (Machine *m) {
-  machine_push(m, token_new_string(0, b64_decode(
-    token_string(machine_pop_exc(m, token_STRING))
-  )));
+  machine_push(m, token_new_string(0, b64_decode(tk_pop_string(m))));
 }
 
 static void decode_bytes (Machine *m) {
-  machine_push(m, token_from_pointer(symbol_BYTES_, b64_decode_bytes(
-    token_string(machine_pop_exc(m, token_STRING))
+  machine_push(m, token_from_pointer(symbol_BLOB_, b64_decode_bytes(
+    tk_pop_string(m)
   )));
 }
 
 static void encode (Machine *m) {
   machine_push(m, token_new_string(0, b64_encode(
-    token_string(machine_pop_exc(m, token_STRING))
+    tk_pop_string(m)
   )));
 }
 
 static void encode_bytes (Machine *m) {
   machine_push(m, token_new_string(0, b64_encode_bytes(
-    fails_read_pointer(m, symbol_BYTES_, machine_pop(m))
+    tk_pop_pointer(m, symbol_BLOB_)
   )));
 }
 

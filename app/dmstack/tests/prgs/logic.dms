@@ -32,14 +32,14 @@
 
 // LOGIC OPERATORS
 // ===============
-(&& ==) andEq =
+(&& ==) andEq =>
 // And
 1 1 123 andEq assert
 0 0 123 andEq assert
 0 1 0 andEq assert
 0 0 0 andEq assert
 
-(&& ==) orEq =
+(&& ==) orEq =>
 // Or
 1 1 123 orEq assert
 0 0 123 orEq assert

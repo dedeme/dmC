@@ -7,6 +7,7 @@
 #include "primitives.h"
 #include "fails.h"
 #include "Heap.h"
+#include "types.h"
 #include "DEFS.h"
 
 struct machine_Machine {
@@ -301,6 +302,18 @@ static void sassert (Machine *this) {
   sexit(this);
 }
 
+static void expect (Machine *this) {
+  Token *expected = machine_pop(this);
+  Token *actual = machine_pop(this);
+  if (token_eq(expected, actual)) return;
+  puts(str_f(
+    "Expected error: %d:\n  Expected: %s\n  Actual  : %s",
+    list_count(this->pmachines) + 1,
+    token_to_str(expected), token_to_str(actual)
+  ));
+  sexit(this);
+}
+
 void machine_fail (Machine *this, char *msg) {
   puts(str_f("runtime error:%d: %s", list_count(this->pmachines) + 1, msg));
   sexit(this);
@@ -375,14 +388,14 @@ static Machine *cprocess (Machine *m) {
   EACH_IX(token_list(m->prg), Token, tk, ix) {
     m->ix = ix;
 
-    Token *t;
     if (sym != -1) {
+      Token *t;
       if (module != -1) {
         t = heap_get(moduleh, sym);
         if (t) {
           if (token_type(tk) == token_SYMBOL) {
             Symbol symbol = token_symbol(tk);
-            if (symbol == symbol_EQUALS)
+            if (symbol == symbol_EQUALS || symbol == symbol_FUNCTION)
               machine_fail(m, "Imported symbols can not be set");
             if (symbol == symbol_AMPERSAND) {
               arr_push(m->stack, t);
@@ -404,7 +417,30 @@ static Machine *cprocess (Machine *m) {
           if (token_type(tk) == token_SYMBOL) {
             Symbol symbol = token_symbol(tk);
             if (symbol == symbol_EQUALS) {
-              heap_add(m->heap, sym, machine_pop(m));
+              Token *tk = machine_pop(m);
+              if (token_type(tk) == token_LIST) {
+                char *name = symbol_to_str(sym);
+                if (*name < 'A' || *name > 'Z')
+                  machine_fail(m, str_f(
+                    "'%s': List or object name must start with uppercase [A-Z]",
+                    name
+                  ));
+              }
+              heap_add(m->heap, sym, tk);
+              sym = -1;
+              continue;
+            }
+            if (symbol == symbol_FUNCTION) {
+              Token *tk = machine_pop(m);
+              if (token_type(tk) != token_LIST)
+                machine_fail(m, "Symbol => not used with function");
+              char *name = symbol_to_str(sym);
+              if (*name >= 'A' && *name <= 'Z')
+                machine_fail(m, str_f(
+                  "'%s': Function name must not start with uppercase [A-Z]",
+                  name
+                ));
+              heap_add(m->heap, sym, tk);
               sym = -1;
               continue;
             }
@@ -418,11 +454,35 @@ static Machine *cprocess (Machine *m) {
           if (token_type(tk) == token_SYMBOL) {
             Symbol symbol = token_symbol(tk);
             if (symbol == symbol_EQUALS) {
-              heap_add(m->heap, sym, machine_pop(m));
+              Token *tk = machine_pop(m);
+              if (token_type(tk) == token_LIST) {
+                char *name = symbol_to_str(sym);
+                if (*name < 'A' || *name > 'Z')
+                  machine_fail(m, str_f(
+                    "'%s': List or object name must start with uppercase [A-Z]",
+                    name
+                  ));
+              }
+              heap_add(m->heap, sym, tk);
+              sym = -1;
+              continue;
+            }
+            if (symbol == symbol_FUNCTION) {
+              Token *tk = machine_pop(m);
+              if (token_type(tk) != token_LIST)
+                machine_fail(m, "Symbol => not used with function");
+              char *name = symbol_to_str(sym);
+              if (*name >= 'A' && *name <= 'Z')
+                machine_fail(m, str_f(
+                  "'%s': Function name must not start with uppercase [A-Z]",
+                  name
+                ));
+              heap_add(m->heap, sym, tk);
               sym = -1;
               continue;
             }
           }
+
           // List<Machine>
           List *pms = m->pmachines;
           for (;;) {
@@ -479,7 +539,7 @@ static Machine *cprocess (Machine *m) {
     if (module != -1) {
       if (token_type(tk) != token_SYMBOL)
         machine_fail(m, str_f(
-          "Expected symbol of module '%s'", symbol_to_str(module)
+          "'%s' is not a module symbol", symbol_to_str(module)
         ));
       sym = token_symbol(tk);
       continue;
@@ -507,6 +567,9 @@ static Machine *cprocess (Machine *m) {
       else if (symbol == symbol_FOR) sfor(m);
       else if (symbol == symbol_IMPORT) import(m);
       else if (symbol == symbol_ASSERT) sassert(m);
+      else if (symbol == symbol_EXPECT) expect(m);
+      else if (symbol == symbol_STACK) types_fail(m);
+      else if (symbol == symbol_STACK_CHECK) types_check(m);
       else  {
         Heap *h = imports_get(symbol);
         if (h) {

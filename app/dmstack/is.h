@@ -9,9 +9,8 @@
 #include "dmc/async.h"
 #include "Reader.h"
 
-/// Returns Opt<Token> - Reads one token from machine_prg(). If there are no
+/// Returns Opt<Token> - Reads one token. If there are no
 /// more tokens, returns 'opt_empty()'.
-/// Throw 'ST_EXC' if fails.
 Opt *tkreader_next(Reader *reader);
 
 #endif
@@ -134,9 +133,6 @@ void fails_range (Machine *m, int min, int max, int ix);
 ///   ix : Value out of range.
 void fails_check_range (Machine *m, int min, int max, int ix);
 
-///
-void *fails_read_pointer (Machine *m, Symbol sym, Token *pointer);
-
 #endif
 // Copyright 29-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -193,9 +189,8 @@ Arr *pmodule_list (Pmodule *pm);
 typedef struct reader_Reader Reader;
 
 /// Creates a new stack machine
-///   source : Identifier (File without extension or 'ad hoc' identifier).
+///   source : Identifier (File without extension or "").
 ///   prg    : Program to process.
-///   nline  : Current line number.
 Reader *reader_new (char *source, char *prg);
 
 /// Creates a new stack machine
@@ -222,7 +217,7 @@ int reader_prg_ix (Reader *this);
 ///
 void reader_set_prg_ix (Reader *this, int value);
 
-/// Used to pass an extra Tokebn.
+/// Used to pass an extra Token.
 /// Its return can be NULL.
 Token *reader_next_tk (Reader *this);
 
@@ -269,6 +264,22 @@ void primitives_add_base (Heap *heap);
 
 ///
 void primitives_add_lib (Lib *lib);
+
+#endif
+// Copyright 02-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+#ifndef TYPES_H
+  #define TYPES_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+/// Check types of stack values and raise a fail if checking not succeeds.
+void types_fail (Machine *m);
+
+/// Check types of stack values and push in stack '0' if checking not succeeds.
+void types_check (Machine *m);
 
 #endif
 // Copyright 22-Sept-2019 ºDeme
@@ -754,6 +765,9 @@ Opt *args_param (char *key);
 /// Returns Arr<char>. Argumentes of dms file.
 Arr *args_dms_params (void);
 
+/// Returns 0 if dmstack was called with the option '-d'
+int args_is_production (void);
+
 #endif
 // Copyright 16-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
@@ -792,6 +806,73 @@ Arr *lib_entries (Lib *this);
 
 #endif
 
+// Copyright 05-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Utility to read tokens.
+/// Every function try to read a type and raises a fail if it fails.
+
+#ifndef TK_H
+  #define TK_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+Int tk_int (Machine *m, Token *t);
+
+///
+double tk_float (Machine *m, Token *t);
+
+///
+char *tk_string (Machine *m, Token *t);
+
+/// Returns Arr<Token>
+Arr *tk_list (Machine *m, Token *t);
+
+///
+Symbol tk_symbol (Machine *m, Token *t);
+
+///
+void *tk_pointer (Machine *m, Token *t, Symbol sym);
+
+///
+Int tk_pop_int (Machine *m);
+
+///
+double tk_pop_float (Machine *m);
+
+///
+char *tk_pop_string (Machine *m);
+
+/// Returns Arr<Token>
+Arr *tk_pop_list (Machine *m);
+
+///
+Symbol tk_pop_symbol (Machine *m);
+
+///
+void *tk_pop_pointer (Machine *m, Symbol sym);
+
+///
+Int tk_peek_int (Machine *m);
+
+///
+double tk_peek_float (Machine *m);
+
+///
+char *tk_peek_string (Machine *m);
+
+/// Returns Arr<Token>
+Arr *tk_peek_list (Machine *m);
+
+///
+Symbol tk_peek_symbol (Machine *m);
+
+///
+void *tk_peek_pointer (Machine *m, Symbol sym);
+
+#endif
 // Copyright 05-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -805,11 +886,11 @@ Arr *lib_entries (Lib *this);
 
 enum symbol_SYSTEM {
   symbol_IMPORT, symbol_IF, symbol_ELIF, symbol_ELSE, symbol_BREAK,
-  symbol_EQUALS, symbol_AMPERSAND, symbol_NOP, symbol_EVAL, symbol_RUN,
-  symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP, symbol_WHILE,
-  symbol_FOR, symbol_ASSERT, symbol_THIS,
+  symbol_EQUALS, symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP, symbol_EVAL,
+  symbol_RUN, symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP, symbol_WHILE,
+  symbol_FOR, symbol_ASSERT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
 
-  symbol_BYTES_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
+  symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
   symbol_ISERVER_, symbol_ISERVER_RQ_,
 
   symbol_SYSTEM_COUNT
@@ -830,6 +911,17 @@ int symbol_eq (Symbol this, Symbol other);
 ///
 char *symbol_to_str (Symbol this);
 
+///
+typedef struct symbol_SymbolKv SymbolKv;
+
+///
+SymbolKv *symbolKv_new (Symbol key, Symbol value);
+
+///
+Symbol symbolKv_key (SymbolKv *this);
+
+///
+Symbol symbolKv_value (SymbolKv *this);
 
 #endif
 // Copyright 25-Aug-2019 ºDeme
@@ -841,6 +933,7 @@ char *symbol_to_str (Symbol this);
   #define TOKEN_H
 
 #include "dmc/async.h"
+#include "dmc/List.h"
 #include "DEFS.h"
 #include "Symbol.h"
 
@@ -902,6 +995,12 @@ Token *token_clone (Token *this);
 
 ///
 int token_eq (Token *this, Token *other);
+
+/// Check a type against an stack.
+///   tokens: List<Token> stack.
+///   type  : Type to check.
+///   return: The actual type.
+char *token_check_type (List *tokens, char *type);
 
 ///
 char *token_to_str (Token *this);
