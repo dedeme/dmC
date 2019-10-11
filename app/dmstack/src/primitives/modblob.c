@@ -10,6 +10,20 @@ static void new (Machine *m) {
   machine_push(m, token_from_pointer(symbol_BLOB_, bytes_bf_new(sz)));
 }
 
+static void make (Machine *m) {
+  Int sz = tk_pop_int(m);
+  Int value = tk_pop_int(m);
+  Bytes *bs = bytes_bf_new(sz);
+  memset(bytes_bs(bs), value, sz);
+  machine_push(m, token_from_pointer(symbol_BLOB_, bs));
+}
+
+static void fill (Machine *m) {
+  Int value = tk_pop_int(m);
+  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
+  memset(bytes_bs(bs), value, bytes_len(bs));
+}
+
 static void from (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
@@ -185,12 +199,14 @@ Pmodule *modblob_mk (void) {
   }
 
   add("new", new); // INT - BLOB
+  add("make", make); // <INT, INT> - <BLOB>  (value, size) - (blob)
+  add("fill", fill); // <BLOB, INT> - <BLOB>
   add("from", from); // LIST - BLOB
   add("get", get); // [BLOB, INT] - INT
   add("set", set); // [BLOB, INT, INT] - []
   add("set+", setplus); // [BLOB, INT, INT] - [BLOB]
-  add("up", up); // [BLOB, INT, INT] - []
-  add("up+", upplus); // [BLOB, INT, INT] - []
+  add("up", up); // [BLOB, INT, LIST] - []
+  add("up+", upplus); // [BLOB, INT, LIST] - [BLOB]
 
   add("size", size); // BLOB - INT
   add("==", equals); // [BLOB, BLOB] - INT

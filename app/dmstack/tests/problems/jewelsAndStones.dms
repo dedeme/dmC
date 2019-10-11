@@ -1,0 +1,39 @@
+// Copyright 06-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( jewels =; stones =
+  0 wrap,ref : C =;
+  stones dup
+  (
+    str,get
+    (C (1 +) ^^) (jewels swap str,index : -1 : !=) if
+    dup
+  )
+  ( stones size)
+  for
+  pop pop
+  C >>
+) fn =>
+
+( jewels =;
+  0 wrap,ref : C =;
+  ( (C (1 +) ^^) (jewels swap str,index : -1 : !=) if)
+  ( str,nextRune dup "" !=)
+  while
+  pop pop
+  C >>
+) fn2 =>
+
+"With chars:" sys,println
+"aAAbbbb" "aA" fn dup 3 expect toStr sys,println
+"ZZ" "z" fn dup 0 expect toStr sys,println
+"ZZ" "" fn dup 0 expect toStr sys,println
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" dup fn dup
+  52 expect toStr sys,println
+
+"\nWith runes:" sys,println
+"aAAbbbb" "aA" fn2 dup 3 expect toStr sys,println
+"ZZ" "z" fn2 dup 0 expect toStr sys,println
+"ZZ" "" fn2 dup 0 expect toStr sys,println
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" dup fn2 dup
+  52 expect toStr sys,println

@@ -24,196 +24,208 @@
 
   // index - lastIndex
 
-  "ab" "a" str,index 0 == assert
-  "" "a" str,index -1 == assert
-  "ab" "b" str,index 1 == assert
-  "ab" "c" str,index -1 == assert
-  "ab" "" str,index 0 == assert
-  "" "" str,index 0 == assert
-  "ab" "abc" str,index -1 == assert
-  "abcd" "bc" str,index 1 == assert
-  "abcd" "bcd" str,index 1 == assert
-  "abcd" "d" str,index 3 == assert
-  "abcd" "d" 0 str,indexFrom 3 == assert
-  "abcd" "d" 2 str,indexFrom 3 == assert
-  "abcde" "d" 4 str,indexFrom -1 == assert
-  "abcd" "ad" str,index -1 == assert
+  "ab" "a" str,index 0 expect
+  "" "a" str,index -1 expect
+  "ab" "b" str,index 1 expect
+  "ab" "c" str,index -1 expect
+  "ab" "" str,index 0 expect
+  "" "" str,index 0 expect
+  "ab" "abc" str,index -1 expect
+  "abcd" "bc" str,index 1 expect
+  "abcd" "bcd" str,index 1 expect
+  "abcd" "d" str,index 3 expect
+  "abcd" "d" 0 str,indexFrom 3 expect
+  "abcd" "d" 2 str,indexFrom 3 expect
+  "abcde" "d" 4 str,indexFrom -1 expect
+  "abcd" "ad" str,index -1 expect
 
-  "ab" "a" str,lastIndex 0 == assert
-  "abac" "a" str,lastIndex 2 == assert
-  "" "a" str,lastIndex -1 == assert
-  "ab" "b" str,lastIndex 1 == assert
-  "abdb" "b" str,lastIndex 3 == assert
-  "ab" "c" str,lastIndex -1 == assert
-  "ab" "" str,lastIndex 0 == assert
-  "" "" str,lastIndex 0 == assert
-  "ab" "abc" str,lastIndex -1 == assert
-  "abcd" "bc" str,lastIndex 1 == assert
-  "abcdbc" "bc" str,lastIndex 4 == assert
-  "abcd" "bcd" str,lastIndex 1 == assert
-  "abcd" "d" str,lastIndex 3 == assert
-  "abcddd" "d" str,lastIndex 5 == assert
-  "abcd" "ad" str,lastIndex -1 == assert
+  "ab" "a" str,lastIndex 0 expect
+  "abac" "a" str,lastIndex 2 expect
+  "" "a" str,lastIndex -1 expect
+  "ab" "b" str,lastIndex 1 expect
+  "abdb" "b" str,lastIndex 3 expect
+  "ab" "c" str,lastIndex -1 expect
+  "ab" "" str,lastIndex 0 expect
+  "" "" str,lastIndex 0 expect
+  "ab" "abc" str,lastIndex -1 expect
+  "abcd" "bc" str,lastIndex 1 expect
+  "abcdbc" "bc" str,lastIndex 4 expect
+  "abcd" "bcd" str,lastIndex 1 expect
+  "abcd" "d" str,lastIndex 3 expect
+  "abcddd" "d" str,lastIndex 5 expect
+  "abcd" "ad" str,lastIndex -1 expect
 
-  // sub - left - right
+  // get - sub - left - right
 
+  "abc" 0 str,get "a" expect
+  "abc" 1 str,get "b" expect
+  "abc" 2 str,get "c" expect
   "ab" 1 str,left r =
-  "a" r == assert
+  "a" r expect
   r "b" + -2 -1 str,sub r =
-  "a" r == assert
+  "a" r expect
   r "b" + 0 0 str,sub r =
-  "" r == assert
+  "" r expect
   r "ab" + -1 0 str,sub r =
-  "" r == assert
+  "" r expect
   r "ab" + 2 2 str,sub r =
-  "" r == assert
+  "" r expect
   r "ab" + 0 2 str,sub r =
-  "ab" r == assert
+  "ab" r expect
   r 1 2 str,sub r =
-  "b" r == assert
+  "b" r expect
   r 1 str,right r =
-  "" r == assert
+  "" r expect
   r "ab" + 0 str,right r =
-  "ab" r == assert
+  "ab" r expect
   r -1 str,right r =
-  "b" r == assert
-  "" 0 str,left "" == assert
-  "abc" 0 str,left "" == assert
-  "abc" 1 str,left "a" == assert
-  "abc" 3 str,left "abc" == assert
-  "" 0 str,right "" == assert
-  "abc" 0 str,right "abc" == assert
-  "abc" 1 str,right "bc" == assert
-  "abc" 3 str,right "" == assert
+  "b" r expect
+  "" 0 str,left "" expect
+  "abc" 0 str,left "" expect
+  "abc" 1 str,left "a" expect
+  "abc" 3 str,left "abc" expect
+  "" 0 str,right "" expect
+  "abc" 0 str,right "abc" expect
+  "abc" 1 str,right "bc" expect
+  "abc" 3 str,right "" expect
+
+  // code - fromCode - runeCode - fromRuneCode
+
+  "a" str,code 97 expect
+  97 str,fromCode "a" expect
+  "ñ" str,runeCode 50097 expect
+  50097 str,fromRuneCode "ñ" expect
+  "世" str,runeCode str,fromRuneCode "世" expect
 
   // trim - ltrim - rtrim
 
-  "" str,trim "" == assert
-  " " str,trim "" == assert
-  "   " str,trim "" == assert
-  " a" str,trim "a" == assert
-  "a " str,trim "a" == assert
-  " a " str,trim "a" == assert
-  " a   " str,trim "a" == assert
-  "   a " str,trim "a" == assert
-  "   a   " str,trim "a" == assert
-  "ab c" str,trim "ab c" == assert
-  " ab c" str,trim "ab c" == assert
-  "ab c " str,trim "ab c" == assert
-  " ab c " str,trim "ab c" == assert
-  "   ab c " str,trim "ab c" == assert
-  " ab c   " str,trim "ab c" == assert
-  "    ab c   " str,trim "ab c" == assert
-  "" str,ltrim "" == assert
-  " " str,ltrim "" == assert
-  "   " str,ltrim "" == assert
-  " a" str,ltrim "a" == assert
-  "a " str,ltrim "a " == assert
-  " a " str,ltrim "a " == assert
-  " a   " str,ltrim "a   " == assert
-  "   a " str,ltrim "a " == assert
-  "   a   " str,ltrim "a   " == assert
-  "ab c" str,ltrim "ab c" == assert
-  " ab c" str,ltrim "ab c" == assert
-  "ab c " str,ltrim "ab c " == assert
-  " ab c " str,ltrim "ab c " == assert
-  "   ab c " str,ltrim "ab c " == assert
-  " ab c   " str,ltrim "ab c   " == assert
-  "    ab c   " str,ltrim "ab c   " == assert
-  "" str,rtrim "" == assert
-  " " str,rtrim "" == assert
-  "   " str,rtrim "" == assert
-  " a" str,rtrim " a" == assert
-  "a " str,rtrim "a" == assert
-  " a " str,rtrim " a" == assert
-  " a   " str,rtrim " a" == assert
-  "   a " str,rtrim "   a" == assert
-  "   a   " str,rtrim "   a" == assert
-  "ab c" str,rtrim "ab c" == assert
-  " ab c" str,rtrim " ab c" == assert
-  "ab c " str,rtrim "ab c" == assert
-  " ab c " str,rtrim " ab c" == assert
-  "   ab c " str,rtrim "   ab c" == assert
-  " ab c   " str,rtrim " ab c" == assert
-  "    ab c   " str,rtrim "    ab c" == assert
+  "" str,trim "" expect
+  " " str,trim "" expect
+  "   " str,trim "" expect
+  " a" str,trim "a" expect
+  "a " str,trim "a" expect
+  " a " str,trim "a" expect
+  " a   " str,trim "a" expect
+  "   a " str,trim "a" expect
+  "   a   " str,trim "a" expect
+  "ab c" str,trim "ab c" expect
+  " ab c" str,trim "ab c" expect
+  "ab c " str,trim "ab c" expect
+  " ab c " str,trim "ab c" expect
+  "   ab c " str,trim "ab c" expect
+  " ab c   " str,trim "ab c" expect
+  "    ab c   " str,trim "ab c" expect
+  "" str,ltrim "" expect
+  " " str,ltrim "" expect
+  "   " str,ltrim "" expect
+  " a" str,ltrim "a" expect
+  "a " str,ltrim "a " expect
+  " a " str,ltrim "a " expect
+  " a   " str,ltrim "a   " expect
+  "   a " str,ltrim "a " expect
+  "   a   " str,ltrim "a   " expect
+  "ab c" str,ltrim "ab c" expect
+  " ab c" str,ltrim "ab c" expect
+  "ab c " str,ltrim "ab c " expect
+  " ab c " str,ltrim "ab c " expect
+  "   ab c " str,ltrim "ab c " expect
+  " ab c   " str,ltrim "ab c   " expect
+  "    ab c   " str,ltrim "ab c   " expect
+  "" str,rtrim "" expect
+  " " str,rtrim "" expect
+  "   " str,rtrim "" expect
+  " a" str,rtrim " a" expect
+  "a " str,rtrim "a" expect
+  " a " str,rtrim " a" expect
+  " a   " str,rtrim " a" expect
+  "   a " str,rtrim "   a" expect
+  "   a   " str,rtrim "   a" expect
+  "ab c" str,rtrim "ab c" expect
+  " ab c" str,rtrim " ab c" expect
+  "ab c " str,rtrim "ab c" expect
+  " ab c " str,rtrim " ab c" expect
+  "   ab c " str,rtrim "   ab c" expect
+  " ab c   " str,rtrim " ab c" expect
+  "    ab c   " str,rtrim "    ab c" expect
 
   // split - splitTrim - join
 
-  "" ";" str,split ";" str,join "" == assert
-  ";" ";" str,split ";" str,join "" == assert
-  "ab" ";" str,split ";" str,join "ab" == assert
-  "ab;" ";" str,split ";" str,join "ab" == assert
-  "ab;c;de" ";" str,split ";" str,join "ab;c;de" == assert
-  ";--" ";--" str,split ";--" str,join "" == assert
-  "ab;--" ";--" str,split ";--" str,join "ab" == assert
-  "ab;--" ";--" str,split ";--" str,join "ab" == assert
-  "ab;--c;--de" ";--" str,split ";--" str,join "ab;--c;--de" == assert
+  "" ";" str,split ";" str,join "" expect
+  ";" ";" str,split ";" str,join "" expect
+  "ab" ";" str,split ";" str,join "ab" expect
+  "ab;" ";" str,split ";" str,join "ab" expect
+  "ab;c;de" ";" str,split ";" str,join "ab;c;de" expect
+  ";--" ";--" str,split ";--" str,join "" expect
+  "ab;--" ";--" str,split ";--" str,join "ab" expect
+  "ab;--" ";--" str,split ";--" str,join "ab" expect
+  "ab;--c;--de" ";--" str,split ";--" str,join "ab;--c;--de" expect
   "ab ;--  c \t ;--  de" ";--" str,split ";--" str,join
-    "ab ;--  c \t ;--  de" == assert
-  "" ";" str,splitTrim ";" str,join "" == assert
-  ";" ";" str,splitTrim ";" str,join "" == assert
-  "ab" ";" str,splitTrim ";" str,join "ab" == assert
-  "ab;" ";" str,splitTrim ";" str,join "ab" == assert
-  "ab;c;de" ";" str,splitTrim ";" str,join "ab;c;de" == assert
-  ";--" ";--" str,splitTrim ";--" str,join "" == assert
-  "ab;--" ";--" str,splitTrim ";--" str,join "ab" == assert
-  "ab;--" ";--" str,splitTrim ";--" str,join "ab" == assert
-  "ab;--c;--de" ";--" str,splitTrim ";--" str,join "ab;--c;--de" == assert
+    "ab ;--  c \t ;--  de" expect
+  "" ";" str,splitTrim ";" str,join "" expect
+  ";" ";" str,splitTrim ";" str,join "" expect
+  "ab" ";" str,splitTrim ";" str,join "ab" expect
+  "ab;" ";" str,splitTrim ";" str,join "ab" expect
+  "ab;c;de" ";" str,splitTrim ";" str,join "ab;c;de" expect
+  ";--" ";--" str,splitTrim ";--" str,join "" expect
+  "ab;--" ";--" str,splitTrim ";--" str,join "ab" expect
+  "ab;--" ";--" str,splitTrim ";--" str,join "ab" expect
+  "ab;--c;--de" ";--" str,splitTrim ";--" str,join "ab;--c;--de" expect
   "ab ;--  c \t ;--  de" ";--" str,splitTrim ";--" str,join
-    "ab;--c;--de" == assert
+    "ab;--c;--de" expect
 
   // replace
 
-  "" "." "" str,replace "" == assert
-  "." "." "" str,replace "" == assert
-  "f.j" "." "" str,replace "fj" == assert
-  "f.j." "." "" str,replace "fj" == assert
-  "" "." "," str,replace "" == assert
-  "." "." "," str,replace "," == assert
-  "f.j" "." "," str,replace "f,j" == assert
-  "f.j." "." "," str,replace "f,j," == assert
-  "" ".." "---" str,replace "" == assert
-  ".." ".." "---" str,replace "---" == assert
-  "f..j" ".." "---" str,replace "f---j" == assert
-  "f.j.." ".." "---" str,replace "f.j---" == assert
+  "" "." "" str,replace "" expect
+  "." "." "" str,replace "" expect
+  "f.j" "." "" str,replace "fj" expect
+  "f.j." "." "" str,replace "fj" expect
+  "" "." "," str,replace "" expect
+  "." "." "," str,replace "," expect
+  "f.j" "." "," str,replace "f,j" expect
+  "f.j." "." "," str,replace "f,j," expect
+  "" ".." "---" str,replace "" expect
+  ".." ".." "---" str,replace "---" expect
+  "f..j" ".." "---" str,replace "f---j" expect
+  "f.j.." ".." "---" str,replace "f.j---" expect
 
   // utf8
 
-  "" str,runes 0 == assert
-  "a" str,runes 1 == assert
-  "\n" str,runes 1 == assert
-  "ú" str,runes 1 == assert
-  "ñ" str,runes 1 == assert
-  "€" str,runes 1 == assert
-  "a b" str,runes 3 == assert
-  "a\nb" str,runes 3 == assert
-  "añb" str,runes 3 == assert
-  "a€b" str,runes 3 == assert
-  " a\tb €\n" str,runes 7 == assert
+  "cañón | a\tb €\n" 0 str,getRune "c" expect
+  "cañón | a\tb €\n" 3 str,getRune "ó" expect
+  "cañón | a\tb €\n" 13 str,getRune "\n" expect
+  "" str,runes 0 expect
+  "a" str,runes 1 expect
+  "\n" str,runes 1 expect
+  "ú" str,runes 1 expect
+  "ñ" str,runes 1 expect
+  "€" str,runes 1 expect
+  "a b" str,runes 3 expect
+  "a\nb" str,runes 3 expect
+  "añb" str,runes 3 expect
+  "a€b" str,runes 3 expect
+  " a\tb €\n" str,runes 7 expect
   "" // u8target   rest rune
   "cañón | a\tb €\n" // u8source
-  (str,nextRune swap u8s = + u8s)
-  (dup size 0 >)
-  while
-  pop "cañón | a\tb €\n" == assert
+  (dup size 0 >) (str,nextRune swap u8s = + u8s) while
+  pop "cañón | a\tb €\n" expect
 
-  "" str,toUnicode str,fromUnicode "" == assert
-  "a" str,toUnicode str,fromUnicode "a" == assert
-  "\n" str,toUnicode str,fromUnicode "\n" == assert
-  "ú" str,toUnicode str,fromUnicode "ú" == assert
-  "ñ" str,toUnicode str,fromUnicode "ñ" == assert
-  "€" str,toUnicode str,fromUnicode "€" == assert
-  "a b" str,toUnicode str,fromUnicode "a b" == assert
-  "a\nb" str,toUnicode str,fromUnicode "a\nb" == assert
-  "añb" str,toUnicode str,fromUnicode "añb" == assert
-  "a€b" str,toUnicode str,fromUnicode "a€b" == assert
-  " a\tb €\n" str,toUnicode str,fromUnicode " a\tb €\n" == assert
+  "" str,toUnicode str,fromUnicode "" expect
+  "a" str,toUnicode str,fromUnicode "a" expect
+  "\n" str,toUnicode str,fromUnicode "\n" expect
+  "ú" str,toUnicode str,fromUnicode "ú" expect
+  "ñ" str,toUnicode str,fromUnicode "ñ" expect
+  "€" str,toUnicode str,fromUnicode "€" expect
+  "a b" str,toUnicode str,fromUnicode "a b" expect
+  "a\nb" str,toUnicode str,fromUnicode "a\nb" expect
+  "añb" str,toUnicode str,fromUnicode "añb" expect
+  "a€b" str,toUnicode str,fromUnicode "a€b" expect
+  " a\tb €\n" str,toUnicode str,fromUnicode " a\tb €\n" expect
   "cañón | a\tb €\n¶" str,toUnicode str,fromUnicode "cañón | a\tb €\n¶"
-    == assert
+    expect
 
-  "" str,fromIso "" == assert
-  "a" str,fromIso "a" == assert
-  "!!" str,fromIso "!!" == assert
+  "" str,fromIso "" expect
+  "a" str,fromIso "a" expect
+  "!!" str,fromIso "!!" expect
   "ñ" str,fromIso "ñ" != assert
 
   "cañón" str,toUpper "CAÑÓN" != assert
@@ -221,14 +233,14 @@
   "é" "f" str,cmp 0 < ! assert
   "é" "f" str,greater? assert
   "es_ES.utf8" sys,setLocale
-  sys,locale "es_ES.utf8" == assert
-  "cañón" str,toUpper "CAÑÓN" == assert
-  "CAÑÓN" str,toLower "cañón" == assert
+  sys,locale "es_ES.utf8" expect
+  "cañón" str,toUpper "CAÑÓN" expect
+  "CAÑÓN" str,toLower "cañón" expect
   "é" "f" > assert
   "é" "f" str,cmp 0 < assert
   "é" "f" str,greater? ! assert
   "C" sys,setLocale
-  sys,locale "C" == assert
+  sys,locale "C" expect
   "CAÑÓN" str,toLower "cañón" != assert
   "é" "f" > assert
   "é" "f" str,cmp 0 < ! assert
@@ -238,12 +250,12 @@
   abc
    deñ
 fg \n
-  ` "abc\n deñ\nfg \\n\n" == assert
+  ` "abc\n deñ\nfg \\n\n" expect
   `
-  abc` "abc" == assert
+  abc` "abc" expect
   `|
   `abc`
-  |` "`abc`\n" == assert
+  |` "`abc`\n" expect
 
   empty? assert
 ) run

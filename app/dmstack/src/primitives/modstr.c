@@ -167,6 +167,38 @@ static void to_upper (Machine *m) {
   pushstr(m, str_to_upper(s));
 }
 
+static void get (Machine *m) {
+  Int ix = tk_pop_int(m);
+  char *s = tk_pop_string(m);
+  fails_check_range(m, 0, strlen(s) - 1, ix);
+  pushstr(m, str_c(s[ix]));
+}
+
+static void getrune (Machine *m) {
+  Int ix = tk_pop_int(m);
+  char *s = tk_pop_string(m);
+  if (ix < 0) fails_range(m, 0, str_runes(s) - 1, ix);
+  int r = 0;
+  Int c = 0;
+  char *rune;
+  char *p = s;
+  for (;;) {
+    p = str_next_rune(&rune, p);
+    if (!*rune) {
+      r = 1;
+      break;
+    }
+    if (c == ix) break;
+    ++c;
+  }
+  if (r) {
+    int len = str_runes(s);
+    if (len == -1) machine_fail(m, str_f("Wrong UTF-8 string '%s'", s));
+    else fails_range(m, 0, len - 1, ix);
+  }
+  pushstr(m, rune);
+}
+
 static void subaux (Machine *m, int begin, int end, int is_right) {
   void bounds (int size) {
     if (is_right) end = size;
@@ -195,6 +227,66 @@ static void left (Machine *m) {
 static void right (Machine *m) {
   Int cut = tk_pop_int(m);
   subaux(m, cut, 0, 1);
+}
+
+static void code (Machine *m) {
+  char *ch = tk_pop_string(m);
+  if (!*ch) machine_fail(m, "String is empty");
+  machine_push(m, token_new_int(0, *ch));
+}
+
+static void fromcode (Machine *m) {
+  Int code = tk_pop_int(m);
+  machine_push(m, token_new_string(0, str_c(code)));
+}
+
+static void runecode (Machine *m) {
+  char *ch = tk_pop_string(m);
+  if (!*ch) machine_fail(m, "String is empty");
+  char *rune;
+  str_next_rune(&rune, ch);
+  if (!*rune) machine_fail(m, "Wrong UTF8 code");
+  unsigned char *rn = (unsigned char *) rune;
+  Int c;
+  switch (strlen(rune)) {
+    case 1: c = *rn; break;
+    case 2: c = *rn * 256 + rn[1]; break;
+    case 3: c = *rn * 65536 + rn[1] * 256 + rn[2]; break;
+    default: c = *rn * 16777216 + rn[1] * 65536 + rn[2] * 256 + rn[3];
+  }
+  machine_push(m, token_new_int(0, c));
+}
+
+static void fromrunecode (Machine *m) {
+  Int code = tk_pop_int(m);
+  char *r;
+  if (code < 256) {
+    r = ATOMIC(2);
+    r[1] = 0;
+    *r = code;
+  } else if (code < 65536) {
+    r = ATOMIC(3);
+    r[2] = 0;
+    r[1] = code % 256;
+    *r = code / 256;
+  } else if (code < 16777216) {
+    r = ATOMIC(4);
+    r[3] = 0;
+    r[2] = code % 256;
+    code = code / 256;
+    r[1] = code % 256;
+    *r = code / 256;
+  } else {
+    r = ATOMIC(5);
+    r[4] = 0;
+    r[3] = code % 256;
+    code = code / 256;
+    r[2] = code % 256;
+    code = code / 256;
+    r[1] = code % 256;
+    *r = code / 256;
+  }
+  machine_push(m, token_new_string(0, r));
 }
 
 static void isdigits (Machine *m) {
@@ -245,9 +337,15 @@ Pmodule *modstr_mk (void) {
   add("toUnicode", to_unicode);
   add("toUpper", to_upper);
 
+  add("get", get);
+  add("getRune", getrune);
   add("sub", sub);
   add("left", left);
   add("right", right);
+  add("code", code);
+  add("fromCode", fromcode);
+  add("runeCode", runecode);
+  add("fromRuneCode", fromrunecode);
 
   add("digits?", isdigits);
   add("number?", isnumber);

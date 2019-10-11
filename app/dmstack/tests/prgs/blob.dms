@@ -12,6 +12,15 @@
   [1, 2, 3] blob,from B2 =
   B2 blob,to [1, 2, 3] == assert
 
+  // make - fill
+
+  1 0 blob,make blob,to () expect
+  112 1 blob,make blob,to (112) expect
+  1 3 blob,make blob,to (1, 1, 1) expect
+  0 blob,new dup 1 blob,fill blob,to () expect
+  112 1 blob,make dup 222 blob,fill blob,to (222) expect
+  1 3 blob,make dup 4 blob,fill blob,to (4, 4, 4) expect
+
   // copy - get - set - set+ - up - up+
   B1 blob,copy B1c =
   B2 blob,copy B2c =

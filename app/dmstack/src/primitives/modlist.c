@@ -37,6 +37,34 @@ static void unary (Machine *m) {
   pushlist(m, a);
 }
 
+static void make (Machine *m) {
+  Int sz = tk_pop_int(m);
+  Token *tk = machine_pop(m);
+  if (token_type(tk) == token_LIST || token_type(tk) == token_POINTER)
+    fails_types_in(m, 4, (enum token_Type[]) {
+        token_INT, token_FLOAT, token_STRING, token_SYMBOL
+      }, tk);
+  Token **tks = GC_MALLOC(sizeof(Token *) * sz);
+  Token **p = tks;
+  Token **pend = p + sz;
+  while (p < pend) *p++ = tk;
+  pushlist(m, arr_new_c(sz, (void **)tks));
+}
+
+static void fill (Machine *m) {
+  Token *tk = machine_pop(m);
+  if (token_type(tk) == token_LIST || token_type(tk) == token_POINTER)
+    fails_types_in(m, 4, (enum token_Type[]) {
+        token_INT, token_FLOAT, token_STRING, token_SYMBOL
+      }, tk);
+  // Arr<Token>
+  Arr *a = tk_pop_list(m);
+  Int sz = arr_size(a);;
+  Token **p = (Token **)arr_start(a);
+  Token **pend = p + sz;
+  while (p < pend) *p++ = tk;
+}
+
 static void push (Machine *m) {
   Token *tk = machine_pop(m);
   // Arr<Token>
@@ -104,7 +132,7 @@ static void insert (Machine *m) {
   arr_insert(a, ix, tk);
 }
 
-static void insertList (Machine *m) {
+static void insertlist (Machine *m) {
   // Arr<Token>
   Arr *add = getlist(m);
   int ix = getint(m);
@@ -122,7 +150,7 @@ static void lremove (Machine *m) {
   arr_remove(a, ix);
 }
 
-static void removeRange (Machine *m) {
+static void removerange (Machine *m) {
   int end = getint(m);
   int begin = getint(m);
   // Arr<Token>
@@ -546,9 +574,11 @@ Pmodule *modlist_mk (void) {
 
   add("new", new); // [] - LIST
   add("unary", unary); // [] - LIST
+  add("make", make); // <INT, *> - <LIST>
 
-  add("push", push); // [LIST, *] - LIST
-  add("push+", pushplus); // [LIST, *] - []
+  add("fill", fill); // <LIST, *> - <>
+  add("push", push); // <LIST, *> - <>
+  add("push+", pushplus); // <LIST, *> - <LIST>
   add("pop", pop); // LIST - *
   add("peek", peek); // LIST - *
   add("push0", push0); // [LIST, *] - []
@@ -556,9 +586,9 @@ Pmodule *modlist_mk (void) {
   add("pop0", pop0); // LIST - *
   add("peek0", peek0); // LIST - *
   add("insert", insert);
-  add("insertList", insertList);
+  add("insertList", insertlist);
   add("remove", lremove);
-  add("removeRange", removeRange);
+  add("removeRange", removerange);
   add("clear", clear);
   add("reverse", reverse);
   add("shuffle", shuffle);

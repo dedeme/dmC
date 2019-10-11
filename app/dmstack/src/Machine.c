@@ -101,39 +101,54 @@ static void sync (Machine *this) {
   pthread_mutex_unlock(&mutex);
 }
 
+static void elif (Machine *this) {
+  Token *prg_not = machine_pop_exc(this, token_LIST);
+  Token *prg_yes = machine_pop_exc(this, token_LIST);
+  if (token_int(machine_pop_exc(this, token_INT)))
+      machine_process("", this->pmachines, prg_yes);
+  else
+      machine_process("", this->pmachines, prg_not);
+}
+
 static void sif (Machine *this) {
-  // Arr<Token>
-  Arr *a = arr_new();
-  arr_push(a, machine_pop_exc(this, token_LIST));
-  arr_push(a, machine_pop_exc(this, token_LIST));
-  Token *last = NULL;
-  for (;;) {
-    if (!arr_size(this->stack)) break;
-    Token *tk = machine_pop_opt(this, token_SYMBOL);
+  Token *prg = machine_pop_opt(this, token_LIST);
+  if (prg) {
+    Token *tk = machine_pop_opt(this, token_INT);
     if (tk) {
-      Symbol sym = token_symbol(tk);
-      if (sym == symbol_ELIF) {
-        arr_push(a, machine_pop_exc(this, token_LIST));
-        arr_push(a, machine_pop_exc(this, token_LIST));
-        continue;
-      } else if (sym == symbol_ELSE) {
-        last = machine_pop_exc(this, token_LIST);
-      } else {
-        machine_fail(this, "Expected 'else' or condition");
-      }
-    }
-    break;
-  }
-  Token **es = (Token **)arr_start(a);
-  REPEAT(arr_size(a) / 2) {
-    machine_process("", this->pmachines, *es++);
-    if (token_int(machine_pop_exc(this, token_INT))) {
-      machine_process("", this->pmachines, *es);
+      if (token_int(tk)) machine_process("", this->pmachines, prg);
       return;
     }
-    ++es;
-  }_REPEAT
-  if (last) machine_process("", this->pmachines, last);
+  } else {
+    Token *tk = machine_peek_opt(this, token_SYMBOL);
+    if (!tk || token_symbol(tk) != symbol_ELSE)
+      machine_fail(this, "Expected List or 'else'");
+  }
+
+  // Arr<Token>
+  Arr *a = arr_new();
+  Token *tk = machine_peek_opt(this, token_SYMBOL);
+  while (tk && token_symbol(tk) == symbol_ELSE) {
+    machine_pop(this);
+    arr_push(a, machine_pop_exc(this, token_LIST));
+    arr_push(a, machine_pop_exc(this, token_INT));
+    tk = arr_size(this->stack) ? machine_peek_opt(this, token_SYMBOL) : NULL;
+  }
+
+  if (arr_size(a)) {
+    int rprg = 1;
+    while (arr_size(a) > 0) {
+      if (token_int(arr_pop(a))) {
+        machine_process("", this->pmachines, arr_pop(a));
+        rprg = 0;
+        break;
+      }
+      arr_pop(a);
+    }
+    if (rprg && prg) machine_process("", this->pmachines, prg);
+  } else {
+    if (!prg)
+      machine_fail(this, "Expected List");
+  }
 }
 
 static void loop (Machine *this) {
@@ -154,8 +169,8 @@ static void loop (Machine *this) {
 }
 
 static void swhile (Machine *this) {
-  Token *cond = machine_pop_exc(this, token_LIST);
   Token *prg = machine_pop_exc(this, token_LIST);
+  Token *cond = machine_pop_exc(this, token_LIST);
 
   for (;;) {
     machine_process("", this->pmachines, cond);
@@ -177,8 +192,19 @@ static void swhile (Machine *this) {
 }
 
 static void sfor (Machine *this) {
-  Token *cond = machine_pop_exc(this, token_LIST);
   Token *prg = machine_pop_exc(this, token_LIST);
+  Token *cond = machine_pop_opt(this, token_INT);
+  if (cond) {
+    for (Int i = 0; i < token_int(cond); ++i) {
+      machine_push(this, token_new_int(0, i));
+      machine_process("", this->pmachines, prg);
+    }
+    return;
+  }
+
+  cond = machine_pop_opt(this, token_LIST);
+
+  if (!cond) fails_types(this, 2, (enum token_Type[]){token_INT, token_LIST});
 
   Machine *m2 = machine_isolate_process("", this->pmachines, cond);
 
@@ -554,8 +580,8 @@ static Machine *cprocess (Machine *m) {
       else if (symbol == symbol_MRUN) mrun(m);
       else if (symbol == symbol_DATA) data(m);
       else if (symbol == symbol_SYNC) sync(m);
-      else if (symbol == symbol_ELSE || symbol == symbol_ELIF)
-        machine_push(m, tk);
+      else if (symbol == symbol_ELIF) elif(m);
+      else if (symbol == symbol_ELSE) machine_push(m, tk);
       else if (symbol == symbol_IF) sif(m);
       else if (symbol == symbol_BREAK) {
         arr_push(m->stack, tk);

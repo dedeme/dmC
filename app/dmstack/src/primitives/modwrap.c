@@ -35,18 +35,16 @@ static void issome (Machine *m) {
 static void option (Machine *m) {
   // List<Machine>
   List *pmachines = machine_pmachines(m);
-  Token *cond = poplist(m);
-  Token *prg2 = poplist(m);
-  Token *prg1 = poplist(m);
-  machine_process("", pmachines, cond);
+  Token *prgfail = poplist(m);
+  Token *prgok = poplist(m);
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (!sz) {
-    machine_process("", pmachines, prg1);
+    machine_process("", pmachines, prgfail);
   } else if (sz == 1) {
     machine_push(m, *arr_start(a));
-    machine_process("", pmachines, prg2);
+    machine_process("", pmachines, prgok);
   } else {
     fails_size_list(m, a, 1);
   }
@@ -78,19 +76,16 @@ static void isright (Machine *m) {
 static void either (Machine *m) {
   // List<Machine>
   List *pmachines = machine_pmachines(m);
-  Token *cond = poplist(m);
-  Token *prg2 = poplist(m);
-  Token *prg1 = poplist(m);
-  machine_process("", pmachines, cond);
-  // Arr<Token>
+  Token *prgfail = poplist(m);
+  Token *prgok = poplist(m);
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
   if (sz == 1) {
     machine_push(m, *arr_start(a));
-    machine_process("", pmachines, prg2);
+    machine_process("", pmachines, prgok);
   } else if (sz == 2) {
     machine_push(m, *arr_start(a));
-    machine_process("", pmachines, prg1);
+    machine_process("", pmachines, prgfail);
   } else {
     fails_size_list(m, a, 2);
   }

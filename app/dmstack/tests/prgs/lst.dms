@@ -13,12 +13,19 @@
   4 even assert
   5 odd assert
 
-  // new - unary - tp2 - tp3
+  // new - unary
 
   lst,new () == assert
   "a" lst,unary ("a") == assert
-  1 2 wrap,tp (1, 2) == assert
-  "a" 1 "b" wrap,tp3 ["a", 1, "b"] == assert
+
+  // make - fill
+
+  1 0 lst,make () expect
+  "a" 1 lst,make ("a") expect
+  1 3 lst,make (1, 1, 1) expect
+  lst,new dup 1 lst,fill () expect
+  "a" 1 lst,make dup "z" lst,fill ("z") expect
+  1 3 lst,make dup 4 lst,fill (4, 4, 4) expect
 
   // push - push0 - pop - pop0 - peek - peek0
 

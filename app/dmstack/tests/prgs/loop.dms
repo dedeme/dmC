@@ -4,131 +4,147 @@
 /// Loop tests
 (
 
-  (1 assert) (1 1 ==) if
-  (0 assert) ("a" "" ==) if
+  1 1 == (1 assert) if
+  "a" "" == (0 assert) if
 
-  (0 assert) else (1 assert) ("a" "a" ==) if
-  (1 assert) else (0 assert) ("a" "a" !=) if
+  "a" "a" == (1 assert) (0 assert) elif
+  "a" "a" != (0 assert) (1 assert) elif
 
-  ("") else ("abc") (2 1 >=) if "abc" == assert
-  ("") else ("abc") (2 1 <) if "" == assert
+  "a" "a" == (1 assert) else (0 assert) if
+  "a" "a" != (0 assert) else (1 assert)  if
 
-  (1 assert) else (0 assert) (0) elif (0 assert) (0) if
-  (0 assert) else (1 assert) (1) elif (0 assert) (0) if
-  (0 assert) else (0 assert) (0) elif (1 assert) (1) if
-  (0 assert) else (0 assert) (1) elif (1 assert) (1) if
-  0 (pop 1) (1) elif (pop 0) (0) if assert
-  0 (pop 0) (1) elif (pop 1) (1) if assert
+  2 1 >= ("abc") else ("") if "abc" == assert
+  2 1 > ("abc") else ("") if "abc" == assert
 
-  ("") else ("de") (0) elif ("abc") (2 1 >=) if "abc" == assert
-  ("") else ("de") (1) elif ("abc") (2 1 >=) if "abc" == assert
-  ("") else ("de") (0) elif ("abc") (2 1 <) if "" == assert
-  ("") else ("de") (1) elif ("abc") (2 1 <) if "de" == assert
+  0 (0 assert) else 0 (0 assert) else (1 assert) if
+  0 (0 assert) else 1 (1 assert) else (0 assert) if
+  1 (1 assert) else 0 (0 assert) else (0 assert) if
+  1 (1 assert) else 1 (0 assert) else (0 assert) if
+  1 0 (pop 0) else 1 (pop 1) else if assert
+  1 1 (pop 1) else 0 (pop 0) else if assert
+
+  2 1 >= ("abc") else 0 ("de") else ("") if "abc" expect
+  2 1 < ("abc") else 0 ("de") else ("") if "" expect
+  2 1 < ("abc") else 1 ("de") else ("") if "de" expect
 
   // "Loop (1): " sys,print; clock,now C1 =
   0 // sum
   0 // c
-  ( (pop; break) else
-    (c =; c +; c 1 +)
-    (dup 10 <) if) loop
+  ( dup 10 < (c =; c +; c 1 +) (pop; break) elif)
+  loop
   45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "Loop (2): " sys,print; clock,now C1 =
   0 // sum
   0 // c
-  ( (pop; break) else
-    (c =; c +; c 1 +)
-    (dup 10 <) if) loop
+  ( dup 10 < (c =; c +; c 1 +) else (pop; break) if)
+  loop
   45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "While: " sys,print; clock,now C1 =
   0 // sum
   0 // c
-  (c =; c +; c 1 +) (dup 10 <) while
+  (dup 10 <) (c =; c +; c 1 +) while
   pop 45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "While to 4 (1): " sys,print; clock,now C1 =
   0 // sum
   0 // c
-  ((c = c +; c 1 +) else (break) (dup 4 >) if) (dup 10 <) while
+  (dup 10 <) (dup 4 > (break) (c = c +; c 1 +) elif) while
   pop 10 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "For: " sys,print; clock,now C1 =
   0 // sum
-  (i =; i +) (10) for
+  10 (i =; i +) for
   45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "For to 4 (1): " sys,print; clock,now C1 =
   0 // sum
   0 // counter
-  ((i =; c =; i +; i) else (i =; break) (dup 4 >) if) (10) for pop
+  (10) (dup 4 > (i =; break) else (i =; c =; i +; i) if) for pop
   10 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "For (2): " sys,print; clock,now C1 =
   0 // sum
-  (i =; i +) (2 10) for
+  (2 10) (i =; i +) for
   44 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "For (3): " sys,print; clock,now C1 =
   0 // sum
-  (i =; i +) (9 -1 -1) for
+  (9 -1 -1) (i =; i +) for
   45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // Value volatil
+  3
   ( i =;
     ["a"] 3 lst,push+; L =;
-    (L ["a", 3] != assert) (i 0 !=) if
-  ) (3) for
+    i 0 != (L ["a", 3] != assert) if
+  )
+  for
 
   // Value NO volatil
+  (3)
   ( i =;
     ["a"] clone 3 lst,push+; L =;
     L ["a", 3] == assert
-  ) (3) for
+  )
+  for
 
   // Value NO volatil
+  3
   ( i =;
     ["a"] data 3 lst,push+; L =;
     L ["a", 3] == assert
-  ) (3) for
+  )
+  for
 
   // Value volatil
+  3
   ( i =;
     [5] L =; L 0 : L 0 get 1 + : set
     L i 6 + lst,unary == assert
-  ) (3) for
+  )
+  for
 
   // Value NO volatil
+  3
   ( i =;
     [5] clone L =; L 0 : L 0 get 1 + : set
     L [6] == assert
-  ) (3) for
+  )
+  for
 
   // Value NO volatil
+  3
   ( i =;
     [5] data L =; L 0 : L 0 get 1 + : set
     L [6] == assert
-  ) (3) for
+  )
+  for
 
   // Value NO volatil
+  3
   ( i =;
     [5] clone blob,from B =; B 0 : B 0 blob,get 1 + : blob,set
     B [6] blob,from blob,== assert
-  ) (3) for
+  )
+  for
 
   // Value NO volatil
+  3
   ( i =;
     [5] data blob,from B =; B 0 : B 0 blob,get 1 + : blob,set
     B [6] blob,from blob,== assert
-  ) (3) for
+  )
+  for
 
   empty? assert
 

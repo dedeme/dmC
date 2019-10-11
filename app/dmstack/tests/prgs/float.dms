@@ -11,8 +11,8 @@
 45. float,abs 45. expect
 -452. float,abs 452. expect
 
-// float,rnd println
-// float,rnd println
+// float,rnd puts
+// float,rnd puts
 
 5. 5. float,max 5. expect
 2. 5. float,max 5. expect

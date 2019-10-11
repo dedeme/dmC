@@ -12,8 +12,8 @@
   45 int,abs 45 == assert
   -452 int,abs 452 == assert
 
-  // 2345 int,rnd print
-  // 2345 int,rnd print
+  // 2345 int,rnd puts
+  // 2345 int,rnd puts
 
   43 5 int,div; 3 == assert; 8 == assert
 

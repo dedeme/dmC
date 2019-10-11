@@ -885,10 +885,11 @@ void *tk_peek_pointer (Machine *m, Symbol sym);
 #include "DEFS.h"
 
 enum symbol_SYSTEM {
-  symbol_IMPORT, symbol_IF, symbol_ELIF, symbol_ELSE, symbol_BREAK,
-  symbol_EQUALS, symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP, symbol_EVAL,
-  symbol_RUN, symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP, symbol_WHILE,
-  symbol_FOR, symbol_ASSERT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
+  symbol_IMPORT, symbol_IF, symbol_ELSE, symbol_ELIF,
+  symbol_BREAK, symbol_EQUALS, symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP,
+  symbol_EVAL, symbol_RUN, symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP,
+  symbol_WHILE, symbol_FOR, symbol_ASSERT, symbol_EXPECT, symbol_THIS,
+  symbol_STACK, symbol_STACK_CHECK,
 
   symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
   symbol_ISERVER_, symbol_ISERVER_RQ_,

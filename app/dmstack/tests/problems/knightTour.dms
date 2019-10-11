@@ -1,0 +1,196 @@
+// Copyright 09-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( State =
+  State "start" obj,get run : Start =
+  State "end" obj,get : end =>
+  State "return" obj,get : return =>
+  State "ahead" obj,get : ahead =>
+  State "side" obj,get : side =>
+
+  ( Ob =
+    Ob ahead
+    (
+      Ob end
+      ( 1)
+      (
+        0
+        (Ob side)
+        (
+          Ob end
+          ( pop; 1; break)
+          ( Ob go (pop; 1; break) if)
+          elif
+        )
+        while
+      )
+      elif
+    )
+    ( 0)
+    elif
+  ) go =>
+
+  Start end
+  ( Start 1 return)
+  (
+    Start dup go return
+  )
+  elif
+) fn =>
+
+/*
+( L =
+  L size 3 <
+  ( L [] lst,push; 1)
+  ( 0)
+  elif
+) Ahead =
+
+( L =
+  L lst,pop : N =
+
+  N [9] ==
+  ( 0)
+  else
+  N [] ==
+  ( L [0] lst,push; 1)
+  else
+  ( L N >> 1 + wrap,some lst,push; 1)
+  if
+) Side =
+
+{
+  "start": ([])
+  "end": ([[9] [9] [9]] == (1) (0) elif)
+  "return": (() (pop; []) elif)
+  "ahead": Ahead
+  "side": Side
+} data fn
+
+puts
+*/
+
+[] data 8 (0 8 lst,make lst.push+) : Board =
+
+(dup Board swap 0 get get : swap 1 get get)
+bget => // <[row, col]> - <INT>
+
+(dup Board swap 0 get get : swap 1 get 1 set)
+bput => // <[row, col]> - <>
+
+(dup Board swap 0 get get : swap 1 get 0 set)
+bquit => // <[row, col]> - <>
+
+(
+  Board
+  (7 -1 -1)
+  ( row =;
+    dup row get
+    8 (col = dup col get toStr sys,print) for pop "" sys,println)
+  for
+  pop
+)
+bshow =>
+
+/*
+[3, 1] bput; Board puts
+[3, 1] bget assert
+[3, 1] bquit; Board puts
+[3, 1] bget ! assert
+*/
+
+(dup 0 get dup 0 >= swap 9 < && : swap 1 get dup 0 >= swap 9 < && : &&)
+csOk? => // <[row, col]> - <INT>
+
+/*
+[0 0] csOk? assert
+[8 8] csOk? assert
+[4 5] csOk? assert
+[-1 -1] csOk? ! assert
+[-1 5] csOk? ! assert
+[-1 9] csOk? ! assert
+[-1 -1] csOk? ! assert
+[4 -1] csOk? ! assert
+[9 -1] csOk? ! assert
+*/
+
+( st =
+  st 0 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get 1 + : set+) if
+  st 1 == (dup 0 swap : 0 get 1 + : set+; dup 1 swap : 1 get 2 + : set+) if
+  st 2 == (dup 0 swap : 0 get -1 + : set+; dup 1 swap : 1 get 2 + : set+) if
+  st 3 == (dup 0 swap : 0 get -2 + : set+; dup 1 swap : 1 get 1 + : set+) if
+  st 4 == (dup 0 swap : 0 get -2 + : set+; dup 1 swap : 1 get -1 + : set+) if
+  st 5 == (dup 0 swap : 0 get -1 + : set+; dup 1 swap : 1 get -2 + : set+) if
+  st 6 == (dup 0 swap : 0 get 1 + : set+; dup 1 swap : 1 get -2 + : set+) if
+  st 7 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get -1 + : set+) if
+) jump => // <[row, col], state> - <[row, col]>
+
+/*
+[2, 2] 0 side bput
+[2, 2] 1 side bput
+[2, 2] 2 side bput
+[2, 2] 3 side bput
+[2, 2] 4 side bput
+[2, 2] 5 side bput
+[2, 2] 6 side bput
+[2, 2] 7 side bput
+bshow
+[2, 2] 0 side bquit
+[2, 2] 1 side bquit
+[2, 2] 2 side bquit
+[2, 2] 3 side bquit
+[2, 2] 4 side bquit
+[2, 2] 5 side bquit
+[2, 2] 6 side bquit
+[2, 2] 7 side bquit
+bshow
+*/
+
+( () lst,push; 1)
+Ahead =
+
+( L =
+  L lst,pop : Last =
+
+  L size
+  (
+    Last () ==
+    ( 0)
+    ( Last 1 get bquit; Last 0 get)
+    elif : wrap,ref : Ix =
+
+    L lst,peek 1 get : Pcs =
+    0
+    (Ix >> 8 <)
+    (
+      Pcs : Ix >> : jump : Cs =
+      Cs csOk? : Cs bget == 0 : &&
+      (
+        L : [Ix >> 1 +, Cs] data : push
+        Cs bput
+        pop; 1; break
+      )
+      ( Ix (++) ^^)
+      elif
+    )
+    while
+  )
+  ( 0)
+  elif
+) Side =
+
+8
+( row =
+  8
+  ( col =
+    {
+      "start": ([[0, [row, col] data] data] data)
+      "end": (size 64 == (1) (0) elif)
+      "return": (() (pop; []) elif)
+      "ahead": Ahead
+      "side": Side
+    } data fn
+  )
+  for
+)
+for
