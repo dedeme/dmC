@@ -70,6 +70,13 @@ Token *token_new_symbol (int line, Symbol value) {
   return this;
 }
 
+Token *token_from_pointer (Symbol sym, void *pointer) {
+  Token *p = token_new_int(0, 0);
+  p->value.pointer = pointer;
+  p->type = token_POINTER;
+  return token_new_list(0, arr_new_from(token_new_symbol(0, sym), p, NULL));
+}
+
 enum token_Type token_type (Token *this) {
   return this->type;
 }
@@ -156,14 +163,31 @@ char *token_to_str (Token *this) {
     case token_INT: return (char *)js_wl(this->value.i);
     case token_POINTER: return (char *)js_wl(this->value.i); // Correcto
     case token_FLOAT: return (char *)js_wd(this->value.f);
-    case token_STRING: return (char *)js_ws(this->value.s);
+    case token_STRING: return this->value.s;
     case token_SYMBOL:
       return str_f("'%s'", symbol_to_str(this->value.sym));
     case token_LIST: {
       // Arr<char>
       Arr *a = arr_map(this->value.a, (FCOPY)token_to_str);
-      if (arr_size(a) > 5) {
-        a = arr_take(a, 5);
+      return str_f("(%s)", str_join(a, ", "));
+    }
+  }
+  EXC_ILLEGAL_STATE("switch not exhaustive");
+  return NULL; // not reachable.
+}
+
+char *token_to_str_draft (Token *this) {
+  switch (this->type) {
+    case token_INT: return (char *)js_wl(this->value.i);
+    case token_POINTER: return (char *)js_wl(this->value.i); // Correcto
+    case token_FLOAT: return (char *)js_wd(this->value.f);
+    case token_STRING: return (char *)js_ws(this->value.s);
+    case token_SYMBOL:
+      return str_f("'%s'", symbol_to_str(this->value.sym));
+    case token_LIST: {
+      // Arr<char>
+      Arr *a = arr_map(arr_take(this->value.a, 5), (FCOPY)token_to_str_draft);
+      if (arr_size(this->value.a) > 5) {
         arr_push(a, "...");
       }
       return str_f("(%s)", str_join(a, ", "));
@@ -184,13 +208,6 @@ char *token_type_to_str (enum token_Type type) {
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
   return NULL; // not reachable.
-}
-
-Token *token_from_pointer (Symbol sym, void *pointer) {
-  Token *p = token_new_int(0, 0);
-  p->value.pointer = pointer;
-  p->type = token_POINTER;
-  return token_new_list(0, arr_new_from(token_new_symbol(0, sym), p, NULL));
 }
 
 char *token_check_type (List *tokens, char *type) {

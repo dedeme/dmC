@@ -24,7 +24,7 @@ void types_fail (Machine *m) {
   char *checked = check(machine_stack(m), t);
   if (!str_eq(checked, t))
     machine_fail(m, str_f(
-      "Stack type check failed. Expected: '%s'. Actual: '%s'", t, checked
+      "Stack type check failed. Expected: '@%s'. Actual: '@%s'", t, checked
     ));
 }
 

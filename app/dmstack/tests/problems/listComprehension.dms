@@ -1,0 +1,31 @@
+// Copyright 09-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+( 1 +; n =
+  [] data
+    ( 1 n)
+    ( x =
+      ( x n)
+      ( y =
+        ( y n)
+        ( z =
+          [x, y, z] data lst,push+
+        )
+        for
+      )
+      for
+    )
+    for
+    ( L =
+      L 0 get : x =
+      L 1 get : y =
+      L 2 get : z =
+      x x * : y y * : + :: z z * :: ==
+    )
+    lst,filter
+  (puts) lst,each
+) triplets =>
+
+20 triplets
+
+empty? assert

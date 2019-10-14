@@ -2,6 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "primitives/modint.h"
+#include <limits.h>
 #include "dmc/rnd.h"
 #include "fails.h"
 #include "tk.h"
@@ -47,6 +48,22 @@ static void min (Machine *m) {
   fn2(m, mn);
 }
 
+static void maxInt (Machine *m) {
+  Int r = 0;
+  if (sizeof(Int) ==  sizeof(int)) r = INT_MAX;
+  else if (sizeof(Int) ==  sizeof(long int)) r = LONG_MAX;
+  else if (sizeof(Int) ==  sizeof(long long int)) r = LLONG_MAX;
+  machine_push(m, token_new_int(0, r));
+}
+
+static void minInt (Machine *m) {
+  Int r = 0;
+  if (sizeof(Int) ==  sizeof(int)) r = INT_MIN;
+  else if (sizeof(Int) ==  sizeof(long int)) r = LONG_MIN;
+  else if (sizeof(Int) ==  sizeof(long long int)) r = LLONG_MIN;
+  machine_push(m, token_new_int(0, r));
+}
+
 static void tofloat (Machine *m) {
   machine_push(m, token_new_float(
     0, (double)tk_pop_int(m)
@@ -67,6 +84,8 @@ Pmodule *modint_mk (void) {
   add("max", max); // [INT, INT] - INT
   add("min", min); // [INT, INT] - INT
 
+  add("maxInt", maxInt); // () - INT
+  add("maxInt", minInt); // () - INT
   add("toFloat", tofloat); // INT - FLOAT
   return r;
 }

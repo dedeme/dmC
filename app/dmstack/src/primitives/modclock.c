@@ -58,9 +58,9 @@ Pmodule *modclock_mk (void) {
   }
 
   add("now", now); // [] - LIST   (() - list (LONG, LONG)
-  add("-", sub); // [LIST - LIST] - LIST   lists ar list (LONG, LONG)
-  add("add", sadd); // [LIST- INT] - LIST   lists ar list (LONG, LONG)
-  add("df", df); // [LIST - LIST] - INT   lists ar list (LONG, LONG)
+  add("-", sub); // [LIST - LIST] - LIST   lists are list (LONG, LONG)
+  add("add", sadd); // [LIST- INT] - LIST   lists are list (LONG, LONG)
+  add("df", df); // [LIST - LIST] - INT   lists are list (LONG, LONG) Millisec.
 
   return r;
 }

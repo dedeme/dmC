@@ -50,7 +50,13 @@ Token *reader_process (Reader *this) {
   Token *tk = opt_nget(tkreader_next(this));
   while (tk) {
     if (token_type(tk) == token_SYMBOL) tk = reader_symbol_id(this, r, tk);
-    arr_push(r, tk);
+    if (token_type(tk) == token_STRING) {
+      EACH(reader_interpolation(this, tk), Token, t) {
+        arr_push(r, t);
+      }_EACH
+    } else {
+      arr_push(r, tk);
+    }
     tk = opt_nget(tkreader_next(this));
   }
   return token_new_list(nline, r);
@@ -147,6 +153,69 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     }_EACH
   }
   return tk;
+}
+
+// Arr<Token>
+Arr *reader_interpolation (Reader *this, Token *tk) {
+  char *s = token_string(tk);
+  int nline = token_line(tk);
+  // Arr<Token>
+  Arr *r = arr_new();
+  int pos = 0;
+  int ix = str_index(s, "${");
+  while (ix != -1) {
+    arr_push(r, token_new_string(nline, str_sub(s, pos, ix)));
+
+    char *p = s + pos;
+    char *p_end = s + ix;
+    while (p < p_end) if (*p++ == '\n') ++nline;
+
+    int ix2 = str_index_from(s, "}", ix);
+    if (ix2 == -1)
+      reader_fail(this, "Interpolation '}' not found");
+
+    Reader *subr = reader_new_from_reader(
+      this, str_sub(s, ix + 2, ix2), nline
+    );
+
+    // Arr<Token>
+    Arr *prg = arr_new();
+    Token *tk = opt_nget(tkreader_next(subr));
+    while (tk) {
+      if (token_type(tk) == token_SYMBOL)
+        tk = reader_symbol_id(subr, prg, tk);
+      arr_push(prg, tk);
+      tk = opt_nget(tkreader_next(subr));
+    }
+
+    p = s + ix + 2;
+    p_end = s + ix2;
+    while (p < p_end) if (*p++ == '\n') ++nline;
+
+    if (arr_size(prg)) {
+      arr_push(r, token_new_list(nline, prg));
+      arr_push(r, token_new_symbol(nline, symbol_DATA));
+      arr_push(r, token_new_symbol(nline, symbol_REF_OUT));
+      arr_push(r, token_new_symbol(nline, symbol_TO_STR));
+      arr_push(r, token_new_symbol(nline, symbol_PLUS));
+    } else {
+      arr_push(r, token_new_string(nline, ""));
+      arr_push(r, token_new_symbol(nline, symbol_PLUS));
+    }
+
+    pos = ix2 + 1;
+    ix = str_index_from(s, "${", pos);
+  }
+
+  arr_push(r, token_new_string(nline, str_right(s, pos)));
+
+  if (arr_size(r) > 1) {
+    char *p = s + pos;
+    char *p_end = s + strlen(s);
+    while (p < p_end) if (*p++ == '\n') ++nline;
+    arr_push(r, token_new_symbol(nline, symbol_PLUS));
+  }
+  return r;
 }
 
 void reader_fail (Reader *this, char *msg) {

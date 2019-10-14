@@ -10,7 +10,7 @@
 #include "tk.h"
 
 static void sputs (Machine *m) {
-  puts(token_to_str(machine_pop(m)));
+  puts(token_to_str_draft(machine_pop(m)));
 }
 
 static void to_str (Machine *m) {

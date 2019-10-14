@@ -130,14 +130,15 @@ static void sif (Machine *this) {
   while (tk && token_symbol(tk) == symbol_ELSE) {
     machine_pop(this);
     arr_push(a, machine_pop_exc(this, token_LIST));
-    arr_push(a, machine_pop_exc(this, token_INT));
+    arr_push(a, machine_pop_exc(this, token_LIST));
     tk = arr_size(this->stack) ? machine_peek_opt(this, token_SYMBOL) : NULL;
   }
 
   if (arr_size(a)) {
     int rprg = 1;
     while (arr_size(a) > 0) {
-      if (token_int(arr_pop(a))) {
+      machine_process("", this->pmachines, arr_pop(a));
+      if (token_int(machine_pop_exc(this, token_INT))) {
         machine_process("", this->pmachines, arr_pop(a));
         rprg = 0;
         break;
@@ -158,11 +159,9 @@ static void loop (Machine *this) {
     machine_process("", this->pmachines, prg);
     if (arr_size(this->stack)) {
       Token *tk = machine_peek_opt(this, token_SYMBOL);
-      if (tk) {
-        if (token_symbol(tk) == symbol_BREAK) {
-          machine_pop(this);
-          break;
-        }
+      if (tk && token_symbol(tk) == symbol_BREAK) {
+        machine_pop(this);
+        break;
       }
     }
   }
@@ -178,11 +177,9 @@ static void swhile (Machine *this) {
       machine_process("", this->pmachines, prg);
       if (arr_size(this->stack)) {
         Token *tk = machine_peek_opt(this, token_SYMBOL);
-        if (tk) {
-          if (token_symbol(tk) == symbol_BREAK) {
-            machine_pop(this);
-            break;
-          }
+        if (tk && token_symbol(tk) == symbol_BREAK) {
+          machine_pop(this);
+          break;
         }
       }
     } else {
@@ -198,6 +195,13 @@ static void sfor (Machine *this) {
     for (Int i = 0; i < token_int(cond); ++i) {
       machine_push(this, token_new_int(0, i));
       machine_process("", this->pmachines, prg);
+      if (arr_size(this->stack)) {
+        Token *tk = machine_peek_opt(this, token_SYMBOL);
+        if (tk && token_symbol(tk) == symbol_BREAK) {
+          machine_pop(this);
+          break;
+        }
+      }
     }
     return;
   }
@@ -249,11 +253,9 @@ static void sfor (Machine *this) {
     machine_process("", this->pmachines, prg);
     if (arr_size(this->stack)) {
       Token *tk = machine_peek_opt(this, token_SYMBOL);
-      if (tk) {
-        if (token_symbol(tk) == symbol_BREAK) {
-          machine_pop(this);
-          break;
-        }
+      if (tk && token_symbol(tk) == symbol_BREAK) {
+        machine_pop(this);
+        break;
       }
     }
     begin += step;
@@ -405,12 +407,13 @@ Token *machine_pop_opt (Machine *this, enum token_Type type) {
   return NULL; // Unreachable
 }
 
-static Machine *cprocess (Machine *m) {
+static void cprocess (Machine *m) {
   fails_register_machine(m);
 
   Symbol module = -1;
   Heap *moduleh = NULL;
   Symbol sym = -1;
+
   EACH_IX(token_list(m->prg), Token, tk, ix) {
     m->ix = ix;
 
@@ -586,7 +589,7 @@ static Machine *cprocess (Machine *m) {
       else if (symbol == symbol_BREAK) {
         arr_push(m->stack, tk);
         fails_unregister_machine();
-        return m;
+        return;
       }
       else if (symbol == symbol_LOOP) loop(m);
       else if (symbol == symbol_WHILE) swhile(m);
@@ -660,8 +663,8 @@ static Machine *cprocess (Machine *m) {
     ));
   }
 
+//if (!*m->source) exit(0);
   fails_unregister_machine();
-  return m;
 }
 
 // pmachines is List<Machine>
@@ -677,7 +680,8 @@ Machine *machine_process (char *source, List *pmachines, Token *prg) {
   m->prg = prg;
   m->ix = 0;
 
-  return cprocess(m);
+  cprocess(m);
+  return m;
 }
 
 // pmachines is List<Machine>
@@ -693,5 +697,6 @@ Machine *machine_isolate_process (char *source, List *pmachines, Token *prg) {
   if (*source)
     imports_add(symbol_new(str_left(source, -4)), m->heap);
 
-  return cprocess(m);
+  cprocess(m);
+  return m;
 }

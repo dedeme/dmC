@@ -10,22 +10,22 @@
   "a" "a" == (1 assert) (0 assert) elif
   "a" "a" != (0 assert) (1 assert) elif
 
-  "a" "a" == (1 assert) else (0 assert) if
-  "a" "a" != (0 assert) else (1 assert)  if
+  ("a" "a" ==) (1 assert) else (0 assert) if
+  ("a" "a" !=) (0 assert) else (1 assert)  if
 
-  2 1 >= ("abc") else ("") if "abc" == assert
-  2 1 > ("abc") else ("") if "abc" == assert
+  (2 1 >=) ("abc") else ("") if "abc" == assert
+  (2 1 >) ("abc") else ("") if "abc" == assert
 
-  0 (0 assert) else 0 (0 assert) else (1 assert) if
-  0 (0 assert) else 1 (1 assert) else (0 assert) if
-  1 (1 assert) else 0 (0 assert) else (0 assert) if
-  1 (1 assert) else 1 (0 assert) else (0 assert) if
-  1 0 (pop 0) else 1 (pop 1) else if assert
-  1 1 (pop 1) else 0 (pop 0) else if assert
+  (0) (0 assert) else (0) (0 assert) else (1 assert) if
+  (0) (0 assert) else (1) (1 assert) else (0 assert) if
+  (1) (1 assert) else (0) (0 assert) else (0 assert) if
+  (1) (1 assert) else (1) (0 assert) else (0 assert) if
+  1 (0) (pop 0) else (1) (pop 1) else if assert
+  1 (1) (pop 1) else (0) (pop 0) else if assert
 
-  2 1 >= ("abc") else 0 ("de") else ("") if "abc" expect
-  2 1 < ("abc") else 0 ("de") else ("") if "" expect
-  2 1 < ("abc") else 1 ("de") else ("") if "de" expect
+  (2 1 >=) ("abc") else (0) ("de") else ("") if "abc" expect
+  (2 1 <) ("abc") else (0) ("de") else ("") if "" expect
+  (2 1 <) ("abc") else (1) ("de") else ("") if "de" expect
 
   // "Loop (1): " sys,print; clock,now C1 =
   0 // sum
@@ -38,7 +38,7 @@
   // "Loop (2): " sys,print; clock,now C1 =
   0 // sum
   0 // c
-  ( dup 10 < (c =; c +; c 1 +) else (pop; break) if)
+  ( dup (10 <) (c =; c +; c 1 +) else (pop; break) if)
   loop
   45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
@@ -66,7 +66,7 @@
   // "For to 4 (1): " sys,print; clock,now C1 =
   0 // sum
   0 // counter
-  (10) (dup 4 > (i =; break) else (i =; c =; i +; i) if) for pop
+  (10) (dup (4 >) (i =; break) else (i =; c =; i +; i) if) for pop
   10 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
 

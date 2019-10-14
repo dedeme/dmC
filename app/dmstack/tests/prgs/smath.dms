@@ -40,7 +40,7 @@ multi /* comment */
 () () + toStr "()" == assert
 (1) () + toStr "(1)" == assert
 () (3.3) + toStr "(3.3)" == assert
-("a") (+) + toStr "(\"a\", '+')" == assert
-("a" ()) ((5) (3 1.4)) + toStr "(\"a\", (), (5), (3, 1.4))" == assert
+("a") (+) + toStr "(a, '+')" == assert
+("a" ()) ((5) (3 1.4)) + toStr "(a, (), (5), (3, 1.4))" == assert
 
 empty? assert

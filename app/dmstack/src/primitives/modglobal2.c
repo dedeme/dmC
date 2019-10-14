@@ -15,7 +15,7 @@ void modglobal2_size (Machine *m) {
   else {
     machine_push(m, tk);
     fails_types(
-      m, 3, (enum token_Type[]){token_STRING, token_LIST}
+      m, 2, (enum token_Type[]){token_STRING, token_LIST}
     );
   }
 }

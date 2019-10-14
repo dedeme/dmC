@@ -37,9 +37,12 @@ void symbol_init (void) {
   arr_set(syms, symbol_ASSERT, "assert");
   arr_set(syms, symbol_EXPECT, "expect");
   arr_set(syms, symbol_THIS, "this");
-
   arr_set(syms, symbol_STACK, "= @");
   arr_set(syms, symbol_STACK_CHECK, "= @?");
+
+  arr_set(syms, symbol_PLUS, "+");
+  arr_set(syms, symbol_TO_STR, "toStr");
+  arr_set(syms, symbol_REF_OUT, ">>");
 
   arr_set(syms, symbol_BLOB_, "= Blob");
   arr_set(syms, symbol_THREAD_, "= Thread");

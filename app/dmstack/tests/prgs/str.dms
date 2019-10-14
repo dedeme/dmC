@@ -257,5 +257,17 @@ fg \n
   `abc`
   |` "`abc`\n" expect
 
+  3 : n1 =
+  4 : n2 =
+
+  "Result: They are ${n1 n2 +} $. That's all."
+    "Result: They are 7 $. That's all." expect
+
+  `
+  Result:
+  They are ${n1 n2 +} $.
+  That's all.`
+    "Result:\nThey are 7 $.\nThat's all." expect
+
   empty? assert
 ) run

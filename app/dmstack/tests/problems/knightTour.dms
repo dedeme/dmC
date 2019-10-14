@@ -1,76 +1,43 @@
 // Copyright 09-Oct-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+// Algorithme ------------------------------------------------------------------
+
 ( State =
-  State "start" obj,get run : Start =
-  State "end" obj,get : end =>
-  State "return" obj,get : return =>
-  State "ahead" obj,get : ahead =>
+  State "start" obj,get : Ob =
+  State "firstStep?" obj,get : firstStep? =>
+  State "stepEnd?" obj,get : stepEnd? =>
+  State "stepFail?" obj,get : stepFail? =>
+  State "win?" obj,get : win? =>
+  State "ahead?" obj,get : ahead? =>
+  State "back" obj,get : back =>
   State "side" obj,get : side =>
+  0 wrap,ref Back? =
 
-  ( Ob =
-    Ob ahead
-    (
-      Ob end
-      ( 1)
-      (
-        0
-        (Ob side)
-        (
-          Ob end
-          ( pop; 1; break)
-          ( Ob go (pop; 1; break) if)
-          elif
-        )
-        while
-      )
-      elif
-    )
-    ( 0)
-    elif
-  ) go =>
-
-  Start end
-  ( Start 1 return)
   (
-    Start dup go return
-  )
-  elif
+    Ob stepEnd? : sEnd? =
+    (sEnd? : Ob firstStep? : &&)
+    ( 0; break)
+    else
+    ( sEnd?)
+    ( Ob back; Back? 1 <<)
+    else
+    ( Back? >> : Ob stepFail? : ||)
+    ( Ob side; Back? 0 <<)
+    else
+    ( Ob win?)
+    ( 1; break)
+    else
+    ( Ob ahead? !)
+    ( Back? 1 <<)
+    else
+    if
+  ) loop
 ) fn =>
 
-/*
-( L =
-  L size 3 <
-  ( L [] lst,push; 1)
-  ( 0)
-  elif
-) Ahead =
+// Board -----------------------------------------------------------------------
 
-( L =
-  L lst,pop : N =
-
-  N [9] ==
-  ( 0)
-  else
-  N [] ==
-  ( L [0] lst,push; 1)
-  else
-  ( L N >> 1 + wrap,some lst,push; 1)
-  if
-) Side =
-
-{
-  "start": ([])
-  "end": ([[9] [9] [9]] == (1) (0) elif)
-  "return": (() (pop; []) elif)
-  "ahead": Ahead
-  "side": Side
-} data fn
-
-puts
-*/
-
-[] data 8 (0 8 lst,make lst.push+) : Board =
+[] data 8 (pop 0 8 lst,make lst,push+) for : Board =
 
 (dup Board swap 0 get get : swap 1 get get)
 bget => // <[row, col]> - <INT>
@@ -86,35 +53,14 @@ bquit => // <[row, col]> - <>
   (7 -1 -1)
   ( row =;
     dup row get
-    8 (col = dup col get toStr sys,print) for pop "" sys,println)
+    8 (col = dup col get toStr " " + sys,print) for pop "" sys,println)
   for
   pop
+  "" sys,println
 )
 bshow =>
 
-/*
-[3, 1] bput; Board puts
-[3, 1] bget assert
-[3, 1] bquit; Board puts
-[3, 1] bget ! assert
-*/
-
-(dup 0 get dup 0 >= swap 9 < && : swap 1 get dup 0 >= swap 9 < && : &&)
-csOk? => // <[row, col]> - <INT>
-
-/*
-[0 0] csOk? assert
-[8 8] csOk? assert
-[4 5] csOk? assert
-[-1 -1] csOk? ! assert
-[-1 5] csOk? ! assert
-[-1 9] csOk? ! assert
-[-1 -1] csOk? ! assert
-[4 -1] csOk? ! assert
-[9 -1] csOk? ! assert
-*/
-
-( st =
+( st =; clone
   st 0 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get 1 + : set+) if
   st 1 == (dup 0 swap : 0 get 1 + : set+; dup 1 swap : 1 get 2 + : set+) if
   st 2 == (dup 0 swap : 0 get -1 + : set+; dup 1 swap : 1 get 2 + : set+) if
@@ -125,72 +71,205 @@ csOk? => // <[row, col]> - <INT>
   st 7 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get -1 + : set+) if
 ) jump => // <[row, col], state> - <[row, col]>
 
-/*
-[2, 2] 0 side bput
-[2, 2] 1 side bput
-[2, 2] 2 side bput
-[2, 2] 3 side bput
-[2, 2] 4 side bput
-[2, 2] 5 side bput
-[2, 2] 6 side bput
-[2, 2] 7 side bput
-bshow
-[2, 2] 0 side bquit
-[2, 2] 1 side bquit
-[2, 2] 2 side bquit
-[2, 2] 3 side bquit
-[2, 2] 4 side bquit
-[2, 2] 5 side bquit
-[2, 2] 6 side bquit
-[2, 2] 7 side bquit
-bshow
-*/
+// Path ------------------------------------------------------------------------
 
-( () lst,push; 1)
-Ahead =
-
-( L =
-  L lst,pop : Last =
-
-  L size
-  (
-    Last () ==
-    ( 0)
-    ( Last 1 get bquit; Last 0 get)
-    elif : wrap,ref : Ix =
-
-    L lst,peek 1 get : Pcs =
-    0
-    (Ix >> 8 <)
-    (
-      Pcs : Ix >> : jump : Cs =
-      Cs csOk? : Cs bget == 0 : &&
-      (
-        L : [Ix >> 1 +, Cs] data : push
-        Cs bput
-        pop; 1; break
-      )
-      ( Ix (++) ^^)
-      elif
-    )
-    while
-  )
-  ( 0)
-  elif
-) Side =
-
-8
-( row =
-  8
-  ( col =
-    {
-      "start": ([[0, [row, col] data] data] data)
-      "end": (size 64 == (1) (0) elif)
-      "return": (() (pop; []) elif)
-      "ahead": Ahead
-      "side": Side
-    } data fn
+(
+  Kpath size
+  ( i =
+    i 1 + j =
+    Kpath i get 1 get : Cs =
+    j 10 < (" " j toStr +) (j toStr) elif
+      ":[" + Cs 0 get : "a" str,code : + :: str,fromCode +
+      Cs 1 get 1 + toStr + "] " + sys,print
+    i 4 % 3 == ("" sys,println) if
   )
   for
+  "\n--------------------------------\n" sys,println
+) kshow =>
+
+(
+  this,Kpath lst,peek : E =
+  E 1 get : E 0 get : this,jump : Cs =
+  this,Kpath [0, Cs] data lst,push
+  Cs this,bput
+) forwardStep => // Jump is tested as valid.
+
+// First part ------------------------------------------------------------------
+
+[[0, [0, 0] data] data] data : Kpath =
+[0, 0] bput
+
+( Cs =
+  Cs 0 get : r =
+  Cs 1 get : c =
+
+  ( r 0 == c 4 == &&) ( 1) else
+  ( r 1 == c 4 == &&) ( 1) else
+  ( r 0 <) ( 0) else
+  ( r 3 >) ( 0) else
+  ( c 0 <) ( 0) else
+  ( c 3 >) ( 0) else
+  ( 1) if
 )
-for
+csOk => // <[row, col]> - <INT>
+
+{
+  "start": this,Kpath
+  "firstStep?": (size 1 ==)
+  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "stepFail?":
+    ( lst,peek : E =
+      E 1 get : E 0 get : this,jump : Cs =
+
+      Cs this,csOk
+      ( Cs this,bget)
+      ( 1)
+      elif
+    )
+  "win?":
+    ( Ob =
+      Ob size : sz =
+      sz 17 <
+      ( 0)
+      (
+        this,forwardStep
+        Ob lst,peek 1 get : Cs =
+        Cs 0 get : r =
+        Cs 1 get : c =
+        r 0 == c 3 == &&
+        ( 1)
+        ( Ob lst,pop 1 get this,bquit; 0)
+        elif
+      )
+      elif
+    )
+  "ahead?":
+    ( Ob =
+      Ob size 18 <
+      ( this,forwardStep; 1)
+      ( 0)
+      elif
+    )
+  "back": (lst,pop 1 get this,bquit)
+  "side": (lst,peek 0 (1 +) up)
+} data fn
+
+bshow
+kshow
+
+// Second part -----------------------------------------------------------------
+
+Kpath [0, [2, 4] data] data lst,push
+[2, 4] bput
+
+( Cs =
+  Cs 0 get : r =
+  Cs 1 get : c =
+
+  ( r 4 == c 4 == &&) ( 1) else
+  ( r 4 == c 5 == &&) ( 1) else
+  ( r 0 <) ( 0) else
+  ( r 3 >) ( 0) else
+  ( c 4 <) ( 0) else
+  ( c 7 >) ( 0) else
+  ( 1) if
+)
+csOk? => // <[row, col]> - <INT>
+
+{
+  "start": this,Kpath
+  "firstStep?": (size 19 ==)
+  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "stepFail?":
+    ( lst,peek : E =
+      E 1 get : E 0 get : this,jump : Cs =
+
+      Cs this,csOk?
+      ( Cs this,bget)
+      ( 1)
+      elif
+    )
+  "win?":
+    ( Ob =
+      Ob size : sz =
+      sz 33 <
+      ( 0)
+      (
+        this,forwardStep
+        Ob lst,peek 1 get : Cs =
+        Cs 0 get : r =
+        r 2 <
+        ( Ob lst,pop 1 get this,bquit; 0)
+        ( 1)
+        elif
+      )
+      elif
+    )
+  "ahead?":
+    ( Ob =
+      Ob size 34 <
+      ( this,forwardStep; 1)
+      ( 0)
+      elif
+    )
+  "back": (lst,pop 1 get this,bquit)
+  "side": (lst,peek 0 (1 +) up)
+} data fn
+
+bshow
+kshow
+
+// Third part ------------------------------------------------------------------
+
+Kpath [0, [4, 6] data] data lst,push
+[4, 6] bput
+
+( Cs =
+  Cs 0 get : r =
+  Cs 1 get : c =
+
+  ( r 4 <) ( 0) else
+  ( r 7 >) ( 0) else
+  ( c 0 <) ( 0) else
+  ( c 7 >) ( 0) else
+  ( 1) if
+)
+csOk? => // <[row, col]> - <INT>
+
+{
+  "start": this,Kpath
+  "firstStep?": (size 35 ==)
+  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "stepFail?":
+    ( Ob =
+      Ob lst,peek : E =
+      E 1 get : E 0 get : this,jump : Cs =
+
+      (Cs this,csOk? !) (1) else
+      (Cs this,bget) (1) else
+      (Ob size 39 == : Cs [6, 5] != : &&) (1) else
+      (Ob size 47 == : Cs [6, 1] != : &&) (1) else
+      (Ob size 55 == : Cs [4, 3] != : &&) (1) else
+      (0) if
+    )
+  "win?":
+    ( Ob =
+      Ob size : sz =
+      sz 63 <
+      ( 0)
+      ( this,forwardStep; 1)
+      elif
+    )
+  "ahead?":
+    ( Ob =
+      Ob size 64 <
+      ( this,forwardStep; 1)
+      ( 0)
+      elif
+    )
+  "back": (lst,pop 1 get this,bquit)
+  "side": (lst,peek 0 (1 +) up)
+} data fn
+
+bshow
+kshow

@@ -16,6 +16,8 @@ enum symbol_SYSTEM {
   symbol_WHILE, symbol_FOR, symbol_ASSERT, symbol_EXPECT, symbol_THIS,
   symbol_STACK, symbol_STACK_CHECK,
 
+  symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
+
   symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
   symbol_ISERVER_, symbol_ISERVER_RQ_,
 

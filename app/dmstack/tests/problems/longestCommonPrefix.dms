@@ -1,0 +1,47 @@
+// Copyright 09-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+
+( s2 =; s1 =
+  s1 size : len1 =
+  s2 size : len2 =
+
+  -1
+  len1 len2 < (len1) (len2)  elif
+  ( i =
+    s1 i str,get : s2 i str,get : == ( pop; i) (break) elif
+  )
+  for
+  1 +
+) lcpAux =>
+
+( L =
+
+  ( L () ==) ("") else
+  ( L size 1 ==) (L 0 get) else
+  (
+    L 0 get : s1 =
+    s1
+    L size
+    ( i =; s =
+      s : 0 : s L i get lcpAux : str,sub
+    )
+    for
+  )
+  if
+) lcp =>
+
+( L =
+  "(" : L ", " str,join : + ") -> " + L lcp js,ws + sys,println
+) print =>
+
+
+["interspecies", "interstellar", "interstate"] print
+["throne", "throne"] print
+["throne", "dungeon"] print
+["throne" , "", "throne"] print
+["chess"] print
+[""] print
+[] print
+["prefix", "suffix"] print
+["foo", "foobar"] print

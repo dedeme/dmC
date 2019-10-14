@@ -55,11 +55,17 @@ int reader_nline (Reader *this);
 ///
 void reader_set_nline (Reader *this, int value);
 
-/// Calculate symbol id of 'tk'. 'tk' is a token_SYMBOL.
+/// Calculates symbol id of 'tk'. 'tk' is a token_SYMBOL.
 ///   this: The reader.
 ///   prg : Arr<Token> symbols read until now.
 ///   tk  : Token type token_SYMBOL.
 Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
+
+/// Reads an interpolation.
+///   this: The reader
+///   tk  : Token of type token_STRING
+///   return: Arr<Token> Tk expanded.
+Arr *reader_interpolation (Reader *this, Token *tk);
 
 ///
 void reader_fail (Reader *this, char *msg);

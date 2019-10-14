@@ -16,9 +16,9 @@ static void show (Machine *m) {
     puts("  [EMPTY]");
     return;
   }
-  printf("  [");
-  while (arr_size(st))
-    printf("%s ", token_to_str(arr_pop(st)));
+  printf("  [ ");
+  for(int i = arr_size(st) - 1; i >= 0; --i)
+    printf("%s ", token_to_str(arr_get(st, i)));
   puts("]");
 }
 

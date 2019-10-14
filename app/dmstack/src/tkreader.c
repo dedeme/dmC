@@ -245,7 +245,7 @@ Opt *tkreader_next(Reader *reader) {
 
       reader_set_nline(reader, nline);
       reader_set_prg_ix(reader, prg_ix + p - prg + strlen(id));
-      return opt_new(token_new_string(start_line, buf_to_str(bf)));
+      return opt_new(token_new_string(start_line + 1, buf_to_str(bf)));
     }
 
     // List --------------------------------------------------------------------
@@ -326,9 +326,14 @@ Opt *tkreader_next(Reader *reader) {
       Arr *a = arr_new();
       Token *tk = opt_nget(tkreader_next(subr));
       while (tk) {
-        if (token_type(tk) == token_SYMBOL)
-          tk = reader_symbol_id(subr, a, tk);
-        arr_push(a, tk);
+        if (token_type(tk) == token_SYMBOL) tk = reader_symbol_id(subr, a, tk);
+        if (token_type(tk) == token_STRING) {
+          EACH(reader_interpolation(reader, tk), Token, t) {
+            arr_push(a, t);
+          }_EACH
+        } else {
+          arr_push(a, tk);
+        }
         tk = opt_nget(tkreader_next(subr));
       }
 
