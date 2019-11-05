@@ -55,11 +55,18 @@ int reader_nline (Reader *this);
 ///
 void reader_set_nline (Reader *this, int value);
 
-/// Calculates symbol id of 'tk'. 'tk' is a token_SYMBOL.
-///   this: The reader.
-///   prg : Arr<Token> symbols read until now.
-///   tk  : Token type token_SYMBOL.
-Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
+/// Calculates symbols from 'tk'. 'tk' is a token_SYMBOL.
+///   this  : The reader.
+///   prg   : Arr<Token> symbols read until now.
+///   tk    : Token type token_SYMBOL.
+///   return: Arr<Token>. If tk
+///     - is symbol_IMPORT, updates imports dictionary and returns 'tk'.
+///     - is symbol_THIS, returns 'reader_source'.
+///     - is symbol starting with '.' and != ".", returns [str_rigth(tk symbol),
+///         symbol "obj", symbol "get"].
+///     - is symbol starting with '@', process a type symbol.
+///     - otherwise returns 'tk'.
+Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
 
 /// Reads an interpolation.
 ///   this: The reader

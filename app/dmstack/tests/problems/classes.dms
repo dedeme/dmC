@@ -5,24 +5,24 @@
 ( v =;
   {
     "var": v
-    "incPrint": ("var" (1 +) obj,up+; "var" obj,get toStr sys,println)
+    "incPrint": ("var" (1 +) obj,up+; .var toStr sys,println)
   } data
 ) myClassNew =>
 
 3 myClassNew : Cl =
 
-Cl dup "incPrint" obj,get run
-Cl dup "incPrint" obj,get run
-Cl "var" obj,get toStr sys,println
+Cl dup .incPrint run
+Cl dup .incPrint run
+Cl .var toStr sys,println
 
 // Interface
 
-(dup "area" obj,get run)
+(dup .area run)
 area =>
 
 // square class
 
-("side" obj,get dup *)
+(.side dup *)
 squareArea =>
 
 ( s =;
@@ -34,7 +34,7 @@ squareArea =>
 
 // rect class
 
-(Self =; Self "hight" obj,get : Self "width" obj,get : *)
+(Self =; Self .hight : Self .width : *)
 rectArea =>
 
 ( w =; h =;

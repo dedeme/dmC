@@ -49,8 +49,11 @@ Token *reader_process (Reader *this) {
   Arr *r = arr_new();
   Token *tk = opt_nget(tkreader_next(this));
   while (tk) {
-    if (token_type(tk) == token_SYMBOL) tk = reader_symbol_id(this, r, tk);
-    if (token_type(tk) == token_STRING) {
+    if (token_type(tk) == token_SYMBOL) {
+      EACH(reader_symbol_id(this, r, tk), Token, t) {
+        arr_push(r, t);
+      }_EACH
+    } else if (token_type(tk) == token_STRING) {
       EACH(reader_interpolation(this, tk), Token, t) {
         arr_push(r, t);
       }_EACH
@@ -98,8 +101,10 @@ void reader_set_nline (Reader *this, int value) {
   this->nline = value;
 }
 
-Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
+// Return Arr<Token>. prg is Arr<Token>
+Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
   Symbol sym = token_symbol(tk);
+  char *symstr = symbol_to_str(sym);
   if (sym == symbol_IMPORT) {
     if (!arr_size(prg)) reader_fail(this, "Import source is missing");
 
@@ -131,32 +136,46 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     TokenPos *pos = opt_nget(token_pos(tk));
     if (!pos) EXC_ILLEGAL_STATE("pos is null")
 
-    return token_new_symbol_pos(this->source, this->source, tokenPos_line(pos));
-  } else if (*symbol_to_str(sym) == '@') {
+    return arr_new_from(
+      token_new_symbol_pos(this->source, this->source, tokenPos_line(pos)), NULL
+    );
+  } else if (*symstr == '.' && symstr[1]) {
     TokenPos *pos = opt_nget(token_pos(tk));
     if (!pos) EXC_ILLEGAL_STATE("pos is null")
 
     int line = tokenPos_line(pos);
-    char *name = symbol_to_str(sym);
-    if (name[strlen(name) - 1] == '?') {
-      this->next_tk = token_new_symbol_pos(
-        symbol_STACK_CHECK, this->source, line
-      );
+    return arr_new_from(
+      token_new_string_pos(str_right(symstr, 1), this->source, line),
+      token_new_symbol_pos(symbol_new("obj"), this->source, line),
+      token_new_symbol_pos(symbol_new("get"), this->source, line),
+      NULL
+    );
+  } else if (*symstr == '@') {
+    TokenPos *pos = opt_nget(token_pos(tk));
+    if (!pos) EXC_ILLEGAL_STATE("pos is null")
+
+    int line = tokenPos_line(pos);
+    if (symstr[strlen(symstr) - 1] == '?') {
       Token *tk = token_new_symbol_pos(
-        symbol_new(str_sub(name, 1, -1)), this->source, line
+        symbol_new(str_sub(symstr, 1, -1)), this->source, line
       );
-      return token_new_list_pos(arr_new_from(tk, NULL), this->source, line);
+      return arr_new_from(
+        token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+        token_new_symbol_pos(symbol_STACK_CHECK, this->source, line),
+        NULL
+      );
     } else {
       if (args_is_production()) {
-        return token_new_symbol_pos(symbol_NOP, this->source, line);
+        return arr_new();
       } else {
-        this->next_tk = token_new_symbol_pos(
-          symbol_STACK, this->source, line
-        );
         Token *tk = token_new_symbol_pos(
-          symbol_new(str_right(name, 1)), this->source, line
+          symbol_new(str_right(symstr, 1)), this->source, line
         );
-        return token_new_list_pos(arr_new_from(tk, NULL), this->source, line);
+        return arr_new_from(
+          token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+          token_new_symbol_pos(symbol_STACK, this->source, line),
+          NULL
+        );
       }
     }
   } else {
@@ -164,13 +183,15 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
       if (symbolKv_key(e) == sym) {
         TokenPos *pos = opt_nget(token_pos(tk));
         if (!pos) EXC_ILLEGAL_STATE("pos is null")
-        return token_new_symbol_pos(
-          symbolKv_value(e), this->source, tokenPos_line(pos)
+        return arr_new_from(
+          token_new_symbol_pos(
+            symbolKv_value(e), this->source, tokenPos_line(pos)
+          ), NULL
         );
       }
     }_EACH
   }
-  return tk;
+  return arr_new_from(tk, NULL);
 }
 
 // Arr<Token>
@@ -207,9 +228,13 @@ Arr *reader_interpolation (Reader *this, Token *tk) {
     Arr *prg = arr_new();
     Token *tk = opt_nget(tkreader_next(subr));
     while (tk) {
-      if (token_type(tk) == token_SYMBOL)
-        tk = reader_symbol_id(subr, prg, tk);
-      arr_push(prg, tk);
+      if (token_type(tk) == token_SYMBOL) {
+        EACH(reader_symbol_id(subr, prg, tk), Token, t) {
+          arr_push(prg, t);
+        }_EACH
+      } else {
+        arr_push(prg, tk);
+      }
       tk = opt_nget(tkreader_next(subr));
     }
 

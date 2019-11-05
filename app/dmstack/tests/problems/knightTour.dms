@@ -4,14 +4,14 @@
 // Algorithme ------------------------------------------------------------------
 
 ( State =
-  State "start" obj,get : Ob =
-  State "firstStep?" obj,get : firstStep? =>
-  State "stepEnd?" obj,get : stepEnd? =>
-  State "stepFail?" obj,get : stepFail? =>
-  State "win?" obj,get : win? =>
-  State "ahead?" obj,get : ahead? =>
-  State "back" obj,get : back =>
-  State "side" obj,get : side =>
+  State .start : Ob =
+  State .firstStep? : firstStep? =>
+  State .stepEnd? : stepEnd? =>
+  State .stepFail? : stepFail? =>
+  State .win? : win? =>
+  State .ahead? : ahead? =>
+  State .back : back =>
+  State .side : side =>
   0 wrap,ref Back? =
 
   (

@@ -377,8 +377,11 @@ Opt *tkreader_next(Reader *reader) {
       Arr *a = arr_new();
       Token *tk = opt_nget(tkreader_next(subr));
       while (tk) {
-        if (token_type(tk) == token_SYMBOL) tk = reader_symbol_id(subr, a, tk);
-        if (token_type(tk) == token_STRING) {
+        if (token_type(tk) == token_SYMBOL) {
+          EACH(reader_symbol_id(subr, a, tk), Token, t) {
+            arr_push(a, t);
+          }_EACH
+        } else if (token_type(tk) == token_STRING) {
           EACH(reader_interpolation(reader, tk), Token, t) {
             arr_push(a, t);
           }_EACH

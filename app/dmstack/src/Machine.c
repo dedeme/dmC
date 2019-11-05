@@ -76,7 +76,7 @@ char *machine_stack_trace (Machine *this) {
 
     Token *tk = arr_get(token_list(m->prg), m->ix);
     TokenPos *pos = opt_nget(token_pos(tk));
-    if (pos !== null) {
+    if (pos) {
       buf_add(bf, str_f(
         "%s:%d:%s\n",
         tokenPos_source(pos), tokenPos_line(pos),

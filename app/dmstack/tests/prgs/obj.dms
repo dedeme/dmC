@@ -15,12 +15,12 @@
     "a": 21
     "b": 22
   } O =
-  O "a" obj,get 21 == assert
+  O .a 21 == assert
   O "b" obj,get 22 == assert
 
   { "a": 31, "b": 32 } O =
   O "a" obj,get 31 == assert
-  O "b" obj,get 32 == assert
+  O .b 32 == assert
   O "a" obj,has? assert
   O "b" obj,has? assert
   O "c" obj,has? ! assert
