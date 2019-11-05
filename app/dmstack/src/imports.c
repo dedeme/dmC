@@ -73,7 +73,7 @@ Kv *imports_read_symbol (Token *tk) {
       return kv_new(
         str_f(
           "List %s\nExpected size:2, actual size: %d",
-          token_to_str(token_new_list(0, a)), arr_size(a)
+          token_to_str(token_new_list(a)), arr_size(a)
         ),
         NULL
       );

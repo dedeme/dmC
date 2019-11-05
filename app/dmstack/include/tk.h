@@ -26,7 +26,7 @@ Arr *tk_list (Machine *m, Token *t);
 Symbol tk_symbol (Machine *m, Token *t);
 
 ///
-void *tk_pointer (Machine *m, Token *t, Symbol sym);
+void *tk_native (Machine *m, Token *t, Symbol sym);
 
 ///
 Int tk_pop_int (Machine *m);
@@ -44,7 +44,7 @@ Arr *tk_pop_list (Machine *m);
 Symbol tk_pop_symbol (Machine *m);
 
 ///
-void *tk_pop_pointer (Machine *m, Symbol sym);
+void *tk_pop_native (Machine *m, Symbol sym);
 
 ///
 Int tk_peek_int (Machine *m);
@@ -62,6 +62,6 @@ Arr *tk_peek_list (Machine *m);
 Symbol tk_peek_symbol (Machine *m);
 
 ///
-void *tk_peek_pointer (Machine *m, Symbol sym);
+void *tk_peek_native (Machine *m, Symbol sym);
 
 #endif

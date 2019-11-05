@@ -29,21 +29,21 @@ static void init (Machine *m) {
 }
 
 static void isinit (Machine *m) {
-  machine_push(m, token_new_int(0, sys.home != 0));
+  machine_push(m, token_new_int(sys.home != 0));
 }
 
 static void home (Machine *m) {
-  if (sys.home) machine_push(m, token_new_string(0, sys.home));
+  if (sys.home) machine_push(m, token_new_string(sys.home));
   else machine_fail(m, "sys init was not called");
 }
 
 static void uname (Machine *m) {
-  if (sys.uname) machine_push(m, token_new_string(0, sys.uname));
+  if (sys.uname) machine_push(m, token_new_string(sys.uname));
   else machine_fail(m, "sys init was not called");
 }
 
 static void udir (Machine *m) {
-  if (sys.udir) machine_push(m, token_new_string(0, sys.udir));
+  if (sys.udir) machine_push(m, token_new_string(sys.udir));
   else machine_fail(m, "sys init was not called");
 }
 
@@ -51,9 +51,9 @@ static void args (Machine *m) {
   // Arr<Token>
   Arr *a = arr_new();
   EACH(args_dms_params(), char, p) {
-    arr_push(a, token_new_string(0, p));
+    arr_push(a, token_new_string(p));
   }_EACH
-  machine_push(m, token_new_list(0, a));
+  machine_push(m, token_new_list(a));
 }
 
 static void sexit (Machine *m) {
@@ -61,7 +61,7 @@ static void sexit (Machine *m) {
 }
 
 static void locale (Machine *m) {
-  machine_push(m, token_new_string(0, sys_locale()));
+  machine_push(m, token_new_string(sys_locale()));
 }
 
 static void setlocale (Machine *m) {
@@ -73,10 +73,10 @@ static void cmd (Machine *m) {
   char *r = opt_nget(sys_cmd(command));
   if (r)
     machine_push(
-      m, token_new_list(0, arr_new_c(1, (void *[]){token_new_string(0, r)}))
+      m, token_new_list(arr_new_c(1, (void *[]){token_new_string(r)}))
     );
   else
-    machine_push(m, token_new_list(0, arr_new()));
+    machine_push(m, token_new_list(arr_new()));
 }
 
 // tp is Tp<List<Machine>, Token>
@@ -101,7 +101,7 @@ static void thread (Machine *m) {
 }
 
 static void join (Machine *m) {
-  pthread_t *th = tk_pop_pointer(m, symbol_THREAD_);
+  pthread_t *th = tk_pop_native(m, symbol_THREAD_);
   async_join(th);
 }
 
@@ -129,7 +129,7 @@ static void sgetline (Machine *m) {
     if (ch == '\n') break;
     buf_cadd(bf, ch);
   }
-  machine_push(m, token_new_string(0, buf_to_str(bf)));
+  machine_push(m, token_new_string(buf_to_str(bf)));
 }
 
 static void sgettext (Machine *m) {
@@ -142,14 +142,14 @@ static void sgettext (Machine *m) {
     if (str_ends(buf_str(bf), mark)) break;
   }
   machine_push(m, token_new_string(
-    0, str_left(buf_to_str(bf), -strlen(mark))
+    str_left(buf_to_str(bf), -strlen(mark))
   ));
 }
 
 static void sgetpass (Machine *m) {
   char *msg = tk_pop_string(m);
   char *r = getpass(msg);
-  machine_push(m, token_new_string(0, str_new(r)));
+  machine_push(m, token_new_string(str_new(r)));
   free(r);
   getc(stdin);
 }

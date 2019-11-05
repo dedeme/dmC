@@ -1,0 +1,20 @@
+// Copyright 29-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+("Q2HDscOzbsOn5I2G=" b64,decode puts) (1 assert) try
+
+( "A msg" fail)
+( Ex =
+  Ex exc,type "generic" expect
+  Ex exc,msg "A msg" expect
+)
+try
+
+( "xx" "A exc" throw)
+( Ex =
+  Ex exc,type "xx" expect
+  Ex exc,msg "A exc" expect
+)
+try
+
+empty? assert

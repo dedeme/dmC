@@ -256,7 +256,7 @@
   // box
 
   //("a", "b", "c") it,box
-  //  (pop; dup it,next puts) ((5)) for; pop
+    //5 (pop; dup it,next puts) for; pop
 
   empty? assert
 ) run

@@ -11,19 +11,19 @@ static char *getstr (Machine *m) {
 }
 
 static void pushstr (Machine *m, char *s) {
-  machine_push(m, token_new_string(0, s));
+  machine_push(m, token_new_string(s));
 }
 
 static void cmp (Machine *m) {
   char *s2 = getstr(m);
   char *s1 = getstr(m);
-  machine_push(m, token_new_int(0, str_cmp_locale(s1, s2)));
+  machine_push(m, token_new_int(str_cmp_locale(s1, s2)));
 }
 
 static void ends (Machine *m) {
   char *sub = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_ends(s, sub)));
+  machine_push(m, token_new_int(str_ends(s, sub)));
 }
 
 static void from_iso (Machine *m) {
@@ -32,7 +32,7 @@ static void from_iso (Machine *m) {
 }
 
 static void from_unicode (Machine *m) {
-  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
+  Bytes *bs = tk_pop_native(m, symbol_BLOB_);
   int len = bytes_len(bs);
   if (len % 2) machine_fail(m, "Blob is not an Unicode string");
   unsigned *u = (unsigned *)bytes_bs(bs);
@@ -44,26 +44,26 @@ static void from_unicode (Machine *m) {
 static void greater (Machine *m) {
   char *s2 = getstr(m);
   char *s1 = getstr(m);
-  machine_push(m, token_new_int(0, str_greater_locale(s1, s2)));
+  machine_push(m, token_new_int(str_greater_locale(s1, s2)));
 }
 
 static void sindex (Machine *m) {
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_index(s, subs)));
+  machine_push(m, token_new_int(str_index(s, subs)));
 }
 
 static void index_from (Machine *m) {
   Int ix = tk_pop_int(m);
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_index_from(s, subs, ix)));
+  machine_push(m, token_new_int(str_index_from(s, subs, ix)));
 }
 
 static void last_index (Machine *m) {
   char *subs = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_last_index(s, subs)));
+  machine_push(m, token_new_int(str_last_index(s, subs)));
 }
 
 static void join (Machine *m) {
@@ -87,43 +87,43 @@ static void replace (Machine *m) {
   char *new = getstr(m);
   char *old = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_string(0, str_replace(s, old, new)));
+  machine_push(m, token_new_string(str_replace(s, old, new)));
 }
 
 static void next_rune (Machine *m) {
   char *s = getstr(m);
   char *rune;
-  machine_push(m, token_new_string(0, str_next_rune(&rune, s)));
-  machine_push(m, token_new_string(0, rune));
+  machine_push(m, token_new_string(str_next_rune(&rune, s)));
+  machine_push(m, token_new_string(rune));
 }
 
 static void runes (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_runes(s)));
+  machine_push(m, token_new_int(str_runes(s)));
 }
 
 static void split (Machine *m) {
   char *sep = getstr(m);
   char *s = getstr(m);
-  Token * fn(char *s) { return token_new_string(0, s); }
+  Token * fn(char *s) { return token_new_string(s); }
   machine_push(m, token_new_list(
-    0, arr_map(str_split(s, sep), (FCOPY)fn)
+    arr_map(str_split(s, sep), (FCOPY)fn)
   ));
 }
 
 static void split_trim (Machine *m) {
   char *sep = getstr(m);
   char *s = getstr(m);
-  Token * fn(char *s) { return token_new_string(0, s); }
+  Token * fn(char *s) { return token_new_string(s); }
   machine_push(m, token_new_list(
-    0, arr_map(str_split_trim(s, sep), (FCOPY)fn)
+    arr_map(str_split_trim(s, sep), (FCOPY)fn)
   ));
 }
 
 static void starts (Machine *m) {
   char *sub = getstr(m);
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, str_starts(s, sub)));
+  machine_push(m, token_new_int(str_starts(s, sub)));
 }
 
 static void trim (Machine *m) {
@@ -210,7 +210,7 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
 
   char *s = getstr(m);
   bounds(strlen(s));
-  machine_push(m, token_new_string(0, str_sub(s, begin, end)));
+  machine_push(m, token_new_string(str_sub(s, begin, end)));
 }
 
 static void sub (Machine *m) {
@@ -232,12 +232,12 @@ static void right (Machine *m) {
 static void code (Machine *m) {
   char *ch = tk_pop_string(m);
   if (!*ch) machine_fail(m, "String is empty");
-  machine_push(m, token_new_int(0, *ch));
+  machine_push(m, token_new_int(*ch));
 }
 
 static void fromcode (Machine *m) {
   Int code = tk_pop_int(m);
-  machine_push(m, token_new_string(0, str_c(code)));
+  machine_push(m, token_new_string(str_c(code)));
 }
 
 static void runecode (Machine *m) {
@@ -254,7 +254,7 @@ static void runecode (Machine *m) {
     case 3: c = *rn * 65536 + rn[1] * 256 + rn[2]; break;
     default: c = *rn * 16777216 + rn[1] * 65536 + rn[2] * 256 + rn[3];
   }
-  machine_push(m, token_new_int(0, c));
+  machine_push(m, token_new_int(c));
 }
 
 static void fromrunecode (Machine *m) {
@@ -286,27 +286,27 @@ static void fromrunecode (Machine *m) {
     r[1] = code % 256;
     *r = code / 256;
   }
-  machine_push(m, token_new_string(0, r));
+  machine_push(m, token_new_string(r));
 }
 
 static void isdigits (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, dec_digits(s)));
+  machine_push(m, token_new_int(dec_digits(s)));
 }
 
 static void isnumber (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_int(0, dec_number(s)));
+  machine_push(m, token_new_int(dec_number(s)));
 }
 
 static void riso (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_string(0, dec_regularize_iso(s)));
+  machine_push(m, token_new_string(dec_regularize_iso(s)));
 }
 
 static void rus (Machine *m) {
   char *s = getstr(m);
-  machine_push(m, token_new_string(0, dec_regularize_us(s)));
+  machine_push(m, token_new_string(dec_regularize_us(s)));
 }
 
 Pmodule *modstr_mk (void) {

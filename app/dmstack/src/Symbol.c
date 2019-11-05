@@ -3,6 +3,8 @@
 
 #include "Symbol.h"
 
+static int sharp = 0;
+
 struct symbol_SymbolKv {
   Symbol key;
   Symbol value;
@@ -21,7 +23,6 @@ void symbol_init (void) {
   arr_set(syms, symbol_IF, "if");
   arr_set(syms, symbol_ELIF, "elif");
   arr_set(syms, symbol_ELSE, "else");
-  arr_set(syms, symbol_BREAK, "break");
   arr_set(syms, symbol_EQUALS, "=");
   arr_set(syms, symbol_FUNCTION, "=>");
   arr_set(syms, symbol_AMPERSAND, "&");
@@ -31,9 +32,12 @@ void symbol_init (void) {
   arr_set(syms, symbol_MRUN, "mrun");
   arr_set(syms, symbol_DATA, "data");
   arr_set(syms, symbol_SYNC, "sync");
+  arr_set(syms, symbol_BREAK, "break");
   arr_set(syms, symbol_LOOP, "loop");
   arr_set(syms, symbol_WHILE, "while");
   arr_set(syms, symbol_FOR, "for");
+  arr_set(syms, symbol_CONTINUE, "continue");
+  arr_set(syms, symbol_RECURSIVE, "recursive");
   arr_set(syms, symbol_ASSERT, "assert");
   arr_set(syms, symbol_EXPECT, "expect");
   arr_set(syms, symbol_THIS, "this");
@@ -50,9 +54,17 @@ void symbol_init (void) {
   arr_set(syms, symbol_FILE_, "= File");
   arr_set(syms, symbol_ISERVER_, "= Iserver");
   arr_set(syms, symbol_ISERVER_RQ_, "= IserverRq");
+  arr_set(syms, symbol_EXC_, "= Exc");
 }
 
 Symbol symbol_new (char *name) {
+  if (str_eq(name, "#")) {
+    ++sharp;
+    return symbol_NOP;
+  }
+  if (name[strlen(name) - 1] == '#') {
+    name = str_f("%s%d", name, sharp);
+  }
   EACH_IX(syms, char, s, ix) {
     if (str_eq(s, name)) return ix;
   }_EACH

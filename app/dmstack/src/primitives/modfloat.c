@@ -10,22 +10,22 @@
 static void fn2 (Machine *m, double (*f)(double, double)) {
   double n2 = tk_pop_float(m);
   double n1 = tk_pop_float(m);
-  machine_push(m, token_new_float(0, f(n1, n2)));
+  machine_push(m, token_new_float(f(n1, n2)));
 }
 
 static void fromStr (Machine *m) {
   machine_push(m, token_new_float(
-    0, js_rd((Js *)tk_pop_string(m))
+    js_rd((Js *)tk_pop_string(m))
   ));
 }
 
 static void sabs (Machine *m) {
   double d = tk_pop_float(m);
-  machine_push(m, token_new_float(0, d >= 0 ? d : -d));
+  machine_push(m, token_new_float(d >= 0 ? d : -d));
 }
 
 static void rnd (Machine *m) {
-  machine_push(m, token_new_float(0, rnd_d()));
+  machine_push(m, token_new_float(rnd_d()));
 }
 
 static void max (Machine *m) {
@@ -40,7 +40,7 @@ static void min (Machine *m) {
 
 static void sround (Machine *m) {
   machine_push(m, token_new_float(
-    0, round(tk_pop_float(m))
+    round(tk_pop_float(m))
   ));
 }
 
@@ -53,19 +53,19 @@ static void roundn (Machine *m) {
     mul *= 10;
   }_REPEAT
 
-  machine_push(m, token_new_float(0, round(n * mul) / mul));
+  machine_push(m, token_new_float(round(n * mul) / mul));
 }
 
 static void eq (Machine *m) {
   double gap = tk_pop_float(m);
   double n1 = tk_pop_float(m);
   double n2 = tk_pop_float(m);
-  machine_push(m, token_new_int(0, n2 < n1 + gap && n2 > n1 - gap));
+  machine_push(m, token_new_int(n2 < n1 + gap && n2 > n1 - gap));
 }
 
 static void toint (Machine *m) {
   machine_push(m, token_new_int(
-    0, (Int)tk_pop_float(m)
+    (Int)tk_pop_float(m)
   ));
 }
 

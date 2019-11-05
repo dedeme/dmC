@@ -5,30 +5,30 @@
   lst,new
   ( @l
     L =
+    L () ==
+    (L 2 lst,push; 2 wrap,some)
     (
       L L size 1 - get 1 + wrap,ref : Next =
-      ( Next (++) ^^)
       ( Next >> pp =; pp int,toFloat math,sqrt float,toInt : lim =;
         0
+        L size
         ( L swap get : p =;
-          ( pop 1 break)
-          ( pp p % !)
-          elif
-          ( break)
           ( p lim >)
+          ( break)
+          else
+          ( pp p % !)
+          ( pop 1 break)
+          else
           if
         )
-        ( L size)
         for
       )
+      ( Next (++) ^^)
       while
       L Next >> lst,push
       Next
     )
-    else
-    (L 2 lst,push; 2 wrap,some)
-    (L () ==)
-    if
+    elif
     @l
   )
   it,new
@@ -45,8 +45,8 @@
     O 1 get : Pv =
 
     P it,next wrap,ref : Current =
-    (Pv Current >> <<; Current P it,next <<)
     (Pv >> : P it,peek : + 2. / :: Current >> :: fn )
+    (Pv Current >> <<; Current P it,next <<)
     while
     Pv Current >> <<
     Current
@@ -64,12 +64,12 @@ weaks =>
 strongs 36 it,take (toStr " " + sys,print) it,each
 "" sys,println
 
-"Strong primes below 1,000,000: "
-  strongs (1000000 <) it,takef it,count toStr + sys,println
+"Strong primes below 100,000: "
+  strongs (100000 <) it,takef it,count toStr + sys,println
 
 "First 37 weak primes:" sys,println
 weaks 37 it,take (toStr " " + sys,print) it,each
 "" sys,println
 
-"Weaks primes below 1,000,000: "
-  weaks (1000000 <) it,takef it,count toStr + sys,println
+"Weaks primes below 100,000: "
+  weaks (100000 <) it,takef it,count toStr + sys,println

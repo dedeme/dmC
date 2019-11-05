@@ -6,7 +6,7 @@
 #include "tk.h"
 
 static void new (Machine *m) {
-  machine_push(m, token_new_list(0, arr_new()));
+  machine_push(m, token_new_list(arr_new()));
 }
 
 static void has (Machine *m) {
@@ -15,11 +15,11 @@ static void has (Machine *m) {
   Arr *a = tk_pop_list(m);
   for (int i = 0; i < arr_size(a); i +=2) {
     if (str_eq(key, tk_string(m, arr_get(a, i)))) {
-      machine_push(m, token_new_int(0, 1));
+      machine_push(m, token_new_int(1));
       return;
     }
   }
-  machine_push(m, token_new_int(0, 0));
+  machine_push(m, token_new_int(0));
 }
 
 static void get (Machine *m) {
@@ -27,7 +27,7 @@ static void get (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
-  if (sz & 1) fails_size_list(m, a, sz + 1);
+  if (sz & 1) fails_list_size(m, a, sz + 1);
   for (int i = 0; i < sz; i +=2) {
     if (str_eq(key, tk_string(m, arr_get(a, i)))) {
       machine_push(m, arr_get(a, i + 1));
@@ -48,7 +48,7 @@ static void putboth (Machine *m, int isplus) {
     : tk_pop_list(m)
   ;
   int sz = arr_size(a);
-  if (sz & 1) fails_size_list(m, a, sz + 1);
+  if (sz & 1) fails_list_size(m, a, sz + 1);
   for (int i = 0; i < sz; i +=2) {
     if (str_eq(key, tk_string(m, arr_get(a, i)))) {
       arr_set(a, i + 1, tk);
@@ -97,13 +97,13 @@ static void frommap (Machine *m) {
   EACH(tk_pop_list(m), Token, tk) {
     // Arr<Token>
     Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_size_list(m, a, 2);
+    if (arr_size(a) != 2) fails_list_size(m, a, 2);
     Token *tk1 = *arr_start(a);
     if (token_type(tk1) != token_STRING) fails_type_in(m, token_STRING, tk1);
     arr_push(r, tk1);
     arr_push(r, arr_get(a, 1));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void tomap (Machine *m) {
@@ -112,7 +112,7 @@ static void tomap (Machine *m) {
   Token *tk1 = NULL;
   EACH(tk_pop_list(m), Token, tk) {
     if (tk1) {
-      arr_push(r, token_new_list(0, arr_new_from(tk1, tk, NULL)));
+      arr_push(r, token_new_list(arr_new_from(tk1, tk, NULL)));
       tk1 = NULL;
     } else {
       if (token_type(tk) != token_STRING) fails_type_in(m, token_STRING, tk);
@@ -121,9 +121,9 @@ static void tomap (Machine *m) {
   }_EACH
   if (tk1) {
     Arr *a = tk_pop_list(m);
-    fails_size_list(m, a, arr_size(a) + 1);
+    fails_list_size(m, a, arr_size(a) + 1);
   }
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 Pmodule *modobj_mk (void) {

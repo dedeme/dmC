@@ -8,18 +8,18 @@
 void modglobal1_and (Machine *m) {
   Int i2 = tk_pop_int(m);
   Int i1 = tk_pop_int(m);
-  machine_push(m, token_new_int(0, i1 && i2));
+  machine_push(m, token_new_int(i1 && i2));
 }
 
 void modglobal1_or (Machine *m) {
   Int i2 = tk_pop_int(m);
   Int i1 = tk_pop_int(m);
-  machine_push(m, token_new_int(0, i1 || i2));
+  machine_push(m, token_new_int(i1 || i2));
 }
 
 void modglobal1_not (Machine *m) {
   Int i = tk_pop_int(m);
-  machine_push(m, token_new_int(0, !i));
+  machine_push(m, token_new_int(!i));
 }
 
 void modglobal1_greater (Machine *m) {
@@ -27,12 +27,12 @@ void modglobal1_greater (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) > token_int(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) > token_int(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) > token_int(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) > token_int(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -42,12 +42,12 @@ void modglobal1_greater (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) > token_float(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) > token_float(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) > token_float(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) > token_float(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -56,7 +56,7 @@ void modglobal1_greater (Machine *m) {
   tk2 = machine_pop_opt(m, token_STRING);
   if (tk2) {
     machine_push(m, token_new_int(
-      0, strcmp(tk_pop_string(m), token_string(tk2)) > 0
+      strcmp(tk_pop_string(m), token_string(tk2)) > 0
     ));
     return;
   }
@@ -70,12 +70,12 @@ void modglobal1_greater_eq (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) >= token_int(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) >= token_int(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) >= token_int(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) >= token_int(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -85,12 +85,12 @@ void modglobal1_greater_eq (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) >= token_float(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) >= token_float(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) >= token_float(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) >= token_float(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -99,7 +99,7 @@ void modglobal1_greater_eq (Machine *m) {
   tk2 = machine_pop_opt(m, token_STRING);
   if (tk2) {
     machine_push(m, token_new_int(
-      0, strcmp(tk_pop_string(m), token_string(tk2)) >= 0
+      strcmp(tk_pop_string(m), token_string(tk2)) >= 0
     ));
     return;
   }
@@ -112,12 +112,12 @@ void modglobal1_less (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) < token_int(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) < token_int(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) < token_int(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) < token_int(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -127,12 +127,12 @@ void modglobal1_less (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) < token_float(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) < token_float(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) < token_float(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) < token_float(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -141,7 +141,7 @@ void modglobal1_less (Machine *m) {
   tk2 = machine_pop_opt(m, token_STRING);
   if (tk2) {
     machine_push(m, token_new_int(
-      0, strcmp(tk_pop_string(m), token_string(tk2)) < 0
+      strcmp(tk_pop_string(m), token_string(tk2)) < 0
     ));
     return;
   }
@@ -154,12 +154,12 @@ void modglobal1_less_eq (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) <= token_int(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) <= token_int(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) <= token_int(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) <= token_int(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -169,12 +169,12 @@ void modglobal1_less_eq (Machine *m) {
   if (tk2) {
     Token *tk1 = machine_pop_opt(m, token_INT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_int(tk1) <= token_float(tk2)));
+      machine_push(m, token_new_int(token_int(tk1) <= token_float(tk2)));
       return;
     }
     tk1 = machine_pop_opt(m, token_FLOAT);
     if (tk1) {
-      machine_push(m, token_new_int(0, token_float(tk1) <= token_float(tk2)));
+      machine_push(m, token_new_int(token_float(tk1) <= token_float(tk2)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -183,7 +183,7 @@ void modglobal1_less_eq (Machine *m) {
   tk2 = machine_pop_opt(m, token_STRING);
   if (tk2) {
     machine_push(m, token_new_int(
-      0, strcmp(tk_pop_string(m), token_string(tk2)) <= 0
+      strcmp(tk_pop_string(m), token_string(tk2)) <= 0
     ));
     return;
   }

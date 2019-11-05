@@ -19,7 +19,7 @@ static Arr *peeklist (Machine *m) {
 
 // a is Arr<Tokeb>
 static void pushlist (Machine *m, Arr *a) {
-  machine_push(m, token_new_list(0, a));
+  machine_push(m, token_new_list(a));
 }
 
 static int getint (Machine *m) {
@@ -40,7 +40,7 @@ static void unary (Machine *m) {
 static void make (Machine *m) {
   Int sz = tk_pop_int(m);
   Token *tk = machine_pop(m);
-  if (token_type(tk) == token_LIST || token_type(tk) == token_POINTER)
+  if (token_type(tk) == token_LIST || token_type(tk) == token_NATIVE)
     fails_types_in(m, 4, (enum token_Type[]) {
         token_INT, token_FLOAT, token_STRING, token_SYMBOL
       }, tk);
@@ -53,7 +53,7 @@ static void make (Machine *m) {
 
 static void fill (Machine *m) {
   Token *tk = machine_pop(m);
-  if (token_type(tk) == token_LIST || token_type(tk) == token_POINTER)
+  if (token_type(tk) == token_LIST || token_type(tk) == token_NATIVE)
     fails_types_in(m, 4, (enum token_Type[]) {
         token_INT, token_FLOAT, token_STRING, token_SYMBOL
       }, tk);
@@ -205,8 +205,8 @@ static void duplicates (Machine *m) {
   Tp *dr = arr_duplicates(a, (FCMP) fn);
   // Arr<Token>
   Arr *r = arr_new();
-  arr_push(r, token_new_list(0, tp_e1(dr)));
-  arr_push(r, token_new_list(0, tp_e2(dr)));
+  arr_push(r, token_new_list(tp_e1(dr)));
+  arr_push(r, token_new_list(tp_e2(dr)));
   pushlist(m, r);
 }
 
@@ -220,7 +220,7 @@ static void all (Machine *m) {
   }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_all(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_all(a, (FPRED)fn)));
 }
 
 static void any (Machine *m) {
@@ -233,7 +233,7 @@ static void any (Machine *m) {
   }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_any(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_any(a, (FPRED)fn)));
 }
 
 static void each (Machine *m) {
@@ -254,7 +254,7 @@ static void eachix (Machine *m) {
   int c = 0;
   void fn (Token *e) {
     machine_push(m, e);
-    machine_push(m, token_new_int(0, c++));
+    machine_push(m, token_new_int(c++));
     machine_process("", machine_pmachines(m), prg);
   }
   // Arr<Token>
@@ -275,7 +275,7 @@ static void eq (Machine *m) {
   Arr *a1 = getlist(m);
   // Arr<Token>
   Arr *a2 = getlist(m);
-  machine_push(m, token_new_int(0, it_eq(it_from(a1), it_from(a2), (FCMP)fn)));
+  machine_push(m, token_new_int(it_eq(it_from(a1), it_from(a2), (FCMP)fn)));
 }
 
 static void neq (Machine *m) {
@@ -291,7 +291,7 @@ static void neq (Machine *m) {
   Arr *a1 = getlist(m);
   // Arr<Token>
   Arr *a2 = getlist(m);
-  machine_push(m, token_new_int(0, !it_eq(it_from(a1), it_from(a2), (FCMP)fn)));
+  machine_push(m, token_new_int(!it_eq(it_from(a1), it_from(a2), (FCMP)fn)));
 }
 
 static void lindex (Machine *m) {
@@ -299,7 +299,7 @@ static void lindex (Machine *m) {
   int fn (Token *t) { return token_eq(t, tk); }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_index(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_index(a, (FPRED)fn)));
 }
 
 static void indexf (Machine *m) {
@@ -312,7 +312,7 @@ static void indexf (Machine *m) {
   }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_index(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_index(a, (FPRED)fn)));
 }
 
 static void find (Machine *m) {
@@ -337,7 +337,7 @@ static void lastindex (Machine *m) {
   int fn (Token *t) { return token_eq(t, tk); }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_last_index(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_last_index(a, (FPRED)fn)));
 }
 
 static void lastindexf (Machine *m) {
@@ -350,7 +350,7 @@ static void lastindexf (Machine *m) {
   }
   // Arr<Token>
   Arr *a = getlist(m);
-  machine_push(m, token_new_int(0, arr_last_index(a, (FPRED)fn)));
+  machine_push(m, token_new_int(arr_last_index(a, (FPRED)fn)));
 }
 
 static void reduce (Machine *m) {
@@ -369,6 +369,21 @@ static void reduce (Machine *m) {
     seed = fn(seed, e);
   }_EACH
   machine_push(m, seed);
+}
+
+static void flat (Machine *m) {
+  // Arr<Token>
+  Arr *a = getlist(m);
+  // Arr<Token>
+  Arr *r = arr_new();
+  void add (Arr *ls) {
+    EACH(ls, Token, tk) {
+      if (token_type(tk) == token_LIST) add(token_list(tk));
+      else arr_push(r, tk);
+    } _EACH
+  }
+  add(a);
+  pushlist(m, r);
 }
 
 static void drop (Machine *m) {
@@ -451,7 +466,7 @@ static void zip (Machine *m) {
     Arr *ae = arr_new();
     arr_push(ae, tp_e1(t));
     arr_push(ae, tp_e2(t));
-    arr_push(r, token_new_list(0, ae));
+    arr_push(r, token_new_list(ae));
   }_EACH
   pushlist(m, r);
 }
@@ -473,7 +488,7 @@ static void zip3 (Machine *m) {
     arr_push(ae, tp3_e1(t));
     arr_push(ae, tp3_e2(t));
     arr_push(ae, tp3_e3(t));
-    arr_push(r, token_new_list(0, ae));
+    arr_push(r, token_new_list(ae));
   }_EACH
   pushlist(m, r);
 }
@@ -484,15 +499,15 @@ static void unzip (Machine *m) {
   EACH(getlist(m), Token, tk) {
     // Arr<Token>
     Arr *ae = token_list(tk);
-    if (arr_size(ae) != 2) fails_size_list(m, ae, 2);
+    if (arr_size(ae) != 2) fails_list_size(m, ae, 2);
     arr_push(a, tp_new(arr_get(ae, 0), arr_get(ae, 1)));
   }_EACH
   // Tp3<Arr<Token>, Arr<Token>>>
   Tp *t = arr_unzip(a);
   // Arr<Token>
   Arr *r = arr_new();
-  arr_push(r, token_new_list(0, tp_e1(t)));
-  arr_push(r, token_new_list(0, tp_e2(t)));
+  arr_push(r, token_new_list(tp_e1(t)));
+  arr_push(r, token_new_list(tp_e2(t)));
   pushlist(m, r);
 }
 
@@ -502,16 +517,16 @@ static void unzip3 (Machine *m) {
   EACH(getlist(m), Token, tk) {
     // Arr<Token>
     Arr *ae = token_list(tk);
-    if (arr_size(ae) != 3) fails_size_list(m, ae, 3);
+    if (arr_size(ae) != 3) fails_list_size(m, ae, 3);
     arr_push(a, tp3_new(arr_get(ae, 0), arr_get(ae, 1), arr_get(ae, 2)));
   }_EACH
   // Tp3<Arr<Token>, Arr<Token>, Arr<Token>>
   Tp3 *t = arr_unzip3(a);
   // Arr<Token>
   Arr *r = arr_new();
-  arr_push(r, token_new_list(0, tp3_e1(t)));
-  arr_push(r, token_new_list(0, tp3_e2(t)));
-  arr_push(r, token_new_list(0, tp3_e3(t)));
+  arr_push(r, token_new_list(tp3_e1(t)));
+  arr_push(r, token_new_list(tp3_e2(t)));
+  arr_push(r, token_new_list(tp3_e3(t)));
   pushlist(m, r);
 }
 
@@ -539,7 +554,7 @@ static void subaux (Machine *m, int begin, int end, int is_right) {
   } else {
     ra = arr_new();
   }
-  machine_push(m, token_new_list(0, ra));
+  machine_push(m, token_new_list(ra));
 }
 
 static void sub (Machine *m) {
@@ -608,6 +623,7 @@ Pmodule *modlist_mk (void) {
   add("lastIndexf", lastindexf);
   add("reduce", reduce);
 
+  add("flat", flat);
   add("drop", drop);
   add("dropf", dropf);
   add("filter", filter);

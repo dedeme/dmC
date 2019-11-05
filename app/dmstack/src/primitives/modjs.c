@@ -6,38 +6,38 @@
 #include "tk.h"
 
 static void isnull (Machine *m) {
-  machine_push(m, token_new_int(0,
+  machine_push(m, token_new_int(
     js_is_null((Js *)tk_pop_string(m))
   ));
 }
 
 static void rb (Machine *m) {
-  machine_push(m, token_new_int(0,
+  machine_push(m, token_new_int(
     js_rb((Js *)tk_pop_string(m))
   ));
 }
 
 static void ri (Machine *m) {
-  machine_push(m, token_new_int(0,
+  machine_push(m, token_new_int(
     js_rl((Js *)tk_pop_string(m))
   ));
 }
 
 static void rf (Machine *m) {
-  machine_push(m, token_new_float(0,
+  machine_push(m, token_new_float(
     js_rd((Js *)tk_pop_string(m))
   ));
 }
 
 static void rs (Machine *m) {
-  machine_push(m, token_new_string(0,
+  machine_push(m, token_new_string(
     js_rs((Js *)tk_pop_string(m))
   ));
 }
 
 static void ra (Machine *m) {
-  Token *fn (char *js) { return token_new_string(0, js); }
-  machine_push(m, token_new_list(0, arr_map(
+  Token *fn (char *js) { return token_new_string(js); }
+  machine_push(m, token_new_list(arr_map(
     js_ra((Js *)tk_pop_string(m)), (FCOPY)fn
   )));
 }
@@ -48,10 +48,10 @@ static void ro (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
   EACH(jsm, Kv, kv) {
-    arr_push(r, token_new_string(0, kv_key(kv)));
-    arr_push(r, token_new_string(0, kv_value(kv)));
+    arr_push(r, token_new_string(kv_key(kv)));
+    arr_push(r, token_new_string(kv_value(kv)));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void rm (Machine *m) {
@@ -62,37 +62,37 @@ static void rm (Machine *m) {
   EACH(jsm, Kv, kv) {
     // Arr<Token>
     Arr *e = arr_new();
-    arr_push(e, token_new_string(0, kv_key(kv)));
-    arr_push(e, token_new_string(0, kv_value(kv)));
-    arr_push(r, token_new_list(0, e));
+    arr_push(e, token_new_string(kv_key(kv)));
+    arr_push(e, token_new_string(kv_value(kv)));
+    arr_push(r, token_new_list(e));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void wn (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_wn()));
+  machine_push(m, token_new_string((char *)js_wn()));
 }
 
 static void wb (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_wb(
+  machine_push(m, token_new_string((char *)js_wb(
     tk_pop_int(m)
   )));
 }
 
 static void wi (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_wl(
+  machine_push(m, token_new_string((char *)js_wl(
     tk_pop_int(m)
   )));
 }
 
 static void wf (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_wd(
+  machine_push(m, token_new_string((char *)js_wd(
     tk_pop_float(m)
   )));
 }
 
 static void ws (Machine *m) {
-  machine_push(m, token_new_string(0, (char *)js_ws(
+  machine_push(m, token_new_string((char *)js_ws(
     tk_pop_string(m)
   )));
 }
@@ -101,7 +101,7 @@ static void wa (Machine *m) {
   char *fn (Token *tk) {
     return tk_string(m, tk);
   }
-  machine_push(m, token_new_string(0, (char *)js_wa(
+  machine_push(m, token_new_string((char *)js_wa(
     arr_map(tk_pop_list(m), (FCOPY)fn)
   )));
 }
@@ -121,8 +121,8 @@ static void wo (Machine *m) {
       key = s;
     }
   }_EACH
-  if (key) fails_size_list(m, a, arr_size(a) + 1);
-  machine_push(m, token_new_string(0, (char *)js_wo(r)));
+  if (key) fails_list_size(m, a, arr_size(a) + 1);
+  machine_push(m, token_new_string((char *)js_wo(r)));
 }
 
 static void wm (Machine *m) {
@@ -133,10 +133,10 @@ static void wm (Machine *m) {
   EACH(a, Token, tk) {
     // Arr<Token>
     Arr *e = tk_list(m, tk);
-    if (arr_size(e) != 2) fails_size_list(m, e, 2);
+    if (arr_size(e) != 2) fails_list_size(m, e, 2);
     map_put(r, tk_string(m, *arr_start(e)), tk_string(m, *(arr_start(e) + 1)));
   }_EACH
-  machine_push(m, token_new_string(0, (char *)js_wo(r)));
+  machine_push(m, token_new_string((char *)js_wo(r)));
 }
 
 void modjs_from_list (Machine *m) {
@@ -149,7 +149,7 @@ void modjs_from_list (Machine *m) {
     machine_process("", machine_pmachines(m), prg);
     arr_push(r, machine_pop(m));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
   wa(m);
 }
 
@@ -163,7 +163,7 @@ void modjs_to_list (Machine *m) {
     machine_process("", machine_pmachines(m), prg);
     arr_push(r, machine_pop(m));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 void modjs_from_map (Machine *m) {
@@ -173,13 +173,13 @@ void modjs_from_map (Machine *m) {
   EACH(tk_pop_list(m), Token, tk) {
     // Arr<Token>
     Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_size_list(m, a, 2);
+    if (arr_size(a) != 2) fails_list_size(m, a, 2);
     arr_push(r, *arr_start(a));
     machine_push(m, arr_get(a, 1));
     machine_process("", machine_pmachines(m), prg);
     arr_push(r, machine_pop(m));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
   wo(m);
 }
 
@@ -195,14 +195,14 @@ void modjs_to_map (Machine *m) {
     if (key) {
       machine_push(m, tk);
       machine_process("", machine_pmachines(m), prg);
-      arr_push(r, token_new_list(0, arr_new_from(key, machine_pop(m), NULL)));
+      arr_push(r, token_new_list(arr_new_from(key, machine_pop(m), NULL)));
       key = NULL;
     } else {
       key = tk;
     }
   }_EACH
-  if (key) fails_size_list(m, a, arr_size(a) + 1);
-  machine_push(m, token_new_list(0, r));
+  if (key) fails_list_size(m, a, arr_size(a) + 1);
+  machine_push(m, token_new_list(r));
 }
 
 Pmodule *modjs_mk (void) {

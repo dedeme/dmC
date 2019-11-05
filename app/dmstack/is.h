@@ -14,6 +14,28 @@
 Opt *tkreader_next(Reader *reader);
 
 #endif
+// Copyright 29-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+#ifndef EXCEPTION_H
+  #define EXCEPTION_H
+
+#include "dmc/async.h"
+#include "Machine.h"
+
+///
+void exception_throw(Machine *m, char *type, char *msg);
+
+///
+char *exception_type(Exc *ex);
+
+///
+char *exception_msg(Exc *ex);
+
+///
+char *exception_stack(Exc *ex);
+
+#endif
 // Copyright 05-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -114,7 +136,7 @@ void fails_type_in (Machine *m, enum token_Type type, Token *token);
 void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token);
 
 /// Error in list size.
-void fails_size_list (Machine *m, Arr *list, int expected);
+void fails_list_size (Machine *m, Arr *list, int expected);
 
 /// Error in field type of list.
 void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected);
@@ -206,7 +228,7 @@ Token *reader_process (Reader *this);
 int reader_is_file (Reader *is_file);
 
 ///
-char *reader_source (Reader *this);
+Symbol reader_source (Reader *this);
 
 ///
 char *reader_prg (Reader *this);
@@ -230,11 +252,17 @@ int reader_nline (Reader *this);
 ///
 void reader_set_nline (Reader *this, int value);
 
-/// Calculate symbol id of 'tk'. 'tk' is a token_SYMBOL.
+/// Calculates symbol id of 'tk'. 'tk' is a token_SYMBOL.
 ///   this: The reader.
 ///   prg : Arr<Token> symbols read until now.
 ///   tk  : Token type token_SYMBOL.
 Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
+
+/// Reads an interpolation.
+///   this: The reader
+///   tk  : Token of type token_STRING
+///   return: Arr<Token> Tk expanded.
+Arr *reader_interpolation (Reader *this, Token *tk);
 
 ///
 void reader_fail (Reader *this, char *msg);
@@ -278,7 +306,7 @@ void primitives_add_lib (Lib *lib);
 /// Check types of stack values and raise a fail if checking not succeeds.
 void types_fail (Machine *m);
 
-/// Check types of stack values and push in stack '0' if checking not succeeds.
+/// Check types of stack values and push in stack '1' if checking succeeds.
 void types_check (Machine *m);
 
 #endif
@@ -620,6 +648,21 @@ void modglobal2_ref_up (Machine *m);
 void modglobal2_ref_upplus (Machine *m);
 
 #endif
+// Copyright 29-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Exception module.
+
+#ifndef PRIMITIVES_MODEXC_H
+  #define PRIMITIVES_MODEXC_H
+
+#include "dmc/async.h"
+#include "Pmodule.h"
+
+///
+Pmodule *modexc_mk (void);
+
+#endif
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -739,9 +782,20 @@ Pmodule *modsys_mk (void);
 #include <stdint.h>
 #include "dmc/async.h"
 
+///
 #define VERSION "201909"
 
+///
 typedef intptr_t Int;
+
+///
+#define exc_dmstack_t "dmstack"
+
+///
+#define MAX_EXC_STACK 10
+
+///
+#define MAX_EXC_TRACE 15
 
 #endif
 // Copyright 23-Sept-2019 ºDeme
@@ -834,7 +888,7 @@ Arr *tk_list (Machine *m, Token *t);
 Symbol tk_symbol (Machine *m, Token *t);
 
 ///
-void *tk_pointer (Machine *m, Token *t, Symbol sym);
+void *tk_native (Machine *m, Token *t, Symbol sym);
 
 ///
 Int tk_pop_int (Machine *m);
@@ -852,7 +906,7 @@ Arr *tk_pop_list (Machine *m);
 Symbol tk_pop_symbol (Machine *m);
 
 ///
-void *tk_pop_pointer (Machine *m, Symbol sym);
+void *tk_pop_native (Machine *m, Symbol sym);
 
 ///
 Int tk_peek_int (Machine *m);
@@ -870,7 +924,7 @@ Arr *tk_peek_list (Machine *m);
 Symbol tk_peek_symbol (Machine *m);
 
 ///
-void *tk_peek_pointer (Machine *m, Symbol sym);
+void *tk_peek_native (Machine *m, Symbol sym);
 
 #endif
 // Copyright 05-Sept-2019 ºDeme
@@ -885,14 +939,16 @@ void *tk_peek_pointer (Machine *m, Symbol sym);
 #include "DEFS.h"
 
 enum symbol_SYSTEM {
-  symbol_IMPORT, symbol_IF, symbol_ELSE, symbol_ELIF,
-  symbol_BREAK, symbol_EQUALS, symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP,
-  symbol_EVAL, symbol_RUN, symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP,
-  symbol_WHILE, symbol_FOR, symbol_ASSERT, symbol_EXPECT, symbol_THIS,
-  symbol_STACK, symbol_STACK_CHECK,
+  symbol_IMPORT, symbol_IF, symbol_ELSE, symbol_ELIF, symbol_EQUALS,
+  symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP, symbol_EVAL, symbol_RUN,
+  symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_BREAK, symbol_LOOP,
+  symbol_WHILE, symbol_FOR, symbol_CONTINUE, symbol_RECURSIVE, symbol_ASSERT,
+  symbol_EXPECT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
+
+  symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 
   symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
-  symbol_ISERVER_, symbol_ISERVER_RQ_,
+  symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
 
   symbol_SYSTEM_COUNT
 };
@@ -943,35 +999,59 @@ Symbol symbolKv_value (SymbolKv *this);
 ///
 enum token_Type {
   token_INT, token_FLOAT, token_STRING, token_LIST, token_SYMBOL,
-  token_POINTER
+  token_NATIVE
 };
 
 ///
 typedef struct token_Token Token;
 
 ///
-Token *token_new_int (int line, Int value);
+typedef struct token_Pos TokenPos;
 
 ///
-Token *token_new_float (int line, double value);
+char *tokenPos_source (TokenPos *this);
 
 ///
-Token *token_new_string (int line, char *value);
+int tokenPos_line (TokenPos *this);
+
+///
+Token *token_new_int (Int value);
+
+///
+Token *token_new_float (double value);
+
+///
+Token *token_new_string (char *value);
 
 /// 'value' is Arr<Token>
-Token *token_new_list (int line, Arr *value);
+Token *token_new_list (Arr *value);
 
 ///
-Token *token_new_symbol (int line, Symbol value);
+Token *token_new_symbol (Symbol value);
 
 ///
 Token *token_from_pointer (Symbol sym, void *pointer);
 
 ///
-enum token_Type token_type (Token *this);
+Token *token_new_int_pos (Int value, Symbol source, int line);
 
 ///
-int token_line (Token *this);
+Token *token_new_float_pos (double value, Symbol source, int line);
+
+///
+Token *token_new_string_pos (char *value, Symbol source, int line);
+
+/// 'value' is Arr<Token>
+Token *token_new_list_pos (Arr *value, Symbol source, int line);
+
+///
+Token *token_new_symbol_pos (Symbol value, Symbol source, int line);
+
+///
+enum token_Type token_type (Token *this);
+
+/// Opt<TokenPos>
+Opt *token_pos (Token *this);
 
 ///
 Int token_int (Token *this);
@@ -989,7 +1069,10 @@ Arr *token_list (Token *this);
 Symbol token_symbol (Token *this);
 
 ///
-void *token_pointer (Token *this);
+Symbol token_native_symbol (Token *this);
+
+///
+void *token_native_pointer (Token *this);
 
 /// Returns a new token equals to 'this'
 Token *token_clone (Token *this);
@@ -1074,6 +1157,9 @@ Heap *machine_heap (Machine *this);
 
 ///
 Token *machine_prg (Machine *this);
+
+///
+char *machine_stack_trace (Machine *this);
 
 ///
 void machine_fail (Machine *this, char *msg);
@@ -2390,9 +2476,9 @@ char *str_trim(char *str);
 
 /// Splits 'str' in an Arr[char].
 /// For example (using ';' as separator):
-///   "" -> []
-///   ";" -> [""]
-///   "a;" -> [a]
+///   "" -> [""]
+///   ";" -> ["", ""]
+///   "a;" -> [a, ""]
 ///   "a;bc" -> ["a", "bc"]
 /// Returns an Arr<char>.
 Arr *str_csplit(char *str, char sep);
@@ -2403,11 +2489,11 @@ Arr *str_csplit_trim(char *str, char sep);
 
 /// Splits 'str' in an Arr<char>.
 /// For example (using ";" as separator):
-///   "" -> []
-///   ";" -> [""]
-///   "a;" -> [a]
+///   "" -> [""]
+///   ";" -> ["", ""]
+///   "a;" -> [a, ""]
 ///   "a;bc" -> ["a", "bc"]
-/// If 'sep' is "" return will have only one string equals to 'str'.
+/// If 'sep' is "" return all runes of 'str'.
 /// Returns an Arr<char>.
 Arr *str_split(char *str, char *sep);
 

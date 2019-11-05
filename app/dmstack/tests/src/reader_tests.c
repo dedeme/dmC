@@ -54,7 +54,7 @@ void reader_tests (void) {
   tk = arr_get(a, 0);
   assert(token_type(tk) == token_STRING);
   assert(str_eq(token_string(tk), "abc"));
-  assert(str_eq(token_to_str(tk), "\"abc\""));
+  assert(str_eq(token_to_str(tk), "abc"));
 
   r = reader_new("*tests*", "  \" a\\\"bb\\\"\\nc@\\t\"  ");
   tk = reader_process(r);
@@ -64,7 +64,7 @@ void reader_tests (void) {
   tk = arr_get(a, 0);
   assert(token_type(tk) == token_STRING);
   assert(str_eq(token_string(tk), " a\"bb\"\nc@\t"));
-  assert(str_eq(token_to_str(tk), "\" a\\\"bb\\\"\\nc@\\t\""));
+  assert(str_eq(token_to_str(tk), " a\"bb\"\nc@\t"));
 
   r = reader_new("*tests*", "-");
   tk = reader_process(r);
@@ -124,7 +124,7 @@ void reader_tests (void) {
   tk = arr_get(a, 0);
   assert(token_type(tk) == token_LIST);
   assert(arr_size(token_list(tk)) == 3);
-  assert(str_eq(token_to_str(tk), "(1, 2, \"a\")"));
+  assert(str_eq(token_to_str(tk), "(1, 2, a)"));
 
   r = reader_new("*tests*", " ( ' (23 , 2 ) : 1.5 ) ");
   tk = reader_process(r);

@@ -11,6 +11,10 @@
   M map,values () == assert
 
   M "b" 2 map,put+; "c" 33 map,put+; "a" 1 map,put+; "c" 3 map,put
+  M "a" map,has? assert
+  M "b" map,has? assert
+  M "c" map,has? assert
+  M "d" map,has? ! assert
   M "a" map,get (1) == assert
   M "b" map,get (2) == assert
   M "c" map,get (3) == assert

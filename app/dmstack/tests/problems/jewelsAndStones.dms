@@ -4,21 +4,23 @@
 ( jewels =; stones =
   0 wrap,ref : C =;
   stones dup
+
+  stones size
   (
     str,get
-    (C (1 +) ^^) (jewels swap str,index : -1 : !=) if
+    jewels swap str,index : -1 : != (C (1 +) ^^) if
     dup
   )
-  ( stones size)
   for
+
   pop pop
   C >>
 ) fn =>
 
 ( jewels =;
   0 wrap,ref : C =;
-  ( (C (1 +) ^^) (jewels swap str,index : -1 : !=) if)
   ( str,nextRune dup "" !=)
+  ( jewels swap str,index : -1 : != (C (1 +) ^^) if)
   while
   pop pop
   C >>

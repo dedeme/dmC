@@ -10,12 +10,12 @@
 static char *kvk (Machine *m, Token *tk) {
   // Arr<Token>
   Arr *a = tk_list(m, tk);
-  if (arr_size(a) != 2) fails_size_list(m, a, 2);
+  if (arr_size(a) != 2) fails_list_size(m, a, 2);
   return tk_string(m, *arr_start(a));
 }
 
 static void new (Machine *m) {
-  machine_push(m, token_new_list(0, arr_new()));
+  machine_push(m, token_new_list(arr_new()));
 }
 
 static void get (Machine *m) {
@@ -25,11 +25,11 @@ static void get (Machine *m) {
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
   Token *tk = opt_nget(it_find(it_from(a), (FPRED)fn));
   if (tk) {
-    machine_push(m, token_new_list(0, arr_new_from(
+    machine_push(m, token_new_list(arr_new_from(
       arr_get(token_list(tk), 1), NULL)
     ));
   } else {
-    machine_push(m, token_new_list(0, arr_new()));
+    machine_push(m, token_new_list(arr_new()));
   }
 }
 
@@ -38,7 +38,7 @@ static void haskey (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
-  machine_push(m, token_new_int(0, arr_index(a, (FPRED)fn) != -1));
+  machine_push(m, token_new_int(arr_index(a, (FPRED)fn) != -1));
 }
 
 static void putboth (Machine *m, int isplus) {
@@ -54,8 +54,8 @@ static void putboth (Machine *m, int isplus) {
   if (t)
     arr_set(token_list(t), 1, tk);
   else
-    arr_push(a, token_new_list(0, arr_new_from(
-      token_new_string(0, key), tk, NULL
+    arr_push(a, token_new_list(arr_new_from(
+      token_new_string(key), tk, NULL
     )));
 }
 
@@ -108,9 +108,9 @@ static void keys (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
   EACH(tk_pop_list(m), Token, tk) {
-    arr_push(r, token_new_string(0, kvk(m, tk)));
+    arr_push(r, token_new_string(kvk(m, tk)));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void values (Machine *m) {
@@ -119,10 +119,10 @@ static void values (Machine *m) {
   EACH(tk_pop_list(m), Token, tk) {
     // Arr<Token>
     Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_size_list(m, a, 2);
+    if (arr_size(a) != 2) fails_list_size(m, a, 2);
     arr_push(r, arr_get(a, 1));
   }_EACH
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void sortboth (Machine *m, int (*greater)(Token *e1, Token *e2)) {
@@ -160,9 +160,8 @@ Pmodule *modmap_mk (void) {
   }
 
   add("new", new); // [] - MAP
-  add("get", get); // [MAP, STRING] - LIST
-                          // ([map, key] - [unary list] or [empty list])
-  add("hasKey", haskey); // [MAP, STRING] - INT
+  add("get", get); // [MAP, STRING] - LIST  ([map, key] - OPT)
+  add("has?", haskey); // [MAP, STRING] - INT
   add("put", put); // [MAP - STRING - *] - []
   add("put+", putplus); // [MAP - STRING - *] - MAP
   add("up", up); // [MAP - STRING - LIST] - []

@@ -4,6 +4,9 @@
 /// List tests
 
 (
+  ["a", [1, 2], "b"] [[3, 4], "c"] +
+    ["a", [1, 2], "b", [3, 4], "c"] expect
+
   () L0 =
   (23) L1 =
   (1, 2, 3, 4, 5, 6) L2 =
@@ -194,6 +197,13 @@
   L0 100 (-) lst,reduce 100 == assert
   L1 100 (-) lst,reduce 77 == assert
   L2 100 (-) lst,reduce 79 == assert
+
+  // flat
+
+  L0 lst,flat L0 expect
+  L1 lst,flat L1 expect
+  L2 lst,flat L2 expect
+  [L0, L1, L2] data lst,flat [23, 1, 2, 3, 4, 5, 6] expect
 
   // drop - dropf
 

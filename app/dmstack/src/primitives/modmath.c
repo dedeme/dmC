@@ -8,18 +8,18 @@
 
 static void fn1 (Machine *m, double (*f)(double)) {
   machine_push(m, token_new_float(
-    0, f(tk_pop_float(m))
+    f(tk_pop_float(m))
   ));
 }
 
 static void fn2 (Machine *m, double (*f)(double, double)) {
   double n2 = tk_pop_float(m);
   double n1 = tk_pop_float(m);
-  machine_push(m, token_new_float(0, f(n1, n2)));
+  machine_push(m, token_new_float(f(n1, n2)));
 }
 
 static void pi (Machine *m) {
-  machine_push(m, token_new_float(0, M_PI));
+  machine_push(m, token_new_float(M_PI));
 }
 
 static void ssin (Machine *m) {
@@ -51,7 +51,7 @@ static void satan2 (Machine *m) {
 }
 
 static void e (Machine *m) {
-  machine_push(m, token_new_float(0, M_E));
+  machine_push(m, token_new_float(M_E));
 }
 
 static void sexp (Machine *m) {

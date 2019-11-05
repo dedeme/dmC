@@ -29,22 +29,14 @@ Symbol tk_symbol (Machine *m, Token *t) {
   return token_symbol(t);
 }
 
-void *tk_pointer (Machine *m, Token *t, Symbol sym) {
-  if (token_type(t) != token_LIST) fails_type_in(m, token_LIST, t);
-  // Arr<Token>
-  Arr *a = token_list(t);
-  if (arr_size(a) != 2) fails_size_list(m, a, 2);
-  Token *symtk = *arr_start(a);
-  if (token_type(symtk) != token_SYMBOL) fails_type_in(m, token_SYMBOL, symtk);
-  if (token_symbol(symtk) != sym)
+void *tk_native (Machine *m, Token *t, Symbol sym) {
+  if (token_type(t) != token_NATIVE) fails_type_in(m, token_NATIVE, t);
+  if (token_native_symbol(t) != sym)
     machine_fail(m, str_f(
-      "Expected pointer of type '%s', found one of type '%s",
-      symbol_to_str(sym), symbol_to_str(token_symbol(symtk))
+      "Expected pointer of type '%s', found one of type '%s'",
+      symbol_to_str(sym), symbol_to_str(token_native_symbol(t))
     ));
-  Token *p = *(arr_start(a) + 1);
-  if (token_type(p) != token_POINTER) fails_type_in(m, token_POINTER, p);
-
-  return (void *)token_int(p);
+  return token_native_pointer(t);
 }
 
 Int tk_pop_int (Machine *m) {
@@ -67,8 +59,8 @@ Symbol tk_pop_symbol (Machine *m) {
   return tk_symbol(m, machine_pop(m));
 }
 
-void *tk_pop_pointer (Machine *m, Symbol sym) {
-  return tk_pointer(m, machine_pop(m), sym);
+void *tk_pop_native (Machine *m, Symbol sym) {
+  return tk_native(m, machine_pop(m), sym);
 }
 
 Int tk_peek_int (Machine *m) {
@@ -91,6 +83,6 @@ Symbol tk_peek_symbol (Machine *m) {
   return tk_symbol(m, machine_peek(m));
 }
 
-void *tk_peek_pointer (Machine *m, Symbol sym) {
-  return tk_pointer(m, machine_peek(m), sym);
+void *tk_peek_native (Machine *m, Symbol sym) {
+  return tk_native(m, machine_peek(m), sym);
 }

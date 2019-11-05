@@ -31,6 +31,13 @@
   i -- i =; i 1 == assert
   i -- i =; i 0 == assert
 
+  5 2 int,& 0 expect
+  5 2 int,| 7 expect
+  5 5 int,^ 0 expect
+  2 int,~ int,~ 2 expect
+  1 2 int,<< 4 expect
+  4 2 int,>> 1 expect
+
   empty? assert
 ) run
 

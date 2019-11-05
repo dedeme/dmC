@@ -105,7 +105,9 @@ Opt *tkreader_next(Reader *reader) {
       ch = *++p;
       if (is_blank(ch)) {
         reader_set_prg_ix(reader, prg_ix + p - prg);
-        return opt_new(token_new_symbol(nline, symbol_new("-")));
+        return opt_new(token_new_symbol_pos(
+          symbol_new("-"), reader_source(reader), nline
+        ));
       }
     }
 
@@ -119,21 +121,21 @@ Opt *tkreader_next(Reader *reader) {
         errno = 0;
         char *tail;
         double d = strtod(n, &tail);
-        if (errno) reader_fail(reader, str_f("Float overflow in '%s'", n));
+        if (errno) reader_fail(reader, str_f("Float overflow in\n'%s'", n));
         if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
         reader_set_prg_ix(reader, prg_ix + p - prg);
-        return opt_new(token_new_float(nline, d));
+        return opt_new(token_new_float_pos(d, reader_source(reader), nline));
       }
 
       errno = 0;
       char *tail;
       int i = strtol (n, &tail, 0);
-      if (errno) reader_fail(reader, str_f("Integer overflow in '%s'", n));
+      if (errno) reader_fail(reader, str_f("Integer overflow in\n'%s'", n));
       if (*tail) reader_fail(reader, str_f("Bad number '%s'", n));
 
       reader_set_prg_ix(reader, prg_ix + p - prg);
-      return opt_new(token_new_int(nline, i));
+      return opt_new(token_new_int_pos(i, reader_source(reader), nline));
     }
 
     // String ------------------------------------------------------------------
@@ -176,7 +178,7 @@ Opt *tkreader_next(Reader *reader) {
               while (--c) {
                 if (!is_hex(*p++))
                   reader_fail(reader, str_f(
-                    "Bad hexadecimal unicode in '%s'",
+                    "Bad hexadecimal unicode in\n'%s'",
                     str_sub(prgd, 0, p - prgd)
                   ));
               }
@@ -185,7 +187,7 @@ Opt *tkreader_next(Reader *reader) {
             }
             default :
               reader_fail(reader, str_f(
-                    "Bad escape sequence in '%s'",
+                    "Bad escape sequence in\n'%s'",
                     str_sub(prgd, 0, p - prgd + 1)
               ));
           }
@@ -196,13 +198,15 @@ Opt *tkreader_next(Reader *reader) {
       }
       if (*p != '"') {
         reader_fail(reader, str_f(
-          "String does not end with \" in %s (%d)",
+          "String does not end with \" in\n%s (%d)",
           str_sub(prgd, 0, p - prgd), (int) *p
         ));
       }
 
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
-      return opt_new(token_new_string(nline, buf_to_str(bf)));
+      return opt_new(token_new_string_pos(
+        buf_to_str(bf), reader_source(reader), nline
+      ));
     }
 
     // String multiline --------------------------------------------------------
@@ -245,7 +249,9 @@ Opt *tkreader_next(Reader *reader) {
 
       reader_set_nline(reader, nline);
       reader_set_prg_ix(reader, prg_ix + p - prg + strlen(id));
-      return opt_new(token_new_string(start_line + 1, buf_to_str(bf)));
+      return opt_new(token_new_string_pos(
+        buf_to_str(bf), reader_source(reader), start_line + 1
+      ));
     }
 
     // List --------------------------------------------------------------------
@@ -281,13 +287,58 @@ Opt *tkreader_next(Reader *reader) {
         }
 
         if (ch == '"') {
-          char ch = *++p;
+          char *start = p;
+          ch = *++p;
           while (ch && ch != '"') {
-            if (ch == '\\' && p[1] == '"') ++p;
+            if (ch == '\\') ++p;
             ch = *++p;
           }
-          if (!ch) --p;
+          if (!ch)
+            reader_fail(reader, str_f(
+              "Quotes unclosed in\n%s", str_sub(prgd, start - prgd, p - prgd)
+            ));
           continue;
+        }
+
+        if (ch == '/') {
+          char *start = p;
+          ch = *++p;
+          if (ch == '/') {
+            int ix = str_cindex_from(prgd, '\n', p - prgd);
+            if (ix == -1) ix = strlen(prgd) - 1;
+            p = prgd + ix;
+            continue;
+          }
+          if (ch == '*') {
+            ch = *++p;
+            while (ch) {
+              if (ch == '*' && p[1] == '/') break;
+              ch = *++p;
+            }
+            if (!ch)
+              reader_fail(reader, str_f(
+                "'/*' unclosed in\n%s", str_right(prgd, start - prgd)
+              ));
+            ++p;
+            continue;
+          }
+        }
+
+        if (ch == '`') {
+          char *start = p++;
+          int ix = str_cindex_from(prgd, '\n', p - prgd);
+          if (ix != -1) {
+            char *close = str_f("%s%c", str_sub(prgd, p - prgd, ix), ch);
+            int ix2 = str_index_from(prgd, close, ix + 1);
+            if (ix2 != -1) {
+              p = prgd + ix2 + strlen(close);
+              continue;
+            }
+          }
+          reader_fail(reader, str_f(
+            "'`' unclosed or not at end of line in\n%s",
+            str_right(prgd, start - prgd)
+          ));
         }
 
         char e = ' ';
@@ -296,7 +347,7 @@ Opt *tkreader_next(Reader *reader) {
         if (sum2 < 0) e = '{';
         if (e != ' ')
           reader_fail(reader, str_f(
-            "Extra '%c' in '%s'", e, str_sub(prgd, 0, p - prgd + 1)
+            "Extra '%c' in\n'%s'", e, str_sub(prgd, 0, p - prgd + 1)
           ));
 
         e = ' ';
@@ -308,13 +359,13 @@ Opt *tkreader_next(Reader *reader) {
         if (sign == '{' && !sum2 && sum1) e = '[';
         if (e != ' ')
           reader_fail(reader, str_f(
-            "Internal '%c' open when '%c' was closed in '%s'",
+            "Internal '%c' open when '%c' was closed in\n'%s'",
             e, sign, str_sub(prgd, 0, p - prgd + 1)
           ));
       }
       if (!*p) {
         reader_fail(reader, str_f(
-          "'%c' without close in '%s'", sign, str_sub(prgd, 0, p - prgd)
+          "'%c' without close in\n'%s'", sign, str_sub(prgd, 0, p - prgd)
         ));
       }
 
@@ -339,14 +390,18 @@ Opt *tkreader_next(Reader *reader) {
 
       reader_set_nline(reader, reader_nline(subr));
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
-      return opt_new(token_new_list(nline_start, a));
+      return opt_new(token_new_list_pos(
+        a, reader_source(reader), nline_start
+      ));
     }
 
     // Symbol ------------------------------------------------------------------
     while (!is_blank(*++p));
     reader_set_prg_ix(reader, prg_ix + p - prg);
     char *id = str_sub(prgd, 0, p - prgd);
-    return opt_new(token_new_symbol(nline, symbol_new(id)));
+    return opt_new(token_new_symbol_pos(
+      symbol_new(id), reader_source(reader), nline
+    ));
   }
 
   return opt_empty();

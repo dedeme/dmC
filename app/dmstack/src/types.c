@@ -16,7 +16,7 @@ static char *check (Arr *stack, char *type) {
     else
       return "";
   }
-  return token_check_type (list_reverse(list_from_arr(stack)), type);
+  return token_check_type(list_reverse(list_from_arr(stack)), type);
 }
 
 void types_fail (Machine *m) {
@@ -31,5 +31,5 @@ void types_fail (Machine *m) {
 void types_check (Machine *m) {
   char *t = symbol_to_str(token_symbol(*arr_start(tk_pop_list(m))));
   char *checked = check(machine_stack(m), t);
-  machine_push(m, token_new_int(0, str_eq(t, checked)));
+  machine_push(m, token_new_int(str_eq(t, checked)));
 }

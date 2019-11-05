@@ -10,32 +10,68 @@
 static void fn2 (Machine *m, int (*f)(int, int)) {
   Int n2 = tk_pop_int(m);
   Int n1 = tk_pop_int(m);
-  machine_push(m, token_new_int(0, f(n1, n2)));
+  machine_push(m, token_new_int(f(n1, n2)));
 }
 
 static void fromStr (Machine *m) {
   machine_push(m, token_new_int(
-    0, js_rl((Js *)tk_pop_string(m))
+    js_rl((Js *)tk_pop_string(m))
   ));
 }
 
 static void sabs (Machine *m) {
   Int i = tk_pop_int(m);
-  machine_push(m, token_new_int(0, i >= 0 ? i : -i));
+  machine_push(m, token_new_int(i >= 0 ? i : -i));
 }
 
 static void rnd (Machine *m) {
   machine_push(m, token_new_int(
-    0, rnd_i(tk_pop_int(m))
+    rnd_i(tk_pop_int(m))
   ));
 }
 
 static void sdiv (Machine *m) {
   Int den = tk_pop_int(m);
   Int num = tk_pop_int(m);
-  div_t r = div(num, den);
-  machine_push(m, token_new_int(0, r.quot));
-  machine_push(m, token_new_int(0, r.rem));
+  Int quot = num / den;
+  Int rem = num - quot * den;
+  machine_push(m, token_new_int(quot));
+  machine_push(m, token_new_int(rem));
+}
+
+static void and (Machine *m) {
+  Int i2 = tk_pop_int(m);
+  Int i1 = tk_pop_int(m);
+  machine_push(m, token_new_int(i1 & i2));
+}
+
+static void or (Machine *m) {
+  Int i2 = tk_pop_int(m);
+  Int i1 = tk_pop_int(m);
+  machine_push(m, token_new_int(i1 | i2));
+}
+
+static void xor (Machine *m) {
+  Int i2 = tk_pop_int(m);
+  Int i1 = tk_pop_int(m);
+  machine_push(m, token_new_int(i1 ^ i2));
+}
+
+static void not (Machine *m) {
+  Int i = tk_pop_int(m);
+  machine_push(m, token_new_int(~i));
+}
+
+static void left (Machine *m) {
+  Int i2 = tk_pop_int(m);
+  Int i1 = tk_pop_int(m);
+  machine_push(m, token_new_int(i1 << i2));
+}
+
+static void right (Machine *m) {
+  Int i2 = tk_pop_int(m);
+  Int i1 = tk_pop_int(m);
+  machine_push(m, token_new_int(i1 >> i2));
 }
 
 static void max (Machine *m) {
@@ -48,25 +84,25 @@ static void min (Machine *m) {
   fn2(m, mn);
 }
 
-static void maxInt (Machine *m) {
+static void maxint (Machine *m) {
   Int r = 0;
   if (sizeof(Int) ==  sizeof(int)) r = INT_MAX;
   else if (sizeof(Int) ==  sizeof(long int)) r = LONG_MAX;
   else if (sizeof(Int) ==  sizeof(long long int)) r = LLONG_MAX;
-  machine_push(m, token_new_int(0, r));
+  machine_push(m, token_new_int(r));
 }
 
-static void minInt (Machine *m) {
+static void minint (Machine *m) {
   Int r = 0;
   if (sizeof(Int) ==  sizeof(int)) r = INT_MIN;
   else if (sizeof(Int) ==  sizeof(long int)) r = LONG_MIN;
   else if (sizeof(Int) ==  sizeof(long long int)) r = LLONG_MIN;
-  machine_push(m, token_new_int(0, r));
+  machine_push(m, token_new_int(r));
 }
 
 static void tofloat (Machine *m) {
   machine_push(m, token_new_float(
-    0, (double)tk_pop_int(m)
+    (double)tk_pop_int(m)
   ));
 }
 
@@ -81,11 +117,18 @@ Pmodule *modint_mk (void) {
   add("rnd", rnd); // [] - INT
   add("div", sdiv); // [INT, INT] - [INT, INT]
                                // (num, den) - [quot, rem]
+  add("&", and);
+  add("|", or);
+  add("^", xor);
+  add("~", not);
+  add("<<", left);
+  add(">>", right);
+
   add("max", max); // [INT, INT] - INT
   add("min", min); // [INT, INT] - INT
 
-  add("maxInt", maxInt); // () - INT
-  add("maxInt", minInt); // () - INT
+  add("maxInt", maxint); // () - INT
+  add("minInt", minint); // () - INT
   add("toFloat", tofloat); // INT - FLOAT
   return r;
 }

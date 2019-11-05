@@ -31,7 +31,7 @@ Token *reader_process (Reader *this);
 int reader_is_file (Reader *is_file);
 
 ///
-char *reader_source (Reader *this);
+Symbol reader_source (Reader *this);
 
 ///
 char *reader_prg (Reader *this);

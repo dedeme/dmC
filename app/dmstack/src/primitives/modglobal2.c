@@ -9,9 +9,9 @@ void modglobal2_size (Machine *m) {
   Token *tk = machine_pop(m);
   enum token_Type t = token_type(tk);
   if (t == token_STRING)
-    machine_push(m, token_new_int(0, strlen(token_string(tk))));
+    machine_push(m, token_new_int(strlen(token_string(tk))));
   else if (t == token_LIST)
-    machine_push(m, token_new_int(0, arr_size(token_list(tk))));
+    machine_push(m, token_new_int(arr_size(token_list(tk))));
   else {
     machine_push(m, tk);
     fails_types(
@@ -76,7 +76,7 @@ void modglobal2_upplus (Machine *m) {
 void modglobal2_ref_get (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
-  if (arr_size(a) != 1) fails_size_list(m, a, 1);
+  if (arr_size(a) != 1) fails_list_size(m, a, 1);
 
   machine_push(m, *arr_start(a));
 }
@@ -89,7 +89,7 @@ static void refsetboth (Machine *m, int isplus) {
   ;
   // Arr<Token>
   Arr *a = token_list(tk1);
-  if (arr_size(a) != 1) fails_size_list(m, a, 1);
+  if (arr_size(a) != 1) fails_list_size(m, a, 1);
 
   *arr_start(a) = tk2;
 }

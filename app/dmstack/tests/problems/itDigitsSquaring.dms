@@ -1,21 +1,19 @@
 // Copyright 06-Oct-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-1000 blob,new (2 blob,set+) (1000) for Cache =
+2 1000 blob,make Cache =
 
-((10 int,div; dup * swap sq +) (dup) if)
+(dup (10 int,div; dup * swap sq +) if)
 sq =>
 
 (
   sq
 
+  dup dup 1 != swap 89 != &&
   ( sum =
     Cache sum blob,get : s89 =
-    (sum ssq) else (89) (s89 1 ==) elif (1) (s89 0 ==) if
+    (s89 0 ==) (1) else (s89 1 ==) (89) else (sum ssq) if
   )
-  else
-  ( nop)
-  ( dup dup 1 == swap 89 == ||)
   if
 )
 ssq =>
@@ -23,21 +21,21 @@ ssq =>
 ( n =
   Cache
     n
-      dup ssq; (0) else (1) (89 ==) if; r =; r blob,set; r
+      dup ssq; 89 == (1) (0) elif; r =; r blob,set; r
 )
 ssq89New =>
 
 (
   sq : n =
   Cache n blob,get
-  (pop n ssq89New) (dup 1 >) if
+  dup 1 > (pop n ssq89New) if
 )
 ssq89 =>
 
 clock,now Cl =
 
 0
-( ssq89 +) (2 99999) for
+(2 99999) (ssq89 +)  for
 1 +
 //85623 == assert
 puts

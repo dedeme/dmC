@@ -31,6 +31,6 @@ pop
 )
 for
 
-clock,now C clock,- 1 get 1000. / toStr : " millis." + sys,println
+clock,now C clock,df toStr : " millis." + sys,println
 
 empty? assert

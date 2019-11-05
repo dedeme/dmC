@@ -6,26 +6,25 @@
 error =>
 
 ( s =
+  s "-" str,starts?
+  ( s size 1 ==  (0) (s 1 str,right str,digits?) elif)
   ( s str,digits?)
-  else
-  ( (s 1 str,right str,digits?) else (0) (s size 1 ==) if)
-  ( s "-" str,starts?)
-  if
+  elif
 ) digits? =>
 
 sys,getLine str,trim : e =
-("No data was entered" error) (e "" ==) if
+e "" == ("No data was entered" error) if
 
 e " " str,index : ix =
-("Expected 2 and only 2 entries" error) (ix -1 ==) if
+ix -1 == ("Expected 2 and only 2 entries" error) if
 
 e ix str,left : n1 =
 e : ix 1 + : str,right; str,trim ; n2 =
 n2 " " str,index : ix =
-("Expected 2 and only 2 entries" error) (ix -1 !=) if
+ix -1 != ("Expected 2 and only 2 entries" error) if
 
-("First entry is not a valid integer" error) (n1 digits? !) if
-("Second entry is not a valid integer" error) (n2 digits? !) if
+n1 digits? ! ("First entry is not a valid integer" error) if
+n2 digits? ! ("Second entry is not a valid integer" error) if
 
 n1 : " + " : n2 : " = "
 n1 int,fromStr n2 int,fromStr + toStr

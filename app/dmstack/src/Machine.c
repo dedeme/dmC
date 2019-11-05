@@ -47,6 +47,49 @@ Token *machine_prg (Machine *this) {
   return this->prg;
 }
 
+char *machine_stack_trace (Machine *this) {
+  Buf *bf = buf_new();
+
+  void stack (void) {
+    // Arr<Token>
+    Arr *st = arr_copy(this->stack);
+    if (!arr_size(st)) {
+      buf_add(bf, "    [EMPTY]\n");
+      return;
+    }
+    buf_add(bf, "    ");
+    int c = 0;
+    while (arr_size(st) && c < MAX_EXC_STACK) {
+      buf_add(bf, str_f("%s ", token_to_str(arr_pop(st))));
+      ++c;
+    }
+    buf_add(bf, "\n");
+  }
+
+  buf_add(bf, "  Stack:\n");
+  stack();
+
+  int c = 0;
+  EACHL(this->pmachines, Machine, m) {
+    if (c >= MAX_EXC_TRACE) break;
+    ++c;
+
+    Token *tk = arr_get(token_list(m->prg), m->ix);
+    TokenPos *pos = opt_nget(token_pos(tk));
+    if (pos !== null) {
+      buf_add(bf, str_f(
+        "%s:%d:%s\n",
+        tokenPos_source(pos), tokenPos_line(pos),
+        token_to_str_draft(tk)
+      ));
+    } else {
+      buf_add(bf, str_f("Runtime:0:%s\n", token_to_str_draft(tk)));
+    }
+  }_EACH
+
+  return buf_to_str(bf);
+}
+
 // static ---------------------------------------------------------------------
 
 static void eval (Machine *this) {
@@ -62,8 +105,8 @@ static void run (Machine *this) {
 
 static void runmod (Machine *this, char *module) {
   Token *prg = machine_pop_exc(this, token_LIST);
-  Token *runner = token_new_list(0, arr_new_from(
-    prg, token_new_symbol(0, symbol_new("run")), NULL
+  Token *runner = token_new_list(arr_new_from(
+    prg, token_new_symbol(symbol_new("run")), NULL
   ));
   machine_process(str_cat(module, ".dms", NULL), this->pmachines, runner);
 }
@@ -90,7 +133,7 @@ static void mrun (Machine *this) {
 static void data (Machine *this) {
   Token *prg = machine_pop_exc(this, token_LIST);
   Machine *m = machine_isolate_process("", this->pmachines, prg);
-  machine_push(this, token_new_list(0, m->stack));
+  machine_push(this, token_new_list(m->stack));
 }
 
 static pthread_mutex_t mutex;
@@ -193,7 +236,7 @@ static void sfor (Machine *this) {
   Token *cond = machine_pop_opt(this, token_INT);
   if (cond) {
     for (Int i = 0; i < token_int(cond); ++i) {
-      machine_push(this, token_new_int(0, i));
+      machine_push(this, token_new_int(i));
       machine_process("", this->pmachines, prg);
       if (arr_size(this->stack)) {
         Token *tk = machine_peek_opt(this, token_SYMBOL);
@@ -249,7 +292,7 @@ static void sfor (Machine *this) {
   for (;;) {
     if (step > 0 && begin >= end) break;
     else if (step < 0 && begin <= end) break;
-    machine_push(this, token_new_int(0, begin));
+    machine_push(this, token_new_int(begin));
     machine_process("", this->pmachines, prg);
     if (arr_size(this->stack)) {
       Token *tk = machine_peek_opt(this, token_SYMBOL);
@@ -259,6 +302,22 @@ static void sfor (Machine *this) {
       }
     }
     begin += step;
+  }
+}
+
+static void recursive (Machine *this) {
+  Token *prg = machine_pop_exc(this, token_LIST);
+
+  for (;;) {
+    machine_process("", this->pmachines, prg);
+    if (arr_size(this->stack)) {
+      Token *tk = machine_peek_opt(this, token_SYMBOL);
+      if (tk && token_symbol(tk) == symbol_CONTINUE) {
+        machine_pop(this);
+        continue;
+      }
+    }
+    break;
   }
 }
 
@@ -295,39 +354,11 @@ static void import (Machine *this) {
   }
 }
 
-static void sexit (Machine *this) {
-  void stack (void) {
-    // Arr<Token>
-    Arr *st = this->stack;
-    if (!arr_size(st)) {
-      puts("    [EMPTY]");
-      return;
-    }
-    printf("    ");
-    while (arr_size(st))
-      printf("%s ", token_to_str(arr_pop(st)));
-    puts("");
-  }
-
-  puts("  Stack:");
-  stack();
-
-  EACHL(this->pmachines, Machine, m) {
-    Token *tk = arr_get(token_list(m->prg), m->ix);
-    printf(
-      "%s:%d:%s\n",
-      machine_source(m), token_line(tk),
-      token_to_str(tk)
-    );
-  }_EACH
-
-  exit(0);
-}
-
 static void sassert (Machine *this) {
   if (token_int(machine_pop_exc(this, token_INT))) return;
   puts(str_f("Assert error:%d:", list_count(this->pmachines) + 1));
-  sexit(this);
+  puts(machine_stack_trace(this));
+  exit(0);
 }
 
 static void expect (Machine *this) {
@@ -339,12 +370,16 @@ static void expect (Machine *this) {
     list_count(this->pmachines) + 1,
     token_to_str(expected), token_to_str(actual)
   ));
-  sexit(this);
+  puts(machine_stack_trace(this));
+  exit(0);
 }
 
 void machine_fail (Machine *this, char *msg) {
-  puts(str_f("runtime error:%d: %s", list_count(this->pmachines) + 1, msg));
-  sexit(this);
+  puts(str_f(
+    "Runtime error in machine:%d: %s", list_count(this->pmachines) + 1, msg
+  ));
+  puts(machine_stack_trace(this));
+  exit(0);
 }
 
 void machine_push (Machine *this, Token *tk) {
@@ -434,6 +469,7 @@ static void cprocess (Machine *m) {
             }
           }
         } else {
+          --m->ix;
           machine_fail(m, str_f(
             "Symbol '%s %s' not found",
             symbol_to_str(module), symbol_to_str(sym)
@@ -586,7 +622,7 @@ static void cprocess (Machine *m) {
       else if (symbol == symbol_ELIF) elif(m);
       else if (symbol == symbol_ELSE) machine_push(m, tk);
       else if (symbol == symbol_IF) sif(m);
-      else if (symbol == symbol_BREAK) {
+      else if (symbol == symbol_BREAK || symbol == symbol_CONTINUE) {
         arr_push(m->stack, tk);
         fails_unregister_machine();
         return;
@@ -594,6 +630,7 @@ static void cprocess (Machine *m) {
       else if (symbol == symbol_LOOP) loop(m);
       else if (symbol == symbol_WHILE) swhile(m);
       else if (symbol == symbol_FOR) sfor(m);
+      else if (symbol == symbol_RECURSIVE) recursive(m);
       else if (symbol == symbol_IMPORT) import(m);
       else if (symbol == symbol_ASSERT) sassert(m);
       else if (symbol == symbol_EXPECT) expect(m);
@@ -637,7 +674,6 @@ static void cprocess (Machine *m) {
         }
       }
       if (!t) {
-        m->ix--;
         machine_fail(m, str_f(
           "Symbol '%s' not found", symbol_to_str(sym)
         ));

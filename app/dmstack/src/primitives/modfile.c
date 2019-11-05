@@ -8,7 +8,7 @@
 #include "fails.h"
 
 static void cwd (Machine *m) {
-  machine_push(m, token_new_string(0, file_cwd()));
+  machine_push(m, token_new_string(file_cwd()));
 }
 
 static void cd (Machine *m) {
@@ -23,18 +23,18 @@ static void smkdir (Machine *m) {
 
 static void dir (Machine *m) {
   char *path = tk_pop_string(m);
-  Token *fn (char *s) { return token_new_string(0, s); }
-  machine_push(m, token_new_list(0, arr_map(file_dir(path), (FCOPY)fn)));
+  Token *fn (char *s) { return token_new_string(s); }
+  machine_push(m, token_new_list(arr_map(file_dir(path), (FCOPY)fn)));
 }
 
 static void isdirectory (Machine *m) {
   char *path = tk_pop_string(m);
-  machine_push(m, token_new_int(0, file_is_directory(path)));
+  machine_push(m, token_new_int(file_is_directory(path)));
 }
 
 static void exists (Machine *m) {
   char *path = tk_pop_string(m);
-  machine_push(m, token_new_int(0, file_exists(path)));
+  machine_push(m, token_new_int(file_exists(path)));
 }
 
 static void del (Machine *m) {
@@ -59,22 +59,22 @@ static void copy (Machine *m) {
 
 static void isregular (Machine *m) {
   struct stat *st = file_info(tk_pop_string(m));
-  machine_push(m, token_new_int(0, S_ISREG(st->st_mode)));
+  machine_push(m, token_new_int(S_ISREG(st->st_mode)));
 }
 
 static void islink (Machine *m) {
   struct stat *st = file_info(tk_pop_string(m));
-  machine_push(m, token_new_int(0, S_ISLNK(st->st_mode)));
+  machine_push(m, token_new_int(S_ISLNK(st->st_mode)));
 }
 
 static void modified (Machine *m) {
   char *path = tk_pop_string(m);
-  machine_push(m, token_new_int(0, file_modified(path)));
+  machine_push(m, token_new_int(file_modified(path)));
 }
 
 static void size (Machine *m) {
   char *path = tk_pop_string(m);
-  machine_push(m, token_new_int(0, file_size(path)));
+  machine_push(m, token_new_int(file_size(path)));
 }
 
 static void swrite (Machine *m) {
@@ -89,7 +89,7 @@ static void append (Machine *m) {
 
 static void sread (Machine *m) {
   char *path = tk_pop_string(m);
-  machine_push(m, token_new_string(0, file_read(path)));
+  machine_push(m, token_new_string(file_read(path)));
 }
 
 static void aopen (Machine *m) {
@@ -108,28 +108,28 @@ static void wopen (Machine *m) {
 }
 
 static void sclose (Machine *m) {
-  file_close((FileLck *)tk_pop_pointer(m, symbol_FILE_));
+  file_close((FileLck *)tk_pop_native(m, symbol_FILE_));
 }
 
 static void readbin (Machine *m) {
-  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
+  FileLck *f = tk_pop_native(m, symbol_FILE_);
   machine_push(m, token_from_pointer(symbol_BLOB_, file_read_bin(f)));
 }
 
 static void readline (Machine *m) {
-  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
-  machine_push(m, token_new_string(0, file_read_line(f)));
+  FileLck *f = tk_pop_native(m, symbol_FILE_);
+  machine_push(m, token_new_string(file_read_line(f)));
 }
 
 static void writebin (Machine *m) {
-  Bytes *bs = tk_pop_pointer(m, symbol_BLOB_);
-  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
+  Bytes *bs = tk_pop_native(m, symbol_BLOB_);
+  FileLck *f = tk_pop_native(m, symbol_FILE_);
   file_write_bin(f, bs);
 }
 
 static void writetext (Machine *m) {
   char *s = tk_pop_string(m);
-  FileLck *f = tk_pop_pointer(m, symbol_FILE_);
+  FileLck *f = tk_pop_native(m, symbol_FILE_);
   file_write_text(f, s);
 }
 
@@ -166,10 +166,10 @@ Pmodule *modfile_mk (void) {
   add("wopen", wopen); // STRING - CPOINTER
   add("close", sclose); // CPOINTER - []
 
-  add("readBin", readbin); // STRING - BLOB
-  add("readLine", readline); // STRING - STRING
-  add("writeBin", writebin); // [STRING, BLOB] - []
-  add("writeText", writetext); // [STRING, STRING] - []  (file, text) -[]
+  add("readBin", readbin); // CPOINTER - BLOB
+  add("readLine", readline); // CPOINTER - STRING
+  add("writeBin", writebin); // [CPOINTER, BLOB] - []
+  add("writeText", writetext); // [CPOINTER, STRING] - []  (file, text) -[]
 
   return r;
 }

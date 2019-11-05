@@ -24,6 +24,9 @@ Heap *machine_heap (Machine *this);
 Token *machine_prg (Machine *this);
 
 ///
+char *machine_stack_trace (Machine *this);
+
+///
 void machine_fail (Machine *this, char *msg);
 
 ///

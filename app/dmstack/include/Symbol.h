@@ -10,16 +10,16 @@
 #include "DEFS.h"
 
 enum symbol_SYSTEM {
-  symbol_IMPORT, symbol_IF, symbol_ELSE, symbol_ELIF,
-  symbol_BREAK, symbol_EQUALS, symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP,
-  symbol_EVAL, symbol_RUN, symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_LOOP,
-  symbol_WHILE, symbol_FOR, symbol_ASSERT, symbol_EXPECT, symbol_THIS,
-  symbol_STACK, symbol_STACK_CHECK,
+  symbol_IMPORT, symbol_IF, symbol_ELSE, symbol_ELIF, symbol_EQUALS,
+  symbol_FUNCTION, symbol_AMPERSAND, symbol_NOP, symbol_EVAL, symbol_RUN,
+  symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_BREAK, symbol_LOOP,
+  symbol_WHILE, symbol_FOR, symbol_CONTINUE, symbol_RECURSIVE, symbol_ASSERT,
+  symbol_EXPECT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
 
   symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 
   symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
-  symbol_ISERVER_, symbol_ISERVER_RQ_,
+  symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
 
   symbol_SYSTEM_COUNT
 };

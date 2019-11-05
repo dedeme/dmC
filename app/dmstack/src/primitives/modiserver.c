@@ -13,20 +13,20 @@ static void open (Machine *m) {
 
 static void close (Machine *m) {
 
-  Iserver *s = (Iserver *)tk_pop_pointer(m, symbol_ISERVER_);
+  Iserver *s = (Iserver *)tk_pop_native(m, symbol_ISERVER_);
   iserver_close(s);
 }
 
 static void getrq (Machine *m) {
-  Iserver *s = (Iserver *)tk_pop_pointer(m, symbol_ISERVER_);
+  Iserver *s = (Iserver *)tk_pop_native(m, symbol_ISERVER_);
   IserverRq *rq = iserver_read(s);
   char *err = iserverRq_error(rq);
   if (*err) {
-    machine_push(m, token_new_list(0, arr_new_from(
-      token_new_string(0, err), token_new_int(0, 0), NULL
+    machine_push(m, token_new_list(arr_new_from(
+      token_new_string(err), token_new_int(0), NULL
     )));
   } else {
-    machine_push(m, token_new_list(0, arr_new_from(
+    machine_push(m, token_new_list(arr_new_from(
       token_from_pointer(symbol_ISERVER_RQ_, rq),
       NULL
     )));
@@ -34,31 +34,31 @@ static void getrq (Machine *m) {
 }
 
 static void readrq (Machine *m) {
-  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
+  IserverRq *rq = (IserverRq *)tk_pop_native(m, symbol_ISERVER_RQ_);
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
-    machine_push(m, token_new_list(0, arr_new_from(
-      token_new_string(0, msg), NULL
+    machine_push(m, token_new_list(arr_new_from(
+      token_new_string(msg), NULL
     )));
   } else {
-    machine_push(m, token_new_list(0, arr_new()));
+    machine_push(m, token_new_list(arr_new()));
   }
 }
 
 static void rqhost (Machine *m) {
-  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
+  IserverRq *rq = (IserverRq *)tk_pop_native(m, symbol_ISERVER_RQ_);
   char *msg = opt_nget(iserverRq_msg(rq));
   if (msg) {
-    machine_push(m, token_new_list(0, arr_new_from(
-      token_new_string(0, iserverRq_host(rq)), NULL
+    machine_push(m, token_new_list(arr_new_from(
+      token_new_string(iserverRq_host(rq)), NULL
     )));
   } else {
-    machine_push(m, token_new_list(0, arr_new()));
+    machine_push(m, token_new_list(arr_new()));
   }
 }
 
 static void writerq (Machine *m) {
-  IserverRq *rq = (IserverRq *)tk_pop_pointer(m, symbol_ISERVER_RQ_);
+  IserverRq *rq = (IserverRq *)tk_pop_native(m, symbol_ISERVER_RQ_);
   char *msg = tk_pop_string(m);
   iserverRq_write(rq, msg);
 }

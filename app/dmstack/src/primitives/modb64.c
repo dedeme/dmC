@@ -7,7 +7,7 @@
 #include "fails.h"
 
 static void decode (Machine *m) {
-  machine_push(m, token_new_string(0, b64_decode(tk_pop_string(m))));
+  machine_push(m, token_new_string(b64_decode(tk_pop_string(m))));
 }
 
 static void decode_bytes (Machine *m) {
@@ -17,14 +17,14 @@ static void decode_bytes (Machine *m) {
 }
 
 static void encode (Machine *m) {
-  machine_push(m, token_new_string(0, b64_encode(
+  machine_push(m, token_new_string(b64_encode(
     tk_pop_string(m)
   )));
 }
 
 static void encode_bytes (Machine *m) {
-  machine_push(m, token_new_string(0, b64_encode_bytes(
-    tk_pop_pointer(m, symbol_BLOB_)
+  machine_push(m, token_new_string(b64_encode_bytes(
+    tk_pop_native(m, symbol_BLOB_)
   )));
 }
 

@@ -22,6 +22,6 @@
 (@iL<s<Blob>i>f ix =; ix get "10" == assert pop @) fn =>
 5. ["10", 2 blob,new, 3] data 0 fn
 
-5. ("Other") else ("Int") (@f?) if "Int" == assert pop
+5. @f? ("Int") ("Other") elif "Int" == assert pop
 
 @

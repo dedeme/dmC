@@ -4,6 +4,7 @@
 #include "fails.h"
 #include <signal.h>
 #include <errno.h>
+#include "exception.h"
 
 struct fails_Mentry {
   pthread_t t;
@@ -62,8 +63,19 @@ void fails_from_exception (Exc *ex) {
   );
   if (e) {
     Machine *current_machine = e->m;
-    if (current_machine)
-      machine_fail(current_machine, exc_msg(ex));
+    if (current_machine) {
+      if (str_eq(exc_type(ex), exc_dmstack_t)) {
+        puts(str_f(
+          "Runtime error in machine:%d: %s\n%s",
+          list_count(machine_pmachines(current_machine)) + 1,
+          exception_msg(ex),
+          exception_stack(ex)
+        ));
+        exit(0);
+      } else {
+        machine_fail(current_machine, exc_msg(ex));
+      }
+    }
   }
   exit(0);
 }
@@ -102,17 +114,17 @@ void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token) {
   ));
 }
 
-void fails_size_list (Machine *m, Arr *list, int expected) {
+void fails_list_size (Machine *m, Arr *list, int expected) {
   machine_fail(m, str_f(
     "List %s\nExpected size: %d, actual size: %d",
-    token_to_str(token_new_list(0, list)), expected, arr_size(list)
+    token_to_str(token_new_list(list)), expected, arr_size(list)
   ));
 }
 
 void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected) {
   machine_fail(m, str_f(
     "List %s\nExpected element of type %d: '%s', actual: '%s'",
-    token_to_str(token_new_list(0, list)), ix,
+    token_to_str(token_new_list(list)), ix,
     token_type_to_str(expected),
     token_type_to_str(token_type(arr_get(list, ix)))
   ));

@@ -11,25 +11,25 @@ static Token *poplist (Machine *m) {
 }
 
 static void none (Machine *m) {
-  machine_push(m, token_new_list(0, arr_new()));
+  machine_push(m, token_new_list(arr_new()));
 }
 
 static void isnone (Machine *m) {
   machine_push(m, token_new_int(
-    0, !arr_size(tk_pop_list(m))
+    !arr_size(tk_pop_list(m))
   ));
 }
 
 static void some (Machine *m) {
-  machine_push(m, token_new_list(0, arr_new_from(machine_pop(m), NULL)));
+  machine_push(m, token_new_list(arr_new_from(machine_pop(m), NULL)));
 }
 
 static void issome (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
-  if (sz > 1) fails_size_list(m, a, 1);
-  machine_push(m, token_new_int(0, sz));
+  if (sz > 1) fails_list_size(m, a, 1);
+  machine_push(m, token_new_int(sz));
 }
 
 static void option (Machine *m) {
@@ -46,14 +46,14 @@ static void option (Machine *m) {
     machine_push(m, *arr_start(a));
     machine_process("", pmachines, prgok);
   } else {
-    fails_size_list(m, a, 1);
+    fails_list_size(m, a, 1);
   }
 }
 
 static void left (Machine *m) {
   Token *s = machine_pop_exc(m, token_STRING);
   machine_push(m, token_new_list(
-    0, arr_new_from(s, token_new_int(0, 0), NULL)
+    arr_new_from(s, token_new_int(0), NULL)
   ));
 }
 
@@ -61,16 +61,16 @@ static void isleft (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
-  if (sz != 1 && sz != 2) fails_size_list(m, a, 2);
-  machine_push(m, token_new_int(0, sz == 2));
+  if (sz != 1 && sz != 2) fails_list_size(m, a, 2);
+  machine_push(m, token_new_int(sz == 2));
 }
 
 static void isright (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
-  if (sz != 1 && sz != 2) fails_size_list(m, a, 2);
-  machine_push(m, token_new_int(0, sz == 1));
+  if (sz != 1 && sz != 2) fails_list_size(m, a, 2);
+  machine_push(m, token_new_int(sz == 1));
 }
 
 static void either (Machine *m) {
@@ -87,20 +87,20 @@ static void either (Machine *m) {
     machine_push(m, *arr_start(a));
     machine_process("", pmachines, prgfail);
   } else {
-    fails_size_list(m, a, 2);
+    fails_list_size(m, a, 2);
   }
 }
 
 static void tp (Machine *m) {
   Token *tk = machine_pop(m);
-  machine_push(m, token_new_list(0, arr_new_from(machine_pop(m), tk, NULL)));
+  machine_push(m, token_new_list(arr_new_from(machine_pop(m), tk, NULL)));
 }
 
 static void tp3 (Machine *m) {
   Token *tk3 = machine_pop(m);
   Token *tk2 = machine_pop(m);
   machine_push(m, token_new_list(
-    0, arr_new_from(machine_pop(m), tk2, tk3, NULL)
+    arr_new_from(machine_pop(m), tk2, tk3, NULL)
   ));
 }
 
@@ -114,14 +114,13 @@ Pmodule *modwrap_mk (void) {
   add("none?", isnone); // OPT - INT
   add("some", some); // * - OPT (* -> (*))
   add("some?", issome); // OPT - INT
-  add("option", option); // [(->B?), (OPT->B?), (->OPT)] - B?
+  add("option", option); // <OPT, (OPT >> -> B?), (B?)> - B?
   add("ref", some); // * - REF (* -> (*))
   add("left", left); // STRING -> EITHER (s -> (s, 0))
   add("left?", isleft); // EITHER - INT
   add("right", some); // * -> EITHER (* -> (*)) -some is ok-
   add("right?", isright); // EITHER - INT
-  add("either", either);
-    // [(LEFT->B?), (RIGHT->B?), (->EITHER)] - B?
+  add("either", either); // <EITHER, (RIGHT->B?), (LEFT->B?)> - B?
   add("tp", tp); // [A, B] -> [(A, B)]
   add("tp3", tp3); // [A, B, C] -> [(A, B, C)]
 

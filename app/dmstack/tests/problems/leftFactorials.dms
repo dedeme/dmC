@@ -1,0 +1,81 @@
+// Copyright 14-Oct-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+100000000 dg =
+8 ndg =
+25 len =
+
+( n =; N =
+  0 len lst,make : R =
+
+  0 // carry
+  len
+  ( i =
+    N i get n * + : dg : int,div
+      rem =
+      R : i : rem : set
+  )
+  for
+  pop
+  R
+) mul =>
+
+( N =; M =
+  0 len lst,make : R =
+
+  0 // carry
+  len
+  ( i =
+    N i get M i get + + : r =
+    r dg >=
+    ( R : i : r dg - : set; 1)
+    ( R : i : r : set; 0)
+    elif
+  )
+  for
+  pop
+  R
+) add =>
+
+( n =
+  0 len lst,make; 0 1 set+; wrap,ref R =
+  (1 : n 1 +) (n =; R (n mul) ^^) for
+  R >>
+) fact =>
+
+( n =
+
+  0 len lst,make wrap,ref R =
+  n
+  (
+    (0 n)
+    ( k =
+      R (k fact add) ^^
+    )
+    for
+  )
+  if
+  R >>
+) lfact =>
+
+( N =
+  N lst,reverse
+  0 wrap,ref : Ix =
+  (Ix >> len < (N : Ix >> : get : 0 ==) (0) elif) (Ix (1 +) ^^) while
+  Ix >> len ==
+  ( "0")
+  (
+    N Ix >> get : toStr
+    (Ix >> 1 + : len)
+    ( i =
+      N i get : toStr; (dup size ndg <) ("0" swap +) while
+      +
+    )
+    for
+  )
+  elif
+) toS =>
+
+10 (i =; "!${i} = ${i lfact toS}" sys,println) for
+(10 : 115 : 10) (i =; "!${i} = ${i lfact toS}" sys,println) for
+

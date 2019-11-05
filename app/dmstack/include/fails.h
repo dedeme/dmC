@@ -48,7 +48,7 @@ void fails_type_in (Machine *m, enum token_Type type, Token *token);
 void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token);
 
 /// Error in list size.
-void fails_size_list (Machine *m, Arr *list, int expected);
+void fails_list_size (Machine *m, Arr *list, int expected);
 
 /// Error in field type of list.
 void fails_type_list (Machine *m, Arr *list, int ix, enum token_Type expected);

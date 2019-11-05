@@ -9,8 +9,19 @@
 #include <stdint.h>
 #include "dmc/async.h"
 
+///
 #define VERSION "201909"
 
+///
 typedef intptr_t Int;
+
+///
+#define exc_dmstack_t "dmstack"
+
+///
+#define MAX_EXC_STACK 10
+
+///
+#define MAX_EXC_TRACE 15
 
 #endif

@@ -4,9 +4,7 @@
 (
   clock,now C1 =
   10 sys,sleep
-  clock,now C1 clock,df dup 10 >= 12 <= && assert
-  clock,now C1 clock,- 1 get df =
-    df 10000 >= df 12000 <= && assert
+  clock,now C1 clock,df dup 10 >= swap 12 <= && assert
 
   C1 25 clock,add -25 clock,add C1 clock,df 0 == assert
   C1 25 clock,add -30 clock,add C1 clock,df -5 == assert

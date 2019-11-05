@@ -2,7 +2,6 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 (
-
   // new - from
   0 blob,new B0 =
   B0 blob,size 0 == assert

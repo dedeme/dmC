@@ -20,7 +20,7 @@ static Token *to (char *tpl, struct tm *tp) {
     free(rs); // free ok
     size += size;
   }
-  return token_new_string(0, s);
+  return token_new_string(s);
 }
 
 static char *rdg (int *dg, int n, char *p) {
@@ -90,7 +90,7 @@ static Opt *from (char *tpl, char *time) {
     }
   }
 
-  return opt_new(token_new_int(0, mktime(&tp)));
+  return opt_new(token_new_int(mktime(&tp)));
 }
 
 static void new (Machine *m) {
@@ -110,13 +110,13 @@ static void new (Machine *m) {
   tp.tm_min = minute;
   tp.tm_sec = second;
 
-  machine_push(m, token_new_int(0, mktime(&tp)));
+  machine_push(m, token_new_int(mktime(&tp)));
 }
 
 static void newdate (Machine *m) {
   int day = tk_pop_int(m);
-  int year = tk_pop_int(m);
   int month = tk_pop_int(m);
+  int year = tk_pop_int(m);
 
   struct tm tp;
   memset(&tp, 0, sizeof(struct tm));
@@ -125,23 +125,24 @@ static void newdate (Machine *m) {
   tp.tm_mday = day;
   tp.tm_hour = 12;
 
-  machine_push(m, token_new_int(0, mktime(&tp)));
+  machine_push(m, token_new_int(mktime(&tp)));
 }
 
 static void fromstr (Machine *m) {
-  char *time = tk_pop_string(m);
   char *tpl = tk_pop_string(m);
+  char *time = tk_pop_string(m);
   Token *r = opt_nget(from(tpl, time));
-  if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
-  else machine_push(m, token_new_list(0, arr_new()));
+  if (r) machine_push(m, token_new_list(arr_new_from(r, NULL)));
+  else machine_push(m, token_new_list(arr_new()));
 }
 
 static void fromdate (Machine *m) {
   char *time = tk_pop_string(m);
-  time = str_f("%s:12", time);
+  time = str_f("%s12", time);
   Token *r = opt_nget(from("%Y%m%d%H", time));
-  if (r) machine_push(m, token_new_list(0, arr_new_from(r, NULL)));
-  else machine_push(m, token_new_list(0, arr_new()));
+
+  if (r) machine_push(m, token_new_list(arr_new_from(r, NULL)));
+  else machine_push(m, token_new_list(arr_new()));
 }
 
 static void todate (Machine *m) {
@@ -166,7 +167,7 @@ static void format (Machine *m) {
 }
 
 static void now (Machine *m) {
-  machine_push(m, token_new_int(0, time(NULL)));
+  machine_push(m, token_new_int(time(NULL)));
 }
 
 static void broke (Machine *m) {
@@ -177,8 +178,8 @@ static void broke (Machine *m) {
   Arr *a = arr_new();
 
   void add (char *id, int v) {
-    arr_push(a, token_new_string(0, id));
-    arr_push(a, token_new_int(0, v));
+    arr_push(a, token_new_string(id));
+    arr_push(a, token_new_int(v));
   }
 
   add("year", tm->tm_year + 1900);
@@ -188,28 +189,28 @@ static void broke (Machine *m) {
   add("minute", tm->tm_min);
   add("second", tm->tm_sec);
 
-  machine_push(m, token_new_list(0, a));
+  machine_push(m, token_new_list(a));
 }
 
 static void tadd (Machine *m) {
   Int n = tk_pop_int(m);
   time_t t = tk_pop_int(m);
 
-  machine_push(m, token_new_int(0, t + n));
+  machine_push(m, token_new_int(t + n));
 }
 
 static void df (Machine *m) {
   time_t t2 = tk_pop_int(m);
   time_t t1 = tk_pop_int(m);
 
-  machine_push(m, token_new_int(0, t1 - t2));
+  machine_push(m, token_new_int(t1 - t2));
 }
 
 static void addd (Machine *m) {
   Int n = tk_pop_int(m);
   time_t t = tk_pop_int(m);
 
-  machine_push(m, token_new_int(0, t + n * 86400));
+  machine_push(m, token_new_int(t + n * 86400));
 }
 
 static void dfd (Machine *m) {
@@ -218,7 +219,7 @@ static void dfd (Machine *m) {
 
   double tmp = ((double)t1 - t2) / 86400.;
   Int r  = (Int)(tmp >= 0 ? tmp + 0.5 : tmp - 0.5);
-  machine_push(m, token_new_int(0, r));
+  machine_push(m, token_new_int(r));
 }
 
 Pmodule *modtime_mk (void) {
@@ -233,7 +234,7 @@ Pmodule *modtime_mk (void) {
   add("newDate", newdate); // [INT, INT, INT] - INT
                                   // [year, month, day] - date
   add("fromStr", fromstr); // [STRING, STRING] - OPT<INT>
-                                  // [template, date] - option of date
+                                  // [date, template] - option of date
   add("fromDate", fromdate); // STRING - INT
   add("toDate", todate); // INT - STRING
   add("toTime", totime); // INT - STRING

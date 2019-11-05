@@ -10,7 +10,7 @@
 /// Check types of stack values and raise a fail if checking not succeeds.
 void types_fail (Machine *m);
 
-/// Check types of stack values and push in stack '0' if checking not succeeds.
+/// Check types of stack values and push in stack '1' if checking succeeds.
 void types_check (Machine *m);
 
 #endif

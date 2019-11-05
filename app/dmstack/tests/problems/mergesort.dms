@@ -2,26 +2,27 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 ( L =
+  L size 2 <
+  ( L)
   (
     L size 2 / : mid =
     L mid lst,left mergeSort : L mid lst,right mergeSort : merge
   )
-  else
-  ( L)
-  ( L size 2 <)
-  if
+  elif
 ) mergeSort =>
 
 ( it,from I2 =; it,from I1 =
   lst,new : R =
-  (
-    (R I2 it,next lst,push) else
-    (R I1 it,next lst,push) (I1 it,peek I2 it,peek < ) if
-  )
   (I1 it,has? I2 it,has? &&)
+  (
+    I1 it,peek I2 it,peek <
+    (R I1 it,next lst,push)
+    (R I2 it,next lst,push)
+    elif
+  )
   while
-  (R I1 it,next lst,push) (I1 it,has?) while
-  (R I2 it,next lst,push) (I2 it,has?) while
+  (I1 it,has?) (R I1 it,next lst,push) while
+  (I2 it,has?) (R I2 it,next lst,push) while
   R
 ) merge =>
 

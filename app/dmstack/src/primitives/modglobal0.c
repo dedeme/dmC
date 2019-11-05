@@ -10,13 +10,13 @@ void modglobal0_add (Machine *m) {
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(0, token_int(tk2) + token_int(tk)));
+      machine_push(m, token_new_int(token_int(tk2) + token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, token_float(tk2) + (double)token_int(tk)));
+        token_new_float(token_float(tk2) + (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -26,12 +26,12 @@ void modglobal0_add (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, (double)token_int(tk2) + token_float(tk)));
+        token_new_float((double)token_int(tk2) + token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(0, token_float(tk2) + token_float(tk)));
+      machine_push(m, token_new_float(token_float(tk2) + token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -39,7 +39,7 @@ void modglobal0_add (Machine *m) {
 
   tk = machine_pop_opt(m, token_STRING);
   if (tk) {
-    machine_push(m, token_new_string(0, str_cat(
+    machine_push(m, token_new_string(str_cat(
       tk_pop_string(m), token_string(tk), NULL
     )));
     return;
@@ -47,7 +47,7 @@ void modglobal0_add (Machine *m) {
 
   tk = machine_pop_opt(m, token_LIST);
   if (tk) {
-    machine_push(m, token_new_list(0, it_to(it_cat(
+    machine_push(m, token_new_list(it_to(it_cat(
       it_from(tk_pop_list(m)), it_from(token_list(tk))
     ))));
     return;
@@ -63,13 +63,13 @@ void modglobal0_sub (Machine *m) {
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(0, token_int(tk2) - token_int(tk)));
+      machine_push(m, token_new_int(token_int(tk2) - token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, token_float(tk2) - (double)token_int(tk)));
+        token_new_float(token_float(tk2) - (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -80,12 +80,12 @@ void modglobal0_sub (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, (double)token_int(tk2) - token_float(tk)));
+        token_new_float((double)token_int(tk2) - token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(0, token_float(tk2) - token_float(tk)));
+      machine_push(m, token_new_float(token_float(tk2) - token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -101,13 +101,13 @@ void modglobal0_mul (Machine *m) {
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(0, token_int(tk2) * token_int(tk)));
+      machine_push(m, token_new_int(token_int(tk2) * token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, token_float(tk2) * (double)token_int(tk)));
+        token_new_float(token_float(tk2) * (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -118,12 +118,12 @@ void modglobal0_mul (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, (double)token_int(tk2) * token_float(tk)));
+        token_new_float((double)token_int(tk2) * token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(0, token_float(tk2) * token_float(tk)));
+      machine_push(m, token_new_float(token_float(tk2) * token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -139,13 +139,13 @@ void modglobal0_div (Machine *m) {
   if (tk) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
-      machine_push(m, token_new_int(0, token_int(tk2) / token_int(tk)));
+      machine_push(m, token_new_int(token_int(tk2) / token_int(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, token_float(tk2) / (double)token_int(tk)));
+        token_new_float(token_float(tk2) / (double)token_int(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -156,12 +156,12 @@ void modglobal0_div (Machine *m) {
     Token *tk2 = machine_pop_opt(m, token_INT);
     if (tk2) {
       machine_push(m,
-        token_new_float(0, (double)token_int(tk2) / token_float(tk)));
+        token_new_float((double)token_int(tk2) / token_float(tk)));
       return;
     }
     tk2 = machine_pop_opt(m, token_FLOAT);
     if (tk2) {
-      machine_push(m, token_new_float(0, token_float(tk2) / token_float(tk)));
+      machine_push(m, token_new_float(token_float(tk2) / token_float(tk)));
       return;
     }
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
@@ -175,13 +175,13 @@ void modglobal0_div (Machine *m) {
 void modglobal0_mod (Machine *m) {
   Int i = tk_pop_int(m);
   Int i2 = tk_pop_int(m);
-  machine_push(m, token_new_int(0, i2 % i));
+  machine_push(m, token_new_int(i2 % i));
 }
 
 void modglobal0_incr (Machine *m) {
-  machine_push(m, token_new_int(0, tk_pop_int(m) + 1));
+  machine_push(m, token_new_int(tk_pop_int(m) + 1));
 }
 
 void modglobal0_decr (Machine *m) {
-  machine_push(m, token_new_int( 0, tk_pop_int(m) - 1));
+  machine_push(m, token_new_int( tk_pop_int(m) - 1));
 }

@@ -45,7 +45,7 @@
   "ab" "b" str,lastIndex 1 expect
   "abdb" "b" str,lastIndex 3 expect
   "ab" "c" str,lastIndex -1 expect
-  "ab" "" str,lastIndex 0 expect
+  "ab" "" str,lastIndex 2 expect
   "" "" str,lastIndex 0 expect
   "ab" "abc" str,lastIndex -1 expect
   "abcd" "bc" str,lastIndex 1 expect
@@ -151,27 +151,29 @@
   // split - splitTrim - join
 
   "" ";" str,split ";" str,join "" expect
-  ";" ";" str,split ";" str,join "" expect
+  ";" ";" str,split ";" str,join ";" expect
   "ab" ";" str,split ";" str,join "ab" expect
-  "ab;" ";" str,split ";" str,join "ab" expect
+  "ab;" ";" str,split ";" str,join "ab;" expect
   "ab;c;de" ";" str,split ";" str,join "ab;c;de" expect
-  ";--" ";--" str,split ";--" str,join "" expect
-  "ab;--" ";--" str,split ";--" str,join "ab" expect
-  "ab;--" ";--" str,split ";--" str,join "ab" expect
+  ";--" ";--" str,split ";--" str,join ";--" expect
+  "ab" ";--" str,split ";--" str,join "ab" expect
+  "ab;--" ";--" str,split ";--" str,join "ab;--" expect
   "ab;--c;--de" ";--" str,split ";--" str,join "ab;--c;--de" expect
   "ab ;--  c \t ;--  de" ";--" str,split ";--" str,join
     "ab ;--  c \t ;--  de" expect
   "" ";" str,splitTrim ";" str,join "" expect
-  ";" ";" str,splitTrim ";" str,join "" expect
+  ";" ";" str,splitTrim ";" str,join ";" expect
   "ab" ";" str,splitTrim ";" str,join "ab" expect
-  "ab;" ";" str,splitTrim ";" str,join "ab" expect
+  "ab;" ";" str,splitTrim ";" str,join "ab;" expect
   "ab;c;de" ";" str,splitTrim ";" str,join "ab;c;de" expect
-  ";--" ";--" str,splitTrim ";--" str,join "" expect
-  "ab;--" ";--" str,splitTrim ";--" str,join "ab" expect
-  "ab;--" ";--" str,splitTrim ";--" str,join "ab" expect
+  ";--" ";--" str,splitTrim ";--" str,join ";--" expect
+  "ab" ";--" str,splitTrim ";--" str,join "ab" expect
+  "ab;--" ";--" str,splitTrim ";--" str,join "ab;--" expect
   "ab;--c;--de" ";--" str,splitTrim ";--" str,join "ab;--c;--de" expect
   "ab ;--  c \t ;--  de" ";--" str,splitTrim ";--" str,join
     "ab;--c;--de" expect
+  "" "" str,split dup size 0 expect; "" str,join "" expect
+  "abñ" "" str,split dup size 3 expect; "" str,join "abñ" expect
 
   // replace
 

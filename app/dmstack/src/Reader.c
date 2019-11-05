@@ -9,7 +9,7 @@
 
 struct reader_Reader {
   int is_file;
-  char *source;
+  Symbol source;
   int nline;
   char *prg;
   int prg_ix;
@@ -21,7 +21,7 @@ struct reader_Reader {
 Reader *reader_new (char *source, char *prg) {
   Reader *this = MALLOC(Reader);
   this->is_file = 1;
-  this->source = source;
+  this->source = symbol_new(source);
   this->nline = 1;
   this->prg = prg;
   this->prg_ix = 0;
@@ -59,14 +59,14 @@ Token *reader_process (Reader *this) {
     }
     tk = opt_nget(tkreader_next(this));
   }
-  return token_new_list(nline, r);
+  return token_new_list_pos(r, this->source, nline);
 }
 
 int reader_is_file (Reader *this) {
   return this->is_file;
 }
 
-char *reader_source (Reader *this) {
+Symbol reader_source (Reader *this) {
   return this->source;
 }
 
@@ -112,7 +112,7 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     Symbol sym = symbolKv_value(symkv);
     char *f = symbol_to_str(sym);
     char *fc = opt_nget(path_canonical(path_cat(
-      path_parent(this->source),
+      path_parent(symbol_to_str(this->source)),
       str_cat(f, ".dms", NULL),
       NULL
     )));
@@ -128,27 +128,45 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
       this->syms, symbolKv_new(key, newsym)
     );
   } else if (sym == symbol_THIS) {
-    return token_new_symbol(token_line(tk), symbol_new(this->source));
+    TokenPos *pos = opt_nget(token_pos(tk));
+    if (!pos) EXC_ILLEGAL_STATE("pos is null")
+
+    return token_new_symbol_pos(this->source, this->source, tokenPos_line(pos));
   } else if (*symbol_to_str(sym) == '@') {
-    int line = token_line(tk);
+    TokenPos *pos = opt_nget(token_pos(tk));
+    if (!pos) EXC_ILLEGAL_STATE("pos is null")
+
+    int line = tokenPos_line(pos);
     char *name = symbol_to_str(sym);
     if (name[strlen(name) - 1] == '?') {
-      this->next_tk = token_new_symbol(line, symbol_STACK_CHECK);
-      Token *tk = token_new_symbol(line, symbol_new(str_sub(name, 1, -1)));
-      return token_new_list(line, arr_new_from(tk, NULL));
+      this->next_tk = token_new_symbol_pos(
+        symbol_STACK_CHECK, this->source, line
+      );
+      Token *tk = token_new_symbol_pos(
+        symbol_new(str_sub(name, 1, -1)), this->source, line
+      );
+      return token_new_list_pos(arr_new_from(tk, NULL), this->source, line);
     } else {
       if (args_is_production()) {
-        return token_new_symbol(line, symbol_NOP);
+        return token_new_symbol_pos(symbol_NOP, this->source, line);
       } else {
-        this->next_tk = token_new_symbol(line, symbol_STACK);
-        Token *tk = token_new_symbol(line, symbol_new(str_right(name, 1)));
-        return token_new_list(line, arr_new_from(tk, NULL));
+        this->next_tk = token_new_symbol_pos(
+          symbol_STACK, this->source, line
+        );
+        Token *tk = token_new_symbol_pos(
+          symbol_new(str_right(name, 1)), this->source, line
+        );
+        return token_new_list_pos(arr_new_from(tk, NULL), this->source, line);
       }
     }
   } else {
     EACHL(this->syms, SymbolKv, e) {
       if (symbolKv_key(e) == sym) {
-        return token_new_symbol(token_line(tk), symbolKv_value(e));
+        TokenPos *pos = opt_nget(token_pos(tk));
+        if (!pos) EXC_ILLEGAL_STATE("pos is null")
+        return token_new_symbol_pos(
+          symbolKv_value(e), this->source, tokenPos_line(pos)
+        );
       }
     }_EACH
   }
@@ -158,13 +176,20 @@ Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
 // Arr<Token>
 Arr *reader_interpolation (Reader *this, Token *tk) {
   char *s = token_string(tk);
-  int nline = token_line(tk);
+  TokenPos *postk = opt_nget(token_pos(tk));
+  if (!postk) EXC_ILLEGAL_STATE("postk is null")
+  int nline = tokenPos_line(postk);
   // Arr<Token>
   Arr *r = arr_new();
   int pos = 0;
   int ix = str_index(s, "${");
   while (ix != -1) {
-    arr_push(r, token_new_string(nline, str_sub(s, pos, ix)));
+    arr_push(r, token_new_string_pos(
+      str_sub(s, pos, ix), this->source, nline
+    ));
+    if (pos) arr_push(r, token_new_symbol_pos(
+      symbol_PLUS, this->source, nline
+    ));
 
     char *p = s + pos;
     char *p_end = s + ix;
@@ -193,32 +218,32 @@ Arr *reader_interpolation (Reader *this, Token *tk) {
     while (p < p_end) if (*p++ == '\n') ++nline;
 
     if (arr_size(prg)) {
-      arr_push(r, token_new_list(nline, prg));
-      arr_push(r, token_new_symbol(nline, symbol_DATA));
-      arr_push(r, token_new_symbol(nline, symbol_REF_OUT));
-      arr_push(r, token_new_symbol(nline, symbol_TO_STR));
-      arr_push(r, token_new_symbol(nline, symbol_PLUS));
+      arr_push(r, token_new_list_pos(prg, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_DATA, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_REF_OUT, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_TO_STR, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_PLUS, this->source, nline));
     } else {
-      arr_push(r, token_new_string(nline, ""));
-      arr_push(r, token_new_symbol(nline, symbol_PLUS));
+      arr_push(r, token_new_string_pos("", this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_PLUS, this->source, nline));
     }
 
     pos = ix2 + 1;
     ix = str_index_from(s, "${", pos);
   }
 
-  arr_push(r, token_new_string(nline, str_right(s, pos)));
+  arr_push(r, token_new_string_pos(str_right(s, pos), this->source, nline));
 
   if (arr_size(r) > 1) {
     char *p = s + pos;
     char *p_end = s + strlen(s);
     while (p < p_end) if (*p++ == '\n') ++nline;
-    arr_push(r, token_new_symbol(nline, symbol_PLUS));
+    arr_push(r, token_new_symbol_pos(symbol_PLUS, this->source, nline));
   }
   return r;
 }
 
 void reader_fail (Reader *this, char *msg) {
-  printf("%s.dms:%d: %s\n", this->source, this->nline, msg);
+  printf("%s.dms:%d: %s\n", symbol_to_str(this->source), this->nline, msg);
   exit(1);
 }

@@ -21,6 +21,9 @@
   { "a": 31, "b": 32 } O =
   O "a" obj,get 31 == assert
   O "b" obj,get 32 == assert
+  O "a" obj,has? assert
+  O "b" obj,has? assert
+  O "c" obj,has? ! assert
 
   (100 +) sum1 =>
   (200 +) sum2 =>

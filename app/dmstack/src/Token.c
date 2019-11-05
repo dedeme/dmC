@@ -3,6 +3,15 @@
 
 #include "Token.h"
 
+struct token_Pos {
+  Symbol source;
+  int line;
+};
+
+struct token_Native {
+  Symbol sym;
+  void *pointer;
+};
 
 union token_Value {
   Int i;
@@ -10,79 +19,120 @@ union token_Value {
   char *s;
   Arr *a; // Arr<Token>
   Symbol sym;
-  void *pointer;
+  struct token_Native *native;
 };
 
 struct token_Token {
   enum token_Type type;
   union token_Value value;
-  int line;
+  // Opt<TokenPos>
+  Opt *pos;
 };
 
-Token *token_new_int (int line, Int value) {
+static Token *new (enum token_Type type, union token_Value value, Opt *pos) {
+  Token *this = MALLOC(Token);
+  this->type = type;
+  this->value = value;
+  this->pos = pos;
+  return this;
+}
+
+static  Token *new_pos(
+  enum token_Type type, union token_Value value, Symbol source, int line
+) {
+  TokenPos *pos = MALLOC(TokenPos);
+  pos->source = source;
+  pos->line = line;
+  return new(type, value, opt_new(pos));
+}
+
+char *tokenPos_source (TokenPos *this) {
+  return symbol_to_str(this->source);
+}
+
+int tokenPos_line (TokenPos *this) {
+  return this->line;
+}
+
+Token *token_new_int (Int value) {
   union token_Value v;
   v.i = value;
-  Token *this = MALLOC(Token);
-  this->type = token_INT;
-  this->value = v;
-  this->line = line;
-  return this;
+  return new(token_INT, v, opt_empty());
 }
 
-Token *token_new_float (int line, double value) {
+Token *token_new_float (double value) {
   union token_Value v;
   v.f = value;
-  Token *this = MALLOC(Token);
-  this->type = token_FLOAT;
-  this->value = v;
-  this->line = line;
-  return this;
+  return new(token_FLOAT, v, opt_empty());
 }
 
-Token *token_new_string (int line, char *value) {
+Token *token_new_string (char *value) {
   union token_Value v;
   v.s = value;
-  Token *this = MALLOC(Token);
-  this->type = token_STRING;
-  this->value = v;
-  this->line = line;
-  return this;
+  return new(token_STRING, v, opt_empty());
 }
 
 // value is Arr<Token>
-Token *token_new_list (int line, Arr *value) {
+Token *token_new_list (Arr *value) {
   union token_Value v;
   v.a = value;
-  Token *this = MALLOC(Token);
-  this->type = token_LIST;
-  this->value = v;
-  this->line = line;
-  return this;
+  return new(token_LIST, v, opt_empty());
 }
 
-Token *token_new_symbol (int line, Symbol value) {
+Token *token_new_symbol (Symbol value) {
   union token_Value v;
   v.sym = value;
-  Token *this = MALLOC(Token);
-  this->type = token_SYMBOL;
-  this->value = v;
-  this->line = line;
-  return this;
+  return new(token_SYMBOL, v, opt_empty());
 }
 
 Token *token_from_pointer (Symbol sym, void *pointer) {
-  Token *p = token_new_int(0, 0);
-  p->value.pointer = pointer;
-  p->type = token_POINTER;
-  return token_new_list(0, arr_new_from(token_new_symbol(0, sym), p, NULL));
+  struct token_Native *nt = MALLOC(struct token_Native);
+  nt -> sym = sym;
+  nt -> pointer = pointer;
+
+  union token_Value v;
+  v.native = nt;
+  return new(token_NATIVE, v, opt_empty());
+}
+
+Token *token_new_int_pos (Int value, Symbol source, int line) {
+  union token_Value v;
+  v.i = value;
+  return new_pos(token_INT, v, source, line);
+}
+
+Token *token_new_float_pos (double value, Symbol source, int line) {
+  union token_Value v;
+  v.f = value;
+  return new_pos(token_FLOAT, v, source, line);
+}
+
+Token *token_new_string_pos (char *value, Symbol source, int line) {
+  union token_Value v;
+  v.s = value;
+  return new_pos(token_STRING, v, source, line);
+}
+
+// value is Arr<Token>
+Token *token_new_list_pos (Arr *value, Symbol source, int line) {
+  union token_Value v;
+  v.a = value;
+  return new_pos(token_LIST, v, source, line);
+}
+
+Token *token_new_symbol_pos (Symbol value, Symbol source, int line) {
+  union token_Value v;
+  v.sym = value;
+  return new_pos(token_SYMBOL, v, source, line);
 }
 
 enum token_Type token_type (Token *this) {
   return this->type;
 }
 
-int token_line (Token *this) {
-  return this->line;
+// Opt<TokenPos>
+Opt *token_pos (Token *this) {
+  return this->pos;
 }
 
 Int token_int (Token *this) {
@@ -106,24 +156,31 @@ Symbol token_symbol (Token *this) {
   return this->value.sym;
 }
 
+Symbol token_native_symbol (Token *this) {
+  return this->value.native->sym;
+}
+
+void *token_native_pointer (Token *this) {
+  return this->value.native->pointer;
+}
+
 Token *token_clone (Token *this) {
   switch (this->type) {
-    case token_INT: return token_new_int(0, this->value.i);
-    case token_FLOAT: return token_new_float(0, this->value.f);
-    case token_STRING: return token_new_string(0, str_new(this->value.s));
-    case token_SYMBOL: return token_new_symbol(0, this->value.sym);
+    case token_INT: return token_new_int(this->value.i);
+    case token_FLOAT: return token_new_float(this->value.f);
+    case token_STRING: return token_new_string(str_new(this->value.s));
+    case token_SYMBOL: return token_new_symbol(this->value.sym);
     case token_LIST: {
       // Arr<Token>
       Arr *r = arr_new();
       EACH(this->value.a, Token, tk){
         arr_push(r, token_clone(tk));
       }_EACH
-      return token_new_list(0, r);
+      return token_new_list(r);
     }
-    case token_POINTER: {
-      Token *r = token_new_int(0, this->value.i);
-      r->type = token_POINTER;
-      return r;
+    case token_NATIVE: {
+      struct token_Native *nt = this->value.native;
+      return token_from_pointer(nt->sym, nt->pointer);
     }
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
@@ -148,7 +205,9 @@ int token_eq (Token *this, Token *other) {
 
   switch (this->type) {
     case token_INT: return this->value.i == other->value.i;
-    case token_POINTER: return this->value.pointer == other->value.pointer;
+    case token_NATIVE:
+      return this->value.native->sym == other->value.native->sym &&
+             this->value.native->pointer == other->value.native->pointer;
     case token_FLOAT: return this->value.f == other->value.f;
     case token_STRING: return str_eq(this->value.s, other->value.s);
     case token_SYMBOL: return symbol_eq(this->value.sym, other->value.sym);
@@ -161,7 +220,12 @@ int token_eq (Token *this, Token *other) {
 char *token_to_str (Token *this) {
   switch (this->type) {
     case token_INT: return (char *)js_wl(this->value.i);
-    case token_POINTER: return (char *)js_wl(this->value.i); // Correcto
+    case token_NATIVE:
+      return str_f(
+        "<%s, %ld>",
+        symbol_to_str(this->value.native->sym),
+        this->value.native->pointer
+      );
     case token_FLOAT: return (char *)js_wd(this->value.f);
     case token_STRING: return this->value.s;
     case token_SYMBOL:
@@ -178,12 +242,6 @@ char *token_to_str (Token *this) {
 
 char *token_to_str_draft (Token *this) {
   switch (this->type) {
-    case token_INT: return (char *)js_wl(this->value.i);
-    case token_POINTER: return (char *)js_wl(this->value.i); // Correcto
-    case token_FLOAT: return (char *)js_wd(this->value.f);
-    case token_STRING: return (char *)js_ws(this->value.s);
-    case token_SYMBOL:
-      return str_f("'%s'", symbol_to_str(this->value.sym));
     case token_LIST: {
       // Arr<char>
       Arr *a = arr_map(arr_take(this->value.a, 5), (FCOPY)token_to_str_draft);
@@ -192,9 +250,8 @@ char *token_to_str_draft (Token *this) {
       }
       return str_f("(%s)", str_join(a, ", "));
     }
+    default: return token_to_str(this);
   }
-  EXC_ILLEGAL_STATE("switch not exhaustive");
-  return NULL; // not reachable.
 }
 
 char *token_type_to_str (enum token_Type type) {
@@ -204,7 +261,7 @@ char *token_type_to_str (enum token_Type type) {
     case token_STRING: return "String";
     case token_SYMBOL: return "Symbol";
     case token_LIST: return "List";
-    case token_POINTER: return "CPointer";
+    case token_NATIVE: return "CPointer";
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
   return NULL; // not reachable.
@@ -232,7 +289,7 @@ char *token_check_type (List *tokens, char *type) {
       case token_STRING: return paste("s", 1);
       case token_SYMBOL: return paste("y", 1);
       case token_LIST: return paste("l", 1);
-      case token_POINTER: return paste("p", 1);
+      case token_NATIVE: return paste("n", 1);
     }
     EXC_ILLEGAL_STATE("switch not exhaustive");
     return NULL; // not reachable.
@@ -273,19 +330,12 @@ char *token_check_type (List *tokens, char *type) {
     if (ix == -1) return paste("<?", 1);
     if (ix == 1) return paste("<>?", 2);
     int len = ix + 1;
-    // Arr<Token
-    Arr *a = tk->type == token_LIST ? tk->value.a : NULL;
-    if (
-      !a ||
-      arr_size(a) != 2 ||
-      ((Token *)*arr_start(a))->type != token_SYMBOL ||
-      ((Token *)*(arr_start(a) + 1))->type != token_POINTER
-    ) {
+    if (tk->type != token_NATIVE) {
       char *r = tpaste();
       return str_f("%c%s", *r, str_right(type, len));
     }
     char *symid = str_f(
-      "<%s>", str_right(symbol_to_str(token_symbol(*arr_start(a))), 2)
+      "<%s>", str_right(symbol_to_str(tk->value.native->sym), 2)
     );
     return str_cat(symid, token_check_type(tail, str_right(type, len)), NULL);
   }

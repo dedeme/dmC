@@ -28,7 +28,7 @@ squareArea =>
 ( s =;
   {
     "side": s
-    "area": squareArea:&
+    "area": (squareArea)
   } data
 ) square =>
 
@@ -41,7 +41,7 @@ rectArea =>
   {
     "hight": h
     "width": w
-    "area": rectArea:&
+    "area": (rectArea)
   } data
 ) rect =>
 

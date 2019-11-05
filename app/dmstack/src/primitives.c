@@ -15,6 +15,7 @@
 #include "primitives/modstr.h"
 #include "primitives/modsys.h"
 #include "primitives/modjs.h"
+#include "primitives/modexc.h"
 #include "primitives/modb64.h"
 #include "primitives/modcryp.h"
 #include "primitives/modtime.h"
@@ -55,6 +56,7 @@ void primitives_init (void) {
   add("str", modstr_mk());
   add("sys", modsys_mk());
   add("js", modjs_mk());
+  add("exc", modexc_mk());
   add("b64", modb64_mk());
   add("cryp", modcryp_mk());
   add("time", modtime_mk());
@@ -84,11 +86,11 @@ void primitives_add_base (Heap *heap) {
     EXC_ILLEGAL_STATE("'global->id' is not symbol_new(\"\")")
   EACH(pmodule_list(global->mod), PmoduleEntry, e) {
     Symbol fn = pmoduleEntry_id(e);
-    Token *tk = token_new_list(0, arr_new_from(
-      token_new_list( 0, arr_new_from(
-        token_new_symbol(0, module), token_new_symbol(0, fn), NULL
+    Token *tk = token_new_list(arr_new_from(
+      token_new_list(arr_new_from(
+        token_new_symbol(module), token_new_symbol(fn), NULL
       )),
-      token_new_symbol(0, symbol_MRUN),
+      token_new_symbol(symbol_MRUN),
       NULL
     ));
     heap_add(heap, fn, tk);
@@ -101,11 +103,11 @@ void primitives_add_lib (Lib *lib) {
     Heap *heap = heap_new();
     EACH(pmodule_list(module->mod), PmoduleEntry, e) {
       Symbol fn = pmoduleEntry_id(e);
-      Token *tk = token_new_list(0, arr_new_from(
-        token_new_list( 0, arr_new_from(
-          token_new_symbol(0, module->id), token_new_symbol(0, fn), NULL
+      Token *tk = token_new_list(arr_new_from(
+        token_new_list(arr_new_from(
+          token_new_symbol(module->id), token_new_symbol(fn), NULL
         )),
-        token_new_symbol(0, symbol_MRUN),
+        token_new_symbol(symbol_MRUN),
         NULL
       ));
       heap_add(heap, fn, tk);

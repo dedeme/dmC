@@ -20,11 +20,11 @@
   (
     Ix >> ix =
     State >> " - " + sys,print
+    Tape size
     ( i =;
       Tape i get
-      ( " " + sys,print) else ("[" swap + "] " + sys,print) (i ix ==) if
+      i ix == ("[" swap + "] " + sys,print) ( " " + sys,print) elif
     )
-    (Tape size)
     for
     "" sys,println
   ) print =>
@@ -35,43 +35,40 @@
     Ix (f) ^^
     Ix >>
 
-    ( Tape mark0 lst,push)
-    ( Tape size ==)
-    elif
-    ( pop; Tape mark0 lst,push0; Ix 0 <<)
     ( dup -1 ==)
+    ( pop; Tape mark0 lst,push0; Ix 0 <<)
+    else
+    ( Tape size ==)
+    ( Tape mark0 lst,push)
+    else
     if
   ) step =>
 
   print
+  (State >> end !=)
   (
     0
+    Rules size
     (
       Rules swap get : Rule =
 
+      State >> : Rule 0 get :: ==
+      Tape Ix >> get : Rule 1 get :: ==
+      &&
       (
         Rule 2 get : Rule 3 get :: step
         State : Rule 4 get :: <<
         pop; 1
         break;
       )
-      (
-        State >> : Rule 0 get :: ==
-        Tape Ix >> get : Rule 1 get :: ==
-        &&
-      )
       if
     )
-    (Rules size)
     for
 
-    ( "No rule applicable" sys,println; break)
-    else
-    ( print)
-    ()
-    if
+      ( print)
+      ( "No rule applicable" sys,println; break)
+      elif
   )
-  (State >> end !=)
   while
 ) mRun =>
 

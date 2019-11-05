@@ -62,7 +62,7 @@ static void tofprocix (void *value, size_t ix) {
   modIt_stkItElement *e = value;
   Machine *m = e->m;
   machine_push(m, e->tk);
-  machine_push(m, token_new_int(0, ix));
+  machine_push(m, token_new_int(ix));
   machine_process("", machine_pmachines(m), e->prg);
 }
 
@@ -100,7 +100,7 @@ static void *tofcopy (void *value) {
 // -----------------------------------------------------------------------------
 
 static It *getIt (Machine *m) {
-  return tk_pop_pointer(m, symbol_ITERATOR_);
+  return tk_pop_native(m, symbol_ITERATOR_);
 }
 
 static void setIt (Machine *m, It *it) {
@@ -115,7 +115,7 @@ static Opt *newf (Tp3 *m_o_fn) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
   int sz = arr_size(a);
-  if (sz > 1) fails_size_list(m, a, 1);
+  if (sz > 1) fails_list_size(m, a, 1);
   return sz
     ? opt_new(*arr_start(a))
     : opt_empty()
@@ -144,7 +144,7 @@ static void from (Machine *m) {
   setIt(m, it_from(ls));
 }
 
-Token *rangef (int *n) { return token_new_int(0, *n); }
+Token *rangef (int *n) { return token_new_int(*n); }
 
 static void range (Machine *m) {
   int end = tk_pop_int(m);
@@ -159,7 +159,7 @@ static void range0 (Machine *m) {
 
 static void has (Machine *m) {
   It *it = getIt(m);
-  machine_push(m, token_new_int(0, it_has_next(it)));
+  machine_push(m, token_new_int(it_has_next(it)));
 }
 
 static void peek (Machine *m) {
@@ -212,7 +212,7 @@ static void zip (Machine *m) {
   It *it1 = getIt(m);
   // t is Tp<Token, Token>
   Token *fn (Tp *t) {
-    return token_new_list(0, arr_new_from(tp_e1(t), tp_e2(t), NULL));
+    return token_new_list(arr_new_from(tp_e1(t), tp_e2(t), NULL));
   }
   setIt(m, it_from(it_to(it_map(it_zip(it1, it2), (FCOPY) fn))));
 }
@@ -224,7 +224,7 @@ static void zip3 (Machine *m) {
   // t is Tp3<Token, Token, Token>
   Token *fn (Tp3 *t) {
     return token_new_list(
-      0, arr_new_from(tp3_e1(t), tp3_e2(t), tp3_e3(t), NULL)
+      arr_new_from(tp3_e1(t), tp3_e2(t), tp3_e3(t), NULL)
     );
   }
   setIt(m, it_from(it_to(it_map(it_zip3(it1, it2, it3), (FCOPY) fn))));
@@ -260,16 +260,16 @@ static void takef (Machine *m) {
 static void all (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
 
-  Token *prg2 = token_new_list(0, arr_new_from(
+  Token *prg2 = token_new_list(arr_new_from(
     prg,
-    token_new_symbol(0, symbol_RUN),
-    token_new_symbol(0, symbol_new("!")),
+    token_new_symbol(symbol_RUN),
+    token_new_symbol(symbol_new("!")),
     NULL
   ));
   // It<Token>
   It *it = getIt(m);
   machine_push(m, token_new_int(
-    0, !it_contains(toStkIt(m, prg2, it), tofpred)
+    !it_contains(toStkIt(m, prg2, it), tofpred)
   ));
 }
 
@@ -278,12 +278,12 @@ static void any (Machine *m) {
 
   // It<Token>
   It *it = getIt(m);
-  machine_push(m, token_new_int(0, it_contains(toStkIt(m, prg, it), tofpred)));
+  machine_push(m, token_new_int(it_contains(toStkIt(m, prg, it), tofpred)));
 }
 
 static void count (Machine *m) {
   It *it = getIt(m);
-  machine_push(m, token_new_int(0, it_count(it)));
+  machine_push(m, token_new_int(it_count(it)));
 }
 
 static void duplicates (Machine *m) {
@@ -299,9 +299,9 @@ static void duplicates (Machine *m) {
   Arr *l2 = arr_map(tp_e2(dr), (FCOPY)modIt_stkItElement_to_token);
   // Arr<Token>
   Arr *r = arr_new();
-  arr_push(r, token_new_list(0, l1));
-  arr_push(r, token_new_list(0, l2));
-  machine_push(m, token_new_list(0, r));
+  arr_push(r, token_new_list(l1));
+  arr_push(r, token_new_list(l2));
+  machine_push(m, token_new_list(r));
 }
 
 static void each (Machine *m) {
@@ -329,7 +329,7 @@ static void eq (Machine *m) {
   It *it1 = getIt(m);
   // Tp<Arr<modIt_stkItElement>>
   machine_push(m, token_new_int(
-    0, it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
+    it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
   ));
 }
 
@@ -342,20 +342,20 @@ static void neq (Machine *m) {
   It *it1 = getIt(m);
   // Tp<Arr<modIt_stkItElement>>
   machine_push(m, token_new_int(
-    0, !it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
+    !it_eq(toStkIt(m, prg, it1), toStkIt(m, prg, it2), tofeq)
   ));
 }
 
 static void equals (Machine *m) {
   machine_push(m, token_new_list(
-    0, arr_new_from(token_new_symbol(0, symbol_new("==")), NULL)
+    arr_new_from(token_new_symbol(symbol_new("==")), NULL)
   ));
   eq(m);
 }
 
 static void notequals (Machine *m) {
   machine_push(m, token_new_list(
-    0, arr_new_from(token_new_symbol(0, symbol_new("==")), NULL)
+    arr_new_from(token_new_symbol(symbol_new("==")), NULL)
   ));
   neq(m);
 }
@@ -370,7 +370,7 @@ static void find (Machine *m) {
   // Arr<Token>
   Arr *r = arr_new();
   if (e) arr_push(r, e->tk);
-  machine_push(m, token_new_list(0, r));
+  machine_push(m, token_new_list(r));
 }
 
 static void indexf (Machine *m) {
@@ -378,13 +378,13 @@ static void indexf (Machine *m) {
 
   // It<Token>
   It *it = getIt(m);
-  machine_push(m, token_new_int(0, it_index(toStkIt(m, prg, it), tofpred)));
+  machine_push(m, token_new_int(it_index(toStkIt(m, prg, it), tofpred)));
 }
 
 static void iindex (Machine *m) {
   Token *tk = machine_pop(m);
   machine_push(m, token_new_list(
-    0, arr_new_from(tk, token_new_symbol(0, symbol_new("==")), NULL)
+    arr_new_from(tk, token_new_symbol(symbol_new("==")), NULL)
   ));
   indexf(m);
 }
@@ -395,14 +395,14 @@ static void lastindexf (Machine *m) {
   // It<Token>
   It *it = getIt(m);
   machine_push(m, token_new_int(
-    0, it_last_index(toStkIt(m, prg, it), tofpred)
+    it_last_index(toStkIt(m, prg, it), tofpred)
   ));
 }
 
 static void lastindex (Machine *m) {
   Token *tk = machine_pop(m);
   machine_push(m, token_new_list(
-    0, arr_new_from(tk, token_new_symbol(0, symbol_new("==")), NULL)
+    arr_new_from(tk, token_new_symbol(symbol_new("==")), NULL)
   ));
   lastindexf(m);
 }
@@ -411,7 +411,7 @@ static void reduce (Machine *m) {
   Token *prg = machine_pop(m);
   Token *seed = machine_pop(m);
   It *it = getIt(m);
-  machine_push(m, token_new_list(0, it_to(it)));
+  machine_push(m, token_new_list(it_to(it)));
   machine_push(m, seed);
   machine_push(m, prg);
   ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("reduce"))))(m);
@@ -419,12 +419,12 @@ static void reduce (Machine *m) {
 
 static void to (Machine *m) {
   It *it = getIt(m);
-  machine_push(m, token_new_list(0, it_to(it)));
+  machine_push(m, token_new_list(it_to(it)));
 }
 
 static void shuffle (Machine *m) {
   It *it = getIt(m);
-  Token *tk = token_new_list(0, it_to(it));
+  Token *tk = token_new_list(it_to(it));
   machine_push(m, tk);
   ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("shuffle"))))(m);
   // Arr<Token>
@@ -440,7 +440,7 @@ static void reverse (Machine *m) {
 static void sort (Machine *m) {
   Token *prg = machine_pop(m);
   It *it = getIt(m);
-  Token *tk = token_new_list(0, it_to(it));
+  Token *tk = token_new_list(it_to(it));
   machine_push(m, tk);
   machine_push(m, prg);
   ((pmodule_Fn)opt_get(pmodule_get(modlist_mk(), symbol_new("sort"))))(m);
@@ -452,6 +452,7 @@ static void sort (Machine *m) {
 static void box (Machine *m) {
   // Arr<Token>
   Arr *a = tk_pop_list(m);
+  if (!arr_size(a)) fails_list_size(m, a, 1);
   // Opt<Token>
   Opt *fn (Token *tk) { return opt_new(tk); }
   Box *bx = rnd_box_new(arr_map(a, (FCOPY)fn));

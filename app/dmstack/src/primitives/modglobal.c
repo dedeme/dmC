@@ -8,13 +8,14 @@
 #include "primitives/modglobal2.h"
 #include "Token.h"
 #include "tk.h"
+#include "exception.h"
 
 static void sputs (Machine *m) {
   puts(token_to_str_draft(machine_pop(m)));
 }
 
 static void to_str (Machine *m) {
-  machine_push(m, token_new_string(0, token_to_str(machine_pop(m))));
+  machine_push(m, token_new_string(token_to_str(machine_pop(m))));
 }
 
 static void clone (Machine *m) {
@@ -25,17 +26,34 @@ static void clone (Machine *m) {
 static void eq (Machine *m) {
   Token *tk2 = machine_pop(m);
   Token *tk1 = machine_pop(m);
-  machine_push(m, token_new_int(0, token_eq(tk1, tk2)));
+  machine_push(m, token_new_int(token_eq(tk1, tk2)));
 }
 
 static void neq (Machine *m) {
   Token *tk2 = machine_pop(m);
   Token *tk1 = machine_pop(m);
-  machine_push(m, token_new_int(0, !token_eq(tk1, tk2)));
+  machine_push(m, token_new_int(!token_eq(tk1, tk2)));
 }
 
 static void fail (Machine *m) {
-  machine_fail(m, tk_pop_string(m));
+  exception_throw(m, "generic", tk_pop_string(m));
+}
+
+static void throw (Machine *m) {
+  char *msg = tk_pop_string(m);
+  exception_throw(m, tk_pop_string(m), msg);
+}
+
+static void try (Machine *m) {
+  // Arr<Token>
+  Arr *a = arr_copy(tk_pop_list(m));
+  Token *prgtry = machine_pop_exc(m, token_LIST);
+  TRY {
+    machine_isolate_process("", machine_pmachines(m), prgtry);
+  } CATCH (ex) {
+    arr_insert(a, 0, token_from_pointer(symbol_EXC_, ex));
+    machine_isolate_process("", machine_pmachines(m), token_new_list(a));
+  }_TRY
 }
 
 static void stkfail (Machine *m, char *fn, int min) {
@@ -77,7 +95,7 @@ static void dup (Machine *m) {
 
 static void empty (Machine *m) {
   Arr *stack = machine_stack(m);
-  arr_push(stack, token_new_int(0, arr_size(stack) == 0));
+  arr_push(stack, token_new_int(arr_size(stack) == 0));
 }
 
 Pmodule *modglobal_mk (void) {
@@ -92,6 +110,8 @@ Pmodule *modglobal_mk (void) {
   add("==", eq);
   add("!=", neq);
   add("fail", fail);
+  add("throw", throw);
+  add("try", try);
   add("swap", swap);
   add("pop", pop);
   add("dup", dup);
