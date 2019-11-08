@@ -2,6 +2,8 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 ( L =
+  L size 2 <
+  ( L)
   (
     lst,new : Less =
     lst,new : Eq =
@@ -9,16 +11,14 @@
     L 0 get : pivot =
     L
     ( e =;
-      (Greater e lst,push) else
-      (Less e lst,push) (e pivot <) elif
-      (Eq e lst,push) (e pivot ==) if
+      (e pivot ==) (Eq e lst,push) else
+      (e pivot <) (Less e lst,push) else
+      (Greater e lst,push)
+      if
     ) lst,each
     Less quicksort Eq Greater quicksort + +
   )
-  else
-  ( L)
-  ( L size 2 <)
-  if
+  elif
 ) quicksort =>
 
 {4, 65, 2, -31, 0, 99, 2, 83, 782, 1} : Ls =

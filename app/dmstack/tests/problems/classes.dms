@@ -5,8 +5,8 @@
 ( v =;
   {
     "var": v
-    "incPrint": ("var" (1 +) obj,up+; .var toStr sys,println)
-  } data
+    "incPrint": ("var" (1 +) map,up+; .var toStr sys,println)
+  } map,from
 ) myClassNew =>
 
 3 myClassNew : Cl =
@@ -29,7 +29,7 @@ squareArea =>
   {
     "side": s
     "area": (squareArea)
-  } data
+  } map,from
 ) square =>
 
 // rect class
@@ -42,7 +42,7 @@ rectArea =>
     "hight": h
     "width": w
     "area": (rectArea)
-  } data
+  } map,from
 ) rect =>
 
 // Test
