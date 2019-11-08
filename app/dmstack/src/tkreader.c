@@ -372,29 +372,12 @@ Opt *tkreader_next(Reader *reader) {
       Reader *subr = reader_new_from_reader(
         reader, str_sub(lstart, 0, p - lstart), nline
       );
-
-      // Arr<Token>
-      Arr *a = arr_new();
-      Token *tk = opt_nget(tkreader_next(subr));
-      while (tk) {
-        if (token_type(tk) == token_SYMBOL) {
-          EACH(reader_symbol_id(subr, a, tk), Token, t) {
-            arr_push(a, t);
-          }_EACH
-        } else if (token_type(tk) == token_STRING) {
-          EACH(reader_interpolation(reader, tk), Token, t) {
-            arr_push(a, t);
-          }_EACH
-        } else {
-          arr_push(a, tk);
-        }
-        tk = opt_nget(tkreader_next(subr));
-      }
+      Token *tk = reader_process(subr);
 
       reader_set_nline(reader, reader_nline(subr));
       reader_set_prg_ix(reader, prg_ix + p - prg + 1);
       return opt_new(token_new_list_pos(
-        a, reader_source(reader), nline_start
+        token_list(tk), reader_source(reader), nline_start
       ));
     }
 

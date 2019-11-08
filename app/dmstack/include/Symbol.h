@@ -18,8 +18,8 @@ enum symbol_SYSTEM {
 
   symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 
-  symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
-  symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
+  symbol_MAP_, symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_,
+  symbol_FILE_, symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
 
   symbol_SYSTEM_COUNT
 };

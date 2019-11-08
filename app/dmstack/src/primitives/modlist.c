@@ -573,6 +573,24 @@ static void right (Machine *m) {
   subaux(m, cut, 0, 1);
 }
 
+static void copy (Machine *m) {
+  // Arr<Token>
+  Arr *a = tk_pop_list(m);
+
+  Arr *ra;
+  int df = arr_size(a);
+  if (df) {
+    int len = df * sizeof(Token *);
+    Token **tks = GC_MALLOC(len);
+    memcpy(tks, (Token **)(arr_start(a)), len);
+    ra = arr_new_c(df, (void **)tks);
+  } else {
+    ra = arr_new();
+  }
+
+  machine_push(m, token_new_list(ra));
+}
+
 static void fromjs (Machine *m) {
   modjs_to_list(m);
 }
@@ -638,6 +656,7 @@ Pmodule *modlist_mk (void) {
   add("sub", sub);
   add("left", left);
   add("right", right);
+  add("copy", copy);
 
   add("fromJs", fromjs);
   add("toJs", tojs);

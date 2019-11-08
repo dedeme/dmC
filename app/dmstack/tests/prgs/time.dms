@@ -20,12 +20,12 @@
     (time,toDate "20190815" == assert) (0 assert) wrap,option
 
   T1 time,broke T2 =
-  T2 "year" obj,get 2019 == assert
-  T2 "month" obj,get 2 == assert
-  T2 "day" obj,get 15 == assert
-  T2 "hour" obj,get 12 == assert
-  T2 "minute" obj,get 45 == assert
-  T2 "second" obj,get 15 == assert
+  T2 .year 2019 == assert
+  T2 .month 2 == assert
+  T2 .day 15 == assert
+  T2 .hour 12 == assert
+  T2 .minute 45 == assert
+  T2 .second 15 == assert
 
   time,now Tn =
   Tn 25 time,add -25 time,add Tn time,df 0 == assert

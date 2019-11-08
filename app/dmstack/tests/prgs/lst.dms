@@ -313,6 +313,15 @@
   ["a", "b", "c"] 0 lst,right ["a", "b", "c"] == assert
   ["a", "b", "c"] 1 lst,right ["b", "c"] == assert
   ["a", "b", "c"] 3 lst,right [] == assert
+  L0 lst,copy : Copy =
+  Copy L0 expect
+  Copy "1" lst,push+ L0 != assert
+  L1 lst,copy : Copy =
+  Copy L1 expect
+  Copy "1" lst,push+ L1 != assert
+  L2 lst,copy : Copy =
+  Copy L2 expect
+  Copy "1" lst,push+ L2 != assert
 
   // fromJs - toJs
 

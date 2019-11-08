@@ -44,29 +44,13 @@ static void ra (Machine *m) {
 
 static void ro (Machine *m) {
   // Map<Js>
-  Map *jsm = js_ro((Js *)tk_pop_string(m));
-  // Arr<Token>
-  Arr *r = arr_new();
-  EACH(jsm, Kv, kv) {
-    arr_push(r, token_new_string(kv_key(kv)));
-    arr_push(r, token_new_string(kv_value(kv)));
+  Map *mp = js_ro((Js *)tk_pop_string(m));
+  // Map<Token>
+  Map *r = map_new();
+  EACH(mp, Kv, kv) {
+    map_put(r, kv_key(kv), token_new_string(kv_value(kv)));
   }_EACH
-  machine_push(m, token_new_list(r));
-}
-
-static void rm (Machine *m) {
-  // Map<Js>
-  Map *jsm = js_ro((Js *)tk_pop_string(m));
-  // Arr<Token>
-  Arr *r = arr_new();
-  EACH(jsm, Kv, kv) {
-    // Arr<Token>
-    Arr *e = arr_new();
-    arr_push(e, token_new_string(kv_key(kv)));
-    arr_push(e, token_new_string(kv_value(kv)));
-    arr_push(r, token_new_list(e));
-  }_EACH
-  machine_push(m, token_new_list(r));
+  machine_push(m, token_from_pointer(symbol_MAP_, r));
 }
 
 static void wn (Machine *m) {
@@ -107,35 +91,14 @@ static void wa (Machine *m) {
 }
 
 static void wo (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
+  // Map<char>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
   // Map<char>
   Map *r = map_new();
-  char *key = NULL;
-  EACH(a, Token, tk) {
-    char *s = tk_string(m, tk);
-    if (key) {
-      arr_push((Arr *)r, kv_new(key, s));
-      key = NULL;
-    } else {
-      key = s;
-    }
+  EACH(mp, Kv, kv) {
+    map_put(r, kv_key(kv), tk_string(m, kv_value(kv)));
   }_EACH
-  if (key) fails_list_size(m, a, arr_size(a) + 1);
-  machine_push(m, token_new_string((char *)js_wo(r)));
-}
 
-static void wm (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  // Map<char>
-  Map *r = map_new();
-  EACH(a, Token, tk) {
-    // Arr<Token>
-    Arr *e = tk_list(m, tk);
-    if (arr_size(e) != 2) fails_list_size(m, e, 2);
-    map_put(r, tk_string(m, *arr_start(e)), tk_string(m, *(arr_start(e) + 1)));
-  }_EACH
   machine_push(m, token_new_string((char *)js_wo(r)));
 }
 
@@ -168,41 +131,33 @@ void modjs_to_list (Machine *m) {
 
 void modjs_from_map (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
-  // Arr<Token>
-  Arr *r = arr_new();
-  EACH(tk_pop_list(m), Token, tk) {
-    // Arr<Token>
-    Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_list_size(m, a, 2);
-    arr_push(r, *arr_start(a));
-    machine_push(m, arr_get(a, 1));
+
+  // Map<Js>
+  Map *r = map_new();
+  EACH(map_kvs(tk_pop_native(m, symbol_MAP_)), Kv, kv) {
+    machine_push(m, kv_value(kv));
     machine_process("", machine_pmachines(m), prg);
-    arr_push(r, machine_pop(m));
+    map_put(r, kv_key(kv), tk_string(m, machine_pop(m)));
   }_EACH
-  machine_push(m, token_new_list(r));
-  wo(m);
+
+  machine_push(m, token_new_string((char *)js_wo(r)));
 }
 
 void modjs_to_map (Machine *m) {
   Token *prg = machine_pop_exc(m, token_LIST);
-  ro(m);
-  // Arr<Token>
-  Arr *r = arr_new();
-  Token *key = NULL;
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  EACH(a, Token, tk) {
-    if (key) {
-      machine_push(m, tk);
-      machine_process("", machine_pmachines(m), prg);
-      arr_push(r, token_new_list(arr_new_from(key, machine_pop(m), NULL)));
-      key = NULL;
-    } else {
-      key = tk;
-    }
+
+  // Map<Js>
+  Map *js = js_ro((Js *)tk_pop_string(m));
+
+  // Map<Token>
+  Map *r = map_new();
+  EACH(map_kvs(js), Kv, kv) {
+    machine_push(m, token_new_string((char *)kv_value(kv)));
+    machine_process("", machine_pmachines(m), prg);
+    map_put(r, kv_key(kv), machine_pop(m));
   }_EACH
-  if (key) fails_list_size(m, a, arr_size(a) + 1);
-  machine_push(m, token_new_list(r));
+
+  machine_push(m, token_from_pointer(symbol_MAP_, r));
 }
 
 Pmodule *modjs_mk (void) {
@@ -217,8 +172,7 @@ Pmodule *modjs_mk (void) {
   add("rf", rf); // STRING - FLOAT
   add("rs", rs); // STRING - STRING
   add("ra", ra); // STRING - LIST
-  add("ro", ro); // STRING - OBJ
-  add("rm", rm); // STRING - MAP
+  add("ro", ro); // STRING - MAP
 
   add("wn", wn); // INT - STRING
   add("wb", wb); // INT - STRING
@@ -226,8 +180,7 @@ Pmodule *modjs_mk (void) {
   add("wf", wf); // FLOAT - STRING
   add("ws", ws); // STRING - STRING
   add("wa", wa); // LIST - STRING
-  add("wo", wo); // OBJ- STRING
-  add("wm", wm); // MAP- STRING
+  add("wo", wo); // MAP- STRING
 
   add("fromList", modjs_from_list); // LIST - STRING
   add("toList", modjs_to_list); // STRING - LIST

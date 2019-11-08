@@ -179,8 +179,17 @@ Token *token_clone (Token *this) {
       return token_new_list(r);
     }
     case token_NATIVE: {
-      struct token_Native *nt = this->value.native;
-      return token_from_pointer(nt->sym, nt->pointer);
+      if (token_native_symbol(this) == symbol_MAP_) {
+        // Map<Token>
+        Map *r = map_new();
+        EACH(token_native_pointer(this), Kv, kv){
+          map_put(r, str_new(kv_key(kv)), token_clone(kv_value(kv)));
+        }_EACH
+        return token_from_pointer(symbol_MAP_, r);
+      } else {
+        struct token_Native *nt = this->value.native;
+        return token_from_pointer(nt->sym, nt->pointer);
+      }
     }
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
@@ -220,12 +229,6 @@ int token_eq (Token *this, Token *other) {
 char *token_to_str (Token *this) {
   switch (this->type) {
     case token_INT: return (char *)js_wl(this->value.i);
-    case token_NATIVE:
-      return str_f(
-        "<%s, %ld>",
-        symbol_to_str(this->value.native->sym),
-        this->value.native->pointer
-      );
     case token_FLOAT: return (char *)js_wd(this->value.f);
     case token_STRING: return this->value.s;
     case token_SYMBOL:
@@ -235,6 +238,24 @@ char *token_to_str (Token *this) {
       Arr *a = arr_map(this->value.a, (FCOPY)token_to_str);
       return str_f("(%s)", str_join(a, ", "));
     }
+    case token_NATIVE: {
+      if (token_native_symbol(this) == symbol_MAP_) {
+        // Arr<char>
+        Arr *a = arr_new();
+        EACH(token_native_pointer(this), Kv, kv) {
+          arr_push(a, str_f(
+            "%s: %s", kv_key(kv), token_to_str(kv_value(kv))
+          ));
+        }_EACH
+        return str_f("{%s}", str_join(a, ", "));
+      } else {
+        return str_f(
+          "<%s, %ld>",
+          symbol_to_str(this->value.native->sym),
+          this->value.native->pointer
+        );
+      }
+    }
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
   return NULL; // not reachable.
@@ -242,6 +263,7 @@ char *token_to_str (Token *this) {
 
 char *token_to_str_draft (Token *this) {
   switch (this->type) {
+    case token_STRING: return (char*)js_ws(this->value.s);
     case token_LIST: {
       // Arr<char>
       Arr *a = arr_map(arr_take(this->value.a, 5), (FCOPY)token_to_str_draft);
@@ -249,6 +271,23 @@ char *token_to_str_draft (Token *this) {
         arr_push(a, "...");
       }
       return str_f("(%s)", str_join(a, ", "));
+    }
+    case token_NATIVE: {
+      if (token_native_symbol(this) == symbol_MAP_) {
+        // Arr<char>
+        Arr *a = arr_new();
+        EACH_IX(token_native_pointer(this), Kv, kv, ix) {
+          if (ix > 5) {
+            arr_push(a, "...");
+            break;
+          }
+          arr_push(a, str_f(
+            "%s: %s", (char *)js_ws(kv_key(kv)),
+            token_to_str_draft(kv_value(kv))
+          ));
+        }_EACH
+        return str_f("{%s}", str_join(a, ", "));
+      }
     }
     default: return token_to_str(this);
   }
@@ -289,40 +328,14 @@ char *token_check_type (List *tokens, char *type) {
       case token_STRING: return paste("s", 1);
       case token_SYMBOL: return paste("y", 1);
       case token_LIST: return paste("l", 1);
-      case token_NATIVE: return paste("n", 1);
+      case token_NATIVE:
+        return token_native_symbol(tk) == symbol_MAP_
+          ? paste("m", 1)
+          : paste("n", 1)
+        ;
     }
     EXC_ILLEGAL_STATE("switch not exhaustive");
     return NULL; // not reachable.
-  }
-
-  char *object (void) {
-    // Arr<Token
-    Arr *a = tk->type == token_LIST ? tk->value.a : NULL;
-    int badformat (void) {
-      for (int i = 0; i < arr_size(a); i += 2)
-        if (token_type(arr_get(a, i)) != token_STRING) return 1;
-      return 0;
-    }
-    if (!a || arr_size(a) % 2 || badformat()) return tpaste();
-    return paste("o", 1);
-  }
-
-  char *map (void) {
-    // Arr<Token
-    Arr *a = tk->type == token_LIST ? tk->value.a : NULL;
-    int badformat (void) {
-      EACH(a, Token, t) {
-        // Arr<Token
-        Arr *a2 = t->type == token_LIST ? t->value.a : NULL;
-        if (
-          !a2 || arr_size(a2) != 2 ||
-          token_type(*arr_start(a2)) != token_STRING
-        ) return 1;
-      }_EACH
-      return 0;
-    }
-    if (!a || badformat()) return tpaste();
-    return paste("m", 1);
   }
 
   char *pointer (void) {
@@ -392,9 +405,8 @@ char *token_check_type (List *tokens, char *type) {
     case 'f':
     case 's':
     case 'y':
-    case 'l': return tpaste();
-    case 'o': return object();
-    case 'm': return map();
+    case 'l':
+    case 'm': return tpaste();
     case '<': return pointer();
     case 'L': return list();
     default: return paste(str_f("%c?", ch), 1);

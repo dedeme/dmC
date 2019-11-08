@@ -23,8 +23,8 @@
   A 1 get js,ri 2 == assert
   A 2 get js,ra () == assert
   A 3 get js,ri 3 == assert
-  A 4 get js,ro {} == assert
-  A 5 get js,ro "a" obj,get js,ri 11 == assert
+  A 4 get js,ro map,size 0 == assert
+  A 5 get js,ro "a" map,get js,ri 11 == assert
   A 6 get js,ra A2 =
   A2 0 get js,rb assert
   A2 0 get js,null? ! assert
@@ -32,14 +32,14 @@
 
   "{\"a\": 1, \"b\": [], \"c\": {}, \"d\": [1, false], "
   "\"e\": {\"a2\": \"\", \"b2\": null} }" + js,ro A =
-  A "a" obj,get js,ri 1 == assert
-  A "b" obj,get js,ra () == assert
-  A "c" obj,get js,ro () == assert
-  A "d" obj,get js,ra 0 get js,ri 1 == assert
-  A "d" obj,get js,ra 1 get js,rb ! assert
-  A "e" obj,get js,ro "a2" obj,get js,null? ! assert
-  A "e" obj,get js,ro "a2" obj,get js,rs "" == assert
-  A "e" obj,get js,ro "b2" obj,get js,null? assert
+  A .a js,ri 1 == assert
+  A .b  js,ra () == assert
+  A .c  js,ro map,size 0 == assert
+  A .d  js,ra 0 get js,ri 1 == assert
+  A .d  js,ra 1 get js,rb ! assert
+  A .e  js,ro .a2  js,null? ! assert
+  A .e  js,ro .a2  js,rs "" == assert
+  A .e  js,ro .b2  js,null? assert
 
   js,wn js,null? assert
   1 js,wb js,rb assert
@@ -52,8 +52,8 @@
   [] js,wa js,ra [] == assert
   []
     1 js,wi lst,push+; 2 js,wi lst,push+; lst,new js,wa lst,push+
-    3.5 js,wf lst,push+; obj,new js,wo lst,push+;
-    {} "a" 11 js,wi obj,put+
+    3.5 js,wf lst,push+; map,new js,wo lst,push+;
+    map,new "a" 11 js,wi map,put+
     js,wo lst,push+
     [] 1 js,wb lst,push+; js,wn lst,push+
     js,wa lst,push+ js,wa
@@ -66,88 +66,72 @@
     Jss 3 get js,rf lst,push+
     Jss 4 get js,ro lst,push+
     Jss 5 get js,ro O =
-      {}
-        "a" O "a" obj,get js,ri
-        obj,put+
+      map,new
+        "a" O "a" map,get js,ri
+        map,put+
       lst,push+
     Jss 6 get js,ra A =
       []
         A 0 get js,rb lst,push+
         A 1 get js,null? (0) (1) elif lst,push+
-      lst,push+
-    [1, 2, [], 3.5, {}, {"a": 11}, [1, 0]] == assert
+      lst,push+ : Arr =
 
-  {} js,wo js,ro {} == assert
-  {}
-    "a" 1 js,wi obj,put+; "b" [] js,wa obj,put+; "c" {} js,wo obj,put+
-    "d"
-      [] 1 js,wi lst,push+; 0 js,wb lst,push+
-      js,wa obj,put+
-    "e"
-      {} "a2" "" js,ws obj,put+; "b2" js,wn obj,put+
-      js,wo obj,put+
-    js,wo Js =
-  Js js,ro Jss =
-  {}
-    "a" Jss "a" obj,get js,ri obj,put+
-    "b" Jss "b" obj,get js,ra obj,put+
-    "c" Jss "c" obj,get js,ro obj,put+
-    "d"
-      []
-        Jss "d" obj,get js,ra A =
-        A 0 get js,ri lst,push+; A 1 get js,rb lst,push+
-      obj,put+
-    "e"
-      {}
-        Jss "e" obj,get js,ro O =
-        "a2"
-          O "a2" obj,get js,rs
-          obj,put+
-        "b2"
-          O "b2" obj,get js,null? (0) (1) elif
-          obj,put+
-      obj,put+
-    {"a": 1, "b": [], "c": {}, "d": [1, 0], "e": {"a2": "", "b2": 0}} == assert
+    Arr 0 get 1 expect
+    Arr 1 get 2 expect
+    Arr 2 get [] expect
+    Arr 3 get 3.5 expect
+    Arr 4 get map,size 0 expect
+    Arr 5 get .a 11 expect
+    Arr 6 get 0 get 1 expect
+    Arr 6 get 1 get 0 expect
 
-  {} js,wm js,rm {} == assert
-  {}
-    "a" 1 js,wi map,put+; "b" [] js,wa map,put+; "c" {} js,wo map,put+
+  {} map,from js,wo js,ro map,size 0 == assert
+  {} map,from
+    "a" 1 js,wi map,put+; "b" [] js,wa map,put+; "c" map,new js,wo map,put+
     "d"
       [] 1 js,wi lst,push+; 0 js,wb lst,push+
       js,wa map,put+
     "e"
-      {} "a2" "" js,ws obj,put+; "b2" js,wn obj,put+
+      map,new "a2" "" js,ws map,put+; "b2" js,wn map,put+
       js,wo map,put+
-    js,wm Js =
-  Js js,rm Jss =
-  {}
-    "a" Jss "a" map,get >> js,ri map,put+
-    "b" Jss "b" map,get >> js,ra map,put+
-    "c" Jss "c" map,get >> js,ro map,put+
+    js,wo Js =
+  Js js,ro Jss =
+  {} map,from
+    "a" Jss "a" map,oget >> js,ri map,put+
+    "b" Jss "b" map,oget >> js,ra map,put+
+    "c" Jss "c" map,oget >> js,ro map,put+
     "d"
       []
-        Jss "d" map,get >> js,ra A =
+        Jss "d" map,oget >> js,ra A =
         A 0 get js,ri lst,push+; A 1 get js,rb lst,push+
       map,put+
     "e"
-      {}
-        Jss "e" map,get >> js,ro O =
+      map,new
+        Jss "e" map,oget >> js,ro O =
         "a2"
-          O "a2" obj,get js,rs
-          obj,put+
+          O "a2" map,get js,rs
+          map,put+
         "b2"
-          O "b2" obj,get js,null? (0) (1) elif
-          obj,put+
-      map,put+
-    {("a": 1), ("b": []), ("c": {}), ("d": [1, 0]),
-      ("e": {"a2": "", "b2": 0})} == assert
+          O "b2" map,get js,null? (0) (1) elif
+          map,put+
+      map,put+ : Mp =
+
+  Mp "a" map,oget >> 1 expect
+  Mp "b" map,oget >> [] expect
+  Mp "c" map,oget >> map,size 0 expect
+  Mp "d" map,oget >> 0 get 1 expect
+  Mp "d" map,oget >> 1 get 0 expect
+  Mp "e" map,oget >> .a2 "" expect
+  Mp "e" map,oget >> .b2 0 expect
 
   [] (js,ws) js,fromList (js,rs) js,toList [] == assert
   ["a", "b"] (js,ws) js,fromList (js,rs) js,toList ["a", "b"] == assert
 
-  {} (js,ws) js,fromMap (js,rs) js,toMap {} == assert
-  {("a": 1), ("b": 2)} (js,wi) js,fromMap (js,ri) js,toMap
-    {("a": 1), ("b": 2)} == assert
+  {} map,from (js,ws) js,fromMap (js,rs) js,toMap map,size 0 == assert
+  {"a": 1, "b": 2} map,from (js,wi) js,fromMap (js,ri) js,toMap : Mp =
+
+  Mp "a" map,get 1 expect
+  Mp "b" map,oget >> 2 expect
 
   empty? assert
 ) run

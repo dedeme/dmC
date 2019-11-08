@@ -30,12 +30,12 @@ Symbol tk_symbol (Machine *m, Token *t) {
 }
 
 void *tk_native (Machine *m, Token *t, Symbol sym) {
-  if (token_type(t) != token_NATIVE) fails_type_in(m, token_NATIVE, t);
-  if (token_native_symbol(t) != sym)
-    machine_fail(m, str_f(
-      "Expected pointer of type '%s', found one of type '%s'",
-      symbol_to_str(sym), symbol_to_str(token_native_symbol(t))
-    ));
+  if (
+    token_type(t) != token_NATIVE ||
+    token_native_symbol(t) != sym
+  )
+    fails_ntype_in(m, sym, t);
+
   return token_native_pointer(t);
 }
 

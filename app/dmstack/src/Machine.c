@@ -368,7 +368,7 @@ static void expect (Machine *this) {
   puts(str_f(
     "Expected error: %d:\n  Expected: %s\n  Actual  : %s",
     list_count(this->pmachines) + 1,
-    token_to_str(expected), token_to_str(actual)
+    token_to_str_draft(expected), token_to_str_draft(actual)
   ));
   puts(machine_stack_trace(this));
   exit(0);

@@ -114,6 +114,11 @@ void fails_from_exception (Exc *ex);
 ///   type: Expected type.
 void fails_type (Machine *m, enum token_Type type);
 
+/// Error found an unexpected type in stack, when expecting a CPointer.
+///   m : Machine
+///   id: Type identifier.
+void fails_ntype (Machine *m, Symbol id);
+
 /// Error found an unexpected type in stack.
 ///   m    : Machine
 ///   n    : Number of errors.
@@ -126,6 +131,12 @@ void fails_types (Machine *m, int n, enum token_Type *types);
 ///   type : Expected type.
 ///   token: Failed token.
 void fails_type_in (Machine *m, enum token_Type type, Token *token);
+
+/// Error found an unexpected, when expecting a CPointer.
+///   m    : Machine
+///   id   : Type identifier.
+///   token: Failed token.
+void fails_ntype_in (Machine *m, Symbol id, Token *token);
 
 /// Error found an unexpected type.
 ///   m    : Machine
@@ -252,11 +263,18 @@ int reader_nline (Reader *this);
 ///
 void reader_set_nline (Reader *this, int value);
 
-/// Calculates symbol id of 'tk'. 'tk' is a token_SYMBOL.
-///   this: The reader.
-///   prg : Arr<Token> symbols read until now.
-///   tk  : Token type token_SYMBOL.
-Token *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
+/// Calculates symbols from 'tk'. 'tk' is a token_SYMBOL.
+///   this  : The reader.
+///   prg   : Arr<Token> symbols read until now.
+///   tk    : Token type token_SYMBOL.
+///   return: Arr<Token>. If tk
+///     - is symbol_IMPORT, updates imports dictionary and returns 'tk'.
+///     - is symbol_THIS, returns 'reader_source'.
+///     - is symbol starting with '.' and != ".", returns [str_rigth(tk symbol),
+///         symbol "obj", symbol "get"].
+///     - is symbol starting with '@', process a type symbol.
+///     - otherwise returns 'tk'.
+Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk);
 
 /// Reads an interpolation.
 ///   this: The reader
@@ -947,8 +965,8 @@ enum symbol_SYSTEM {
 
   symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 
-  symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_,
-  symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
+  symbol_OBJECT_, symbol_MAP_, symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_,
+  symbol_FILE_, symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
 
   symbol_SYSTEM_COUNT
 };

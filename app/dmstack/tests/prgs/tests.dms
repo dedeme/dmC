@@ -17,7 +17,6 @@
 "wrap" import
 "it" import
 "recursive" import
-"obj" import
 "map" import
 "js" import
 "b64" import

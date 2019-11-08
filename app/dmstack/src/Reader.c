@@ -146,7 +146,7 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     int line = tokenPos_line(pos);
     return arr_new_from(
       token_new_string_pos(str_right(symstr, 1), this->source, line),
-      token_new_symbol_pos(symbol_new("obj"), this->source, line),
+      token_new_symbol_pos(symbol_new("map"), this->source, line),
       token_new_symbol_pos(symbol_new("get"), this->source, line),
       NULL
     );
@@ -178,7 +178,7 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
         );
       }
     }
-  } else {
+  } else if (this->prg[this->prg_ix] == ',') {
     EACHL(this->syms, SymbolKv, e) {
       if (symbolKv_key(e) == sym) {
         TokenPos *pos = opt_nget(token_pos(tk));
@@ -223,20 +223,8 @@ Arr *reader_interpolation (Reader *this, Token *tk) {
     Reader *subr = reader_new_from_reader(
       this, str_sub(s, ix + 2, ix2), nline
     );
-
     // Arr<Token>
-    Arr *prg = arr_new();
-    Token *tk = opt_nget(tkreader_next(subr));
-    while (tk) {
-      if (token_type(tk) == token_SYMBOL) {
-        EACH(reader_symbol_id(subr, prg, tk), Token, t) {
-          arr_push(prg, t);
-        }_EACH
-      } else {
-        arr_push(prg, tk);
-      }
-      tk = opt_nget(tkreader_next(subr));
-    }
+    Arr *prg = token_list(reader_process(subr));
 
     p = s + ix + 2;
     p_end = s + ix2;

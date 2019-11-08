@@ -26,6 +26,11 @@ void fails_from_exception (Exc *ex);
 ///   type: Expected type.
 void fails_type (Machine *m, enum token_Type type);
 
+/// Error found an unexpected type in stack, when expecting a CPointer.
+///   m : Machine
+///   id: Type identifier.
+void fails_ntype (Machine *m, Symbol id);
+
 /// Error found an unexpected type in stack.
 ///   m    : Machine
 ///   n    : Number of errors.
@@ -38,6 +43,12 @@ void fails_types (Machine *m, int n, enum token_Type *types);
 ///   type : Expected type.
 ///   token: Failed token.
 void fails_type_in (Machine *m, enum token_Type type, Token *token);
+
+/// Error found an unexpected, when expecting a CPointer.
+///   m    : Machine
+///   id   : Type identifier.
+///   token: Failed token.
+void fails_ntype_in (Machine *m, Symbol id, Token *token);
 
 /// Error found an unexpected type.
 ///   m    : Machine

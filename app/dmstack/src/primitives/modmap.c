@@ -6,57 +6,102 @@
 #include "tk.h"
 #include "primitives/modjs.h"
 
-// Tp<Token>
-static char *kvk (Machine *m, Token *tk) {
-  // Arr<Token>
-  Arr *a = tk_list(m, tk);
-  if (arr_size(a) != 2) fails_list_size(m, a, 2);
-  return tk_string(m, *arr_start(a));
+static void new (Machine *m) {
+  machine_push(m, token_from_pointer(symbol_MAP_, map_new()));
 }
 
-static void new (Machine *m) {
-  machine_push(m, token_new_list(arr_new()));
+static void from (Machine *m) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Machine *m2 = machine_isolate_process("", machine_pmachines(m), prg);
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  int sz = arr_size(a);
+  if (sz % 2) fails_list_size(m, a, sz + 1);
+
+  // Map<Token>
+  Map *r = map_new();
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    char *k = tk_string(m, *tks++);
+    map_put(r, k, *tks++);
+  }
+  machine_push(m, token_from_pointer(symbol_MAP_, r));
+
+}
+
+static void size (Machine *m) {
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  machine_push(m, token_new_int(map_size(mp)));
+}
+
+static int eqaux (Machine *m) {
+  // Arr<Token>
+  Token *prg = machine_pop_exc(m, token_LIST);
+  int fn (Token *e1, Token *e2) {
+    machine_push(m, e1);
+    machine_push(m, e2);
+    machine_process("", machine_pmachines(m), prg);
+    return tk_pop_int(m);
+  }
+  // Map<Token>
+  Map *m1 = tk_pop_native(m, symbol_MAP_);
+  // Map<Token>
+  Map *m2 = tk_pop_native(m, symbol_MAP_);
+  if (map_size(m1) != map_size(m2)) return 0;
+  EACH(map_kvs(m1), Kv, kv) {
+    Token *tk = opt_nget(map_get(m2, kv_key(kv)));
+    if (!tk || !fn(kv_value(kv), tk)) return 0;
+  }_EACH
+  return 1;
+}
+
+static void eq (Machine *m) {
+  machine_push(m, token_new_int(eqaux(m)));
+}
+
+static void neq (Machine *m) {
+  machine_push(m, token_new_int(!eqaux(m)));
 }
 
 static void get (Machine *m) {
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
-  Token *tk = opt_nget(it_find(it_from(a), (FPRED)fn));
-  if (tk) {
-    machine_push(m, token_new_list(arr_new_from(
-      arr_get(token_list(tk), 1), NULL)
-    ));
-  } else {
-    machine_push(m, token_new_list(arr_new()));
-  }
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
+  Token *tk = opt_nget(map_get(mp, key));
+  if (tk) machine_push(m, tk);
+  else machine_fail(m, str_f("Key '%s' not found", key));
+}
+
+static void oget (Machine *m) {
+  char *key = tk_pop_string(m);
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
+  Token *tk = opt_nget(map_get(mp, key));
+  if (tk) machine_push(m, token_new_list(arr_new_from(tk, NULL)));
+  else machine_push(m, token_new_list(arr_new()));
 }
 
 static void haskey (Machine *m) {
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
-  machine_push(m, token_new_int(arr_index(a, (FPRED)fn) != -1));
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
+  machine_push(m, token_new_int(map_has_key(mp, key)));
 }
 
 static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = isplus
-    ? tk_peek_list(m)
-    : tk_pop_list(m)
+  // Map<Token>
+  Map *mp = isplus
+    ? tk_peek_native(m, symbol_MAP_)
+    : tk_pop_native(m, symbol_MAP_)
   ;
-  int fn (Token *tk) { return str_eq(kvk(m, tk), key); }
-  Token *t = opt_nget(it_find(it_from(a), (FPRED)fn));
-  if (t)
-    arr_set(token_list(t), 1, tk);
-  else
-    arr_push(a, token_new_list(arr_new_from(
-      token_new_string(key), tk, NULL
-    )));
+
+  map_put(mp, key, tk);
 }
 
 static void put (Machine *m) {
@@ -73,11 +118,6 @@ static void upboth (Machine *m, int isplus) {
   Token *tk1 = machine_peek(m);
   machine_push(m, tk2);
   get(m);
-  // Arr<Token>
-  Arr *a =tk_pop_list(m);
-  if (!arr_size(a))
-    machine_fail(m, str_f("Key '%s' not found", token_string(tk2)));
-  machine_push(m, *arr_start(a));
 
   machine_process("", machine_pmachines(m), prg);
 
@@ -98,52 +138,66 @@ static void upplus (Machine *m) {
 
 static void mremove (Machine *m) {
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int fn (Token *tk) { return !str_eq(kvk(m, tk), key); }
-  arr_filter_in(a, (FPRED)fn);
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
+  map_remove(mp, key);
 }
 
 static void keys (Machine *m) {
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
   // Arr<Token>
   Arr *r = arr_new();
-  EACH(tk_pop_list(m), Token, tk) {
-    arr_push(r, token_new_string(kvk(m, tk)));
+  EACH(map_keys(mp), char, k) {
+    arr_push(r, token_new_string(k));
   }_EACH
   machine_push(m, token_new_list(r));
 }
 
 static void values (Machine *m) {
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+
   // Arr<Token>
   Arr *r = arr_new();
-  EACH(tk_pop_list(m), Token, tk) {
-    // Arr<Token>
-    Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_list_size(m, a, 2);
-    arr_push(r, arr_get(a, 1));
+  EACH(map_kvs(mp), Kv, kv) {
+    arr_push(r, kv_value(kv));
   }_EACH
   machine_push(m, token_new_list(r));
 }
 
-static void sortboth (Machine *m, int (*greater)(Token *e1, Token *e2)) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  arr_sort(a, (FCMP)greater);
-}
-
 static void sort (Machine *m) {
-  int greater (Token *e1, Token *e2) {
-    return strcmp(kvk(m, e1), kvk(m, e2)) > 0;
-  }
-  sortboth(m, greater);
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  map_sort(mp);
 }
 
 static void sortlocale (Machine *m) {
-  int greater (Token *e1, Token *e2) {
-    return strcoll(kvk(m, e1), kvk(m, e2)) > 0;
-  }
-  sortboth(m, greater);
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  map_sort_locale(mp);
 }
+
+static void copy (Machine *m) {
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  machine_push(m, token_from_pointer(symbol_MAP_, arr_copy((Arr *)mp)));
+}
+
+static void to (Machine *m) {
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  // Arr<Token>
+  Arr *a = arr_new();
+  EACH(mp, Kv, kv) {
+    arr_push(a, token_new_string(kv_key(kv)));
+    arr_push(a, kv_value(kv));
+  }_EACH
+  machine_push(m, token_new_list(a));
+}
+
 
 static void fromjs (Machine *m) {
   modjs_to_map(m);
@@ -160,7 +214,12 @@ Pmodule *modmap_mk (void) {
   }
 
   add("new", new); // [] - MAP
-  add("get", get); // [MAP, STRING] - LIST  ([map, key] - OPT)
+  add("from", from);
+  add("size", size); // [MAP] - INT
+  add("eq?", eq);
+  add("neq?", neq);
+  add("get", get); // [MAP, STRING] - *
+  add("oget", oget); // [MAP, STRING] - LIST  ([map, key] - OPT)
   add("has?", haskey); // [MAP, STRING] - INT
   add("put", put); // [MAP - STRING - *] - []
   add("put+", putplus); // [MAP - STRING - *] - MAP
@@ -171,6 +230,8 @@ Pmodule *modmap_mk (void) {
   add("values", values); // MAP - LIST
   add("sort", sort); // MAP - []
   add("sortLocale", sortlocale); // MAP - []
+  add("copy", copy);
+  add("to", to);
 
   add("fromJs", fromjs);
   add("toJs", tojs);

@@ -13,11 +13,8 @@
 (@i<Blob> ix =; ix blob,get 10 == assert @) fn =>
 [10] blob,from 0 fn
 
-(@so key =; key obj,get 10 == assert @) fn =>
-{"a", 10, "b", 4} data "a" fn
-
-(@sm key =; key map,get (10) == assert @) fn =>
-{("a", 10), ("b", 4)} data "a" fn
+(@sm key =; key map,get 10 == assert @) fn =>
+{"a", 10, "b", 4} map,from "a" fn
 
 (@iL<s<Blob>i>f ix =; ix get "10" == assert pop @) fn =>
 5. ["10", 2 blob,new, 3] data 0 fn

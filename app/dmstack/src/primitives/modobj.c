@@ -6,56 +6,85 @@
 #include "tk.h"
 
 static void new (Machine *m) {
-  machine_push(m, token_new_list(arr_new()));
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Machine *m2 = machine_isolate_process("", machine_pmachines(m), prg);
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  int sz = arr_size(a);
+  if (sz % 2) fails_list_size(m, a, sz + 1);
+
+  // Arr<char | Token>
+  Arr *r = arr_new();
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    arr_push(r, tk_string(m, *tks++));
+    arr_push(r, *tks++);
+  }
+  machine_push(m, token_from_pointer(symbol_OBJECT_, r));
+}
+
+static void size (Machine *m) {
+  // Arr<char | Token>
+  Arr *a = tk_pop_native(m, symbol_OBJECT_);
+  machine_push(m, token_new_int(arr_size(a) / 2));
 }
 
 static void has (Machine *m) {
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  for (int i = 0; i < arr_size(a); i +=2) {
-    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
+  // Arr<char | Token>
+  Arr *a = tk_pop_native(m, symbol_OBJECT_);
+
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    if (str_eq(key, *tks)) {
       machine_push(m, token_new_int(1));
       return;
     }
+    tks += 2;
   }
   machine_push(m, token_new_int(0));
 }
 
 static void get (Machine *m) {
   char *key = tk_pop_string(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz & 1) fails_list_size(m, a, sz + 1);
-  for (int i = 0; i < sz; i +=2) {
-    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
-      machine_push(m, arr_get(a, i + 1));
+  // Arr<char | Token>
+  Arr *a = tk_pop_native(m, symbol_OBJECT_);
+
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    if (str_eq(key, *tks)) {
+      machine_push(m, *++tks);
       return;
     }
+    tks += 2;
   }
   machine_fail(m, str_f("Key '%s' not found", key));
 }
 
 static void putboth (Machine *m, int isplus) {
   Token *tk = machine_pop(m);
-  Token *keytk = machine_pop(m);
 
-  char *key = tk_string(m, keytk);
-  // Arr<Token>
+  char *key = tk_string(m, machine_pop(m));
+  // Arr<char | Token>
   Arr *a = isplus
-    ? tk_peek_list(m)
-    : tk_pop_list(m)
+    ? tk_peek_native(m, symbol_OBJECT_)
+    : tk_pop_native(m, symbol_OBJECT_)
   ;
-  int sz = arr_size(a);
-  if (sz & 1) fails_list_size(m, a, sz + 1);
-  for (int i = 0; i < sz; i +=2) {
-    if (str_eq(key, tk_string(m, arr_get(a, i)))) {
-      arr_set(a, i + 1, tk);
+
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    if (str_eq(key, *tks)) {
+      *++tks = tk;
       return;
     }
+    tks += 2;
   }
-  arr_push(a, keytk);
+
+  arr_push(a, key);
   arr_push(a, tk);
 }
 
@@ -92,38 +121,29 @@ static void upplus (Machine *m) {
 }
 
 static void frommap (Machine *m) {
-  // Arr<Token>
+  // Arr<char | Token>
   Arr *r = arr_new();
-  EACH(tk_pop_list(m), Token, tk) {
-    // Arr<Token>
-    Arr *a = tk_list(m, tk);
-    if (arr_size(a) != 2) fails_list_size(m, a, 2);
-    Token *tk1 = *arr_start(a);
-    if (token_type(tk1) != token_STRING) fails_type_in(m, token_STRING, tk1);
-    arr_push(r, tk1);
-    arr_push(r, arr_get(a, 1));
+  EACH(map_kvs(tk_pop_native(m, symbol_MAP_)), Kv, kv) {
+    arr_push(r, kv_key(kv));
+    arr_push(r, kv_value(kv));
   }_EACH
-  machine_push(m, token_new_list(r));
+  machine_push(m, token_from_pointer(symbol_OBJECT_, r));
 }
 
 static void tomap (Machine *m) {
-  // Arr<Token>
-  Arr *r = arr_new();
-  Token *tk1 = NULL;
-  EACH(tk_pop_list(m), Token, tk) {
-    if (tk1) {
-      arr_push(r, token_new_list(arr_new_from(tk1, tk, NULL)));
-      tk1 = NULL;
-    } else {
-      if (token_type(tk) != token_STRING) fails_type_in(m, token_STRING, tk);
-      tk1 = tk;
-    }
-  }_EACH
-  if (tk1) {
-    Arr *a = tk_pop_list(m);
-    fails_list_size(m, a, arr_size(a) + 1);
+  // Arr<char | Token>
+  Arr *a = tk_pop_native(m, symbol_OBJECT_);
+
+  // Map<Token>
+  Map *mp = map_new();
+  void **tks = arr_start(a);
+  void **end = arr_end(a);
+  while (tks < end) {
+    char *k = *tks++;
+    map_put(mp, k, *tks++);
   }
-  machine_push(m, token_new_list(r));
+
+  machine_push(m, token_from_pointer(symbol_MAP_, mp));
 }
 
 Pmodule *modobj_mk (void) {
@@ -133,6 +153,7 @@ Pmodule *modobj_mk (void) {
   }
 
   add("new", new); // [] - OBJ
+  add("size", size);
   add("has?", has); // [OBJ, STRING] - INT
   add("get", get); // [OBJ, STRING] - *
   add("put", put); // [OBJ - STRING - *] - []

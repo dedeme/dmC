@@ -89,15 +89,29 @@ void fails_type (Machine *m, enum token_Type type) {
   fails_type_in(m, type, arr_peek(machine_stack(m)));
 }
 
+void fails_ntype (Machine *m, Symbol id) {
+  fails_ntype_in(m, id, arr_peek(machine_stack(m)));
+}
+
 void fails_types (Machine *m, int n, enum token_Type *types) {
   fails_types_in(m, n, types, arr_peek(machine_stack(m)));
 }
 
 void fails_type_in (Machine *m, enum token_Type type, Token *token) {
   machine_fail(m, str_f(
-    "Stack pop: Expected token of type '%s', found type '%s'",
+    "Expected token of type '%s', found type '%s'",
     token_type_to_str(type),
     token_type_to_str(token_type(token))
+  ));
+}
+
+void fails_ntype_in (Machine *m, Symbol id, Token *token) {
+  machine_fail(m, str_f(
+    "Expected token of type '%s', found type '%s'",
+    symbol_to_str(id),
+    token_type(token) == token_NATIVE
+      ? symbol_to_str(token_native_symbol(token))
+      : token_type_to_str(token_type(token))
   ));
 }
 
@@ -108,7 +122,7 @@ void fails_types_in (Machine *m, int n, enum token_Type *types, Token *token) {
     arr_push(ts, token_type_to_str(types[i]));
   }_RANGE
   machine_fail(m, str_f(
-    "Stack pop: Expected token of type ['%s'], found type '%s'",
+    "Expected token of type ['%s'], found type '%s'",
     str_join(ts, ", "),
     token_type_to_str(token_type(token))
   ));

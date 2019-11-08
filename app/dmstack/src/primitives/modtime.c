@@ -175,11 +175,10 @@ static void broke (Machine *m) {
   struct tm *tm = localtime(&t);
 
   // Arr<Token>
-  Arr *a = arr_new();
+  Map *mp = map_new();
 
   void add (char *id, int v) {
-    arr_push(a, token_new_string(id));
-    arr_push(a, token_new_int(v));
+    map_put(mp, id, token_new_int(v));
   }
 
   add("year", tm->tm_year + 1900);
@@ -189,7 +188,7 @@ static void broke (Machine *m) {
   add("minute", tm->tm_min);
   add("second", tm->tm_sec);
 
-  machine_push(m, token_new_list(a));
+  machine_push(m, token_from_pointer(symbol_MAP_, mp));
 }
 
 static void tadd (Machine *m) {
@@ -242,7 +241,7 @@ Pmodule *modtime_mk (void) {
   add("format", format); // [INT - STRING] - STRING
                                // [date, template] - date
   add("now", now); // [] - INT
-  add("broke", broke); // INT - OBJ
+  add("broke", broke); // INT - MAP
   add("add", tadd); // [INT - INT] - INT  - In seconds (date + secs.)
   add("df", df); // [INT - INT] - INT  - In seconds (date - date) = secs.
   add("addDays", addd); // [INT - INT] - INT (date + days)

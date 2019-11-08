@@ -11,7 +11,6 @@
 #include "primitives/modlist.h"
 #include "primitives/modwrap.h"
 #include "primitives/modmap.h"
-#include "primitives/modobj.h"
 #include "primitives/modstr.h"
 #include "primitives/modsys.h"
 #include "primitives/modjs.h"
@@ -52,7 +51,6 @@ void primitives_init (void) {
   add("lst", modlist_mk());
   add("wrap", modwrap_mk());
   add("map", modmap_mk());
-  add("obj", modobj_mk());
   add("str", modstr_mk());
   add("sys", modsys_mk());
   add("js", modjs_mk());

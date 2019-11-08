@@ -48,6 +48,7 @@ void symbol_init (void) {
   arr_set(syms, symbol_TO_STR, "toStr");
   arr_set(syms, symbol_REF_OUT, ">>");
 
+  arr_set(syms, symbol_MAP_, "= Map");
   arr_set(syms, symbol_BLOB_, "= Blob");
   arr_set(syms, symbol_THREAD_, "= Thread");
   arr_set(syms, symbol_ITERATOR_, "= Iterator");
@@ -63,7 +64,7 @@ Symbol symbol_new (char *name) {
     return symbol_NOP;
   }
   if (name[strlen(name) - 1] == '#') {
-    name = str_f("%s%d", name, sharp);
+    name = str_f("%s·%d", name, sharp);
   }
   EACH_IX(syms, char, s, ix) {
     if (str_eq(s, name)) return ix;

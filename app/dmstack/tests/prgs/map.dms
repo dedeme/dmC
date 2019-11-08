@@ -5,52 +5,80 @@
 
 (
   map,new M =
+  M map,copy map,size 0 expect
+  M map,to size 0 expect
+  M clone map,to [] expect
+  M clone M (==) map,eq? assert
+  M clone M (?=) map,neq? ! assert
 
-  M dup map,sort () == assert
+  M dup map,sort map,size 0 == assert
   M map,keys () == assert
   M map,values () == assert
 
   M "b" 2 map,put+; "c" 33 map,put+; "a" 1 map,put+; "c" 3 map,put
+  M map,size 3 expect
   M "a" map,has? assert
   M "b" map,has? assert
   M "c" map,has? assert
   M "d" map,has? ! assert
-  M "a" map,get (1) == assert
-  M "b" map,get (2) == assert
-  M "c" map,get (3) == assert
+  M "a" map,oget (1) == assert
+  M "b" map,oget (2) == assert
+  M "c" map,oget (3) == assert
+  M clone map,to ["b" 2, "c" 3, "a" 1] expect
 
-  M clone M2 =;
+  M map,copy M2 =;
+  M M2 (==) map,eq? assert
+  M2 "a" map,remove
+  M M2 (==) map,neq? assert
+  M2 "b" (100 +) map,up+ "c" (200 +) map,up
+  M2 "a" map,oget () expect
+  M2 "b" map,oget (102) expect
+  M2 "c" map,oget (203) expect
+  M2 "b" map,get 102 expect
+  M2 "c" map,get 203 expect
+  M2 .b 102 expect
+  M2 .c 203 expect
+
+  M map,to map,from M2 =;
   M2 "a" map,remove
   M2 "b" (100 +) map,up+ "c" (200 +) map,up
-    M2 (("b", 102), ("c", 203)) == assert
+  M2 "a" map,oget () expect
+  M2 "b" map,oget (102) expect
+  M2 "c" map,oget (203) expect
+  M2 "b" map,get 102 expect
+  M2 "c" map,get 203 expect
+  M2 .b 102 expect
+  M2 .c 203 expect
 
-  M {("b": 2), ("c": 3), ("a": 1)} == assert
-  M dup map,sort
-    {
-      ("a": 1)
-      ("b": 2)
-      ("c": 3)
-    } == assert
+  M "a" map,oget (1) expect
+  M "b" map,oget (2) expect
+  M "c" map,oget (3) expect
 
-  M map,keys ("a", "b", "c") == assert
-  M map,values (1, 2, 3) == assert
+  M dup map,sort map,keys ["a", "b", "c"] expect
+  M map,values [1, 2, 3] == assert
 
   M "c" map,remove
-  M "a" map,get (1) == assert
-  M "b" map,get (2) == assert
-  M size 2 == assert
+  M "a" map,oget (1) == assert
+  M "b" map,oget (2) == assert
+  M map,size 2 == assert
 
   // fromJs - toJs
 
-  {} (js,wi) map,toJs "{}" == assert
-  {("a": 1)} (js,wi) map,toJs "{\"a\":1}" == assert
-  {("a": 1), ("b": 2), ("c", 3)} (js,wi) map,toJs
+  map,new (js,wi) map,toJs "{}" == assert
+  {"a": 1} map,from (js,wi) map,toJs "{\"a\":1}" == assert
+  {"a": 1, "b": 2, "c": 3} map,from (js,wi) map,toJs
     "{\"a\":1,\"b\":2,\"c\":3}" == assert
 
-  {} (js,wi) map,toJs (js,ri) map,fromJs {} == assert
-  {("a": 1)} (js,wi) map,toJs (js,ri) map,fromJs {("a": 1)} == assert
-  {("a": 1), ("b": 2), ("c", 3)} (js,wi) map,toJs (js,ri) map,fromJs
-    {("a": 1), ("b": 2), ("c", 3)} == assert
+  {} map,from (js,wi) map,toJs (js,ri) map,fromJs map,size 0 == assert
+  {"a": 1} map,from (js,wi) map,toJs (js,ri) map,fromJs :  Mp =
+  Mp map,size 1 expect
+  Mp "a" map,oget (1) expect
+
+  {"a": 1, "b": 2, "c", 3} map,from (js,wi) map,toJs (js,ri) map,fromJs : Mp =
+  Mp map,size 3 expect
+  Mp "a" map,oget (1) expect
+  Mp "b" map,oget (2) expect
+  Mp "c" map,oget (3) expect
 
   empty? assert
 )run
