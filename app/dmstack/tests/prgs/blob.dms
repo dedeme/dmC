@@ -74,6 +74,21 @@
   [1, 2, 33] blob,from 1 blob,right blob,to [2, 33] == assert
   [1, 2, 33] blob,from 3 blob,right blob,to [] == assert
 
+  // copy + ++
+
+  [] blob,from blob,copy blob,to [] expect
+  [1] blob,from blob,copy blob,to [1] expect
+  [1, 2, 3] blob,from blob,copy blob,to [1, 2, 3] expect
+  [] blob,from [] blob,from blob,+ blob,to [] expect
+  [1] blob,from [] blob,from blob,+ blob,to [1] expect
+  [] blob,from [1] blob,from blob,+ blob,to [1] expect
+  [1, 2] blob,from [3, 4] blob,from blob,+ blob,to [1, 2, 3, 4] expect
+  ([] blob,from [] blob,from) blob,++ blob,to [] expect
+  ([1] blob,from [] blob,from) blob,++ blob,to [1] expect
+  ([] blob,from [1] blob,from) blob,++ blob,to [1] expect
+  ([1, 2] blob,from [3] blob,from [4, 5] blob,from) blob,++ blob,to
+    [1, 2, 3, 4, 5] expect
+
   // fromJs - toJs
 
   [] blob,from blob,toJs "\"\"" == assert

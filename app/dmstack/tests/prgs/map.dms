@@ -11,7 +11,7 @@
   M clone M (==) map,eq? assert
   M clone M (?=) map,neq? ! assert
 
-  M dup map,sort map,size 0 == assert
+  M map,sort size 0 == assert
   M map,keys () == assert
   M map,values () == assert
 
@@ -54,8 +54,17 @@
   M "b" map,oget (2) expect
   M "c" map,oget (3) expect
 
-  M dup map,sort map,keys ["a", "b", "c"] expect
-  M map,values [1, 2, 3] == assert
+  M map,pairs : Pairs =
+  Pairs (P =; P ["a", 1] ==) lst,any? assert
+  Pairs (P =; P ["b", 2] ==) lst,any? assert
+  Pairs (P =; P ["c", 3] ==) lst,any? assert
+  Pairs (P =; P ["a", 2] ==) lst,any? ! assert
+
+  M map,sort dup lst,reverse : Sorted =
+  [] data Sorted size (i =; Sorted i get 0 get lst,push+) for
+    ["c", "b", "a"] expect
+  [] data Sorted size (i =; Sorted i get 1 get lst,push+) for
+    [3, 2, 1] expect
 
   M "c" map,remove
   M "a" map,oget (1) == assert

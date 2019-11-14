@@ -193,7 +193,7 @@ lib/liblocalcompilation/obj/primitives/modclock.o : include/primitives/modclock.
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
 
-lib/liblocalcompilation/obj/primitives/modpath.o : include/primitives/modpath.h src/primitives/modpath.c include/tk.h src/tk.c include/Pmodule.h src/Pmodule.c
+lib/liblocalcompilation/obj/primitives/modpath.o : include/primitives/modpath.h src/primitives/modpath.c include/tk.h src/tk.c include/fails.h src/fails.c include/Pmodule.h src/Pmodule.c
 	gcc $(CFLAGS) -c src/primitives/modpath.c -o lib/liblocalcompilation/obj/primitives/modpath.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
@@ -217,4 +217,3 @@ lib/liblocalcompilation/obj/Lib.o : include/Lib.h src/Lib.c include/Heap.h src/H
 	gcc $(CFLAGS) -c src/Lib.c -o lib/liblocalcompilation/obj/Lib.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
-

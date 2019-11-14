@@ -58,6 +58,21 @@ void modglobal0_add (Machine *m) {
   });
 }
 
+void modglobal0_add2 (Machine *m) {
+  Machine *m2 = machine_isolate_process(
+    "", machine_pmachines(m), machine_pop_exc(m, token_LIST)
+  );
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  if (!arr_size(a)) fails_list_size(m, a, 1);
+
+  machine_push(m, *(arr_start(a)));
+  for (int i = 1; i < arr_size(a); ++i) {
+    machine_push(m, arr_get(a, i));
+    modglobal0_add(m);
+  }
+}
+
 void modglobal0_sub (Machine *m) {
   Token *tk = machine_pop_opt(m, token_INT);
   if (tk) {
@@ -179,7 +194,9 @@ void modglobal0_mod (Machine *m) {
 }
 
 void modglobal0_incr (Machine *m) {
-  machine_push(m, token_new_int(tk_pop_int(m) + 1));
+  Token *tk = machine_pop_opt(m, token_INT);
+  if (tk) machine_push(m, token_new_int(token_int(tk) + 1));
+  else modglobal0_add2(m);
 }
 
 void modglobal0_decr (Machine *m) {

@@ -10,10 +10,12 @@
   "" "a" path,+ "a" expect
   "a" "b" path,+ "a/b" expect
 
-  ["", ""] path,cat "" expect
-  ["a", ""] path,cat "a/" expect
-  ["", "a"] path,cat "a" expect
-  ["a", "b"] path,cat "a/b" expect
+  [""] path,++ "" expect
+  ["a"] path,++ "a" expect
+  ["", ""] path,++ "" expect
+  ["a", ""] path,++ "a/" expect
+  ["", "a"] path,++ "a" expect
+  ["a", "b"] path,++ "a/b" expect
 
   "" path,name "" == assert
   "/" path,name "" == assert

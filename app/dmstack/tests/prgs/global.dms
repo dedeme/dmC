@@ -42,6 +42,10 @@
   Ls dup 3 get swap 0 get; assert; size ! assert
 
   (4 6 +) run 10 == assert
+  (4 6 2) ++ 12 expect
+  (4 6. 2) ++ 12. expect
+  ("a" "b" "c" "") ++ "abc" expect
+  ((1) (2 3 4) (4) ()) ++ (1 2 3 4 4) expect
 
   "()" eval () == assert
   "4 3 +" eval 7 == assert

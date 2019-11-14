@@ -59,12 +59,18 @@
   -7 it,range0 it,to () == assert
   3 it,range0 it,to (0, 1, 2) == assert
 
-  // + - push - push0
+  // + ++ - push - push0
 
   () it,from () it,from it,+ it,to () == assert
   ("a") it,from () it,from it,+ it,to ("a") == assert
   () it,from ("b") it,from it,+ it,to ("b") == assert
   ("a", "b") it,from ("b", "c") it,from it,+ it,to ("a" "b" "b" "c") == assert
+
+  (() it,from () it,from) it,++ it,to () == assert
+  (("a") it,from () it,from) it,++ it,to ("a") == assert
+  (() it,from ("b") it,from) it,++ it,to ("b") == assert
+  (("a", "b") it,from ("b", "c") it,from) it,++ it,to
+    ("a" "b" "b" "c") == assert
 
   () it,from "a" it,push it,to ("a") == assert
   (1, 2) it,from "a" it,push it,to (1, 2, "a") == assert

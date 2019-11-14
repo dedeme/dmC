@@ -182,6 +182,21 @@ static void plus (Machine *m) {
   machine_push(m, token_from_pointer(symbol_BLOB_, r));
 }
 
+static void plus2 (Machine *m) {
+  Machine *m2 = machine_isolate_process(
+    "", machine_pmachines(m), machine_pop_exc(m, token_LIST)
+  );
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  if (!arr_size(a)) fails_list_size(m, a, 1);
+
+  machine_push(m, *(arr_start(a)));
+  for (int i = 1; i < arr_size(a); ++i) {
+    machine_push(m, arr_get(a, i));
+    plus(m);
+  }
+}
+
 static void fromjs (Machine *m) {
   char *js = tk_pop_string(m);
   machine_push(m, token_from_pointer(symbol_BLOB_, bytes_from_js((Js *)js)));
@@ -218,6 +233,7 @@ Pmodule *modblob_mk (void) {
   add("right", right); // [BLOB, INT] - [BLOB]
   add("copy", copy); // [BLOB] - [BLOB]
   add("+", plus); // [BLOB, BLOB] - [BLOB]
+  add("++", plus2); // [(BLOB, BLOB, ...)] - [BLOB]
 
   add("fromJs", fromjs); // STRING - BLOB
   add("toJs", tojs); // BLOB - STRING

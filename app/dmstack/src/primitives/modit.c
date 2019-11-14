@@ -178,6 +178,21 @@ static void plus (Machine *m) {
   setIt(m, it_cat(it1, it2));
 }
 
+static void plus2 (Machine *m) {
+  Machine *m2 = machine_isolate_process(
+    "", machine_pmachines(m), machine_pop_exc(m, token_LIST)
+  );
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  if (!arr_size(a)) fails_list_size(m, a, 1);
+
+  machine_push(m, *(arr_start(a)));
+  for (int i = 1; i < arr_size(a); ++i) {
+    machine_push(m, arr_get(a, i));
+    plus(m);
+  }
+}
+
 static void drop (Machine *m) {
   int n = tk_pop_int(m);
   It *it = getIt(m);
@@ -477,6 +492,7 @@ Pmodule *modit_mk (void) {
   add("next", next);
 
   add("+", plus);
+  add("++", plus2);
   add("drop", drop);
   add("dropf", dropf);
   add("filter", filter);

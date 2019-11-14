@@ -340,7 +340,8 @@ static void import (Machine *this) {
   char *fid = str_left(fc, -4);
   Symbol ssource = symbol_new(fid);
 
-  if (!imports_is_on_way(ssource) && !imports_get(ssource)) {
+  int onway = imports_is_on_way(ssource);
+  if (!onway && !imports_get(ssource)) {
     imports_put_on_way(ssource);
 
     Reader *r = reader_new(fid, file_read(fc));
@@ -351,6 +352,8 @@ static void import (Machine *this) {
     imports_add(ssource, m->heap);
 
     imports_quit_on_way(ssource);
+  } else if (onway) {
+    machine_fail(this, str_f("Cyclic import of '%s'", fid));
   }
 }
 

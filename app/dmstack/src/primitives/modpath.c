@@ -3,6 +3,7 @@
 
 #include "primitives/modpath.h"
 #include "tk.h"
+#include "fails.h"
 
 static void canonical (Machine *m) {
   char *path = opt_nget(
@@ -23,9 +24,13 @@ static void plus (Machine *m) {
   ));
 }
 
-static void cat (Machine *m) {
-  // Arr<!Token>
-  Arr *a = tk_pop_list(m);
+static void plus2 (Machine *m) {
+  Machine *m2 = machine_isolate_process(
+    "", machine_pmachines(m), machine_pop_exc(m, token_LIST)
+  );
+  // Arr<Token>
+  Arr *a = machine_stack(m2);
+  if (!arr_size(a)) fails_list_size(m, a, 1);
   char *fn (Token *tk) { return tk_string(m, tk); }
   char *r = str_cjoin(arr_map(a, (FCOPY)fn), '/');
   if (*r == '/') r = str_right(r, 1);
@@ -63,8 +68,8 @@ Pmodule *modpath_mk (void) {
   }
 
   add("canonical", canonical); // STRING - OPT<STRING>
-  add("+", plus); // STRING - STRING
-  add("cat", cat); // LIST - STRING
+  add("+", plus); // [STRING, STRING] - STRING
+  add("++", plus2); // [(STRING,  STRING, ...)] - STRING
   add("extension", extension); // STRING - STRING
   add("name", name); // STRING - STRING
   add("onlyName", only_name); // STRING - STRING

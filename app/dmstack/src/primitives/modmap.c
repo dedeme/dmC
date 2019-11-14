@@ -27,7 +27,6 @@ static void from (Machine *m) {
     map_put(r, k, *tks++);
   }
   machine_push(m, token_from_pointer(symbol_MAP_, r));
-
 }
 
 static void size (Machine *m) {
@@ -168,16 +167,36 @@ static void values (Machine *m) {
   machine_push(m, token_new_list(r));
 }
 
+// Map<Token>. Return Arr<Token> where Token is List<String, *>
+static Arr *pairsaux (Map *mp) {
+  // Arr<Token>
+  Arr *a = arr_new();
+  EACH(mp, Kv, kv) {
+    arr_push(a, token_new_list(
+      arr_new_from(token_new_string(kv_key(kv)), kv_value(kv), NULL)
+    ));
+  }_EACH
+  return a;
+}
+
+static void pairs (Machine *m) {
+  // Map<Token>
+  Map *mp = tk_pop_native(m, symbol_MAP_);
+  machine_push(m, token_new_list(pairsaux(mp)));
+}
+
 static void sort (Machine *m) {
   // Map<Token>
   Map *mp = tk_pop_native(m, symbol_MAP_);
   map_sort(mp);
+  machine_push(m, token_new_list(pairsaux(mp)));
 }
 
 static void sortlocale (Machine *m) {
   // Map<Token>
   Map *mp = tk_pop_native(m, symbol_MAP_);
   map_sort_locale(mp);
+  machine_push(m, token_new_list(pairsaux(mp)));
 }
 
 static void copy (Machine *m) {
@@ -214,10 +233,10 @@ Pmodule *modmap_mk (void) {
   }
 
   add("new", new); // [] - MAP
-  add("from", from);
+  add("from", from); // LIST - MAP
   add("size", size); // [MAP] - INT
-  add("eq?", eq);
-  add("neq?", neq);
+  add("eq?", eq); // [MAP, MAP] - INT
+  add("neq?", neq); // [MAP, MAP] - INT
   add("get", get); // [MAP, STRING] - *
   add("oget", oget); // [MAP, STRING] - LIST  ([map, key] - OPT)
   add("has?", haskey); // [MAP, STRING] - INT
@@ -228,10 +247,11 @@ Pmodule *modmap_mk (void) {
   add("remove", mremove); // [MAP, STRING] - []
   add("keys", keys); // MAP - LIST
   add("values", values); // MAP - LIST
-  add("sort", sort); // MAP - []
-  add("sortLocale", sortlocale); // MAP - []
-  add("copy", copy);
-  add("to", to);
+  add("pairs", pairs); // MAP - LIST (map - list<list<key, value>>
+  add("sort", sort); // MAP - LIST (map - list<list<key, value>>
+  add("sortLocale", sortlocale); // MAP - LIST (map - list<list<key, value>>
+  add("copy", copy); // MAP - MAP
+  add("to", to); // MAP - LIST
 
   add("fromJs", fromjs);
   add("toJs", tojs);
