@@ -217,3 +217,4 @@ lib/liblocalcompilation/obj/Lib.o : include/Lib.h src/Lib.c include/Heap.h src/H
 	gcc $(CFLAGS) -c src/Lib.c -o lib/liblocalcompilation/obj/Lib.o \
 		-Iinclude \
 		-I$(LIB_INCLUDE_dmc)
+

@@ -321,11 +321,17 @@ void primitives_add_lib (Lib *lib);
 #include "dmc/async.h"
 #include "Machine.h"
 
+enum types_Check { types_PUT, types_REMOVE, types_NOTHING };
+
 /// Check types of stack values and raise a fail if checking not succeeds.
 void types_fail (Machine *m);
 
 /// Check types of stack values and push in stack '1' if checking succeeds.
 void types_check (Machine *m);
+
+int types__check (
+  Machine *m, Arr *stack, char *type, int with_stop, enum types_Check check
+);
 
 #endif
 // Copyright 22-Sept-2019 ºDeme
@@ -962,6 +968,7 @@ enum symbol_SYSTEM {
   symbol_MRUN, symbol_DATA, symbol_SYNC, symbol_BREAK, symbol_LOOP,
   symbol_WHILE, symbol_FOR, symbol_CONTINUE, symbol_RECURSIVE, symbol_ASSERT,
   symbol_EXPECT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
+  symbol_STACK_OPEN, symbol_STACK_CLOSE, symbol_STACK_STOP,
 
   symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 

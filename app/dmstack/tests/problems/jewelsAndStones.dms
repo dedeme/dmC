@@ -39,3 +39,5 @@
 "ZZ" "" fn2 dup 0 expect toStr sys,println
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" dup fn2 dup
   52 expect toStr sys,println
+
+empty? assert

@@ -53,6 +53,8 @@ Sq area 16 == assert
 3 2 rect : Rc =
 Rc area 6 == assert
 
+empty? assert
+
 // Output:
 // 4
 // 5

@@ -79,3 +79,4 @@
 10 (i =; "!${i} = ${i lfact toS}" sys,println) for
 (10 : 115 : 10) (i =; "!${i} = ${i lfact toS}" sys,println) for
 
+empty? assert

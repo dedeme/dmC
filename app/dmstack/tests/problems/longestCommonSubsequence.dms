@@ -69,3 +69,5 @@ clock,now C1 =
 "beginning-middle-ending" "beginning-diddle-dum-ending" print
 "rosettacode" "raisethysword" print
 clock,now C1 clock,df toStr " Millisecs." + puts
+
+empty? assert

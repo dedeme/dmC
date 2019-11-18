@@ -127,3 +127,5 @@
 } mRun
 */
 
+empty? assert
+

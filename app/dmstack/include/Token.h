@@ -106,10 +106,4 @@ char *token_to_str_draft (Token *this);
 ///
 char *token_type_to_str (enum token_Type type);
 
-/// Check a type against an stack.
-///   tokens: List<Token> stack.
-///   type  : Type to check.
-///   return: The actual type.
-char *token_check_type (List *tokens, char *type);
-
 #endif

@@ -33,6 +33,18 @@ static void to_unicode(Buf *bf, char *hexdigits) {
   buf_cadd(bf, (codepoint>>0  & 0x3F) | 0x80);
 }
 
+static char *big_msg (char *tx) {
+  tx = str_trim(tx);
+  int ix = str_cindex(tx, '\n');
+  char *left = ix == -1 ? tx : str_left(tx, ix);
+  ix = str_last_cindex(tx, '\n');
+  char *right = str_right(tx, ix + 1);
+  return str_eq(left, right)
+    ? left
+    : str_f("%s\n...\n%s", left, right)
+  ;
+}
+
 Opt *tkreader_next(Reader *reader) {
   if (
     reader_is_file(reader) &&
@@ -295,7 +307,8 @@ Opt *tkreader_next(Reader *reader) {
           }
           if (!ch)
             reader_fail(reader, str_f(
-              "Quotes unclosed in\n%s", str_sub(prgd, start - prgd, p - prgd)
+              "Quotes unclosed in\n%s",
+              big_msg(str_sub(prgd, start - prgd, p - prgd))
             ));
           continue;
         }
@@ -317,7 +330,8 @@ Opt *tkreader_next(Reader *reader) {
             }
             if (!ch)
               reader_fail(reader, str_f(
-                "'/*' unclosed in\n%s", str_right(prgd, start - prgd)
+                "'/*' unclosed in\n%s",
+                big_msg(str_right(prgd, start - prgd))
               ));
             ++p;
             continue;
@@ -337,7 +351,7 @@ Opt *tkreader_next(Reader *reader) {
           }
           reader_fail(reader, str_f(
             "'`' unclosed or not at end of line in\n%s",
-            str_right(prgd, start - prgd)
+            big_msg(str_right(prgd, start - prgd))
           ));
         }
 
@@ -347,7 +361,7 @@ Opt *tkreader_next(Reader *reader) {
         if (sum2 < 0) e = '{';
         if (e != ' ')
           reader_fail(reader, str_f(
-            "Extra '%c' in\n'%s'", e, str_sub(prgd, 0, p - prgd + 1)
+            "Extra '%c' in\n'%s'", e, big_msg(str_sub(prgd, 0, p - prgd + 1))
           ));
 
         e = ' ';
@@ -360,12 +374,13 @@ Opt *tkreader_next(Reader *reader) {
         if (e != ' ')
           reader_fail(reader, str_f(
             "Internal '%c' open when '%c' was closed in\n'%s'",
-            e, sign, str_sub(prgd, 0, p - prgd + 1)
+            e, sign, big_msg(str_sub(prgd, 0, p - prgd + 1))
           ));
       }
       if (!*p) {
         reader_fail(reader, str_f(
-          "'%c' without close in\n'%s'", sign, str_sub(prgd, 0, p - prgd)
+          "'%c' without close in\n'%s'",
+          sign, big_msg(str_sub(prgd, 0, p - prgd))
         ));
       }
 

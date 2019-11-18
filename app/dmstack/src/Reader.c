@@ -16,6 +16,7 @@ struct reader_Reader {
   Token *next_tk;
   // List<SymbolKv>
   List *syms;
+  int stkcounter;
 };
 
 Reader *reader_new (char *source, char *prg) {
@@ -27,6 +28,7 @@ Reader *reader_new (char *source, char *prg) {
   this->prg_ix = 0;
   this->next_tk = NULL;
   this->syms = list_new();
+  this->stkcounter = 0;
   return this;
 }
 
@@ -39,6 +41,7 @@ Reader *reader_new_from_reader (Reader *parent, char *prg, int nline) {
   this->prg_ix = 0;
   this->next_tk = NULL;
   this->syms = parent->syms;
+  this->stkcounter = 0;
   return this;
 }
 
@@ -62,6 +65,10 @@ Token *reader_process (Reader *this) {
     }
     tk = opt_nget(tkreader_next(this));
   }
+  if (this->stkcounter)
+    reader_fail(this, str_f(
+      "Expected 0 'stack stops'. Actual %d.", this->stkcounter
+  ));
   return token_new_list_pos(r, this->source, nline);
 }
 
@@ -155,28 +162,50 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
     if (!pos) EXC_ILLEGAL_STATE("pos is null")
 
     int line = tokenPos_line(pos);
-    if (symstr[strlen(symstr) - 1] == '?') {
+    if (symstr[1] == '?') {
       Token *tk = token_new_symbol_pos(
-        symbol_new(str_sub(symstr, 1, -1)), this->source, line
+        symbol_new(str_right(symstr, 2)), this->source, line
       );
       return arr_new_from(
         token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
         token_new_symbol_pos(symbol_STACK_CHECK, this->source, line),
         NULL
       );
+    } else if (symstr[1] == '+') {
+      if (args_is_production()) return arr_new();
+
+      ++this->stkcounter;
+      Token *tk = token_new_symbol_pos(
+        symbol_new(str_right(symstr, 2)), this->source, line
+      );
+      return arr_new_from(
+        token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+        token_new_symbol_pos(symbol_STACK_OPEN, this->source, line),
+        NULL
+      );
+    } else if (symstr[1] == '-') {
+      if (args_is_production()) return arr_new();
+
+      --this->stkcounter;
+      Token *tk = token_new_symbol_pos(
+        symbol_new(str_right(symstr, 2)), this->source, line
+      );
+      return arr_new_from(
+        token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+        token_new_symbol_pos(symbol_STACK_CLOSE, this->source, line),
+        NULL
+      );
     } else {
-      if (args_is_production()) {
-        return arr_new();
-      } else {
-        Token *tk = token_new_symbol_pos(
-          symbol_new(str_right(symstr, 1)), this->source, line
-        );
-        return arr_new_from(
-          token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
-          token_new_symbol_pos(symbol_STACK, this->source, line),
-          NULL
-        );
-      }
+      if (args_is_production()) return arr_new();
+
+      Token *tk = token_new_symbol_pos(
+        symbol_new(str_right(symstr, 1)), this->source, line
+      );
+      return arr_new_from(
+        token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+        token_new_symbol_pos(symbol_STACK, this->source, line),
+        NULL
+      );
     }
   } else if (this->prg[this->prg_ix] == ',') {
     EACHL(this->syms, SymbolKv, e) {

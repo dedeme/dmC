@@ -1,9 +1,8 @@
 // Copyright 20-Sep-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-( @i
-  n =
-  (n toStr ": value not allowed" + sys,println, 1 sys,exit) (n 1 <) if
+( @+i:: n =
+  n 1 < (n toStr ": value not allowed" + sys,println, 1 sys,exit) if
 
   [[]] : Row =
   n
@@ -19,6 +18,8 @@
     (toStr) lst,map; " " str,join sys,println
   )
   for
-@ ) pascal =>
+@-) pascal =>
 
 100 pascal
+
+empty? assert

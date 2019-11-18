@@ -19,7 +19,7 @@ typedef intptr_t Int;
 #define exc_dmstack_t "dmstack"
 
 ///
-#define MAX_EXC_STACK 10
+#define MAX_EXC_STACK 5
 
 ///
 #define MAX_EXC_TRACE 15

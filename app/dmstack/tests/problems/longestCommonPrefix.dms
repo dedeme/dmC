@@ -45,3 +45,5 @@
 [] print
 ["prefix", "suffix"] print
 ["foo", "foobar"] print
+
+empty? assert

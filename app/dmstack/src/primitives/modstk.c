@@ -12,14 +12,18 @@ static void clear (Machine *m) {
 static void show (Machine *m) {
   Arr *st = machine_stack(m);
   puts("Stack:");
-  if (!arr_size(st)) {
-    puts("  [EMPTY]");
-    return;
-  }
   printf("  [ ");
-  for(int i = arr_size(st) - 1; i >= 0; --i)
-    printf("%s ", token_to_str(arr_get(st, i)));
+  int sz1 = arr_size(st) - 1;
+  if (sz1 >= 0) {
+    printf("%s", token_to_str_draft(arr_get(st, sz1)));
+    for(int i = sz1 - 1; i >= 0; --i)
+      printf(", %s", token_to_str(arr_get(st, i)));
+  }
   puts("]");
+}
+
+static void size (Machine *m) {
+  machine_push(m, token_new_int(arr_size(machine_stack(m))));
 }
 
 Pmodule *modstk_mk (void) {
@@ -30,6 +34,7 @@ Pmodule *modstk_mk (void) {
 
   add("clear", clear);
   add("show", show);
+  add("size", size);
 
   return r;
 }

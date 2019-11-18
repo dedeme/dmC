@@ -60,17 +60,17 @@
 ) filter =>
 */
 
-( @<Blob> :: Row =
+( @+<Blob>:: Row =
   7 (Row swap blob,get toStr sys,print) for
   "" sys,println
-@ ) printRow =>
+@-) printRow =>
 
 // Row ix value
-( @ii<Blob> :: value =; ix =; Row =
+( @+<Blob>ii:: value =; ix =; Row =
   1 ix (i =; Row i blob,get value == (pop 0 break) if) for
-@i ) newDigit? =>
+@-i) newDigit? =>
 
-( @ii<Blob>
+( @+<Blob>ii::
   wrap,tp3  // Row min max - min & max inclusive
   ( dup dup 0 get Row =
     1 get mn =
@@ -99,9 +99,9 @@
     sz == (Row blob,copy lst,unary) (lst,new) elif
   )
   it,new
-@<Iterator>) mkIt =>
+@-<Iterator>) mkIt =>
 
-( @<Blob> :: Row =
+( @+<Blob>:: Row =
   Row 0 blob,get a =
   Row 1 blob,get b =
   Row 2 blob,get c =
@@ -116,7 +116,7 @@
   f g + r4 =
 
   (r1 r2 !=) (0) else (r1 r3 !=) (0) else (r1 r4 !=) (0) else (1) if
-@i) filter =>
+@-i) filter =>
 
 clock,now Cl =
 

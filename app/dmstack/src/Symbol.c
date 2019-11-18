@@ -43,6 +43,9 @@ void symbol_init (void) {
   arr_set(syms, symbol_THIS, "this");
   arr_set(syms, symbol_STACK, "= @");
   arr_set(syms, symbol_STACK_CHECK, "= @?");
+  arr_set(syms, symbol_STACK_OPEN, "= @+");
+  arr_set(syms, symbol_STACK_CLOSE, "= @-");
+  arr_set(syms, symbol_STACK_STOP, "= @!");
 
   arr_set(syms, symbol_PLUS, "+");
   arr_set(syms, symbol_TO_STR, "toStr");

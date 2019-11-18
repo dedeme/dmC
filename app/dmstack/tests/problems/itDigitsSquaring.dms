@@ -40,6 +40,6 @@ clock,now Cl =
 //85623 == assert
 puts
 
-@? assert
-
 clock,now Cl clock,df puts
+
+empty? assert

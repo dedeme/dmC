@@ -30,3 +30,4 @@
 Ls (js,wi) lst,map js,wa sys,println
 Ls mergeSort (js,wi) lst,map js,wa sys,println
 
+empty? assert

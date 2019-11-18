@@ -110,8 +110,7 @@ bshow =>
   ( c 0 <) ( 0) else
   ( c 3 >) ( 0) else
   ( 1) if
-)
-csOk => // <[row, col]> - <INT>
+) csOk => // <[row, col]> - <INT>
 
 {
   "start": this,Kpath
@@ -152,7 +151,7 @@ csOk => // <[row, col]> - <INT>
     )
   "back": (lst,pop 1 get this,bquit)
   "side": (lst,peek 0 (1 +) up)
-} map,from fn
+} map,from fn pop
 
 bshow
 kshow
@@ -214,7 +213,7 @@ csOk? => // <[row, col]> - <INT>
     )
   "back": (lst,pop 1 get this,bquit)
   "side": (lst,peek 0 (1 +) up)
-} map,from fn
+} map,from fn pop
 
 bshow
 kshow
@@ -233,8 +232,8 @@ Kpath [0, [4, 6] data] data lst,push
   ( c 0 <) ( 0) else
   ( c 7 >) ( 0) else
   ( 1) if
-)
-csOk? => // <[row, col]> - <INT>
+) csOk? => // <[row, col]> - <INT>
+
 
 {
   "start": this,Kpath
@@ -269,7 +268,9 @@ csOk? => // <[row, col]> - <INT>
     )
   "back": (lst,pop 1 get this,bquit)
   "side": (lst,peek 0 (1 +) up)
-} map,from fn
+} map,from fn pop
 
 bshow
 kshow
+
+empty? assert

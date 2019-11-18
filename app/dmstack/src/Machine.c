@@ -53,17 +53,16 @@ char *machine_stack_trace (Machine *this) {
   void stack (void) {
     // Arr<Token>
     Arr *st = arr_copy(this->stack);
-    if (!arr_size(st)) {
-      buf_add(bf, "    [EMPTY]\n");
-      return;
-    }
-    buf_add(bf, "    ");
+    buf_add(bf, "    [");
     int c = 0;
+    int sz = arr_size(st);
     while (arr_size(st) && c < MAX_EXC_STACK) {
-      buf_add(bf, str_f("%s ", token_to_str(arr_pop(st))));
+      if (c) buf_add(bf, ", ");
+      buf_add(bf, str_f("%s", token_to_str_draft(arr_pop(st))));
       ++c;
     }
-    buf_add(bf, "\n");
+    if (sz > c) buf_add(bf, str_f(", ... (%d more)]\n", sz - c));
+    else buf_add(bf, "]\n");
   }
 
   buf_add(bf, "  Stack:\n");
@@ -359,7 +358,7 @@ static void import (Machine *this) {
 
 static void sassert (Machine *this) {
   if (token_int(machine_pop_exc(this, token_INT))) return;
-  puts(str_f("Assert error:%d:", list_count(this->pmachines) + 1));
+  puts("Assert error:\n");
   puts(machine_stack_trace(this));
   exit(0);
 }
@@ -369,8 +368,7 @@ static void expect (Machine *this) {
   Token *actual = machine_pop(this);
   if (token_eq(expected, actual)) return;
   puts(str_f(
-    "Expected error: %d:\n  Expected: %s\n  Actual  : %s",
-    list_count(this->pmachines) + 1,
+    "Expect error:\n  Expected: %s\n  Actual  : %s",
     token_to_str_draft(expected), token_to_str_draft(actual)
   ));
   puts(machine_stack_trace(this));
@@ -379,7 +377,7 @@ static void expect (Machine *this) {
 
 void machine_fail (Machine *this, char *msg) {
   puts(str_f(
-    "Runtime error in machine:%d: %s", list_count(this->pmachines) + 1, msg
+    "Runtime error:\n %s", msg
   ));
   puts(machine_stack_trace(this));
   exit(0);
@@ -639,6 +637,8 @@ static void cprocess (Machine *m) {
       else if (symbol == symbol_EXPECT) expect(m);
       else if (symbol == symbol_STACK) types_fail(m);
       else if (symbol == symbol_STACK_CHECK) types_check(m);
+      else if (symbol == symbol_STACK_OPEN) types_open_fail(m);
+      else if (symbol == symbol_STACK_CLOSE) types_close_fail(m);
       else  {
         Heap *h = imports_get(symbol);
         if (h) {

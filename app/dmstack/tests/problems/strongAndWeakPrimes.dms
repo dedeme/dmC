@@ -1,10 +1,9 @@
 // Copyright 01-Oct-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-(
+( @+
   lst,new
-  ( @l
-    L =
+  ( @+l:: L =
     L () ==
     (L 2 lst,push; 2 wrap,some)
     (
@@ -29,30 +28,29 @@
       Next
     )
     elif
-    @l
-  )
+  @-l)
   it,new
-@<Iterator> ) primes =>
+@-<Iterator>) primes =>
 
-( @l
-  fn =>
+( @+l:: fn =>
   primes : P =
   P it,next wrap,ref : Pv =
+
   [P, Pv] data
-  ( @L<lL<i>>
+  ( @+l
     O =;
     O 0 get : P =
     O 1 get : Pv =
 
     P it,next wrap,ref : Current =
-    (Pv >> : P it,peek : + 2. / :: Current >> :: fn )
-    (Pv Current >> <<; Current P it,next <<)
+    (Pv >> : P it,peek : + 2. / :: Current >> :: fn)
+    (Pv Current >> <<; Current P it,next << )
     while
     Pv Current >> <<
     Current
-  @L<i> )
+  @-l)
   it,new
-@<Iterator> ) strWeak =>
+@-<Iterator>) strWeak =>
 
 ( >=:& strWeak @<Iterator> )
 strongs =>
@@ -65,11 +63,13 @@ strongs 36 it,take (toStr " " + sys,print) it,each
 "" sys,println
 
 "Strong primes below 100,000: "
-  strongs (100000 <) it,takef it,count toStr + sys,println
+  strongs (1000 <) it,takef it,count toStr + sys,println
 
 "First 37 weak primes:" sys,println
 weaks 37 it,take (toStr " " + sys,print) it,each
 "" sys,println
 
 "Weaks primes below 100,000: "
-  weaks (100000 <) it,takef it,count toStr + sys,println
+  weaks (1000 <) it,takef it,count toStr + sys,println
+
+empty? assert
