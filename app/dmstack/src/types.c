@@ -26,7 +26,13 @@ static char *typetk (Token *tk) {
     case token_LIST: return "l";
     case token_NATIVE: {
       Symbol sym = token_native_symbol(tk);
-      return sym == symbol_MAP_ ? "m" : str_f("<%s>", symbol_to_str(sym));
+      switch (sym) {
+        case symbol_MAP_ : return "m";
+        case symbol_REF_ : return "r";
+        case symbol_OPTION_ : return "o";
+        case symbol_EITHER_ : return "e";
+        default: return str_f("<%s>", symbol_to_str(sym));
+      }
     }
   }
   EXC_ILLEGAL_STATE("switch not exhaustive");
@@ -68,7 +74,7 @@ static int check (
     if (p == type) break;
     if (!ix)
       machine_fail(m, str_f(
-        "Expected '@%s', found '@[]%s", type, p
+        "Expected '@%s', found '@[]%s'", type, p
       ));
 
     --ix;
@@ -84,6 +90,7 @@ static int check (
           token_type(tk) == token_SYMBOL &&
           token_symbol(tk) == symbol_STACK_STOP
         ) {
+          // check === CHECK fails when not debug.
           if (p == type && check != types_CHECK) f = 0;
           else wrong(check, m, type, p);
         }
@@ -99,6 +106,24 @@ static int check (
         if (
           token_type(tk) == token_NATIVE &&
           token_native_symbol(tk) == symbol_MAP_
+        ) f = 0;
+        break;
+      case 'r':
+        if (
+          token_type(tk) == token_NATIVE &&
+          token_native_symbol(tk) == symbol_REF_
+        ) f = 0;
+        break;
+      case 'o':
+        if (
+          token_type(tk) == token_NATIVE &&
+          token_native_symbol(tk) == symbol_OPTION_
+        ) f = 0;
+        break;
+      case 'e':
+        if (
+          token_type(tk) == token_NATIVE &&
+          token_native_symbol(tk) == symbol_EITHER_
         ) f = 0;
         break;
       case '>': {

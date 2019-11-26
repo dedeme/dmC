@@ -17,9 +17,9 @@
     )
     for
     ( L =
-      L 0 get : x =
-      L 1 get : y =
-      L 2 get : z =
+      L !0 : x =
+      L !1 : y =
+      L !2 : z =
       x x * : y y * : + :: z z * :: ==
     )
     lst,filter

@@ -79,8 +79,7 @@ static void oget (Machine *m) {
   Map *mp = tk_pop_native(m, symbol_MAP_);
 
   Token *tk = opt_nget(map_get(mp, key));
-  if (tk) machine_push(m, token_new_list(arr_new_from(tk, NULL)));
-  else machine_push(m, token_new_list(arr_new()));
+  machine_push(m, token_from_pointer(symbol_OPTION_, tk));
 }
 
 static void haskey (Machine *m) {

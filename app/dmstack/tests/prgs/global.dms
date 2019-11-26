@@ -15,31 +15,59 @@
   B3:& A =; A:& clone B =; A:& B:& == assert
   () A =; A:& clone B =; A:& B:& == assert
   [1, 1.56, (23 ()) "abc"] A =; A:& clone B =; A:& B:& == assert
-  A:& 3 "four" set+ 0 "zero" set
-  A:& 0 get "zero" == assert
-  A:& 3 get "four" == assert
+  A:& 3 "four" lst,set+ 0 "zero" lst,set
+  A:& 0 lst,get "zero" == assert
+  A:& 3 lst,get "four" == assert
 
-  "" size ! assert
-  "abc" size 3 == assert
+  3 wrap,ref : R0 =
+  4 wrap,ref : R1 =
+  R0 clone : R2 =
+  R0 R1 != assert
+  R0 R2 == assert
+
+  wrap,none : On =
+  On clone : On1 =
+  3 wrap,some : O0 =
+  4 wrap,some : O1 =
+  O0 clone : O2 =
+  On On1 == assert
+  On O0 != assert
+  O0 O1 != assert
+  O0 O2 == assert
+
+  3 wrap,left : L0 =
+  4 wrap,left : L1 =
+  L0 clone L2 =
+  3 wrap,right : R0 =
+  4 wrap,right : R1 =
+  R0 clone R2 =
+  L0 L1 != assert
+  L0 L2 == assert
+  R0 R1 != assert
+  R0 R2 == assert
+  L0 R0 != assert
+
+  "" str,len ! assert
+  "abc" str,len 3 == assert
 
   B0:& blob,size ! assert
   B3:& blob,size 3 == assert
   B3:& 1 blob,get 2 == assert
   B3:& dup 2 blob,get swap 0 blob,get; assert; 3 == assert
 
-  B0:& blob,to size ! assert
-  B3 blob,to size 3 == assert
-  B3 blob,to 1 get 2 == assert
-  B3 blob,to dup 2 get swap 0 get; assert; 3 == assert
+  B0:& blob,to lst,size ! assert
+  B3 blob,to lst,size 3 == assert
+  B3 blob,to 1 lst,get 2 == assert
+  B3 blob,to dup 2 lst,get swap 0 lst,get; assert; 3 == assert
   B3 0 10 blob,set+ 2 12 blob,set
   B3 0 blob,get 10 == assert
   B3 2 blob,get 12 == assert
 
-  () size ! assert
+  () lst,size ! assert
   [1, 1.5, "a", []] Ls =
-  Ls size 4 == assert
-  Ls 1 get 1.5 == assert
-  Ls dup 3 get swap 0 get; assert; size ! assert
+  Ls lst,size 4 == assert
+  Ls !1 1.5 == assert
+  Ls dup !3 swap !0; assert; lst,size ! assert
 
   (4 6 +) run 10 == assert
   (4 6 2) ++ 12 expect
@@ -61,12 +89,39 @@
   { ("1": 4), ("2": 3 n +) data, ("3": 7 fn) data } data
     (("1", 4), ("2", 11), ("3", 9)) == assert
 
-  [4] data Ref =
+  4 wrap,ref Ref =
   Ref >> 4 == assert
   Ref 2 <<+; >> 2 == assert
   Ref 10 <<; Ref >> 10 == assert
   Ref (2 *) ^^+; >> 20 == assert
   Ref (2 +) ^^; Ref >> 22 == assert
+
+  wrap,none wrap,none? assert
+  wrap,none wrap,some? ! assert
+
+  6 wrap,some : Some =
+  Some wrap,none? ! assert
+  Some wrap,some? assert
+  Some
+  ( 6 expect)
+  ( 1 assert)
+  wrap,option
+
+  "Error test" wrap,left : Left =
+  Left wrap,left? assert
+  Left wrap,right? ! assert
+  Left
+  ( 0 assert)
+  ( "Error test" expect)
+  wrap,either
+
+  "Ok test" wrap,right : Right =
+  Right wrap,left? ! assert
+  Right wrap,right? assert
+  Right
+  ( "Ok test" expect)
+  ( 0 assert)
+  wrap,either
 
   empty? assert
 ) run

@@ -11,25 +11,21 @@ static Token *poplist (Machine *m) {
 }
 
 static void none (Machine *m) {
-  machine_push(m, token_new_list(arr_new()));
+  machine_push(m, token_from_pointer(symbol_OPTION_, NULL));
 }
 
 static void isnone (Machine *m) {
-  machine_push(m, token_new_int(
-    !arr_size(tk_pop_list(m))
-  ));
+  Token *value = tk_pop_native(m, symbol_OPTION_);
+  machine_push(m, token_new_int(!value));
 }
 
 static void some (Machine *m) {
-  machine_push(m, token_new_list(arr_new_from(machine_pop(m), NULL)));
+  machine_push(m, token_from_pointer(symbol_OPTION_, machine_pop(m)));
 }
 
 static void issome (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz > 1) fails_list_size(m, a, 1);
-  machine_push(m, token_new_int(sz));
+  Token *value = tk_pop_native(m, symbol_OPTION_);
+  machine_push(m, token_new_int((Int)value));
 }
 
 static void option (Machine *m) {
@@ -37,40 +33,41 @@ static void option (Machine *m) {
   List *pmachines = machine_pmachines(m);
   Token *prgfail = poplist(m);
   Token *prgok = poplist(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (!sz) {
-    machine_process("", pmachines, prgfail);
-  } else if (sz == 1) {
-    machine_push(m, *arr_start(a));
+  Token *value = tk_pop_native(m, symbol_OPTION_);
+  if (value) {
+    machine_push(m, value);
     machine_process("", pmachines, prgok);
   } else {
-    fails_list_size(m, a, 1);
+    machine_process("", pmachines, prgfail);
   }
 }
 
+static void ref (Machine *m) {
+  machine_push(m, token_from_pointer(symbol_REF_, machine_pop(m)));
+}
+
 static void left (Machine *m) {
-  Token *s = machine_pop_exc(m, token_STRING);
-  machine_push(m, token_new_list(
-    arr_new_from(s, token_new_int(0), NULL)
-  ));
+  Token **values = ATOMIC(sizeof(Token *) + sizeof(Token *));
+  values[0] = machine_pop(m);
+  values[1] = NULL;
+  machine_push(m, token_from_pointer(symbol_EITHER_, values));
 }
 
 static void isleft (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz != 1 && sz != 2) fails_list_size(m, a, 2);
-  machine_push(m, token_new_int(sz == 2));
+  Token **values = tk_pop_native(m, symbol_EITHER_);
+  machine_push(m, token_new_int((Int)*values));
+}
+
+static void right (Machine *m) {
+  Token **values = ATOMIC(sizeof(Token *) + sizeof(Token *));
+  values[0] = NULL;
+  values[1] = machine_pop(m);
+  machine_push(m, token_from_pointer(symbol_EITHER_, values));
 }
 
 static void isright (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz != 1 && sz != 2) fails_list_size(m, a, 2);
-  machine_push(m, token_new_int(sz == 1));
+  Token **values = tk_pop_native(m, symbol_EITHER_);
+  machine_push(m, token_new_int(!*values));
 }
 
 static void either (Machine *m) {
@@ -78,16 +75,13 @@ static void either (Machine *m) {
   List *pmachines = machine_pmachines(m);
   Token *prgfail = poplist(m);
   Token *prgok = poplist(m);
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz == 1) {
-    machine_push(m, *arr_start(a));
-    machine_process("", pmachines, prgok);
-  } else if (sz == 2) {
-    machine_push(m, *arr_start(a));
+  Token **values = tk_pop_native(m, symbol_EITHER_);
+  if (*values) {
+    machine_push(m, values[0]);
     machine_process("", pmachines, prgfail);
   } else {
-    fails_list_size(m, a, 2);
+    machine_push(m, values[1]);
+    machine_process("", pmachines, prgok);
   }
 }
 
@@ -115,10 +109,10 @@ Pmodule *modwrap_mk (void) {
   add("some", some); // * - OPT (* -> (*))
   add("some?", issome); // OPT - INT
   add("option", option); // <OPT, (OPT >> -> B?), (B?)> - B?
-  add("ref", some); // * - REF (* -> (*))
+  add("ref", ref); // * - REF (* -> (*))
   add("left", left); // STRING -> EITHER (s -> (s, 0))
   add("left?", isleft); // EITHER - INT
-  add("right", some); // * -> EITHER (* -> (*)) -some is ok-
+  add("right", right); // * -> EITHER (* -> (*)) -some is ok-
   add("right?", isright); // EITHER - INT
   add("either", either); // <EITHER, (RIGHT->B?), (LEFT->B?)> - B?
   add("tp", tp); // [A, B] -> [(A, B)]

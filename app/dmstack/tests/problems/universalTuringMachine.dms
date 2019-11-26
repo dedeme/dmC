@@ -20,9 +20,9 @@
   (
     Ix >> ix =
     State >> " - " + sys,print
-    Tape size
+    Tape lst,size
     ( i =;
-      Tape i get
+      Tape i lst,get
       i ix == ("[" swap + "] " + sys,print) ( " " + sys,print) elif
     )
     for
@@ -31,14 +31,14 @@
 
 
   ( f =>; mark =
-    Tape : Ix >> mark :: set
+    Tape : Ix >> mark :: lst,set
     Ix (f) ^^
     Ix >>
 
     ( dup -1 ==)
     ( pop; Tape mark0 lst,push0; Ix 0 <<)
     else
-    ( Tape size ==)
+    ( Tape lst,size ==)
     ( Tape mark0 lst,push)
     else
     if
@@ -48,16 +48,16 @@
   (State >> end !=)
   (
     0
-    Rules size
+    Rules lst,size
     (
-      Rules swap get : Rule =
+      Rules swap lst,get : Rule =
 
-      State >> : Rule 0 get :: ==
-      Tape Ix >> get : Rule 1 get :: ==
+      State >> : Rule !0 :: ==
+      Tape Ix >> lst,get : Rule !1 :: ==
       &&
       (
-        Rule 2 get : Rule 3 get :: step
-        State : Rule 4 get :: <<
+        Rule !2 : Rule !3 :: step
+        State : Rule !4 :: <<
         pop; 1
         break;
       )

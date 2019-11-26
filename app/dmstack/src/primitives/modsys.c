@@ -72,11 +72,9 @@ static void cmd (Machine *m) {
   char *command = tk_pop_string(m);
   char *r = opt_nget(sys_cmd(command));
   if (r)
-    machine_push(
-      m, token_new_list(arr_new_c(1, (void *[]){token_new_string(r)}))
-    );
+    machine_push(m, token_from_pointer(symbol_OPTION_, token_new_string(r)));
   else
-    machine_push(m, token_new_list(arr_new()));
+    machine_push(m, token_from_pointer(symbol_OPTION_, NULL));
 }
 
 // tp is Tp<List<Machine>, Token>

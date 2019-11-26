@@ -3,8 +3,8 @@
 
 
 ( s2 =; s1 =
-  s1 size : len1 =
-  s2 size : len2 =
+  s1 str,len : len1 =
+  s2 str,len : len2 =
 
   -1
   len1 len2 < (len1) (len2)  elif
@@ -18,13 +18,13 @@
 ( L =
 
   ( L () ==) ("") else
-  ( L size 1 ==) (L 0 get) else
+  ( L lst,size 1 ==) (L !0) else
   (
-    L 0 get : s1 =
+    L !0 : s1 =
     s1
-    L size
+    L lst,size
     ( i =; s =
-      s : 0 : s L i get lcpAux : str,sub
+      s : 0 : s L i lst,get lcpAux : str,sub
     )
     for
   )

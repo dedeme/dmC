@@ -72,9 +72,9 @@
 
 ( @+<Blob>ii::
   wrap,tp3  // Row min max - min & max inclusive
-  ( dup dup 0 get Row =
-    1 get mn =
-    2 get mx =
+  ( dup dup !0 Row =
+    !1 mn =
+    !2 mx =
     Row blob,size sz =
     sz 1 - // i
     (
@@ -96,7 +96,7 @@
       )
       elif
     ) loop
-    sz == (Row blob,copy lst,unary) (lst,new) elif
+    sz == (Row blob,copy wrap,some) (wrap,none) elif
   )
   it,new
 @-<Iterator>) mkIt =>

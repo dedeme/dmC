@@ -26,3 +26,5 @@
 "path" import
 "types" import
 "exc" import
+
+empty? assert

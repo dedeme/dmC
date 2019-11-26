@@ -6,12 +6,12 @@
 (
   // genk
 
-  6 cryp,genk size 6 == assert
+  6 cryp,genk str,len 6 == assert
   // 6 cryp,genk print
 
   // key
 
-  "deme" 6 cryp,key "wiWTB9" == assert
+  "deme" 6 cryp,key "wiWTB9" expect
   "Generaro" 5 cryp,key "Ixy8I" == assert
   "Generara" 5 cryp,key "0DIih" == assert
 
@@ -49,3 +49,4 @@
 
   empty? assert
 ) run
+

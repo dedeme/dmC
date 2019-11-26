@@ -91,6 +91,9 @@ Symbol token_native_symbol (Token *this);
 ///
 void *token_native_pointer (Token *this);
 
+///
+void token_set_native_pointer (Token *this, void *value);
+
 /// Returns a new token equals to 'this'
 Token *token_clone (Token *this);
 

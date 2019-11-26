@@ -6,12 +6,12 @@
 (
   map,new M =
   M map,copy map,size 0 expect
-  M map,to size 0 expect
+  M map,to lst,size 0 expect
   M clone map,to [] expect
   M clone M (==) map,eq? assert
   M clone M (?=) map,neq? ! assert
 
-  M map,sort size 0 == assert
+  M map,sort lst,size 0 == assert
   M map,keys () == assert
   M map,values () == assert
 
@@ -21,9 +21,9 @@
   M "b" map,has? assert
   M "c" map,has? assert
   M "d" map,has? ! assert
-  M "a" map,oget (1) == assert
-  M "b" map,oget (2) == assert
-  M "c" map,oget (3) == assert
+  M "a" map,oget (1 expect) (0 assert) wrap,option
+  M "b" map,oget (2 expect) (0 assert) wrap,option
+  M "c" map,oget (3 expect) (0 assert) wrap,option
   M clone map,to ["b" 2, "c" 3, "a" 1] expect
 
   M map,copy M2 =;
@@ -31,9 +31,9 @@
   M2 "a" map,remove
   M M2 (==) map,neq? assert
   M2 "b" (100 +) map,up+ "c" (200 +) map,up
-  M2 "a" map,oget () expect
-  M2 "b" map,oget (102) expect
-  M2 "c" map,oget (203) expect
+  M2 "a" map,oget (0 expect) (1 assert) wrap,option
+  M2 "b" map,oget (102 expect) (0 assert) wrap,option
+  M2 "c" map,oget (203 expect) (0 assert) wrap,option
   M2 "b" map,get 102 expect
   M2 "c" map,get 203 expect
   M2 .b 102 expect
@@ -42,17 +42,17 @@
   M map,to map,from M2 =;
   M2 "a" map,remove
   M2 "b" (100 +) map,up+ "c" (200 +) map,up
-  M2 "a" map,oget () expect
-  M2 "b" map,oget (102) expect
-  M2 "c" map,oget (203) expect
+  M2 "a" map,oget (0 expect) (1 assert) wrap,option
+  M2 "b" map,oget (102 expect) (0 assert) wrap,option
+  M2 "c" map,oget (203 expect) (0 assert) wrap,option
   M2 "b" map,get 102 expect
   M2 "c" map,get 203 expect
   M2 .b 102 expect
   M2 .c 203 expect
 
-  M "a" map,oget (1) expect
-  M "b" map,oget (2) expect
-  M "c" map,oget (3) expect
+  M "a" map,oget (1 expect) (0 assert) wrap,option
+  M "b" map,oget (2 expect) (0 assert) wrap,option
+  M "c" map,oget (3 expect) (0 assert) wrap,option
 
   M map,pairs : Pairs =
   Pairs (P =; P ["a", 1] ==) lst,any? assert
@@ -61,14 +61,14 @@
   Pairs (P =; P ["a", 2] ==) lst,any? ! assert
 
   M map,sort dup lst,reverse : Sorted =
-  [] data Sorted size (i =; Sorted i get 0 get lst,push+) for
+  [] data Sorted lst,size (i =; Sorted i lst,get !0 lst,push+) for
     ["c", "b", "a"] expect
-  [] data Sorted size (i =; Sorted i get 1 get lst,push+) for
+  [] data Sorted lst,size (i =; Sorted i lst,get !1 lst,push+) for
     [3, 2, 1] expect
 
   M "c" map,remove
-  M "a" map,oget (1) == assert
-  M "b" map,oget (2) == assert
+  M "a" map,oget (1 expect) (0 assert) wrap,option
+  M "b" map,oget (2 expect) (0 assert) wrap,option
   M map,size 2 == assert
 
   // fromJs - toJs
@@ -81,13 +81,13 @@
   {} map,from (js,wi) map,toJs (js,ri) map,fromJs map,size 0 == assert
   {"a": 1} map,from (js,wi) map,toJs (js,ri) map,fromJs :  Mp =
   Mp map,size 1 expect
-  Mp "a" map,oget (1) expect
+  Mp "a" map,oget (1 expect) (0 assert) wrap,option
 
   {"a": 1, "b": 2, "c", 3} map,from (js,wi) map,toJs (js,ri) map,fromJs : Mp =
   Mp map,size 3 expect
-  Mp "a" map,oget (1) expect
-  Mp "b" map,oget (2) expect
-  Mp "c" map,oget (3) expect
+  Mp "a" map,oget (1 expect) (0 assert) wrap,option
+  Mp "b" map,oget (2 expect) (0 assert) wrap,option
+  Mp "c" map,oget (3 expect) (0 assert) wrap,option
 
   empty? assert
 )run

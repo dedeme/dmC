@@ -136,17 +136,11 @@ Pmodule *modglobal_mk (void) {
   add("<=", modglobal1_less_eq);
 
   // modglobal2 -------------------------------------
-  add("size", modglobal2_size);
-  add("get", modglobal2_get);
-  add("set", modglobal2_set);
-  add("set+", modglobal2_setplus);
-  add("up", modglobal2_up);
-  add("up+", modglobal2_upplus);
-  add(">>", modglobal2_ref_get);
-  add("<<", modglobal2_ref_set);
-  add("<<+", modglobal2_ref_setplus);
-  add("^^", modglobal2_ref_up);
-  add("^^+", modglobal2_ref_upplus);
+  add(">>", modglobal2_get);
+  add("<<", modglobal2_set);
+  add("<<+", modglobal2_setplus);
+  add("^^", modglobal2_up);
+  add("^^+", modglobal2_upplus);
 
   return r;
 }

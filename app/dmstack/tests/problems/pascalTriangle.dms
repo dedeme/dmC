@@ -4,10 +4,10 @@
 ( @+i:: n =
   n 1 < (n toStr ": value not allowed" + sys,println, 1 sys,exit) if
 
-  [[]] : Row =
+  [] wrap,ref : Row =
   n
   ( pop
-    [0] data : Pv =
+    0 wrap,ref : Pv =
 
     Row >>
     lst,new

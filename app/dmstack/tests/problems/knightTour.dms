@@ -39,21 +39,21 @@
 
 [] data 8 (pop 0 8 lst,make lst,push+) for : Board =
 
-(dup Board swap 0 get get : swap 1 get get)
+(dup Board swap !0 lst,get : swap !1 lst,get)
 bget => // <[row, col]> - <INT>
 
-(dup Board swap 0 get get : swap 1 get 1 set)
+(dup Board swap !0 lst,get : swap !1 1 lst,set)
 bput => // <[row, col]> - <>
 
-(dup Board swap 0 get get : swap 1 get 0 set)
+(dup Board swap !0 lst,get : swap !1 0 lst,set)
 bquit => // <[row, col]> - <>
 
 (
   Board
   (7 -1 -1)
   ( row =;
-    dup row get
-    8 (col = dup col get toStr " " + sys,print) for pop "" sys,println)
+    dup row lst,get
+    8 (col = dup col lst,get toStr " " + sys,print) for pop "" sys,println)
   for
   pop
   "" sys,println
@@ -61,26 +61,26 @@ bquit => // <[row, col]> - <>
 bshow =>
 
 ( st =; clone
-  st 0 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get 1 + : set+) if
-  st 1 == (dup 0 swap : 0 get 1 + : set+; dup 1 swap : 1 get 2 + : set+) if
-  st 2 == (dup 0 swap : 0 get -1 + : set+; dup 1 swap : 1 get 2 + : set+) if
-  st 3 == (dup 0 swap : 0 get -2 + : set+; dup 1 swap : 1 get 1 + : set+) if
-  st 4 == (dup 0 swap : 0 get -2 + : set+; dup 1 swap : 1 get -1 + : set+) if
-  st 5 == (dup 0 swap : 0 get -1 + : set+; dup 1 swap : 1 get -2 + : set+) if
-  st 6 == (dup 0 swap : 0 get 1 + : set+; dup 1 swap : 1 get -2 + : set+) if
-  st 7 == (dup 0 swap : 0 get 2 + : set+; dup 1 swap : 1 get -1 + : set+) if
+  st 0 == (dup 0 swap : !0 2 + : lst,set+; dup 1 swap : !1 1 + : lst,set+) if
+  st 1 == (dup 0 swap : !0 1 + : lst,set+; dup 1 swap : !1 2 + : lst,set+) if
+  st 2 == (dup 0 swap : !0 -1 + : lst,set+; dup 1 swap : !1 2 + : lst,set+) if
+  st 3 == (dup 0 swap : !0 -2 + : lst,set+; dup 1 swap : !1 1 + : lst,set+) if
+  st 4 == (dup 0 swap : !0 -2 + : lst,set+; dup 1 swap : !1 -1 + : lst,set+) if
+  st 5 == (dup 0 swap : !0 -1 + : lst,set+; dup 1 swap : !1 -2 + : lst,set+) if
+  st 6 == (dup 0 swap : !0 1 + : lst,set+; dup 1 swap : !1 -2 + : lst,set+) if
+  st 7 == (dup 0 swap : !0 2 + : lst,set+; dup 1 swap : !1 -1 + : lst,set+) if
 ) jump => // <[row, col], state> - <[row, col]>
 
 // Path ------------------------------------------------------------------------
 
 (
-  Kpath size
+  Kpath lst,size
   ( i =
     i 1 + j =
-    Kpath i get 1 get : Cs =
+    Kpath i lst,get !1 : Cs =
     j 10 < (" " j toStr +) (j toStr) elif
-      ":[" + Cs 0 get : "a" str,code : + :: str,fromCode +
-      Cs 1 get 1 + toStr + "] " + sys,print
+      ":[" + Cs !0 : "a" str,code : + :: str,fromCode +
+      Cs !1 1 + toStr + "] " + sys,print
     i 4 % 3 == ("" sys,println) if
   )
   for
@@ -89,7 +89,7 @@ bshow =>
 
 (
   this,Kpath lst,peek : E =
-  E 1 get : E 0 get : this,jump : Cs =
+  E !1 : E !0 : this,jump : Cs =
   this,Kpath [0, Cs] data lst,push
   Cs this,bput
 ) forwardStep => // Jump is tested as valid.
@@ -100,8 +100,8 @@ bshow =>
 [0, 0] bput
 
 ( Cs =
-  Cs 0 get : r =
-  Cs 1 get : c =
+  Cs !0 : r =
+  Cs !1 : c =
 
   ( r 0 == c 4 == &&) ( 1) else
   ( r 1 == c 4 == &&) ( 1) else
@@ -114,11 +114,11 @@ bshow =>
 
 {
   "start": this,Kpath
-  "firstStep?": (size 1 ==)
-  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "firstStep?": (lst,size 1 ==)
+  "stepEnd?": (lst,peek !0 : 8 : ==)
   "stepFail?":
     ( lst,peek : E =
-      E 1 get : E 0 get : this,jump : Cs =
+      E !1 : E !0 : this,jump : Cs =
 
       Cs this,csOk
       ( Cs this,bget)
@@ -127,30 +127,30 @@ bshow =>
     )
   "win?":
     ( Ob =
-      Ob size : sz =
+      Ob lst,size : sz =
       sz 17 <
       ( 0)
       (
         this,forwardStep
-        Ob lst,peek 1 get : Cs =
-        Cs 0 get : r =
-        Cs 1 get : c =
+        Ob lst,peek !1 : Cs =
+        Cs !0 : r =
+        Cs !1 : c =
         r 0 == c 3 == &&
         ( 1)
-        ( Ob lst,pop 1 get this,bquit; 0)
+        ( Ob lst,pop !1 this,bquit; 0)
         elif
       )
       elif
     )
   "ahead?":
     ( Ob =
-      Ob size 18 <
+      Ob lst,size 18 <
       ( this,forwardStep; 1)
       ( 0)
       elif
     )
-  "back": (lst,pop 1 get this,bquit)
-  "side": (lst,peek 0 (1 +) up)
+  "back": (lst,pop !1 this,bquit)
+  "side": (lst,peek 0 (1 +) lst,up)
 } map,from fn pop
 
 bshow
@@ -162,8 +162,8 @@ Kpath [0, [2, 4] data] data lst,push
 [2, 4] bput
 
 ( Cs =
-  Cs 0 get : r =
-  Cs 1 get : c =
+  Cs !0 : r =
+  Cs !1 : c =
 
   ( r 4 == c 4 == &&) ( 1) else
   ( r 4 == c 5 == &&) ( 1) else
@@ -177,11 +177,11 @@ csOk? => // <[row, col]> - <INT>
 
 {
   "start": this,Kpath
-  "firstStep?": (size 19 ==)
-  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "firstStep?": (lst,size 19 ==)
+  "stepEnd?": (lst,peek !0 : 8 : ==)
   "stepFail?":
     ( lst,peek : E =
-      E 1 get : E 0 get : this,jump : Cs =
+      E !1 : E !0 : this,jump : Cs =
 
       Cs this,csOk?
       ( Cs this,bget)
@@ -190,15 +190,15 @@ csOk? => // <[row, col]> - <INT>
     )
   "win?":
     ( Ob =
-      Ob size : sz =
+      Ob lst,size : sz =
       sz 33 <
       ( 0)
       (
         this,forwardStep
-        Ob lst,peek 1 get : Cs =
-        Cs 0 get : r =
+        Ob lst,peek !1 : Cs =
+        Cs !0 : r =
         r 2 <
-        ( Ob lst,pop 1 get this,bquit; 0)
+        ( Ob lst,pop !1 this,bquit; 0)
         ( 1)
         elif
       )
@@ -206,13 +206,13 @@ csOk? => // <[row, col]> - <INT>
     )
   "ahead?":
     ( Ob =
-      Ob size 34 <
+      Ob lst,size 34 <
       ( this,forwardStep; 1)
       ( 0)
       elif
     )
-  "back": (lst,pop 1 get this,bquit)
-  "side": (lst,peek 0 (1 +) up)
+  "back": (lst,pop !1 this,bquit)
+  "side": (lst,peek 0 (1 +) lst,up)
 } map,from fn pop
 
 bshow
@@ -224,8 +224,8 @@ Kpath [0, [4, 6] data] data lst,push
 [4, 6] bput
 
 ( Cs =
-  Cs 0 get : r =
-  Cs 1 get : c =
+  Cs !0 : r =
+  Cs !1 : c =
 
   ( r 4 <) ( 0) else
   ( r 7 >) ( 0) else
@@ -237,23 +237,23 @@ Kpath [0, [4, 6] data] data lst,push
 
 {
   "start": this,Kpath
-  "firstStep?": (size 35 ==)
-  "stepEnd?": (lst,peek 0 get : 8 : ==)
+  "firstStep?": (lst,size 35 ==)
+  "stepEnd?": (lst,peek !0 : 8 : ==)
   "stepFail?":
     ( Ob =
       Ob lst,peek : E =
-      E 1 get : E 0 get : this,jump : Cs =
+      E !1 : E !0 : this,jump : Cs =
 
       (Cs this,csOk? !) (1) else
       (Cs this,bget) (1) else
-      (Ob size 39 == : Cs [6, 5] != : &&) (1) else
-      (Ob size 47 == : Cs [6, 1] != : &&) (1) else
-      (Ob size 55 == : Cs [4, 3] != : &&) (1) else
+      (Ob lst,size 39 == : Cs [6, 5] != : &&) (1) else
+      (Ob lst,size 47 == : Cs [6, 1] != : &&) (1) else
+      (Ob lst,size 55 == : Cs [4, 3] != : &&) (1) else
       (0) if
     )
   "win?":
     ( Ob =
-      Ob size : sz =
+      Ob lst,size : sz =
       sz 63 <
       ( 0)
       ( this,forwardStep; 1)
@@ -261,13 +261,13 @@ Kpath [0, [4, 6] data] data lst,push
     )
   "ahead?":
     ( Ob =
-      Ob size 64 <
+      Ob lst,size 64 <
       ( this,forwardStep; 1)
       ( 0)
       elif
     )
-  "back": (lst,pop 1 get this,bquit)
-  "side": (lst,peek 0 (1 +) up)
+  "back": (lst,pop !1 this,bquit)
+  "side": (lst,peek 0 (1 +) lst,up)
 } map,from fn pop
 
 bshow

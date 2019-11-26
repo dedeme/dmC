@@ -25,8 +25,8 @@
 */
 
 ( s2 =; s1 =
-  s1 size : len1 =
-  s2 size : len2 =
+  s1 str,len : len1 =
+  s2 str,len : len2 =
   "" len2 1 + lst,make : wrap,ref PriorRow =
 
   len1
@@ -38,12 +38,12 @@
       PriorRow >> : PRow =
 
       s1 i str,get : s2 j str,get : ==
-      ( Row :: PRow j get : s1 i str,get : + :: lst,push)
+      ( Row :: PRow j lst,get : s1 i str,get : + :: lst,push)
       (
-        Row j get : subs1 =
-        PRow : j 1 + : get : subs2 =
+        Row j lst,get : subs1 =
+        PRow : j 1 + : lst,get : subs2 =
 
-        subs1 size : subs2 size : >
+        subs1 str,len : subs2 str,len : >
         ( Row subs1 lst,push)
         ( Row subs2 lst,push)
         elif
@@ -54,7 +54,7 @@
     PriorRow Row <<
   )
   for
-  PriorRow >> len2 get
+  PriorRow >> len2 lst,get
 ) lcs =>
 
 ( s2 =; s1 =

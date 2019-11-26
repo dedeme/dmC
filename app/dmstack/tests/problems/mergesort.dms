@@ -2,10 +2,10 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 ( L =
-  L size 2 <
+  L lst,size 2 <
   ( L)
   (
-    L size 2 / : mid =
+    L lst,size 2 / : mid =
     L mid lst,left mergeSort : L mid lst,right mergeSort : merge
   )
   elif

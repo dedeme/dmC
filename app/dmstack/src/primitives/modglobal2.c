@@ -5,107 +5,32 @@
 #include "fails.h"
 #include "tk.h"
 
-void modglobal2_size (Machine *m) {
-  Token *tk = machine_pop(m);
-  enum token_Type t = token_type(tk);
-  if (t == token_STRING)
-    machine_push(m, token_new_int(strlen(token_string(tk))));
-  else if (t == token_LIST)
-    machine_push(m, token_new_int(arr_size(token_list(tk))));
-  else {
-    machine_push(m, tk);
-    fails_types(
-      m, 2, (enum token_Type[]){token_STRING, token_LIST}
-    );
-  }
-}
-
 void modglobal2_get (Machine *m) {
-  Int ix = tk_pop_int(m);
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  if (ix < 0 || ix >= arr_size(a))
-    fails_range(m, 0, arr_size(a) - 1, ix);
-
-  machine_push(m, arr_start(a)[ix]);
-}
-
-static void setboth (Machine *m, int isplus) {
-  Token *tk3 = machine_pop(m);
-  Int ix = tk_pop_int(m);
-  // Arr<Token>
-  Arr *a = isplus ? tk_peek_list(m) : tk_pop_list(m);
-  if (ix < 0 || ix >= arr_size(a))
-    fails_range(m, 0, arr_size(a) - 1, ix);
-
-  arr_start(a)[ix] = tk3;
-}
-
-void modglobal2_set (Machine *m) {
-  setboth(m, 0);
-}
-
-void modglobal2_setplus (Machine *m) {
-  setboth(m, 1);
-}
-
-static void upboth (Machine *m, int isplus) {
-  Token *prg = machine_pop_exc(m, token_LIST);
-  Token *tk2 = machine_pop(m);
-  Token *tk1 = machine_peek(m);
-  machine_push(m, tk2);
-  modglobal2_get(m);
-
-  machine_process("", machine_pmachines(m), prg);
-
-  Token *tk3 = machine_pop(m);
-  machine_push(m, tk1);
-  machine_push(m, tk2);
-  machine_push(m, tk3);
-  setboth(m, isplus);
-}
-
-void modglobal2_up (Machine *m) {
-  upboth(m, 0);
-}
-
-void modglobal2_upplus (Machine *m) {
-  upboth(m, 1);
-}
-
-void modglobal2_ref_get (Machine *m) {
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  if (arr_size(a) != 1) fails_list_size(m, a, 1);
-
-  machine_push(m, *arr_start(a));
+  machine_push(m, tk_pop_native(m, symbol_REF_));
 }
 
 static void refsetboth (Machine *m, int isplus) {
   Token *tk2 = machine_pop(m);
   Token *tk1 = isplus
-    ? machine_peek_opt(m, token_LIST)
-    : machine_pop_opt(m, token_LIST)
+    ? machine_peek(m)
+    : machine_pop(m)
   ;
-  // Arr<Token>
-  Arr *a = token_list(tk1);
-  if (arr_size(a) != 1) fails_list_size(m, a, 1);
-
-  *arr_start(a) = tk2;
+  tk_native(m, tk1, symbol_REF_);
+  token_set_native_pointer(tk1, tk2);
 }
 
-void modglobal2_ref_set (Machine *m) {
+void modglobal2_set (Machine *m) {
   refsetboth(m, 0);
 }
 
-void modglobal2_ref_setplus (Machine *m) {
+void modglobal2_setplus (Machine *m) {
   refsetboth(m, 1);
 }
 
 static void refupboth (Machine *m, int isplus) {
   Token *prg = machine_pop_exc(m, token_LIST);
   Token *tk1 = machine_peek(m);
-  modglobal2_ref_get(m);
+  modglobal2_get(m);
 
   machine_process("", machine_pmachines(m), prg);
 
@@ -115,10 +40,10 @@ static void refupboth (Machine *m, int isplus) {
   refsetboth(m, isplus);
 }
 
-void modglobal2_ref_up (Machine *m) {
+void modglobal2_up (Machine *m) {
   refupboth(m, 0);
 }
 
-void modglobal2_ref_upplus (Machine *m) {
+void modglobal2_upplus (Machine *m) {
   refupboth(m, 1);
 }

@@ -112,12 +112,9 @@ static Opt *newf (Tp3 *m_o_fn) {
   Machine *m = tp3_e1(m_o_fn);
   machine_push(m, tp3_e2(m_o_fn));
   machine_process("", machine_pmachines(m), tp3_e3(m_o_fn));
-  // Arr<Token>
-  Arr *a = tk_pop_list(m);
-  int sz = arr_size(a);
-  if (sz > 1) fails_list_size(m, a, 1);
-  return sz
-    ? opt_new(*arr_start(a))
+  Token *tk = tk_pop_native(m, symbol_OPTION_);
+  return tk
+    ? opt_new(tk)
     : opt_empty()
   ;
 }
@@ -381,11 +378,8 @@ static void find (Machine *m) {
   // It<Token>
   It *it = getIt(m);
   modIt_stkItElement *e = opt_nget(it_find(toStkIt(m, prg, it), tofpred));
-
-  // Arr<Token>
-  Arr *r = arr_new();
-  if (e) arr_push(r, e->tk);
-  machine_push(m, token_new_list(r));
+  if (e) machine_push(m, token_from_pointer(symbol_OPTION_, e->tk));
+  else machine_push(m, token_from_pointer(symbol_OPTION_, NULL));
 }
 
 static void indexf (Machine *m) {

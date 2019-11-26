@@ -49,8 +49,12 @@ void symbol_init (void) {
 
   arr_set(syms, symbol_PLUS, "+");
   arr_set(syms, symbol_TO_STR, "toStr");
-  arr_set(syms, symbol_REF_OUT, ">>");
+  arr_set(syms, symbol_LST, "lst");
+  arr_set(syms, symbol_GET, "get");
 
+  arr_set(syms, symbol_REF_, "= Ref");
+  arr_set(syms, symbol_OPTION_, "= Option");
+  arr_set(syms, symbol_EITHER_, "= Either");
   arr_set(syms, symbol_MAP_, "= Map");
   arr_set(syms, symbol_BLOB_, "= Blob");
   arr_set(syms, symbol_THREAD_, "= Thread");

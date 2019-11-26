@@ -58,7 +58,7 @@ char *machine_stack_trace (Machine *this) {
     int sz = arr_size(st);
     while (arr_size(st) && c < MAX_EXC_STACK) {
       if (c) buf_add(bf, ", ");
-      buf_add(bf, str_f("%s", token_to_str_draft(arr_pop(st))));
+      buf_add(bf, token_to_str_draft(arr_pop(st)));
       ++c;
     }
     if (sz > c) buf_add(bf, str_f(", ... (%d more)]\n", sz - c));
@@ -190,7 +190,15 @@ static void sif (Machine *this) {
     if (rprg && prg) machine_process("", this->pmachines, prg);
   } else {
     if (!prg)
-      machine_fail(this, "Expected List");
+      machine_fail(this, str_f(
+        "Expected List. Actual %s.",
+        token_type_to_str(token_type(machine_peek(this)))
+      ));
+    else
+      machine_fail(this, str_f(
+        "Expected Int. Actual %s.",
+        token_type_to_str(token_type(machine_peek(this)))
+      ));
   }
 }
 

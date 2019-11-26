@@ -109,7 +109,7 @@
   // Value volatil
   3
   ( i =;
-    [5] L =; L 0 : L 0 get 1 + : set
+    [5] L =; L 0 : L !0 1 + : lst,set
     L i 6 + lst,unary == assert
   )
   for
@@ -117,7 +117,7 @@
   // Value NO volatil
   3
   ( i =;
-    [5] clone L =; L 0 : L 0 get 1 + : set
+    [5] clone L =; L 0 : L !0 1 + : lst,set
     L [6] == assert
   )
   for
@@ -125,7 +125,7 @@
   // Value NO volatil
   3
   ( i =;
-    [5] data L =; L 0 : L 0 get 1 + : set
+    [5] data L =; L 0 : L 0 lst,get 1 + : lst,set
     L [6] == assert
   )
   for

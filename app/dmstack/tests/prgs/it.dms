@@ -209,12 +209,12 @@
 
   // find
 
-  () it,from (2 %) it,find () == assert
-  (23) it,from (2 %) it,find (23) == assert
-  (1, 2, 3) it,from (2 %) it,find (1) == assert
-  () it,from (2 % !) it,find () == assert
-  (23) it,from (2 % !) it,find () == assert
-  (1, 2, 3) it,from (2 % !) it,find (2) == assert
+  () it,from (2 %) it,find (0 assert) (1 assert) wrap,option
+  (23) it,from (2 %) it,find (23 expect) (0 assert) wrap,option
+  (1, 2, 3) it,from (2 %) it,find (1 expect) (0 assert) wrap,option
+  () it,from (2 % !) it,find (0 assert) (1 assert) wrap,option
+  (23) it,from (2 % !) it,find (0 assert) (1 assert) wrap,option
+  (1, 2, 3) it,from (2 % !) it,find (2 expect) (0 assert) wrap,option
 
   // index - lastIndex
 

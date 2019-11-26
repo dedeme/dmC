@@ -2,13 +2,13 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 ( L =
-  L size 2 <
+  L lst,size 2 <
   ( L)
   (
     lst,new : Less =
     lst,new : Eq =
     lst,new : Greater =
-    L 0 get : pivot =
+    L !0 : pivot =
     L
     ( e =;
       (e pivot ==) (Eq e lst,push) else

@@ -2,6 +2,7 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "Reader.h"
+#include "dmc/Dec.h"
 #include "DEFS.h"
 #include "tkreader.h"
 #include "imports.h"
@@ -112,6 +113,7 @@ void reader_set_nline (Reader *this, int value) {
 Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
   Symbol sym = token_symbol(tk);
   char *symstr = symbol_to_str(sym);
+
   if (sym == symbol_IMPORT) {
     if (!arr_size(prg)) reader_fail(this, "Import source is missing");
 
@@ -157,6 +159,20 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
       token_new_symbol_pos(symbol_new("get"), this->source, line),
       NULL
     );
+  } else if (*symstr == '!' && symstr[1]) {
+    TokenPos *pos = opt_nget(token_pos(tk));
+    if (!pos) EXC_ILLEGAL_STATE("pos is null")
+
+    int line = tokenPos_line(pos);
+    char *ns = str_right(symstr, 1);
+    if (!dec_digits(ns)) return arr_new_from(tk, NULL);
+    int n = atoi(ns);
+    return arr_new_from(
+      token_new_int_pos(n, this->source, line),
+      token_new_symbol_pos(symbol_new("lst"), this->source, line),
+      token_new_symbol_pos(symbol_new("get"), this->source, line),
+      NULL
+    );
   } else if (*symstr == '@') {
     TokenPos *pos = opt_nget(token_pos(tk));
     if (!pos) EXC_ILLEGAL_STATE("pos is null")
@@ -171,7 +187,8 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
         token_new_symbol_pos(symbol_STACK_CHECK, this->source, line),
         NULL
       );
-    } else if (symstr[1] == '+') {
+    }
+    if (symstr[1] == '+') {
       if (args_is_production()) return arr_new();
 
       ++this->stkcounter;
@@ -183,7 +200,8 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
         token_new_symbol_pos(symbol_STACK_OPEN, this->source, line),
         NULL
       );
-    } else if (symstr[1] == '-') {
+    }
+    if (symstr[1] == '-') {
       if (args_is_production()) return arr_new();
 
       --this->stkcounter;
@@ -195,19 +213,21 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
         token_new_symbol_pos(symbol_STACK_CLOSE, this->source, line),
         NULL
       );
-    } else {
-      if (args_is_production()) return arr_new();
-
-      Token *tk = token_new_symbol_pos(
-        symbol_new(str_right(symstr, 1)), this->source, line
-      );
-      return arr_new_from(
-        token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
-        token_new_symbol_pos(symbol_STACK, this->source, line),
-        NULL
-      );
     }
-  } else if (this->prg[this->prg_ix] == ',') {
+    if (args_is_production()) return arr_new();
+
+    Token *tk = token_new_symbol_pos(
+      symbol_new(str_right(symstr, 1)), this->source, line
+    );
+    return arr_new_from(
+      token_new_list_pos(arr_new_from(tk, NULL), this->source, line),
+      token_new_symbol_pos(symbol_STACK, this->source, line),
+      NULL
+    );
+  } else if (
+    this->prg[this->prg_ix] == ',' &&
+    this->prg[this->prg_ix + 1] > ' '
+  ) {
     EACHL(this->syms, SymbolKv, e) {
       if (symbolKv_key(e) == sym) {
         TokenPos *pos = opt_nget(token_pos(tk));
@@ -220,6 +240,7 @@ Arr *reader_symbol_id (Reader *this, Arr *prg, Token *tk) {
       }
     }_EACH
   }
+
   return arr_new_from(tk, NULL);
 }
 
@@ -262,7 +283,9 @@ Arr *reader_interpolation (Reader *this, Token *tk) {
     if (arr_size(prg)) {
       arr_push(r, token_new_list_pos(prg, this->source, nline));
       arr_push(r, token_new_symbol_pos(symbol_DATA, this->source, nline));
-      arr_push(r, token_new_symbol_pos(symbol_REF_OUT, this->source, nline));
+      arr_push(r, token_new_int_pos(0, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_LST, this->source, nline));
+      arr_push(r, token_new_symbol_pos(symbol_GET, this->source, nline));
       arr_push(r, token_new_symbol_pos(symbol_TO_STR, this->source, nline));
       arr_push(r, token_new_symbol_pos(symbol_PLUS, this->source, nline));
     } else {

@@ -5,7 +5,7 @@
   0 wrap,ref : C =;
   stones dup
 
-  stones size
+  stones str,len
   (
     str,get
     jewels swap str,index : -1 : != (C (1 +) ^^) if

@@ -51,6 +51,65 @@ static void make (Machine *m) {
   pushlist(m, arr_new_c(sz, (void **)tks));
 }
 
+void size (Machine *m) {
+  // Arr<Token>
+  Arr *a = tk_pop_list(m);
+  machine_push(m, token_new_int(arr_size(a)));
+}
+
+void get (Machine *m) {
+  Int ix = tk_pop_int(m);
+  // Arr<Token>
+  Arr *a = tk_pop_list(m);
+  if (ix < 0 || ix >= arr_size(a))
+    fails_range(m, 0, arr_size(a) - 1, ix);
+
+  machine_push(m, arr_start(a)[ix]);
+}
+
+static void setboth (Machine *m, int isplus) {
+  Token *tk3 = machine_pop(m);
+  Int ix = tk_pop_int(m);
+  // Arr<Token>
+  Arr *a = isplus ? tk_peek_list(m) : tk_pop_list(m);
+  if (ix < 0 || ix >= arr_size(a))
+    fails_range(m, 0, arr_size(a) - 1, ix);
+
+  arr_start(a)[ix] = tk3;
+}
+
+void set (Machine *m) {
+  setboth(m, 0);
+}
+
+void setplus (Machine *m) {
+  setboth(m, 1);
+}
+
+static void upboth (Machine *m, int isplus) {
+  Token *prg = machine_pop_exc(m, token_LIST);
+  Token *tk2 = machine_pop(m);
+  Token *tk1 = machine_peek(m);
+  machine_push(m, tk2);
+  get(m);
+
+  machine_process("", machine_pmachines(m), prg);
+
+  Token *tk3 = machine_pop(m);
+  machine_push(m, tk1);
+  machine_push(m, tk2);
+  machine_push(m, tk3);
+  setboth(m, isplus);
+}
+
+void up (Machine *m) {
+  upboth(m, 0);
+}
+
+void upplus (Machine *m) {
+  upboth(m, 1);
+}
+
 static void fill (Machine *m) {
   Token *tk = machine_pop(m);
   if (token_type(tk) == token_LIST || token_type(tk) == token_NATIVE)
@@ -325,11 +384,8 @@ static void find (Machine *m) {
   }
   // Arr<Token>
   Arr *a = getlist(m);
-  Token *r0 = opt_nget(it_find(it_from(a), (FPRED)fn));
-  // Arr<Token>
-  Arr *r = arr_new();
-  if (r0) arr_push(r, r0);
-  pushlist(m, r);
+  Token *r = opt_nget(it_find(it_from(a), (FPRED)fn));
+  machine_push(m, token_from_pointer(symbol_OPTION_, r));
 }
 
 static void lastindex (Machine *m) {
@@ -378,8 +434,13 @@ static void flat (Machine *m) {
   Arr *r = arr_new();
   void add (Arr *ls) {
     EACH(ls, Token, tk) {
-      if (token_type(tk) == token_LIST) add(token_list(tk));
-      else arr_push(r, tk);
+      if (token_type(tk) == token_LIST) {
+        EACH(token_list(tk), Token, t) {
+          arr_push(r, t);
+        }_EACH
+      } else {
+        arr_push(r, tk);
+      }
     } _EACH
   }
   add(a);
@@ -609,6 +670,13 @@ Pmodule *modlist_mk (void) {
   add("unary", unary); // [] - LIST
   add("make", make); // <INT, *> - <LIST>
 
+  add("size", size);
+  add("get", get);
+  add("set", set);
+  add("set+", setplus);
+  add("up", up);
+  add("up+", upplus);
+
   add("fill", fill); // <LIST, *> - <>
   add("push", push); // <LIST, *> - <>
   add("push+", pushplus); // <LIST, *> - <LIST>
@@ -641,7 +709,7 @@ Pmodule *modlist_mk (void) {
   add("lastIndexf", lastindexf);
   add("reduce", reduce);
 
-  add("flat", flat);
+  add("flat", flat); // only one level
   add("drop", drop);
   add("dropf", dropf);
   add("filter", filter);

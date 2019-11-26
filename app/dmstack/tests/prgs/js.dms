@@ -19,24 +19,24 @@
 
   "[]" js,ra () == assert
   "[1, 2, [], 3, {}, {\"a\": 11}, [true, null]]" js,ra A =
-  A 0 get js,ri 1 == assert
-  A 1 get js,ri 2 == assert
-  A 2 get js,ra () == assert
-  A 3 get js,ri 3 == assert
-  A 4 get js,ro map,size 0 == assert
-  A 5 get js,ro "a" map,get js,ri 11 == assert
-  A 6 get js,ra A2 =
-  A2 0 get js,rb assert
-  A2 0 get js,null? ! assert
-  A2 1 get js,null? assert
+  A !0 js,ri 1 == assert
+  A !1 js,ri 2 == assert
+  A !2 js,ra () == assert
+  A !3 js,ri 3 == assert
+  A !4 js,ro map,size 0 == assert
+  A !5 js,ro "a" map,get js,ri 11 == assert
+  A !6 js,ra A2 =
+  A2 !0 js,rb assert
+  A2 !0 js,null? ! assert
+  A2 !1 js,null? assert
 
   "{\"a\": 1, \"b\": [], \"c\": {}, \"d\": [1, false], "
   "\"e\": {\"a2\": \"\", \"b2\": null} }" + js,ro A =
   A .a js,ri 1 == assert
   A .b  js,ra () == assert
   A .c  js,ro map,size 0 == assert
-  A .d  js,ra 0 get js,ri 1 == assert
-  A .d  js,ra 1 get js,rb ! assert
+  A .d  js,ra 0 lst,get js,ri 1 == assert
+  A .d  js,ra 1 lst,get js,rb ! assert
   A .e  js,ro .a2  js,null? ! assert
   A .e  js,ro .a2  js,rs "" == assert
   A .e  js,ro .b2  js,null? assert
@@ -60,30 +60,30 @@
     Js =
   Js js,ra Jss =
   []
-    Jss 0 get js,ri lst,push+
-    Jss 1 get js,ri lst,push+
-    Jss 2 get js,ra lst,push+
-    Jss 3 get js,rf lst,push+
-    Jss 4 get js,ro lst,push+
-    Jss 5 get js,ro O =
+    Jss !0 js,ri lst,push+
+    Jss !1 js,ri lst,push+
+    Jss !2 js,ra lst,push+
+    Jss !3 js,rf lst,push+
+    Jss !4 js,ro lst,push+
+    Jss !5 js,ro O =
       map,new
         "a" O "a" map,get js,ri
         map,put+
       lst,push+
-    Jss 6 get js,ra A =
+    Jss !6 js,ra A =
       []
-        A 0 get js,rb lst,push+
-        A 1 get js,null? (0) (1) elif lst,push+
+        A !0 js,rb lst,push+
+        A !1 js,null? (0) (1) elif lst,push+
       lst,push+ : Arr =
 
-    Arr 0 get 1 expect
-    Arr 1 get 2 expect
-    Arr 2 get [] expect
-    Arr 3 get 3.5 expect
-    Arr 4 get map,size 0 expect
-    Arr 5 get .a 11 expect
-    Arr 6 get 0 get 1 expect
-    Arr 6 get 1 get 0 expect
+    Arr !0 1 expect
+    Arr !1 2 expect
+    Arr !2 [] expect
+    Arr !3 3.5 expect
+    Arr !4 map,size 0 expect
+    Arr !5 .a 11 expect
+    Arr !6 !0 1 expect
+    Arr !6 !1 0 expect
 
   {} map,from js,wo js,ro map,size 0 == assert
   {} map,from
@@ -97,17 +97,17 @@
     js,wo Js =
   Js js,ro Jss =
   {} map,from
-    "a" Jss "a" map,oget >> js,ri map,put+
-    "b" Jss "b" map,oget >> js,ra map,put+
-    "c" Jss "c" map,oget >> js,ro map,put+
+    "a" Jss "a" map,get js,ri map,put+
+    "b" Jss "b" map,get js,ra map,put+
+    "c" Jss "c" map,get js,ro map,put+
     "d"
       []
-        Jss "d" map,oget >> js,ra A =
-        A 0 get js,ri lst,push+; A 1 get js,rb lst,push+
+        Jss "d" map,get js,ra A =
+        A 0 lst,get js,ri lst,push+; A 1 lst,get js,rb lst,push+
       map,put+
     "e"
       map,new
-        Jss "e" map,oget >> js,ro O =
+        Jss "e" map,get js,ro O =
         "a2"
           O "a2" map,get js,rs
           map,put+
@@ -116,13 +116,13 @@
           map,put+
       map,put+ : Mp =
 
-  Mp "a" map,oget >> 1 expect
-  Mp "b" map,oget >> [] expect
-  Mp "c" map,oget >> map,size 0 expect
-  Mp "d" map,oget >> 0 get 1 expect
-  Mp "d" map,oget >> 1 get 0 expect
-  Mp "e" map,oget >> .a2 "" expect
-  Mp "e" map,oget >> .b2 0 expect
+  Mp "a" map,get 1 expect
+  Mp "b" map,get [] expect
+  Mp "c" map,get map,size 0 expect
+  Mp "d" map,get 0 lst,get 1 expect
+  Mp "d" map,get 1 lst,get 0 expect
+  Mp "e" map,get .a2 "" expect
+  Mp "e" map,get .b2 0 expect
 
   [] (js,ws) js,fromList (js,rs) js,toList [] == assert
   ["a", "b"] (js,ws) js,fromList (js,rs) js,toList ["a", "b"] == assert
@@ -131,7 +131,7 @@
   {"a": 1, "b": 2} map,from (js,wi) js,fromMap (js,ri) js,toMap : Mp =
 
   Mp "a" map,get 1 expect
-  Mp "b" map,oget >> 2 expect
+  Mp "b" map,get 2 expect
 
   empty? assert
 ) run

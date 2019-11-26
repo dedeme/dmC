@@ -321,17 +321,20 @@ void primitives_add_lib (Lib *lib);
 #include "dmc/async.h"
 #include "Machine.h"
 
-enum types_Check { types_PUT, types_REMOVE, types_NOTHING };
-
 /// Check types of stack values and raise a fail if checking not succeeds.
 void types_fail (Machine *m);
 
 /// Check types of stack values and push in stack '1' if checking succeeds.
 void types_check (Machine *m);
 
-int types__check (
-  Machine *m, Arr *stack, char *type, int with_stop, enum types_Check check
-);
+/// Check types of stack values at the begin of a procedure and raise a
+/// fail if checking not succeeds.
+void types_open_fail (Machine *m);
+
+/// Check types of stack values at the end of a procedure and raise a
+/// fail if checking not succeeds.
+void types_close_fail (Machine *m);
+
 
 #endif
 // Copyright 22-Sept-2019 ºDeme
@@ -816,7 +819,7 @@ typedef intptr_t Int;
 #define exc_dmstack_t "dmstack"
 
 ///
-#define MAX_EXC_STACK 10
+#define MAX_EXC_STACK 5
 
 ///
 #define MAX_EXC_TRACE 15
@@ -972,8 +975,9 @@ enum symbol_SYSTEM {
 
   symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
 
-  symbol_MAP_, symbol_BLOB_, symbol_THREAD_, symbol_ITERATOR_,
-  symbol_FILE_, symbol_ISERVER_, symbol_ISERVER_RQ_, symbol_EXC_,
+  symbol_REF_, symbol_OPTION_, symbol_EITHER_, symbol_MAP_, symbol_BLOB_,
+  symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_, symbol_ISERVER_,
+  symbol_ISERVER_RQ_, symbol_EXC_,
 
   symbol_SYSTEM_COUNT
 };
@@ -1099,6 +1103,9 @@ Symbol token_native_symbol (Token *this);
 ///
 void *token_native_pointer (Token *this);
 
+///
+void token_set_native_pointer (Token *this, void *value);
+
 /// Returns a new token equals to 'this'
 Token *token_clone (Token *this);
 
@@ -1113,12 +1120,6 @@ char *token_to_str_draft (Token *this);
 
 ///
 char *token_type_to_str (enum token_Type type);
-
-/// Check a type against an stack.
-///   tokens: List<Token> stack.
-///   type  : Type to check.
-///   return: The actual type.
-char *token_check_type (List *tokens, char *type);
 
 #endif
 // Copyright 12-Sept-2019 ºDeme

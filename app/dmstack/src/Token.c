@@ -164,6 +164,10 @@ void *token_native_pointer (Token *this) {
   return this->value.native->pointer;
 }
 
+void token_set_native_pointer (Token *this, void *value) {
+  this->value.native->pointer = value;
+}
+
 Token *token_clone (Token *this) {
   switch (this->type) {
     case token_INT: return token_new_int(this->value.i);
@@ -179,13 +183,36 @@ Token *token_clone (Token *this) {
       return token_new_list(r);
     }
     case token_NATIVE: {
-      if (token_native_symbol(this) == symbol_MAP_) {
+      Symbol sym = this->value.native->sym;
+      if (sym == symbol_MAP_) {
         // Map<Token>
         Map *r = map_new();
         EACH(token_native_pointer(this), Kv, kv){
           map_put(r, str_new(kv_key(kv)), token_clone(kv_value(kv)));
         }_EACH
         return token_from_pointer(symbol_MAP_, r);
+      } else if (sym == symbol_REF_) {
+        return token_from_pointer(
+          symbol_REF_,
+          token_clone(this->value.native->pointer)
+        );
+      } else if (sym == symbol_OPTION_) {
+        Token *value = token_native_pointer(this);
+        return token_from_pointer(
+          symbol_OPTION_,
+          value ? token_clone(value) : NULL
+        );
+      } else if (sym == symbol_EITHER_) {
+        Token **nvalues = ATOMIC(sizeof(Token *) + sizeof(Token *));
+        Token **values = this->value.native->pointer;
+        if (values[0]) {
+          nvalues[0] = token_clone(values[0]);
+          nvalues[1] = NULL;
+        } else {
+          nvalues[0] = NULL;
+          nvalues[1] = token_clone(values[1]);
+        }
+        return token_from_pointer(symbol_EITHER_, nvalues);
       } else {
         struct token_Native *nt = this->value.native;
         return token_from_pointer(nt->sym, nt->pointer);
@@ -196,6 +223,7 @@ Token *token_clone (Token *this) {
   return NULL; // not reachable.
 }
 
+// other can be NULL.
 int token_eq (Token *this, Token *other) {
   // a1 and a2 are Arr<Token>
   int arreq (Arr *a1, Arr *a2) {
@@ -209,14 +237,39 @@ int token_eq (Token *this, Token *other) {
     return 1;
   }
 
-  enum token_Type t = token_type(this);
-  if (t != token_type(other)) return 0;
+  if (!other || token_type(this) != token_type(other)) return 0;
 
   switch (this->type) {
     case token_INT: return this->value.i == other->value.i;
-    case token_NATIVE:
-      return this->value.native->sym == other->value.native->sym &&
-             this->value.native->pointer == other->value.native->pointer;
+    case token_NATIVE: {
+      Symbol sym = this->value.native->sym;
+      if (sym == symbol_REF_) {
+        return sym == other->value.native->sym &&
+          token_eq(this->value.native->pointer, other->value.native->pointer);
+      } else if (sym == symbol_OPTION_) {
+        Token *value = this->value.native->pointer;
+        if (value)
+          return sym == other->value.native->sym &&
+            token_eq(value, other->value.native->pointer);
+        else
+          return sym == other->value.native->sym &&
+            !other->value.native->pointer;
+      } else if (sym == symbol_EITHER_) {
+        Token **values = this->value.native->pointer;
+        if (values[0]) {
+          return sym == other->value.native->sym &&
+            token_eq(values[0], ((Token **)other->value.native->pointer)[0]) &&
+            !((Token **)other->value.native->pointer)[1];
+        } else {
+          return sym == other->value.native->sym &&
+            token_eq(values[1], ((Token **)other->value.native->pointer)[1]) &&
+            !((Token **)other->value.native->pointer)[0];
+        }
+      } else {
+        return sym == other->value.native->sym &&
+               this->value.native->pointer == other->value.native->pointer;
+      }
+    }
     case token_FLOAT: return this->value.f == other->value.f;
     case token_STRING: return str_eq(this->value.s, other->value.s);
     case token_SYMBOL: return symbol_eq(this->value.sym, other->value.sym);
@@ -239,7 +292,8 @@ char *token_to_str (Token *this) {
       return str_f("(%s)", str_join(a, ", "));
     }
     case token_NATIVE: {
-      if (token_native_symbol(this) == symbol_MAP_) {
+      Symbol sym = this->value.native->sym;
+      if (sym == symbol_MAP_) {
         // Arr<char>
         Arr *a = arr_new();
         EACH(token_native_pointer(this), Kv, kv) {
@@ -248,6 +302,16 @@ char *token_to_str (Token *this) {
           ));
         }_EACH
         return str_f("{%s}", str_join(a, ", "));
+      } else if (sym == symbol_REF_) {
+        return str_f("<|%s>", token_to_str(this->value.native->pointer));
+      } else if (sym == symbol_OPTION_) {
+        Token *value = this->value.native->pointer;
+        if (value) return str_f("<O|%s>", token_to_str(value));
+        else return "<O|>";
+      } else if (sym == symbol_EITHER_) {
+        Token **values = this->value.native->pointer;
+        if (values[0]) return str_f("<L|%s>", token_to_str(values[0]));
+        else return str_f("<R|%s>", token_to_str(values[1]));
       } else {
         return str_f(
           "<%s, %ld>",

@@ -131,18 +131,17 @@ static void newdate (Machine *m) {
 static void fromstr (Machine *m) {
   char *tpl = tk_pop_string(m);
   char *time = tk_pop_string(m);
-  Token *r = opt_nget(from(tpl, time));
-  if (r) machine_push(m, token_new_list(arr_new_from(r, NULL)));
-  else machine_push(m, token_new_list(arr_new()));
+  machine_push(
+    m, token_from_pointer(symbol_OPTION_, opt_nget(from(tpl, time)))
+  );
 }
 
 static void fromdate (Machine *m) {
   char *time = tk_pop_string(m);
   time = str_f("%s12", time);
-  Token *r = opt_nget(from("%Y%m%d%H", time));
-
-  if (r) machine_push(m, token_new_list(arr_new_from(r, NULL)));
-  else machine_push(m, token_new_list(arr_new()));
+  machine_push(
+    m, token_from_pointer(symbol_OPTION_, opt_nget(from("%Y%m%d%H", time)))
+  );
 }
 
 static void todate (Machine *m) {
@@ -234,7 +233,7 @@ Pmodule *modtime_mk (void) {
                                   // [year, month, day] - date
   add("fromStr", fromstr); // [STRING, STRING] - OPT<INT>
                                   // [date, template] - option of date
-  add("fromDate", fromdate); // STRING - INT
+  add("fromDate", fromdate); // STRING - OPT<INT>
   add("toDate", todate); // INT - STRING
   add("toTime", totime); // INT - STRING
   add("toDateTime", todatetime); // INT - STRING

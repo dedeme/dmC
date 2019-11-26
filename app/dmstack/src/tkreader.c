@@ -10,6 +10,17 @@ static int is_blank (char ch) {
   return ((unsigned char)ch) <= ' ' || ch == ';' || ch == ':' || ch == ',';
 }
 
+static int is_paren (char ch) {
+  return ch == '(' || ch == ')' ||
+         ch == '{' || ch == '}' ||
+         ch == '[' || ch == ']'
+  ;
+}
+
+static int is_blank_or_parent (char ch) {
+  return is_blank(ch) || is_paren(ch);
+}
+
 static void to_unicode(Buf *bf, char *hexdigits) {
   char hexvalue (char ch) {
     return (ch <= '9') ? ch - '0' : toupper(ch) - 'A' + 10;
@@ -361,7 +372,7 @@ Opt *tkreader_next(Reader *reader) {
         if (sum2 < 0) e = '{';
         if (e != ' ')
           reader_fail(reader, str_f(
-            "Extra '%c' in\n'%s'", e, big_msg(str_sub(prgd, 0, p - prgd + 1))
+            "Extra '%c' in\n%s", e, big_msg(str_sub(prgd, 0, p - prgd + 1))
           ));
 
         e = ' ';
@@ -373,13 +384,13 @@ Opt *tkreader_next(Reader *reader) {
         if (sign == '{' && !sum2 && sum1) e = '[';
         if (e != ' ')
           reader_fail(reader, str_f(
-            "Internal '%c' open when '%c' was closed in\n'%s'",
+            "Internal '%c' open when '%c' was closed in\n%s",
             e, sign, big_msg(str_sub(prgd, 0, p - prgd + 1))
           ));
       }
       if (!*p) {
         reader_fail(reader, str_f(
-          "'%c' without close in\n'%s'",
+          "'%c' without close in\n%s",
           sign, big_msg(str_sub(prgd, 0, p - prgd))
         ));
       }
@@ -396,8 +407,12 @@ Opt *tkreader_next(Reader *reader) {
       ));
     }
 
+    // Closed parentheses ------------------------------------------------------
+    if (ch == ')' || ch == '}' || ch == ']')
+      reader_fail(reader, str_f("'%c' not open", ch));
+
     // Symbol ------------------------------------------------------------------
-    while (!is_blank(*++p));
+    while (!is_blank_or_parent(*++p));
     reader_set_prg_ix(reader, prg_ix + p - prg);
     char *id = str_sub(prgd, 0, p - prgd);
     return opt_new(token_new_symbol_pos(

@@ -150,6 +150,9 @@
 
   // split - splitTrim - join
 
+  "ab c" "" str,split ("a", "b", " ", "c") expect
+  "" "" str,split () expect
+
   "" ";" str,split ";" str,join "" expect
   ";" ";" str,split ";" str,join ";" expect
   "ab" ";" str,split ";" str,join "ab" expect
@@ -172,8 +175,8 @@
   "ab;--c;--de" ";--" str,splitTrim ";--" str,join "ab;--c;--de" expect
   "ab ;--  c \t ;--  de" ";--" str,splitTrim ";--" str,join
     "ab;--c;--de" expect
-  "" "" str,split dup size 0 expect; "" str,join "" expect
-  "abñ" "" str,split dup size 3 expect; "" str,join "abñ" expect
+  "" "" str,split dup lst,size 0 expect; "" str,join "" expect
+  "abñ" "" str,split dup lst,size 3 expect; "" str,join "abñ" expect
 
   // replace
 
@@ -208,7 +211,7 @@
   " a\tb €\n" str,runes 7 expect
   "" // u8target   rest rune
   "cañón | a\tb €\n" // u8source
-  (dup size 0 >) (str,nextRune swap u8s = + u8s) while
+  (dup str,len 0 >) (str,nextRune swap u8s = + u8s) while
   pop "cañón | a\tb €\n" expect
 
   "" str,toUnicode str,fromUnicode "" expect

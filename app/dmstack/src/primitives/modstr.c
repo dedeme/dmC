@@ -97,11 +97,6 @@ static void next_rune (Machine *m) {
   machine_push(m, token_new_string(rune));
 }
 
-static void runes (Machine *m) {
-  char *s = getstr(m);
-  machine_push(m, token_new_int(str_runes(s)));
-}
-
 static void split (Machine *m) {
   char *sep = getstr(m);
   char *s = getstr(m);
@@ -174,6 +169,11 @@ static void get (Machine *m) {
   pushstr(m, str_c(s[ix]));
 }
 
+static void len (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_int(strlen(s)));
+}
+
 static void getrune (Machine *m) {
   Int ix = tk_pop_int(m);
   char *s = tk_pop_string(m);
@@ -197,6 +197,11 @@ static void getrune (Machine *m) {
     else fails_range(m, 0, len - 1, ix);
   }
   pushstr(m, rune);
+}
+
+static void runes (Machine *m) {
+  char *s = getstr(m);
+  machine_push(m, token_new_int(str_runes(s)));
 }
 
 static void subaux (Machine *m, int begin, int end, int is_right) {
@@ -326,7 +331,6 @@ Pmodule *modstr_mk (void) {
   add("join", join);
   add("replace", replace);
   add("nextRune", next_rune);
-  add("runes", runes);
   add("split", split);
   add("splitTrim", split_trim);
   add("starts?", starts);
@@ -338,7 +342,9 @@ Pmodule *modstr_mk (void) {
   add("toUpper", to_upper);
 
   add("get", get);
+  add("len", len);
   add("getRune", getrune);
+  add("runes", runes);
   add("sub", sub);
   add("left", left);
   add("right", right);

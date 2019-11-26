@@ -7,11 +7,11 @@
     L () ==
     (L 2 lst,push; 2 wrap,some)
     (
-      L L size 1 - get 1 + wrap,ref : Next =
+      L L lst,size 1 - lst,get 1 + wrap,ref : Next =
       ( Next >> pp =; pp int,toFloat math,sqrt float,toInt : lim =;
         0
-        L size
-        ( L swap get : p =;
+        L lst,size
+        ( L swap lst,get : p =;
           ( p lim >)
           ( break)
           else
@@ -25,10 +25,10 @@
       ( Next (++) ^^)
       while
       L Next >> lst,push
-      Next
+      Next >> wrap,some
     )
     elif
-  @-l)
+  @-o)
   it,new
 @-<Iterator>) primes =>
 
@@ -39,23 +39,23 @@
   [P, Pv] data
   ( @+l
     O =;
-    O 0 get : P =
-    O 1 get : Pv =
+    O !0 : P =
+    O !1 : Pv =
 
     P it,next wrap,ref : Current =
     (Pv >> : P it,peek : + 2. / :: Current >> :: fn)
     (Pv Current >> <<; Current P it,next << )
     while
     Pv Current >> <<
-    Current
-  @-l)
+    Current >> wrap,some
+  @-o)
   it,new
 @-<Iterator>) strWeak =>
 
-( >=:& strWeak @<Iterator> )
+(@+:: (>=) strWeak @-<Iterator>)
 strongs =>
 
-( <=:& strWeak @<Iterator> )
+(@+:: (<=) strWeak @-<Iterator>)
 weaks =>
 
 "First 36 strong primes:" sys,println
