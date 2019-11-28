@@ -973,7 +973,7 @@ enum symbol_SYSTEM {
   symbol_EXPECT, symbol_THIS, symbol_STACK, symbol_STACK_CHECK,
   symbol_STACK_OPEN, symbol_STACK_CLOSE, symbol_STACK_STOP,
 
-  symbol_PLUS, symbol_TO_STR, symbol_REF_OUT,
+  symbol_PLUS, symbol_TO_STR, symbol_LST, symbol_GET,
 
   symbol_REF_, symbol_OPTION_, symbol_EITHER_, symbol_MAP_, symbol_BLOB_,
   symbol_THREAD_, symbol_ITERATOR_, symbol_FILE_, symbol_ISERVER_,

@@ -39,12 +39,20 @@
 0 1 0 andEq assert
 0 0 0 andEq assert
 
-(&& ==) orEq =>
+1 1 (1) andEq assert
+0 1 (0) andEq assert
+0 0 (0 assert) andEq assert
+
+(|| ==) orEq =>
 // Or
 1 1 123 orEq assert
-0 0 123 orEq assert
-0 1 0 orEq assert
+1 0 123 orEq assert
+1 1 0 orEq assert
 0 0 0 orEq assert
+
+1 1 (0 assert) orEq assert
+1 0 (1) orEq assert
+0 0 (0) orEq assert
 
 // Not
 189 ! ! assert

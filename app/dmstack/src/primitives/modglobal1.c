@@ -6,15 +6,47 @@
 #include "tk.h"
 
 void modglobal1_and (Machine *m) {
-  Int i2 = tk_pop_int(m);
-  Int i1 = tk_pop_int(m);
-  machine_push(m, token_new_int(i1 && i2));
+  Token *tk = machine_pop_opt(m, token_LIST);
+  if (tk) {
+    Int i1 = tk_pop_int(m);
+    if (i1) {
+      Machine *m2 = machine_isolate_process("", machine_pmachines(m), tk);
+      if (arr_size(machine_stack(m2)) != 1)
+        machine_fail(m, str_f(
+          "Lazy '&&' stack. Expected size: 1, actual size: %d.",
+          arr_size(machine_stack(m2))
+      ));
+      machine_push(m, machine_pop_exc(m2, token_INT));
+    } else {
+      machine_push(m, token_new_int(0));
+    }
+  } else {
+    Int i2 = tk_pop_int(m);
+    Int i1 = tk_pop_int(m);
+    machine_push(m, token_new_int(i1 && i2));
+  }
 }
 
 void modglobal1_or (Machine *m) {
-  Int i2 = tk_pop_int(m);
-  Int i1 = tk_pop_int(m);
-  machine_push(m, token_new_int(i1 || i2));
+  Token *tk = machine_pop_opt(m, token_LIST);
+  if (tk) {
+    Int i1 = tk_pop_int(m);
+    if (i1) {
+      machine_push(m, token_new_int(1));
+    } else {
+      Machine *m2 = machine_isolate_process("", machine_pmachines(m), tk);
+      if (arr_size(machine_stack(m2)) != 1)
+        machine_fail(m, str_f(
+          "Lazy '||' stack. Expected size: 1, actual size: %d.",
+          arr_size(machine_stack(m2))
+      ));
+      machine_push(m, machine_pop_exc(m2, token_INT));
+    }
+  } else {
+    Int i2 = tk_pop_int(m);
+    Int i1 = tk_pop_int(m);
+    machine_push(m, token_new_int(i1 || i2));
+  }
 }
 
 void modglobal1_not (Machine *m) {
