@@ -10,10 +10,23 @@
 )
 try
 
-( "xx" "A exc" throw)
+( "xx" "A exc" throw; 0 assert)
 ( Ex =
   Ex exc,type "xx" expect
   Ex exc,msg "A exc" expect
+)
+try
+
+0 wrap,ref : Ok =
+( "A msg" fail)
+( Ex =
+  ( "xx" "A exc" throw; 0 assert)
+  ( Ex =
+    Ex exc,type "xx" expect
+    Ex exc,msg "A exc" expect
+    Ok 1 <<
+  )
+  try
 )
 try
 

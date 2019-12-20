@@ -4,6 +4,7 @@
 #include "primitives/modint.h"
 #include <limits.h>
 #include "dmc/rnd.h"
+#include "dmc/Dec.h"
 #include "fails.h"
 #include "tk.h"
 
@@ -106,6 +107,18 @@ static void tofloat (Machine *m) {
   ));
 }
 
+static void toiso (Machine *m) {
+  machine_push(m, token_new_string(
+    dec_int_to_iso(tk_pop_int(m))
+  ));
+}
+
+static void tous (Machine *m) {
+  machine_push(m, token_new_string(
+    dec_int_to_us(tk_pop_int(m))
+  ));
+}
+
 Pmodule *modint_mk (void) {
   Pmodule *r = pmodule_new();
   void add (char *name, pmodule_Fn fn) {
@@ -130,6 +143,10 @@ Pmodule *modint_mk (void) {
   add("maxInt", maxint); // () - INT
   add("minInt", minint); // () - INT
   add("toFloat", tofloat); // INT - FLOAT
+
+  add("toIso", toiso); // INT - STRING
+  add("toUs", tous); // INT - STRING
+
   return r;
 }
 

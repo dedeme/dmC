@@ -32,7 +32,7 @@
   0 // c
   ( dup 10 < (c =; c +; c 1 +) (pop; break) elif)
   loop
-  45 == assert
+  45 expect
   // clock,now C1 clock,- 1 get long,toInt puts
 
   // "Loop (2): " sys,print; clock,now C1 =
@@ -49,6 +49,26 @@
   (dup 10 <) (c =; c +; c 1 +) while
   pop 45 == assert
   // clock,now C1 clock,- 1 get long,toInt puts
+
+   (
+     dup 0 < ("Negative number" fail) if
+     r : =
+     1
+     ( 1 : r 1 +)
+     ( *)
+     for
+   ) fac =>
+   6 fac 720 expect
+
+   (
+     dup 0 < ("Negative number" fail) if
+     1 swap // stack: result, number
+     ( 1 + *)
+     for
+   ) fac =>
+   6 fac 720 expect
+
+
 
   // "While to 4 (1): " sys,print; clock,now C1 =
   0 // sum

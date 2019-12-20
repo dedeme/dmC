@@ -4,6 +4,7 @@
 #include "primitives/modfloat.h"
 #include <math.h>
 #include "dmc/rnd.h"
+#include "dmc/Dec.h"
 #include "fails.h"
 #include "tk.h"
 
@@ -69,6 +70,20 @@ static void toint (Machine *m) {
   ));
 }
 
+static void toiso (Machine *m) {
+  int scale = tk_pop_int(m);
+  machine_push(m, token_new_string(
+    dec_double_to_iso(tk_pop_float(m), scale)
+  ));
+}
+
+static void tous (Machine *m) {
+  int scale = tk_pop_int(m);
+  machine_push(m, token_new_string(
+    dec_double_to_us(tk_pop_float(m), scale)
+  ));
+}
+
 Pmodule *modfloat_mk (void) {
   Pmodule *r = pmodule_new();
   void add (char *name, pmodule_Fn fn) {
@@ -87,6 +102,10 @@ Pmodule *modfloat_mk (void) {
   add("==", eq);
 
   add("toInt", toint); // [FLOAT] - INT
+
+  add("toIso", toiso); // [FLOAT, INT] - STRING
+  add("toUs", tous);   // [FLOAT, INT] - STRING
+
   return r;
 }
 

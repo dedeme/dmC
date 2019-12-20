@@ -121,6 +121,11 @@ static void starts (Machine *m) {
   machine_push(m, token_new_int(str_starts(s, sub)));
 }
 
+static void reverse (Machine *m) {
+  char *s = getstr(m);
+  pushstr(m, str_reverse(s));
+}
+
 static void trim (Machine *m) {
   char *s = getstr(m);
   pushstr(m, str_trim(s));
@@ -334,6 +339,7 @@ Pmodule *modstr_mk (void) {
   add("split", split);
   add("splitTrim", split_trim);
   add("starts?", starts);
+  add("reverse", reverse);
   add("trim", trim);
   add("ltrim", ltrim);
   add("rtrim", rtrim);

@@ -215,7 +215,7 @@ Pmodule *modblob_mk (void) {
 
   add("new", new); // INT - BLOB
   add("make", make); // <INT, INT> - <BLOB>  (value, size) - (blob)
-  add("fill", fill); // <BLOB, INT> - <BLOB>
+  add("fill", fill); // <BLOB, INT> - []
   add("from", from); // LIST - BLOB
   add("get", get); // [BLOB, INT] - INT
   add("set", set); // [BLOB, INT, INT] - []

@@ -1,7 +1,7 @@
 // Copyright 17-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// JSON module.
+/// JSON module.
 
 #ifndef PRIMITIVES_MODJS_H
   #define PRIMITIVES_MODJS_H

@@ -1,6 +1,8 @@
 // Copyright 29-Oct-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+/// Exceptions management.
+
 #ifndef EXCEPTION_H
   #define EXCEPTION_H
 

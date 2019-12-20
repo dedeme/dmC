@@ -4,8 +4,15 @@
 /// Recursive tests
 
 (
-  // "start" print
+  dup 0 < ("Negative number" fail) if
+  1 swap // stack: result, number
+  (dup (n =; n *, n 1 - : continue) ( pop) elif)
+  recursive
+) fac =>
+// "Recursive tail function 3"
+6 fac 720 expect
 
+(
   (dup (dup 1 - sum +) if)
   sum =>
   // "Recursive not tail function"
@@ -40,7 +47,7 @@
     n =; 1 n (sum1) loop
   ) sum =>
   // "Recursive tail function to loop"
-  6 sum 21 == assert
+  6 sum 21 expect
 
   (1 + it,range0 R =; 0 R (+) it,each) sum =>
   // "Range"

@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// String module.
+/// String module.
 
 #ifndef MODULES_MODSTR_H
   #define MODULES_MODSTR_H

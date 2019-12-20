@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Map module.
+/// Map module.
 
 #ifndef MODULES_MODMAP_H
   #define MODULES_MODMAP_H

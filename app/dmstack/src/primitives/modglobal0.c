@@ -106,9 +106,7 @@ void modglobal0_sub (Machine *m) {
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
   }
 
-  fails_types(m, 2, (enum token_Type[]){
-    token_INT, token_FLOAT
-  });
+  fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
 }
 
 void modglobal0_mul (Machine *m) {
@@ -182,9 +180,7 @@ void modglobal0_div (Machine *m) {
     fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
   }
 
-  fails_types(m, 2, (enum token_Type[]){
-    token_INT, token_FLOAT
-  });
+  fails_types(m, 2, (enum token_Type[]){token_INT, token_FLOAT});
 }
 
 void modglobal0_mod (Machine *m) {

@@ -17,6 +17,8 @@ Opt *tkreader_next(Reader *reader);
 // Copyright 29-Oct-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+/// Exceptions management.
+
 #ifndef EXCEPTION_H
   #define EXCEPTION_H
 
@@ -433,7 +435,7 @@ Pmodule *modit_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Math module.
+/// Math module.
 
 #ifndef MODULES_MODMATH_H
   #define MODULES_MODMATH_H
@@ -448,7 +450,7 @@ Pmodule *modmath_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// List module.
+/// List module.
 
 #ifndef MODULES_MODLIST_H
   #define MODULES_MODLIST_H
@@ -463,7 +465,7 @@ Pmodule *modlist_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Map module.
+/// Map module.
 
 #ifndef MODULES_MODMAP_H
   #define MODULES_MODMAP_H
@@ -478,7 +480,7 @@ Pmodule *modmap_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Float module.
+/// Float module.
 
 #ifndef MODULES_MODFLOAT_H
   #define MODULES_MODFLOAT_H
@@ -493,7 +495,7 @@ Pmodule *modfloat_mk (void);
 // Copyright 03-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Blob module.
+/// Blob module.
 
 #ifndef MODULES_MODBLOB_H
   #define MODULES_MODBLOB_H
@@ -508,7 +510,7 @@ Pmodule *modblob_mk (void);
 // Copyright 02-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Stack management module.
+/// Stack management module.
 
 #ifndef MODULES_MODSTK_H
   #define MODULES_MODSTK_H
@@ -598,7 +600,7 @@ Pmodule *modobj_mk (void);
 // Copyright 17-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// JSON module.
+/// JSON module.
 
 #ifndef PRIMITIVES_MODJS_H
   #define PRIMITIVES_MODJS_H
@@ -693,7 +695,7 @@ Pmodule *modexc_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// String module.
+/// String module.
 
 #ifndef MODULES_MODSTR_H
   #define MODULES_MODSTR_H
@@ -771,7 +773,7 @@ Pmodule *modclock_mk (void);
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Int module.
+/// Int module.
 
 #ifndef MODULES_MODINT_H
   #define MODULES_MODINT_H
@@ -1546,6 +1548,42 @@ Js *bytes_to_js(Bytes *this);
 Bytes *bytes_from_js(Js *js);
 
 #endif
+// Copyright 13-Dec-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+#ifndef DMC_REGEX_H
+  #define DMC_REGEX_H
+
+/// Regular expressions management.
+
+#include "dmc/std.h"
+
+/// Returns the offets where ereg is found in s.
+///   rex   : Regular expression to find. It does not admit grouping (that is,
+///           parenthesis).
+///   s     : String to search in.
+///   return: Opt[Arr[Itp]]. Offsets of 's' with elements which match. Each
+///           'Itp' contains [ofsset start inclusive - ofsect - end exclusive].
+///           If any error happens, it returns opt_empty.
+Opt *regex_matches (char *rex, char *s);
+
+/// Equals to 'regex_matches' but "ignoring case".
+Opt *regex_matches_ic (char *rex, char *s);
+
+/// Replace ocurrences of 'rex' in 's' by 'replacement'. Ocurrences are
+/// find by regex_matches.
+///   rex        : Regular expression to replace. It does not admit grouping (that
+///                is, parenthesis).
+///   s          : String to search in.
+///   replacement: New string.
+///   return     : Opt[char]. A new string with repacements done.
+///                If any error happens, it returns opt_empty.
+Opt *regex_replace (char *rex, char *s, char *replacement);
+
+/// Equals to regex_replace, but "ignoring case".
+Opt *regex_replace_ic (char *rex, char *s, char *replacement);
+
+#endif
 // Copyright 15-Oct-2018 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
@@ -1638,6 +1676,29 @@ Js *darr_to_js(Darr *this);
 
 ///
 Darr *darr_from_js(Js *js);
+
+#endif
+// Copyright 13-Dec-2019 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+#ifndef DMC_ITP_H
+  #define DMC_ITP_H
+
+/// Tuple of two integers.
+
+#include "dmc/std.h"
+
+///
+typedef struct itp_Itp Itp;
+
+///
+Itp *itp_new(int i1, int i2);
+
+///
+int itp_e1(Itp *this);
+
+///
+int itp_e2(Itp *this);
 
 #endif
 // Copyright 23-Apr-2019 ºDeme
@@ -1850,7 +1911,7 @@ char *cryp_decryp (char *b64, char *k);
 
 /// Encodes automatically 's' with a random key of 'nk' digits.
 ///   nK: Number of digits for random key (1 to 64 both inclusive).
-///   s : Text for enconding.
+///   s : Text for encoding.
 char *cryp_auto_cryp (char *s, int nk);
 
 /// Decodes a text codified with autoCryp().
@@ -2139,7 +2200,15 @@ Tp *it_duplicates (It *this, int (feq)(void *e1, void *e2));
 
 /// Calls "wget -q -O - 'url'" and returns the text read.
 /// If the reading fails, it returns an empty string.
-char *ext_wget(char *url);
+char *ext_wget (char *url);
+
+/// Reads an URL.
+/// Calls "node -e [script] 2>/dev/null" and returs the text read.
+/// If the reading fails, it returns an empty string.
+/// [script] is a script which run a node library called "puppeteer". This
+/// library must be downloaded (npm install puppeteer).
+///   url: URL to read. It must include protocol ("https://www.google.com").
+char *ext_puppeteer (char *url);
 
 /// Reads a text using GUI. It calls:
 ///   zenity --entry --title='title' --text='prompt' 2>/dev/null
@@ -2147,13 +2216,13 @@ char *ext_wget(char *url);
 /// If user clicks on cancel, it returns an empty string.
 /// It is posible set a default text adding in promp:
 ///   \" --entry-text \"[text_to_add]
-char *ext_zenity_entry(char *title, char *prompt);
+char *ext_zenity_entry (char *title, char *prompt);
 
 /// ext_zenity_msg shows a message box. It calls:
 ///   zenity --notification --window-icon='icon' --text='text' 2>/dev/null
 /// 'icon' is one of gnome icon stock. For example: info, dialog-warning,
 /// dialog-error, dialog-information, face-wink, etc
-void ext_zenity_msg(char *icon, char *text);
+void ext_zenity_msg (char *icon, char *text);
 
 /// ext_pdf generates a pdf file from a html text. It calls:
 ///   pdfPrinter -s %s -t %s 'options' 2>&1
@@ -2161,7 +2230,7 @@ void ext_zenity_msg(char *icon, char *text);
 ///   tx_source  : Text html
 ///   file_target: Path of the new pdf file
 ///   options    : Options for pdfPrinter
-void ext_pdf(
+void ext_pdf (
   char *tx_source,
   char *file_target,
   char *options
@@ -2173,14 +2242,14 @@ void ext_pdf(
 /// fresh target file, you have to delete it previously.
 ///   source: can be a file or directory,
 ///   target: Zip file. If it is a relative path, it hangs on source parent.
-void ext_zip(char *source, char *target);
+void ext_zip (char *source, char *target);
 
 /// ext_unzip uncompress source in target, It calls:
 ///   unzip -q 'source' -d 'target' 2>&1
 ///
 ///   source: Zip file.
 ///   target: A directory. It it does not exist, it is created.
-void ext_unzip(char *source, char *target);
+void ext_unzip (char *source, char *target);
 
 #endif
 // Copyright 23-Apr-2019 ºDeme
@@ -2490,6 +2559,9 @@ char *str_left(char *str, int end);
 
 /// str_right is equals to 'str_sub(str, begin, strlen(s))'.
 char *str_right(char *str, int begin);
+
+/// Returns a new string in reverse order
+char *str_reverse(char *str);
 
 /// Returns a new string removing spaces (ch <= ' ') at left.
 char *str_ltrim(char *str);
@@ -3061,22 +3133,22 @@ FileLck *file_wopen (char *path);
 /// It returns a FileLck object which will be freed when close is called..
 FileLck *file_aopen (char *path);
 
-/// Reads a text file opened with file_ropen.
+/// Reads a text file open with file_ropen.
 /// It does not delete ends of line.
 /// When reading is finished, returns a blank string.
 char *file_read_line (FileLck *lck);
 
-/// Writes a text file opened with file_wopen or file_aopen.
+/// Writes a text file open with file_wopen or file_aopen.
 void file_write_text (FileLck *lck, char *text);
 
-/// Reads a binary file opened with file_ropen.
+/// Reads a binary file open with file_ropen.
 /// When reading is finished, returns an empty Bytes.
 Bytes *file_read_bin_buf (FileLck *lck, int buffer);
 
 /// file_read_bin is the same as 'file_read_bin_bf' using a buffer of 8192.
 Bytes *file_read_bin (FileLck *lck);
 
-/// Writes a binary file opened with file_wopen.
+/// Writes a binary file open with file_wopen.
 /// Returns 0 if there is no error.
 void file_write_bin (FileLck *lck, Bytes *bs);
 
@@ -3517,8 +3589,20 @@ typedef struct dec_Dec Dec;
 ///   scale: Decimal positions. Maximum scale is 10.
 Dec *dec_new(double n, int scale);
 
-///
+/// Returns use '.' as decimal point.
 char *dec_to_str(Dec *this);
+
+/// Returns use '.' as thousands separator.
+char *dec_int_to_iso(int n);
+
+/// Returns use ',' as thousands separator.
+char *dec_int_to_us(int n);
+
+/// Returns use ',' as decimal point and '.' as thousands separator.
+char *dec_double_to_iso(double n, int scale);
+
+/// Returns use '.' as decimal point and ',' as thousands separator.
+char *dec_double_to_us(double n, int scale);
 
 /// Returns the rounded double value of 'this'.
 double dec_n(Dec *this);

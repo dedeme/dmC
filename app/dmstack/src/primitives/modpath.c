@@ -33,7 +33,6 @@ static void plus2 (Machine *m) {
   if (!arr_size(a)) fails_list_size(m, a, 1);
   char *fn (Token *tk) { return tk_string(m, tk); }
   char *r = str_cjoin(arr_map(a, (FCOPY)fn), '/');
-  if (*r == '/') r = str_right(r, 1);
   machine_push(m, token_new_string(r));
 }
 

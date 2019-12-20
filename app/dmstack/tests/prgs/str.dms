@@ -97,7 +97,11 @@
   50097 str,fromRuneCode "ñ" expect
   "世" str,runeCode str,fromRuneCode "世" expect
 
-  // trim - ltrim - rtrim
+  // reverse - trim - ltrim - rtrim
+
+  "" str,reverse "" expect
+  "a" str,reverse "a" expect
+  "abc" str,reverse "cba" expect
 
   "" str,trim "" expect
   " " str,trim "" expect

@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Float module.
+/// Float module.
 
 #ifndef MODULES_MODFLOAT_H
   #define MODULES_MODFLOAT_H

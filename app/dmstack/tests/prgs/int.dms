@@ -38,6 +38,24 @@
   1 2 int,<< 4 expect
   4 2 int,>> 1 expect
 
+  0 int,toIso "0" expect
+  -0 int,toIso "0" expect
+  2 int,toIso "2" expect
+  -2 int,toIso "-2" expect
+  1112 int,toIso "1.112" expect
+  -1122 int,toIso "-1.122" expect
+  123451112 int,toIso "123.451.112" expect
+  -123451112 int,toIso "-123.451.112" expect
+
+  0 int,toUs "0" expect
+  -0 int,toUs "0" expect
+  2 int,toUs "2" expect
+  -2 int,toUs "-2" expect
+  1112 int,toUs "1,112" expect
+  -1122 int,toUs "-1,122" expect
+  123451112 int,toUs "123,451,112" expect
+  -123451112 int,toUs "-123,451,112" expect
+
   empty? assert
 ) run
 

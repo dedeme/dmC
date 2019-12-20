@@ -42,4 +42,40 @@ math,e 2.718281828459045 expect
 7. math,sqrt 2.6457513110645907 expect
 7.5 math,cbrt 1.9574338205844317 expect
 
+0. 0 float,toIso "0" expect
+-0. 0 float,toIso "0" expect
+2. 0 float,toIso "2" expect
+-2. 0 float,toIso "-2" expect
+1112. 0 float,toIso "1.112" expect
+-1122. 0 float,toIso "-1.122" expect
+123451112. 0 float,toIso "123.451.112" expect
+-123451112. 0 float,toIso "-123.451.112" expect
+
+0. 0 float,toUs "0" expect
+-0. 0 float,toUs "0" expect
+2. 0 float,toUs "2" expect
+-2. 0 float,toUs "-2" expect
+1112. 0 float,toUs "1,112" expect
+-1122. 0 float,toUs "-1,122" expect
+123451112. 0 float,toUs "123,451,112" expect
+-123451112. 0 float,toUs "-123,451,112" expect
+
+0.20 2 float,toIso "0,20" expect
+-0.02 2 float,toIso "-0,02" expect
+2.346 2 float,toIso "2,35" expect
+-2.346 2 float,toIso "-2,35" expect
+1112. 2 float,toIso "1.112,00" expect
+-1122. 2 float,toIso "-1.122,00" expect
+123451112.41 2 float,toIso "123.451.112,41" expect
+-123451112.41 2 float,toIso "-123.451.112,41" expect
+
+0.20 2 float,toUs "0.20" expect
+-0.02 2 float,toUs "-0.02" expect
+2.346 2 float,toUs "2.35" expect
+-2.346 2 float,toUs "-2.35" expect
+1112. 2 float,toUs "1,112.00" expect
+-1122. 2 float,toUs "-1,122.00" expect
+123451112.41 2 float,toUs "123,451,112.41" expect
+-123451112.41 2 float,toUs "-123,451,112.41" expect
+
 empty? assert

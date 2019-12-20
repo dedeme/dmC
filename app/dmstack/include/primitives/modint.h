@@ -1,7 +1,7 @@
 // Copyright 04-Sept-2019 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-// Int module.
+/// Int module.
 
 #ifndef MODULES_MODINT_H
   #define MODULES_MODINT_H
