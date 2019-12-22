@@ -56,9 +56,9 @@ static void rqhost (Machine *m) {
   }
 }
 
-static void writerq (Machine *m) {
-  IserverRq *rq = (IserverRq *)tk_pop_native(m, symbol_ISERVER_RQ_);
+static void writerp (Machine *m) {
   char *msg = tk_pop_string(m);
+  IserverRq *rq = (IserverRq *)tk_pop_native(m, symbol_ISERVER_RQ_);
   iserverRq_write(rq, msg);
 }
 
@@ -73,7 +73,7 @@ Pmodule *modiserver_mk (void) {
   add("getRq", getrq); // ISERVER - EITHER<STRING, ISERVER_RQ>
   add("readRq", readrq); // ISERVER_RQ - OPT<STRING>
   add("rqHost", rqhost); // ISERVER_RQ - OPT<STRING>
-  add("writeRq", writerq); // ISERVER_RQ - []
+  add("writeRp", writerp); // [ISERVER_RQ, STRING] - []
 
   return r;
 }
