@@ -66,8 +66,7 @@ void fails_from_exception (Exc *ex) {
     if (current_machine) {
       if (str_eq(exc_type(ex), exc_dmstack_t)) {
         puts(str_f(
-          "Runtime error in machine:%d: %s\n%s",
-          list_count(machine_pmachines(current_machine)) + 1,
+          "Runtime error: %s\n%s",
           exception_msg(ex),
           exception_stack(ex)
         ));

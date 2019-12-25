@@ -79,8 +79,12 @@ static void cmd (Machine *m) {
 
 // tp is Tp<List<Machine>, Token>
 static void threadfn (Tp *tp) {
-  Machine *m = tp_e1(tp);
-  machine_isolate_process("", machine_pmachines(m), tp_e2(tp));
+  TRY{
+    Machine *m = tp_e1(tp);
+    machine_isolate_process("", machine_pmachines(m), tp_e2(tp));
+  } CATCH (e) {
+    fails_from_exception(e);
+  }_TRY
 }
 
 static void freethread (Machine *m) {
