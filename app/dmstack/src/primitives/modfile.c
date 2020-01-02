@@ -57,14 +57,33 @@ static void copy (Machine *m) {
   file_copy(tk_pop_string(m), new);
 }
 
+static void tmpin (Machine *m) {
+  char *prf = tk_pop_string(m);
+  file_tmp_in(tk_pop_string(m), prf);
+}
+
+static void tmp (Machine *m) {
+  file_tmp(tk_pop_string(m));
+}
+
 static void isregular (Machine *m) {
-  struct stat *st = file_info(tk_pop_string(m));
-  machine_push(m, token_new_int(S_ISREG(st->st_mode)));
+  char *p = tk_pop_string(m);
+  int r = 0;
+  if (file_exists(p)) {
+    struct stat *st = file_info(p);
+    r = S_ISREG(st->st_mode);
+  }
+  machine_push(m, token_new_int(r));
 }
 
 static void islink (Machine *m) {
-  struct stat *st = file_info(tk_pop_string(m));
-  machine_push(m, token_new_int(S_ISLNK(st->st_mode)));
+  char *p = tk_pop_string(m);
+  int r = 0;
+  if (file_exists(p)) {
+    struct stat *st = file_info(p);
+    r = S_ISLNK(st->st_mode);
+  }
+  machine_push(m, token_new_int(r));
 }
 
 static void modified (Machine *m) {
@@ -151,6 +170,8 @@ Pmodule *modfile_mk (void) {
   add("rename", srename); // [STRING, STRING] - []   (old, new) - []
   add("link", slink); // [STRING, STRING] - []   (old, new) - []
   add("copy", copy); // [STRING, STRING] - []   (source, target) - []
+  add("tmpIn", tmpin); // [STRING, STRING] - STRING   (dir, prefix) - path
+  add("tmp", tmp); // [STRING] - STRING   (prefix) - path
 
   add("regular?", isregular); // STRING - INT
   add("link?", islink); // STRING - INT

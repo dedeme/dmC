@@ -47,7 +47,7 @@ static void ref (Machine *m) {
 }
 
 static void left (Machine *m) {
-  Token **values = ATOMIC(sizeof(Token *) + sizeof(Token *));
+  Token **values = GC_MALLOC(sizeof(Token *) + sizeof(Token *));
   values[0] = machine_pop(m);
   values[1] = NULL;
   machine_push(m, token_from_pointer(symbol_EITHER_, values));
@@ -59,7 +59,7 @@ static void isleft (Machine *m) {
 }
 
 static void right (Machine *m) {
-  Token **values = ATOMIC(sizeof(Token *) + sizeof(Token *));
+  Token **values = GC_MALLOC(sizeof(Token *) + sizeof(Token *));
   values[0] = NULL;
   values[1] = machine_pop(m);
   machine_push(m, token_from_pointer(symbol_EITHER_, values));

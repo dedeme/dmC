@@ -20,16 +20,15 @@ static void getrq (Machine *m) {
   Iserver *s = (Iserver *)tk_pop_native(m, symbol_ISERVER_);
   IserverRq *rq = iserver_read(s);
   char *err = iserverRq_error(rq);
-  Token **values = ATOMIC(sizeof(Token *) + sizeof(Token *));
-  if (*err) {
+  Token **values = GC_MALLOC(sizeof(Token *) + sizeof(Token *));
+  values[0] = NULL;
+  values[1] = NULL;
+  if (*err)
     values[0] = token_new_string(err);
-    values[1] = NULL;
-    machine_push(m, token_from_pointer(symbol_EITHER_, values));
-  } else {
-    values[0] = NULL;
+  else
     values[1] = token_from_pointer(symbol_ISERVER_RQ_, rq);
-    machine_push(m, token_from_pointer(symbol_EITHER_, values));
-  }
+
+  machine_push(m, token_from_pointer(symbol_EITHER_, values));
 }
 
 static void readrq (Machine *m) {
