@@ -59,11 +59,11 @@ static void copy (Machine *m) {
 
 static void tmpin (Machine *m) {
   char *prf = tk_pop_string(m);
-  file_tmp_in(tk_pop_string(m), prf);
+  machine_push(m, token_new_string(file_tmp_in(tk_pop_string(m), prf)));
 }
 
 static void tmp (Machine *m) {
-  file_tmp(tk_pop_string(m));
+  machine_push(m, token_new_string(file_tmp(tk_pop_string(m))));
 }
 
 static void isregular (Machine *m) {

@@ -352,7 +352,6 @@ int main (int argc, char **argv) {
     "\n"
     "/** I18n management. */\n"
     "\n"
-    "let lang = {};\n\n"
   );
 
   EACH(langs, char, lang) {
@@ -366,6 +365,7 @@ int main (int argc, char **argv) {
   }_EACH
 
   file_write_text(lck,
+    "let lang = es;\n\n"
     "export class I18n {\n"
     "  /** @return {void} */\n"
     "  static en () {\n"
