@@ -234,6 +234,7 @@ int main (int argc, char **argv) {
     help();
     return 0;
   }
+  exc_init();
   char *source = argv[1];
   char *target = argv[2];
 

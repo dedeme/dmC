@@ -668,7 +668,7 @@ Pmodule *modlist_mk (void) {
 
   add("new", new); // [] - LIST
   add("unary", unary); // [] - LIST
-  add("make", make); // <INT, *> - <LIST>
+  add("make", make); // <*, INT> - <LIST>
 
   add("size", size);
   add("get", get);

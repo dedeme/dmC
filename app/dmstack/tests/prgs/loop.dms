@@ -115,6 +115,7 @@
   ( i =;
     ["a"] clone 3 lst,push+; L =;
     L ["a", 3] == assert
+    L puts
   )
   for
 
