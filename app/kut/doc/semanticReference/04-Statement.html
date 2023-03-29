@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>Kmarkdown Tests</title>
+<script src="/dm/www/ace/ace.js"></script>
+<script>
+function aceConf(ed, langIx) {
+  ed.setTheme("ace/theme/deme");
+  ed.getSession().setTabSize(2);
+  ed.getSession().setUseSoftTabs(true);
+  ed.setOptions({
+    readOnly: true,
+    maxLines: 100000
+  });
+  switch (langIx) {
+  case 0:
+    ed.getSession().setMode("ace/mode/kut");
+    break;
+  case 1:
+    ed.getSession().setMode("ace/mode/c");
+    break;
+  default:
+    console.log("Ace language " + langIx + " not found.");
+  }
+}
+aceFns = [];
+
+window.onload = function () {
+  for (fn of aceFns) fn();
+}
+</script>
+</head>
+
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Statement</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Semantic Reference.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='04-Modules.html'>Anterior (Token)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#hp:001'>Empty statement</a><br>
+<a href='#hp:002'>Block</a><br>
+<a href='#hp:003'>Reserved symbol</a><br>
+<a href='#hp:004'>No reseved symbol</a>
+<p>
+<hr>
+<p>Statements (<code>Stat</code>) is a command to execute by <i>kut</i>.</p>
+<p>Statements are wrapped in "code statements" (<code>StatCode</code>) that beside the
+statemente save information about file and line where it appears.</p>
+<h2 id='hp:001'>Empty statement</h2>
+<p>Scheme: <code>;</code></p>
+<h2 id='hp:002'>Block</h2>
+<p>Scheme: <code>{ <span class='kmd-fm'>Stat</span>* }</code></p>
+<h2 id='hp:003'>Reserved symbol</h2>
+<h3>break</h3>
+<p>Scheme: <code>break ;</code></p>
+<p>Only alowed in <code>while</code> and <code>for</code> loops.</p>
+<h3>continue</h3>
+<p>Scheme: <code>continue ;</code></p>
+<p>Only alowed in <code>while</code> and <code>for</code> loops.</p>
+<h3>trace</h3>
+<p>Scheme: <code>trace <span class='kmd-fm'>:</span>? exp ;</code></p>
+<p>Examples:<br>
+<code>trace a;</code><br>
+<code>trace : b + "c";</code></p>
+<h3>assert</h3>
+<p>Scheme: <code>assert exp ;</code></p>
+<p>Example: <code>assert a == 3;</code></p>
+<h3>return</h3>
+<p>Scheme: <code>return <span class='kmd-fm'>Exp</span>? ;</code></p>
+<p>Examples:<br>
+<code>return;</code><br>
+<code>return z / 4;</code></p>
+<h3>import</h3>
+<p>Scheme: <code>import TkString <span class='kmd-fm'>: TkSymbol</span> ;</code></p>
+<p><code>TkString</code> is a file path which can be absolute or relative. It can not
+contain dots, finish with <code>/</code> nor be an empty string.</p>
+<p>Examples:<br>
+<code>import "a/cd";</code><br>
+<code>import "/home/kut/mod" : kmod;</code></p>
+<h3>try</h3>
+<p>Scheme: <code>try Stat catch ( TkSymbol ) Stat <span class='kmd-fm'>finally Stat</span>?</code></p>
+<p>Examples:<br>
+<code>try return 5 / b; catch(e) sys.println(e);</code><br>
+<code>try { return A[ix]; } catch(e) { sys.println(e); } finally sys.println("ok");</code></p>
+<h3>while</h3>
+<p>Scheme: <code>while ( <span class='kmd-fm'>Exp</span>? ) Stat</code></p>
+<p>Examples:<br>
+<code>while () { I! += 1; if (I! > 10) break; }</code><br>
+<code>while (I! &lt;= 10) I! += 1;</code></p>
+<h3>if</h3>
+<p>Scheme: <code>if ( Exp ) Stat <span class='kmd-fm'>else Stat</span>?</code></p>
+<p>Examples:<br>
+<code>if (x > 3) sys.println("Greater");</code> <br>
+<code>if (x > 3) { sys.println("Greater"); } else { sys.println("Not greater"); }</code></p>
+<h3>for</h3>
+<p>Scheme1: <code>for ( TkSymbol1 <span class='kmd-fm'>, TkSymbol2</span>? = Exp ) Stat</code> <br> <br>
+Scheme2: <code>for ( TkSymbol = Exp1 : Exp2 <span class='kmd-fm'>: Exp3</span>? ) Stat</code></p>
+<p>In the Scheme1 <code>Exp</code> is an array or iterator, <code>TkSymbol1</code> is bound to
+each element and <code>TkSymbol2</code> to its index.</p>
+<p>In the Scheme2 <code>Exp1</code>, <code>Exp2</code> and <code>Exp3</code> solve to an integer whose value
+is bound to <code>TkSymbol</code>.</p>
+<p>Examples:<br>
+<code>for (e = ["a", "v"]) sys.println(e);</code><br>
+<code>for (e, i = ["a", "v"]) sys.println(e + "->" + math.toStr(i));</code><br>
+<code>for (i = [0 : 12]) { sys.println(math.toStr(i)); }</code><br>
+<code>for (i = [0 : 12 : 2]) sys.println(math.toStr(i));</code></p>
+<h3>switch</h3>
+<p>Scheme: <code>switch ( Exp ) { <span class='kmd-fm'>Exp:Stat;</span>* <span class='kmd-fm'>default:Stat;</span>? }</code></p>
+<p>Example: <code>switch (v) { 3 : return 3 * 2; default: return 25; }</code></p>
+<h2 id='hp:004'>No reseved symbol</h2>
+<h3>Function calling</h3>
+<p>Scheme: <code>Exp ( <span class='kmd-fm'>Exp</span>* ) ;</code></p>
+<p>Examples:<br>
+<code>sys.println("a");</code><br>
+<code>run();</code><br>
+<code>process[ix](true, z);</code></p>
+<h3>Assignement</h3>
+<p>Scheme: <code>TkSymbol = Exp ;</code></p>
+<p>Example: <code>v = 3 + 5;</code></p>
+<h3>Binary + assignement</h3>
+<p>Scheme: <code>Exp TkOperator Exp ;</code></p>
+<p><code>TkOperator</code> is one of <code>+= -= *= /= %= &amp;= |=</code>.</p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div style="position: fixed;top: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:END_PAGE');">
+    <img border="0" src="img/down.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

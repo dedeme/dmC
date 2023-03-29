@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>Kmarkdown Tests</title>
+<script src="/dm/www/ace/ace.js"></script>
+<script>
+function aceConf(ed, langIx) {
+  ed.setTheme("ace/theme/deme");
+  ed.getSession().setTabSize(2);
+  ed.getSession().setUseSoftTabs(true);
+  ed.setOptions({
+    readOnly: true,
+    maxLines: 100000
+  });
+  switch (langIx) {
+  case 0:
+    ed.getSession().setMode("ace/mode/kut");
+    break;
+  case 1:
+    ed.getSession().setMode("ace/mode/c");
+    break;
+  default:
+    console.log("Ace language " + langIx + " not found.");
+  }
+}
+aceFns = [];
+
+window.onload = function () {
+  for (fn of aceFns) fn();
+}
+</script>
+</head>
+
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Row code</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Syntax Reference.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href="index.html">Índice</a> · <a href='02-Token.html'>Posterior (Token)</a></p>
+<hr>
+<p>Kut code is written in plain text and codified in UTF-8.</p>
+<p>Kut files have the extension '.kut'.</p>
+<p>Each file produce a module.</p>
+<p>A module can make reference to other modules.</p>
+<p>The main module is that that is called in the command line. For example:</p>
+<script>
+  aceFns.push(() => {
+    ed = ace.edit("ed0");
+    aceConf(ed, 0);
+  });
+</script>
+<table ><tr><td><div id="ed0" class="kmd-aceEditor">
+kut myProgram
+</div></td></tr></table>
+<p>That command runs the module 'myProgram' written in the file 'myProgram.kut'
+placed in the current directory.</p>
+<p>Kut reads 'myProgram" and any other module referencied, generating syntaxis
+tokens, expressions and statements.</p>
+<p>When the main module is readd, it is executed.</p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div style="position: fixed;top: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:END_PAGE');">
+    <img border="0" src="img/down.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

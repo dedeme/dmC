@@ -1,0 +1,91 @@
+=
+title = Start
+withDown
+withUp
+=
+
+(Files ##main.h## y ##main.c##)
+
+** Command line
+
+Kut can be call in the following ways:
+
+*** ##kut -v##
+
+Shows Kut version.
+
+Example:
+
+<{c0 ed0
+  kut -v
+}>
+
+*** ##kut -c <file>##
+
+Test syntaxis of //<file>//.
+
+//<file>// is without extension.
+
+Example:
+
+<{c0 ed1
+  kut -c myprogr
+}>
+
+*** ##kut <file> [arguments]##
+
+Executes //<file>// with optional arguments.
+
+//<file>// is without extension.
+
+Examples:
+
+<{c0 ed2
+  kut myprogr
+  kut myprogr arg1 arg2
+}>
+
+** Initialization
+
+*** System
+
+<{l
+  Sets the language to 'C'.
+
+  Prepares random numbers.
+
+  Prepares thread system.
+}>
+
+*** Code files index
+
+Initializes the object <{h 80-Objects.html#hp:001 fileix}> and adds the relative path of the Kut file
+which is being processed.
+
+*** Read and run the main module.
+
+This actions are done inside a ##TRY## block which prints in the stadard output
+the message of any exception not catched.
+
+First //reading// is done and, after that, depending of the ##-c## option in the
+command line, //testing// or //running// is exectuted.
+
+<{d
+  //Reading//
+  The code of the main file is read, added to the module list as an undefined
+    module, converted to a defined one and updated in the list.
+
+  //Testing//
+  Runs the code checker and prints the detected errors.
+
+  //Running//
+  Runs the code interpreter with ##runner_run##. \\
+  This function returns an expression which is discarded, unless it is
+  ##break## or ##continue##, in whose case an exception is thrown. \\
+  To start ##runner_run## a new stack is prepared, a //heap0// with unsolved
+  expression is created and a list of //heap// is initialized whith an empty
+  //heap// where the solved expression of //heap0// will be saved.
+}>
+
+
+

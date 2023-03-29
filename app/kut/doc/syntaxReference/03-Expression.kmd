@@ -1,0 +1,201 @@
+=
+title = Expression
+withDown
+withUp
+=
+
+Expression (##Exp##) is the more basic semantic unity.
+
+Statements (##Stat##) and modules are composed of them.
+
+** Single expressions.
+
+We will call them as ##Exp1## to distinguish then from normal expression.
+
+A single expression can continue with a "completion" sequence (##Compl##). See
+<{h #completion completion}>
+
+*** Parenthesis
+
+Scheme: ##( ||Exp||? )##
+
+Example: ##(3 + 2)##.
+
+*** Unary expression
+
+Scheme: ##||! | -|| Exp1 ||Compl||*##
+
+Examples: \\
+##!val##\\
+##-23##
+
+*** Array
+
+Scheme: ##[]## or ##[ Exp ||, Exp||* ]##
+
+Examples:\\
+##[]##\\
+##[1 + 2, "b"]##
+
+*** Range
+
+Scheme: ##[ Exp : Exp : ||Exp||? ]##
+
+Examples:
+##[3 : 10*12]##\\
+##[a+12 : -4 : -2]##
+
+*** Dictionary
+
+Scheme: ##{}## or
+##{ ||TkSymbol | TkString|| : Exp ||, [TkSymbol | TkString] : Exp||* }##
+
+Examples: \\
+##{}##\\
+##{"a": 3 + 2, "c m": 12.4, def: "zzz"}##
+
+*** Function
+
+Scheme: ##\ ||TkSymbol||* -> Stat##
+
+Examples:\\
+##\-> sys.println();##\\
+##\a, b -> { c = a + b; sys.println(c); }##
+
+*** Comment
+
+Scheme: ##TkLongComment## or ##TkLineComment##
+
+*** Bool
+
+Scheme: ##TkBool##
+
+*** Int
+
+Scheme: ##TkInt##
+
+*** Float
+
+Scheme: ##TkFloat##
+
+*** String
+
+Scheme: ##TkString##
+
+*** Symbol
+
+Scheme: ##TkSymbol##
+
+*** Switch
+
+Scheme: ##switch ( Exp ) { ||Exp:Exp;||* ||default:Exp;||? }##
+
+Example: ##switch (v) { 3 : 3 * 2; default: 25; }##
+
+<{v <a name="completion"></a> }>
+
+** Expression completion
+
+A single expression can be completed with one or more sequences.
+
+For example:
+
+##mod.val(3, 2)!["left"]##
+
+Sequences are:
+
+*** Point
+
+Scheme: ##. TkSymbol##
+
+Example: ##sys.println##
+
+*** Exclamation
+
+Scheme: ##!##
+
+Example: ##A!##
+
+*** Index
+
+Scheme: ##[Exp]##
+
+Examples:\\
+##A[1+c]##\\
+##D["ac"]##
+
+*** Slice
+
+Scheme: ##[||Exp||? : ||Exp||?]##
+
+Examples:\\
+##[:]##\\
+##[a:]##\\
+##[:5+b]##\\
+##[10 : 110]##
+
+*** Parenthesis
+
+Scheme: ##()## or ##(Exp ||, Exp||*)##
+
+Examples:\\
+##run()##\\
+##new(3, "a", c * 2)##
+
+** Composite expression
+
+Scheme: ##Exp1 ||Binary Exp1||* ||? Exp : Exp||?##
+
+Examples:\\
+##[22]##\\
+##3 + 2 * 11##\\
+##a > b ? 11 + a : "cde"##
+
+##Binary## stands by "binary operator".
+
+This operators are:
+
+<{d
+  Precedence 1
+    ##* / %##
+
+  Precedence 2
+    ##+ -##
+
+  Precedence 3
+    ##== != > >= < <=##
+
+  Precedence 4
+    ##& |##
+}>
+
+Expressions with binary operators are grouped by operator prececende and
+among the same precedende from left to right.
+
+Examples:
+
+##3 + 2 > 4## produces ##true##.\\
+##3 - 2 - 2## produces ##-1##.\\
+##3 - (2 - 2)## produces ##3##.\\
+
+** Precedence.
+
+Operations are solved following then next order:
+
+<{l1
+  ##()##
+
+  ##! -##
+
+  Continuations ##.## ##[]## ##()##
+
+  ##* / %##
+
+  ##+ -##
+
+  ##== != > >= < <=##
+
+  ##& |##
+
+  ##?##
+}>

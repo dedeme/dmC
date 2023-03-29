@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>Kmarkdown Tests</title>
+<script src="/dm/www/ace/ace.js"></script>
+<script>
+function aceConf(ed, langIx) {
+  ed.setTheme("ace/theme/deme");
+  ed.getSession().setTabSize(2);
+  ed.getSession().setUseSoftTabs(true);
+  ed.setOptions({
+    readOnly: true,
+    maxLines: 100000
+  });
+  switch (langIx) {
+  case 0:
+    ed.getSession().setMode("ace/mode/kut");
+    break;
+  case 1:
+    ed.getSession().setMode("ace/mode/c");
+    break;
+  default:
+    console.log("Ace language " + langIx + " not found.");
+  }
+}
+aceFns = [];
+
+window.onload = function () {
+  for (fn of aceFns) fn();
+}
+</script>
+</head>
+
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Reading</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Program Reference.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-Start.html'>Anterior (Start)</a> · <a href="index.html">Índice</a> · <a href='80-Objects.html'>Posterior (Objects)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#hp:001'>Block readers (<code>reader.(h/c)</code>)</a><br>
+<a href='#hp:002'>Statement reader (<code>st_reader.(h(c)</code>)</a><br>
+<a href='#hp:003'>Continuations reader (<code>pt_sq_pr_reader.(h/c)</code>)</a><br>
+<a href='#hp:004'>Expression reader (<code>ex_reader.(h/c)</code>)</a><br>
+<a href='#hp:005'>Token reader (<code>cdr/cdr.(h.c)</code>)</a>
+<p>
+<hr>
+<p>(Files in the directory <code>reader</code>)</p>
+<h2 id='hp:001'>Block readers (<code>reader.(h/c)</code>)</h2>
+<p>There are two functions which use a code reader (see
+<a href='81-Classes.html#hp:010'>Cdr</a>):</p>
+
+<dl>
+<dt><code>reader_read_block</code></dt>
+<dd>  Read an array of statements inside brackets.<br>
+  <i>NOTE 1: imports are not allowed here.</i> <br>
+  <i>NOTE 2: When this function is called, the token '{' already has been read.</i></dd>
+<dt><code>reader_read_main_block</code></dt>
+<dd>  Read the main code of a module. <br>
+  In particular it creates: <br>
+  * imports: Map from module identifier to file index. <br>
+  * heap0: With the module main symbols. <br>
+  * statements: Array with the module statements.</dd>
+</dl>
+<p>The statements contains unsolved expressions. That is:</p>
+
+<ul>
+<li>Symbols are not solved.</li>
+<li>Functions calls are not run.</li>
+<li>Functions have empty imports, empty heap0 and empty heaps.</li>
+<li>There are not <i>empty</i>, <i>break</i> nor <i>continue</i> expressions. However
+  <i>empty</i> expressions are created internally as part of other not empty
+  expressions.</li>
+</ul>
+<h2 id='hp:002'>Statement reader (<code>st_reader.(h(c)</code>)</h2>
+<p>Read a statement from a code reader (see <a href='81-Classes.html#hp:010'>Cdr</a>).
+Every statement is a <code>StatCode</code> which wraps a single <code>Stat</code> (see
+<a href='81-Classes.html#hp:004'>StatCode</a> and <a href='81-Classes.html#hp:003'>Stat</a>).</p>
+<p>Reading follows the next process:</p>
+<ul>
+<li>Try to read the next token (<i>tk</i>).
+  <ul>
+  <li>If end of text is reached returns a <code>stat_end</code>.
+  <li>Oterwise:
+    <ul>
+    <li>If <i>tk</i> is a comment, it is skipped, and the next token is read.
+    </li>
+    <li>If <i>tk</i> is a symbol, it is read (see bellow).</li>
+    <li>If <i>tk</i> is ';', returns a <code>stat_empty</code>.</li>
+    <li>If <i>tk</i> is '{', returns a <code>stat_block</code>.</li>
+    <li>If <i>tk</i> is '}', returns a <code>stat_block_close</code>.</li>
+    <li>Otherwise throws an exception.</li>
+    </ul>
+  </li>
+  </ul>
+</li>
+</ul><p>Symbols are read in the following order:</p>
+<p><i>(NOTE: 'Optional elments' are underlined, 'no code elements' are in italics,
+blanks are not significative.)</i></p>
+
+<dl>
+<dt><code>stat_break</code></dt>
+<dd>  Scheme: <code>break;</code>]</dd>
+<dt><code>stat_continue</code></dt>
+<dd>  Scheme: <code>continue;</code>]</dd>
+<dt><code>stat_trace</code></dt>
+<dd>  Scheme: <code>trace <u>:</u> <i>expression</i>;</code></dd>
+<dt><code>stat_assert</code></dt>
+<dd>  Scheme: <code>assert <i>expression</i>;</code></dd>
+<dt><code>stat_return</code></dt>
+<dd>  Scheme: <code>return <u><i>expression</i></u>;</code></dd>
+<dt><code>stat_import</code></dt>
+<dd>  Scheme: <code>import <i>string</i> <u>: <i>symbol</i></u>;</code><br> <br>
+  <i>string</i> is a module path.<br>
+  <i>symbol</i> is the optional symbol used inside the code. If it is not
+    indicated, the base of the module path is used. <br> <br>
+  <i>NOTE: When reading imports, its path is checked to verify if it exists in
+  the file system.</i></dd>
+<dt><code>stat_try</code></dt>
+<dd>  Scheme: <code>try <i>statement1</i> catch (<i>symbol</i>) <i>statement2</i>
+    <u>finally <i>statement3</i></u></code><br> <br>
+  <i>statement1</i> will be run.<br>
+  <i>symbol</i> point to a string with a message of error if <i>statement1</i> fails.<br>
+  <i>statement2</i> will be run if <i>statement1</i> fails. <br>
+  <i>statement3</i> will be run in any case after <i>statement1</i> or
+    <i>statement2</i>.<br> <br>
+  <i>NOTE: <code>catch</code> or <code>finally</code> without <code>try</code> throw exceptions.</i></dd>
+<dt><code>stat_while</code></dt>
+<dd>  Scheme: <code>While (<u><i>expression</i></u>) <i>statement</i></code>
+  <i>expression</i> is an optional boolean, string or array expression.</dd>
+<dt><code>stat_if</code></dt>
+<dd>  Scheme: <code>if (<i>expression</i>) <i>statement1</i> <u>else <i>statement2</i></u></code> <br>
+  <i>expression</i> is a boolean, string or array expression. <br> <br>
+  <i>NOTE: <code>else</code> without <code>if</code> throws exception.</i></dd>
+<dt><code>stat_for</code></dt>
+<dd>  Scheme1: <code>for (<i>symbol1</i><u>, <i>symbol2</i></u> = <i>expression</i>) <i>statement</i></code> <br>
+  Scheme2: <code>for (<i>symbol</i> = <i>expression1</i>:<i>expression2</i><u>:<i>expression3</u></i>)
+    statement</code> <br> <br>
+  In Scheme 1: <br>
+  <i>expression</i> is an array or iterator expression. <br>
+  <i>symbol1</i> point to the collection element.<br>
+  <i>symbol2</i> is the element number in 'base 0'.<br> <br>
+  In Scheme 2: <br>
+  <i>symbol</i> point to a counter.<br>
+  <i>expression1</i>, <i>expression2</i> and <i>expression3</i> are an integer expression.<br></dd>
+<dt><code>stat_switch</code></dt>
+<dd>  Scheme: <code>switch (<i>expression</i>) {
+    <span class='kmd-fm'><i>exps</i>:<i>stats</i></span>* <u>default:<i>stat</i></u> }</code> <br> <br>
+  <i>exps:stats</i> are optional pairs of 'expressions - statements'<br>
+  <code>default:</code><i>stat</i> is an optional last entry.</dd>
+</dl>
+<p>If the symbol is not in the previous ones, it is completed with its possible
+continuations (e.g: <code>sys.print</code>, <code>A[0]</code>, <code>D["a"].f(z)</code>).
+See <a href='#continuations'>continuations</a>.</p>
+<p>After the completed symbol can come out:</p>
+
+<dl>
+<dt><code>;</code></dt>
+<dd>  A <code>stat_func</code> is returned.</dd>
+<dt><code><i>Asignation symbol</i></code></dt>
+<dd>  A <code>stat_assign</code> or one of <code>stat_xxx_as</code> is returned.</dd>
+</dl>
+<p>Otherwise an exception is thrown.</p>
+<p> <a name="continuations"></a></p>
+<h2 id='hp:003'>Continuations reader (<code>pt_sq_pr_reader.(h/c)</code>)</h2>
+<p>Continuations are sequences of tokens that can follow to symbols. These
+continuations can not exist or go on without limit.</p>
+<p>A continuation can be:</p>
+
+<dl>
+<dt><code>.<i>symbol</i></code></dt>
+<dd>  (e.g. <code>sys.print</code>)</dd>
+<dt><code>!</code></dt>
+<dd>  (e.g. <code>A!</code>)</dd>
+<dt><code>[<i>expression</i>]</code></dt>
+<dd>  (e.g. <code>A[23]</code>)</dd>
+<dt><code>[<i><u>expression1</u>:<u>expression2</u></i>]</code></dt>
+<dd>  (e.g. <code>tx[:]</code>, <code>tx[:3]</code>, <code>tx[5:]</code>, <code>tx[0:12]</code>) <br> <br>
+  <i>NOTE: The operator ':' is mandatory.</i> <br> <br></dd>
+<dt><code>(<u><i>expression</i></u><span class='kmd-fm'>, <i>expression</i></span>*)</code> <br> <br></dt>
+<dd>  (e.g. <code>f()</code>, <code>fn(a)</code>, <code>f(12, zt, "yes")</code>)</dd>
+</dl>
+<h2 id='hp:004'>Expression reader (<code>ex_reader.(h/c)</code>)</h2>
+<p>Scheme: <code><i>fexp1</i><span class='kmd-fm'><i>operator fexp</i></span>*<u>?<i>exp1</i>:<i>exp2</i></u></code><br> <br></p>
+<p><i>fexp1</i> and <i>fexp</i> are a final expressions.
+<i>opeerator</i> is a binary operator.
+<i>exp1</i> and <i>exp2</i> are normal expressions.</p>
+<p>Final expressions are:</p>
+
+<dl>
+<dt><code>(<i>expression</i>)</code></dt>
+<dd>  Parentheses are removed and <i>expression</i> is returned.</dd>
+<dt><code>exp_not</code></dt>
+<dd>  Scheme: <code>!<i>fexp</i></code> <br> <br>
+  <i>fexp</i> is a final expression with continuations.</dd>
+<dt><code>exp_minus</code></dt>
+<dd>  Scheme: <code>-<i>fexp</i></code> <br> <br>
+  <i>fexp</i> is a final expression with continuations.</dd>
+<dt><code>exp_array</code></dt>
+<dd>  Scheme: <code>[<u><i>expression1</i></u><span class='kmd-fm'>, <i>expression</i></span>*]</code></dd>
+<dt><code>exp_range</code></dt>
+<dd>  Scheme: <code>[<i>expression1</i>:<i>expression2</i><u>:<i>expression3</i></u>]</code> <br> <br></dd>
+<dt>//expressions// are integers.</dt>
+<dd></dd>
+<dt><code>exp_map</code></dt>
+<dd>  Scheme: <code>{<u><i>key1</i>:<i>expression1</i></u><span class='kmd-fm'>, <i>key</i>:<i>expression</i></span>*}</code> <br> <br>
+  <i>key1</i> and <i>key</i> are strings or symbols.</dd>
+<dt><code>exp_function</code></dt>
+<dd>  Scheme: <code>\<u><i>symbol1</i></u><span class='kmd-fm'>, symbol</span>* -> statement</code></dd>
+<dt><code>exp_bool</code></dt>
+<dd>  Scheme: <code>token_bool</code></dd>
+<dt><code>exp_int</code></dt>
+<dd>  Scheme: <code>token_int</code></dd>
+<dt><code>exp_float</code></dt>
+<dd>  Scheme: <code>token_float</code></dd>
+<dt><code>exp_string</code></dt>
+<dd>  Scheme: <code>token_string</code></dd>
+<dt><code>exp_switch</code></dt>
+<dd>  Scheme: <code>switch (<i>expression</i>) {
+    <span class='kmd-fm'><i>exp1</i>:<i>exp2</i></span>* <u>default:<i>exp</i></u> }</code> <br> <br>
+  <i>exp1:exp2</i> are optional pairs of 'expression - expression'<br>
+  <code>default:</code><i>exp</i> is an optional last entry.</dd>
+<dt><code>exp_sym</code></dt>
+<dd>  Scheme: <code><i>symbol</i></code></dd>
+</dl>
+<p>A final expression can be completed with continuations (e.g. <code>mod.val</code>,
+<code>A[0]</code>, <code>D["a"].f(z)</code>). See <a href='#continuations'>continuations</a>.</p>
+<h2 id='hp:005'>Token reader (<code>cdr/cdr.(h.c)</code>)</h2>
+<p>Read tokens. See <a href='81-Classes.html#hp:010'>class Cdr</a>.</p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div style="position: fixed;top: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:END_PAGE');">
+    <img border="0" src="img/down.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+A = [0];
+try A! = 1;
+catch (e) A! = 2;
+sys.test(A!, 1);
+
+A! = 0;
+try {
+  A! = 1;
+  sys.throw("here");
+} catch (e) {
+  A! = 2;
+}
+sys.test(A!, 2);
+
+/*
+A! = 0;
+try {
+  A! = 1;
+  {
+    sys.throw("here");
+  }
+} catch (e) {
+  A! = 2;
+  sys.throw(e);
+}
+sys.test(A!, 2);
+*/
+
+A! = 0;
+try A! = 1;
+catch (e) A! = 2;
+finally A! = 3;
+sys.test(A!, 3);
+
+A! = 0;
+try {
+  A! = 1;
+  sys.throw("here");
+} catch (e) {
+  A! = 2;
+} finally A! = 3;
+sys.test(A!, 3);
+
+/*
+A! = 0;
+try {
+  A! = 1;
+  {
+    sys.throw("here");
+  }
+} catch (e) {
+  A! = 2;
+  sys.throw(e);
+} finally sys.println("finally");
+sys.test(A!, 2);
+*/
+
+fn1 = \-> {
+  try return 1;
+  catch (e) return 2;
+};
+sys.test(fn1(), 1);
+
+fn2 = \-> {
+  try sys.throw("here");
+  catch (e) return 2;
+};
+sys.test(fn2(), 2);
+
+/*
+fn3 = \-> {
+  try sys.throw("here");
+  catch (e) sys.throw("here2");
+};
+sys.test(fn3(), 2);
+*/
+
+fn4 = \-> {
+  try return 1;
+  catch (e) return 2;
+  finally return 3;
+};
+sys.test(fn4(), 3);
+
+fn5 = \-> {
+  try sys.throw("here");
+  catch (e) return 2;
+  finally return 4;
+};
+sys.test(fn5(), 4);
+
+fnV = [0];
+fn6 = \-> {
+  try return 1;
+  catch (e) return 2;
+  finally fnV! = 5;
+};
+sys.test(fn6(), 1);
+sys.test(fnV!, 5);
+
+fnV! = 0;
+fn7 = \-> {
+  try sys.throw("here");
+  catch (e) return 2;
+  finally fnV! = 5;
+};
+sys.test(fn7(), 2);
+sys.test(fnV!, 5);
+
+Sum = [0];
+C1 = [0];
+while () {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! >= 5) break;
+  continue;
+}
+sys.test(Sum!, 10);
+
+Sum! = 0;
+C1! = 0;
+while () {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! < 5) continue;
+  break;
+}
+sys.test(Sum!, 10);
+
+fnw1 = \ -> {
+  C = [0];
+  while () {
+    if (C! == 4) return C!;
+    C! += 1;
+  }
+  return -4;
+};
+sys.test(fnw1(), 4);
+
+Sum! = 0;
+C1! = 0;
+while (C1! < 5) {
+  Sum! += C1!;
+  C1! += 1;
+}
+sys.test(Sum!, 10);
+
+Sum! = 0;
+C1! = 0;
+while (C1! < 25) {
+  Sum! += C1!;
+  C1! += 1;
+}
+sys.test(Sum!, 300);
+
+Sum! = 0;
+C1! = 0;
+while (C1! < 25) {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! >= 5) break;
+}
+sys.test(Sum!, 10);
+
+Sum! = 0;
+C1! = 0;
+while ([1]) {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! < 5) continue;
+  break;
+}
+sys.test(Sum!, 10);
+
+Sum! = 0;
+C1! = 0;
+while ([]) {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! < 5) continue;
+  break;
+}
+sys.test(Sum!, 0);
+
+Sum! = 0;
+C1! = 0;
+while ("a") {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! < 5) continue;
+  break;
+}
+sys.test(Sum!, 10);
+
+Sum! = 0;
+C1! = 0;
+while ("") {
+  Sum! += C1!;
+  C1! += 1;
+  if (C1! < 5) continue;
+  break;
+}
+sys.test(Sum!, 0);
+
+fnw2 = \ -> {
+  C = [0];
+  while (C! < 4) C! += 1;
+  return C!;
+};
+sys.test(fnw1(), 4);
+
+fnw3 = \ -> {
+  C = [0];
+  while ("1") {
+    if (C! == 4) return C!;
+    C! += 1;
+  }
+  return -4;
+};
+sys.test(fnw1(), 4);
+
+C = [23];
+if ([]) C! = 0;
+else C! = 1;
+sys.test(C!, 1);
+
+C! = 23;
+if ([1, 4]) C! = 1;
+else C! = 0;
+sys.test(C!, 1);
+
+C! = 23;
+if ("") C! = 0;
+else C! = 1;
+sys.test(C!, 1);
+
+C! = 23;
+if ("  ") {
+  C! = 1;
+} else {
+  C! = 0;
+}
+sys.test(C!, 1);
+
+fni1 = \a, b -> if (a > b) return "up"; else return "down";;
+sys.test(fni1(3, 2), "up");
+sys.test(fni1("a", "z"), "down");
+
+fni2 = \a, b -> {
+  if (a > b) {
+    return "up";
+  } else if (a == b) {
+    return "eq";
+  } else {
+    return "down";
+  }
+};
+sys.test(fni2(3.5, 2.03), "up");
+sys.test(fni2("a", "z"), "down");
+sys.test(fni2(1, 1), "eq");
+
+

@@ -1,0 +1,4 @@
+import "sub/s1";
+
+sys.test(s1.hello("world"), "hello world");
+sys.println(s1.hello("world"));

@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>Kmarkdown Tests</title>
+<script src="/dm/www/ace/ace.js"></script>
+<script>
+function aceConf(ed, langIx) {
+  ed.setTheme("ace/theme/deme");
+  ed.getSession().setTabSize(2);
+  ed.getSession().setUseSoftTabs(true);
+  ed.setOptions({
+    readOnly: true,
+    maxLines: 100000
+  });
+  switch (langIx) {
+  case 0:
+    ed.getSession().setMode("ace/mode/kut");
+    break;
+  case 1:
+    ed.getSession().setMode("ace/mode/c");
+    break;
+  default:
+    console.log("Ace language " + langIx + " not found.");
+  }
+}
+aceFns = [];
+
+window.onload = function () {
+  for (fn of aceFns) fn();
+}
+</script>
+</head>
+
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Expression</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Syntax Reference.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-Token.html'>Anterior (Token)</a> · <a href="index.html">Índice</a> · <a href='04-Statement.html'>Posterior (Statement)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#hp:001'>Single expressions.</a><br>
+<a href='#hp:002'>Expression completion</a><br>
+<a href='#hp:003'>Composite expression</a><br>
+<a href='#hp:004'>Precedence.</a>
+<p>
+<hr>
+<p>Expression (<code>Exp</code>) is the more basic semantic unity.</p>
+<p>Statements (<code>Stat</code>) and modules are composed of them.</p>
+<h2 id='hp:001'>Single expressions.</h2>
+<p>We will call them as <code>Exp1</code> to distinguish then from normal expression.</p>
+<p>A single expression can continue with a "completion" sequence (<code>Compl</code>). See
+<a href='#completion'>completion</a></p>
+<h3>Parenthesis</h3>
+<p>Scheme: <code>( <span class='kmd-fm'>Exp</span>? )</code></p>
+<p>Example: <code>(3 + 2)</code>.</p>
+<h3>Unary expression</h3>
+<p>Scheme: <code><span class='kmd-fm'>! | -</span> Exp1 <span class='kmd-fm'>Compl</span>*</code></p>
+<p>Examples: <br>
+<code>!val</code><br>
+<code>-23</code></p>
+<h3>Array</h3>
+<p>Scheme: <code>[]</code> or <code>[ Exp <span class='kmd-fm'>, Exp</span>* ]</code></p>
+<p>Examples:<br>
+<code>[]</code><br>
+<code>[1 + 2, "b"]</code></p>
+<h3>Range</h3>
+<p>Scheme: <code>[ Exp : Exp : <span class='kmd-fm'>Exp</span>? ]</code></p>
+<p>Examples:
+<code>[3 : 10*12]</code><br>
+<code>[a+12 : -4 : -2]</code></p>
+<h3>Dictionary</h3>
+<p>Scheme: <code>{}</code> or
+<code>{ <span class='kmd-fm'>TkSymbol | TkString</span> : Exp <span class='kmd-fm'>, [TkSymbol | TkString] : Exp</span>* }</code></p>
+<p>Examples: <br>
+<code>{}</code><br>
+<code>{"a": 3 + 2, "c m": 12.4, def: "zzz"}</code></p>
+<h3>Function</h3>
+<p>Scheme: <code>\ <span class='kmd-fm'>TkSymbol</span>* -> Stat</code></p>
+<p>Examples:<br>
+<code>\-> sys.println();</code><br>
+<code>\a, b -> { c = a + b; sys.println(c); }</code></p>
+<h3>Comment</h3>
+<p>Scheme: <code>TkLongComment</code> or <code>TkLineComment</code></p>
+<h3>Bool</h3>
+<p>Scheme: <code>TkBool</code></p>
+<h3>Int</h3>
+<p>Scheme: <code>TkInt</code></p>
+<h3>Float</h3>
+<p>Scheme: <code>TkFloat</code></p>
+<h3>String</h3>
+<p>Scheme: <code>TkString</code></p>
+<h3>Symbol</h3>
+<p>Scheme: <code>TkSymbol</code></p>
+<h3>Switch</h3>
+<p>Scheme: <code>switch ( Exp ) { <span class='kmd-fm'>Exp:Exp;</span>* <span class='kmd-fm'>default:Exp;</span>? }</code></p>
+<p>Example: <code>switch (v) { 3 : 3 * 2; default: 25; }</code></p>
+<p> <a name="completion"></a> </p>
+<h2 id='hp:002'>Expression completion</h2>
+<p>A single expression can be completed with one or more sequences.</p>
+<p>For example:</p>
+<p><code>mod.val(3, 2)!["left"]</code></p>
+<p>Sequences are:</p>
+<h3>Point</h3>
+<p>Scheme: <code>. TkSymbol</code></p>
+<p>Example: <code>sys.println</code></p>
+<h3>Exclamation</h3>
+<p>Scheme: <code>!</code></p>
+<p>Example: <code>A!</code></p>
+<h3>Index</h3>
+<p>Scheme: <code>[Exp]</code></p>
+<p>Examples:<br>
+<code>A[1+c]</code><br>
+<code>D["ac"]</code></p>
+<h3>Slice</h3>
+<p>Scheme: <code>[<span class='kmd-fm'>Exp</span>? : <span class='kmd-fm'>Exp</span>?]</code></p>
+<p>Examples:<br>
+<code>[:]</code><br>
+<code>[a:]</code><br>
+<code>[:5+b]</code><br>
+<code>[10 : 110]</code></p>
+<h3>Parenthesis</h3>
+<p>Scheme: <code>()</code> or <code>(Exp <span class='kmd-fm'>, Exp</span>*)</code></p>
+<p>Examples:<br>
+<code>run()</code><br>
+<code>new(3, "a", c * 2)</code></p>
+<h2 id='hp:003'>Composite expression</h2>
+<p>Scheme: <code>Exp1 <span class='kmd-fm'>Binary Exp1</span>* <span class='kmd-fm'>? Exp : Exp</span>?</code></p>
+<p>Examples:<br>
+<code>[22]</code><br>
+<code>3 + 2 * 11</code><br>
+<code>a > b ? 11 + a : "cde"</code></p>
+<p><code>Binary</code> stands by "binary operator".</p>
+<p>This operators are:</p>
+
+<dl>
+<dt>Precedence 1</dt>
+<dd>    <code>* / %</code></dd>
+<dt>Precedence 2</dt>
+<dd>    <code>+ -</code></dd>
+<dt>Precedence 3</dt>
+<dd>    <code>== != > >= &lt; &lt;=</code></dd>
+<dt>Precedence 4</dt>
+<dd>    <code>&amp; |</code></dd>
+</dl>
+<p>Expressions with binary operators are grouped by operator prececende and
+among the same precedende from left to right.</p>
+<p>Examples:</p>
+<p><code>3 + 2 > 4</code> produces <code>true</code>.<br>
+<code>3 - 2 - 2</code> produces <code>-1</code>.<br>
+<code>3 - (2 - 2)</code> produces <code>3</code>.<br></p>
+<h2 id='hp:004'>Precedence.</h2>
+<p>Operations are solved following then next order:</p>
+
+<ol>
+<li><code>()</code></li>
+<li><code>! -</code></li>
+<li>Continuations <code>.</code> <code>[]</code> <code>()</code></li>
+<li><code>* / %</code></li>
+<li><code>+ -</code></li>
+<li><code>== != > >= &lt; &lt;=</code></li>
+<li><code>&amp; |</code></li>
+<li><code>?</code></li>
+</ol>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div style="position: fixed;top: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:END_PAGE');">
+    <img border="0" src="img/down.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

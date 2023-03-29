@@ -1,0 +1,363 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>Kmarkdown Tests</title>
+<script src="/dm/www/ace/ace.js"></script>
+<script>
+function aceConf(ed, langIx) {
+  ed.setTheme("ace/theme/deme");
+  ed.getSession().setTabSize(2);
+  ed.getSession().setUseSoftTabs(true);
+  ed.setOptions({
+    readOnly: true,
+    maxLines: 100000
+  });
+  switch (langIx) {
+  case 0:
+    ed.getSession().setMode("ace/mode/kut");
+    break;
+  case 1:
+    ed.getSession().setMode("ace/mode/c");
+    break;
+  default:
+    console.log("Ace language " + langIx + " not found.");
+  }
+}
+aceFns = [];
+
+window.onload = function () {
+  for (fn of aceFns) fn();
+}
+</script>
+</head>
+
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Expression</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Semantic Reference.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a> · <a href='04-Modules.html'>Posterior (Token)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#hp:001'>Final expressions</a><br>
+<a href='#hp:002'>Symbol expressions</a><br>
+<a href='#hp:003'>Completion expressions</a><br>
+<a href='#hp:004'>'switch' expressions</a><br>
+<a href='#hp:005'>Monary operations.</a><br>
+<a href='#hp:006'>Binary operations</a><br>
+<a href='#hp:007'>Operator ternary</a>
+<p>
+<hr>
+<p>Expression (<code>Exp</code>) is the more basic semantic unity.</p>
+<h2 id='hp:001'>Final expressions</h2>
+<p>They are atomic expressions. Every expression is <i>solved</i> by <code>Kut</code> in
+a final expression, before its corresponding statement is executed.</p>
+<p>This expressons have a <i>type</i>. Types should be indicated in commentaries
+when it is necessary.</p>
+<p>Final expressions are:</p>
+<h3>Boolean</h3>
+<p>Logical values of <code>true</code> and <code>false</code>.</p>
+<p>Type: <code>b</code>.</p>
+<h3>Int</h3>
+<p>Integers of 64 bits.</p>
+<p>Type: <code>i</code>.</p>
+<h3>Float</h3>
+<p>Floating point numbers.</p>
+<p>Type: <code>f</code>.</p>
+<h3>String</h3>
+<p>Sequence of utf8 characters.</p>
+<p>Type: <code>s</code></p>
+<h3>Function</h3>
+<p>Code to be executed.</p>
+<p>Type: <code>\&lt;vars> -> &lt;return></code></p>
+<p>Where <code>&lt;vars></code> are a list, posibly empty, of variable types and <code>return</code>
+is the type of function return. If the function returns nothing, we write
+<code>()</code></p>
+<p>Examples:<br>
+<code>\ -> ()<br>
+\s, i -> () <br>
+\s -> s</code></p>
+<h3>Object</h3>
+<p>Built-in object.</p>
+<p>Type: <code>&lt;<u>identifier</u>></code></p>
+<p>There are the next object types:</p>
+
+<dl>
+<dt><code>&lt;bfunction></code></dt>
+<dd>    Built-in function.</dd>
+<dt><code>&lt;bmodule></code></dt>
+<dd>    Built-in module.</dd>
+<dt><code>&lt;file></code></dt>
+<dd>    Open file.</dd>
+<dt><code>&lt;iter></code></dt>
+<dd>    Iterator.</dd>
+<dt><code>&lt;module></code></dt>
+<dd>    Normal module.</dd>
+</dl>
+<h3>Array</h3>
+<p>Expressions array. Its elements can be <i>not solved</i> expressions, therefore
+for an array to be properly <i>final</i> is necessary to solve it.</p>
+<p>Type: <code>a</code> or <code>[]</code> or <code>[&lt;types>]</code> or <code>[&lt;type>...]</code></p>
+
+<dl>
+<dt><code>a</code></dt>
+<dd>    Stands for a generic array.</dd>
+<dt><code>[]</code></dt>
+<dd>    Stands for an empty array.</dd>
+<dt><code>[&lt;types>]</code></dt>
+<dd>    Stands for an array with elements of different type. (e.g. <code>[i, s]</code>
+    stands for an array whose first element is an intenger and the second one
+    a string.)</dd>
+<dt><code>[&lt;type>...]</code></dt>
+<dd>    Stands for an array with undefined elements number (posible none) of a type.
+    (e.g. <code>[i...]</code> stands for an array of an undefined number of integers.)</dd>
+</dl>
+<h3>Dictionary</h3>
+<p>Map from string to other element. This elements can be <i>not solved</i>
+expressions, therefore for an dictionary to be properly <i>final</i> is necessary
+to solve it.</p>
+<p>Type: <code>d</code> or <code>{&lt;type>}</code></p>
+
+<dl>
+<dt><code>d</code></dt>
+<dd>    Stands for a generic dictionary.</dd>
+<dt><code>{&lt;type>}</code></dt>
+<dd>    Stands for a dicitionary with undefined elements numer (posible none) of a
+    type. (e.g. <code>{i}</code> stands for an array of an undefined number of integers.)</dd>
+</dl>
+<h2 id='hp:002'>Symbol expressions</h2>
+<p>Symbols are names which point to other elements.</p>
+<p>At runtime, symbols are solved in final expressions.</p>
+<p>When solving symbols and a symbol which points to a module is found, if the
+module has not been loaded yet, it is loaded in that moment.</p>
+<p>To solve a symbol is followed the next procedure:</p>
+
+<ol>
+<li>Try to find it in the previuos defintions of its block.</li>
+<li>Try in the provious defintions of upper blocks (from closer to
+  further).</li>
+<li>Try in the top definitions of its module.</li>
+<li>Try in the imported modules.</li>
+<li>Try in the built-in modules.</li>
+</ol>
+<p>If every step fails, an expection is thrown, aborting the program.</p>
+<h2 id='hp:003'>Completion expressions</h2>
+<p>They are expressions which point to an element or group of elements inside of a
+container.</p>
+<h3>Dot completion</h3>
+<p>It can be applied to:</p>
+
+<dl>
+<dt><code>&lt;module></code> or <code>&lt;bmodule></code></dt>
+<dd>    Points to a top symbol of it.</dd>
+<dt><code>d</code></dt>
+<dd>    Points to a dictionary element.<br>
+    It returns an array with the element pointed by key or throws an exception
+    if such element does not exist.<br>
+    For expample:<br>
+    <code>{"a": 1, "b": 2}.a</code> returns <code>1</code>.<br>
+    <code>{"a": 1, "b": 2}.zd</code> throws the exception "Key not found".<br></dd>
+</dl>
+<h3>Index-Key completion</h3>
+<p>It can be applied to:</p>
+
+<dl>
+<dt><code>s</code> (e.g. <code>s[ix]</code>)</dt>
+<dd>    Returns the byte in the <i>ix</i> position, using an index of "base 0".<br>
+    Index values out of range produce exceptions.<br>
+    For expample <code>"ab"[1]</code> returns <code>"b"</code>.<br> <br>
+    <i>Note: Be carefull with unicode characters. For example <code>"aros"[3]</code>
+    returns "s", but <code>"años"[3]</code> returns "o", because "ñ" consumes two
+    bytes. Moreover <code>"años"[1]</code> and <code>"años"[2]</code> returns unexpected
+    strings.<br>
+    The built-in <code>str</code> library has the function <code>toRunes</code> to
+    manage utf-8 characters.</i></dd>
+<dt><code>a</code> (e.g. <code>a[ix]</code>)</dt>
+<dd>    Returns the element in the <i>ix</i> position, using an index of "base 0".<br>
+    Index values out of range produce exceptions.<br>
+    For expample <code>[32, 17, 11][0]</code> returns <code>32</code>.<br> <br></dd>
+<dt><code>d</code> (e.g. <code>d[key]</code>)</dt>
+<dd>    Returns an array with the element pointed by key or throws an exception
+    if such element does not exist.<br>
+    For expample:<br>
+    <code>{"a": 1, "b": 2}["a"]</code> returns <code>1</code>.<br>
+    <code>{"a": 1, "b": 2}["zd"]</code> throws the exception "Key not found".<br></dd>
+</dl>
+<h3>Slice completion</h3>
+<p>This option returns a subcontainer of a container.</p>
+<p>It has 4 forms:</p>
+
+<dl>
+<dt><code>[:]</code></dt>
+<dd>    Returns the complete collection.</dd>
+<dt><code>[begin:]</code></dt>
+<dd>    Returns the collection between <code>begin</code> (inclusive) and the end.</dd>
+<dt><code>[:end]</code></dt>
+<dd>    Returns the collection between the beginning and <code>end</code> (exclusive).</dd>
+<dt><code>[begin:end]</code></dt>
+<dd>    Returns the collection between <code>begin</code> (inclusive) and <code>end</code>
+    (exclusive).</dd>
+</dl>
+<p><code>begin</code> and <code>end</code> are integers. Its values are forced to valid limits:</p>
+
+<ul>
+<li>If <code>begin</code> or <code>end</code> are negatives, they are changed to
+    <code><i>x + len(container)</i></code>.</li>
+<li>If <code>begin</code> or <code>end</code> are out of bounds, they are set to them.</li>
+<li>If <code>begin >= end</code> the subcollection returned is empty.</li>
+</ul>
+<p>Slice completion works with:</p>
+
+<dl>
+<dt><code>s</code></dt>
+<dd>    For example: <br>
+    <code>"abc"[:]</code> returns <code>"abc"</code><br> 
+    <code>"abc"[:2]</code> returns <code>"ab"</code><br> 
+    <code>"abc"[2:]</code> returns <code>"c"</code><br> 
+    <code>"abc"[1:2]</code> returns <code>"b"</code><br> 
+    <code>"abc"[:-1]</code> returns <code>"ab"</code><br> 
+    <code>"abc"[-1:]</code> returns <code>"c"</code></dd>
+<dt><code>a</code></dt>
+<dd>    For example: <br>
+    <code>[1, 2, 3][:]</code> returns <code>[1, 2, 3]</code><br> 
+    <code>[1, 2, 3][:2]</code> returns <code>[1, 2]</code><br> 
+    <code>[1, 2, 3][2:]</code> returns <code>[3]</code><br> 
+    <code>[1, 2, 3][1:2]</code> returns <code>[2]</code><br> 
+    <code>[1, 2, 3][:-1]</code> returns <code>[1, 2]</code><br> 
+    <code>[1, 2, 3][-1:]</code> returns <code>[3]</code></dd>
+</dl>
+<h3>Call function completion</h3>
+<p>A list of expressions between parenthesis.</p>
+<p>For example: <br>
+<code>math.maxInt()</code><br>
+<code>math.pow(3.0, 2.0)</code></p>
+<h2 id='hp:004'>'switch' expressions</h2>
+<p>This expressions allow to match an expression with several others and return
+a new one.</p>
+<p>The symbol <code>default</code> can be used to force the selection.</p>
+<p>If no expression match and there is not <code>default</code> option, an exception is
+thrown.</p>
+<p>Examples:</p>
+<script>
+  aceFns.push(() => {
+    ed = ace.edit("ed1");
+    aceConf(ed, 0);
+  });
+</script>
+<table ><tr><td><div id="ed1" class="kmd-aceEditor">
+a = switch([1, 2, 3][1]) {
+    1 : "one";
+    2 : "two";
+    3 : "three";
+    default: "none";
+  };
+  // a == "two"
+
+  b = switch([1, 2, 3][1]) {
+    1 : "one";
+    3 : "three";
+    default: "none";
+  };
+  // b == none
+
+  c = switch([1, 2, 3][1]) {
+    1 : "one";
+    3 : "three";
+  };
+  // Throws a "switch did not catch" exception.
+</div></td></tr></table>
+<p><i>Note: Matching expressions must be bool, int, float, string or array.</i></p>
+<h2 id='hp:005'>Monary operations.</h2>
+<h3>Operator <code>!</code></h3>
+<p>Applied to bool, string and arrays.</p>
+<p>Examples:<br>
+  <code>!true</code> -> <code>false</code><br> 
+  <code>!false</code> -> <code>true</code><br>
+  <code>!"abc"</code> -> <code>false</code> <br>
+  <code>!""</code> -> <code>true</code> <br>
+  <code>![1, 2]</code> -> <code>false</code> <br>
+  <code>![]</code> -> <code>true</code> <br></p>
+<p><i>NOTE: An empty string is considered as <code>false</code> and a non empty one as
+<code>true</code>. Similarly an empty array is considered as <code>false</code> and a non empty
+one as <code>true</code>.</i></p>
+<h3>Operator <code>-</code></h3>
+<p>Sign "minus". Applied to int and float.</p>
+<p>examples:<br>
+  <code>-3</code> -> <code>-3</code><br>
+  <code>--3</code> -> <code>3</code><br>
+  <code>-0.0</code> -> <code>0.0</code><br>
+  <code>--3.45</code> -> <code>3.45</code></p>
+<h2 id='hp:006'>Binary operations</h2>
+<p>Binary operations only can be applied to expressions of the same type.</p>
+<h3>Operator <code>+</code></h3>
+<p>Applied to int, float, string and array.</p>
+<p>Examples:<br>
+  <code>2 + 3</code> -> <code>5</code><br>
+  <code>2.1 + 3.6</code> -> <code>5.7</code><br>
+  <code>"a" + "bc"</code> -> <code>"abc"</code><br>
+  <code>[1] + [2, 3]</code> -> <code>[1, 2, 3]</code></p>
+<h3>Operators <code>- * /</code></h3>
+<p>Applied to int and float.</p>
+<p>Examples:<br>
+  <code>2 - -2</code> -> <code>4</code><br>
+  <code>2 * -2</code> -> <code>-4</code><br>
+  <code>3 / -2</code> -> <code>-1</code><br>
+  <code>2.0 - -2.0</code> -> <code>4</code><br>
+  <code>2.0 * -2.0</code> -> <code>4</code><br>
+  <code>3.0 / -2.0</code> -> <code>-1.5</code></p>
+<h3>Operator <code>%</code></h3>
+<p>Applied to int.</p>
+<p>Example: <code>15 % 7</code> -> <code>2</code></p>
+<h3>Operators <code>&amp; |</code></h3>
+<p>Applied to to bool, string and arrays.</p>
+<p>Examples:<br>
+  <code>true &amp; false</code> -> <code>false</code><br> 
+  <code>true | false</code> -> <code>true</code><br> 
+  <code>"abc" &amp; ""</code> -> <code>false</code> <br>
+  <code>"abc" | ""</code> -> <code>true</code> <br>
+  <code>[] &amp; [1, 2]</code> -> <code>false</code> <br>
+  <code>[] | [1, 2]</code> -> <code>true</code> <br></p>
+<p><i>NOTE: An empty string is considered as <code>false</code> and a non empty one as
+<code>true</code>. Similarly an empty array is considered as <code>false</code> and a non empty
+one as <code>true</code>.</i></p>
+<p>This operators are short-circuited, that is <code>e2</code> is not solved if the
+expression is type <code>e1&amp;e2</code> and <code>e1</code> is <code>false</code>, or if the expression is
+type <code>e2|e1</code> and <code>e1</code> is <code>true</code>.</p>
+<p>Examples:<br>
+  <code>3 == 0 &amp; 3 == "a"</code> -> <code>false</code><br>
+  <code>3 != 0 &amp; 3 == "a"</code> -> throws an exception.<br>
+  <code>3 != 0 | 3 == "a"</code> -> <code>true</code><br>
+  <code>3 == 0 | 3 == "a"</code> -> throws an exception.</p>
+<h2 id='hp:007'>Operator ternary</h2>
+<p>The conditional part can be applied to bool, string and arrays.</p>
+<p>Examples:
+  <code>"ab"[0] == "a" ? 1 : 2</code> -> 1<br> 
+  <code>"" ? 1 : 2</code> -> 2<br> 
+  <code>[0] ? 1 : 2</code> -> 1</p>
+<p><i>NOTE: An empty string is considered as <code>false</code> and a non empty one as
+<code>true</code>. Similarly an empty array is considered as <code>false</code> and a non empty
+one as <code>true</code>.</i></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div style="position: fixed;top: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:END_PAGE');">
+    <img border="0" src="img/down.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

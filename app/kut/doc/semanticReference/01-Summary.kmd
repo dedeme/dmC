@@ -1,0 +1,28 @@
+=
+book = Kut. Semantic Reference.
+title = Summary
+withDown
+withUp
+=
+
+Kut is an imperative language. Its minimal significative element is the
+//statement//.
+
+Each statement can be seen as a command to excecute an action.
+
+Statements are grouped in //modules//.
+
+Each module matches a file with extension ##.kut##. This files can contain,
+besaides statements, //comments//.
+
+A module can refer to other modules.
+
+Kut programs start running the statements of a module, called the //main//
+module. The rest of modules are called //secundary// modules.
+
+Secundary modules are not executed and only their top level symbols are take into
+account.
+
+Statements work over PC devices and manage //expressions// to send and receive
+information from them.
+

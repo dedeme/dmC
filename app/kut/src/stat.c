@@ -1,0 +1,615 @@
+// Copyright 05-Mar-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+#include "stat.h"
+#include "DEFS.h"
+#include "fileix.h"
+
+#undef TRY
+
+
+enum stat_Stat_t {
+  END, EMPTY,
+  ASSIGN, ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS,
+  FUNCTION, BLOCK,
+  BLOCK_CLOSE, BREAK, CONTINUE,
+  TRACE, RETURN,
+  TRY, WHILE, IF, FOR, FOR_IX, FOR_R, FOR_RS, SWITCH,
+  IMPORT
+};
+
+typedef enum stat_Stat_t Stat_t;
+
+struct stat_Stat {
+  Stat_t type;
+  void *value;
+};
+
+static Stat *new(Stat_t type, void *value) {
+  Stat *this = MALLOC(Stat);
+  this->type = type;
+  this->value = value;
+  return this;
+}
+
+struct stat_StatCode {
+  int file_ix;
+  int nline;
+  Stat *stat;
+};
+
+StatCode *stat_code_new(int file_ix, int nline, Stat *stat) {
+  StatCode *this = MALLOC(StatCode);
+  this->file_ix = file_ix;
+  this->nline = nline;
+  this->stat = stat;
+  return this;
+}
+
+int stat_code_file_ix(StatCode *this) {
+  return this->file_ix;
+}
+
+int stat_code_line(StatCode *this) {
+  return this->nline;
+}
+
+Stat *stat_code_stat(StatCode *this) {
+  return this->stat;
+}
+
+static Stat end_stat = { .type = END, .value = "<end>" };
+Stat *stat_end (void) {
+  return &end_stat;
+}
+
+int stat_is_end (Stat *this) {
+  return this == &end_stat;
+}
+
+static Stat empty_stat = { .type = EMPTY, .value = "" };
+Stat *stat_empty (void) {
+  return &empty_stat;
+}
+
+int stat_is_empty (Stat *this) {
+  return this == &empty_stat;
+}
+
+Stat *stat_assign (Exp *left, Exp *right) {
+  return new(ASSIGN, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_assign (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_assign, "assign", this);
+  return this->value;
+}
+
+int stat_is_assign (Stat *this) {
+  return this->type == ASSIGN;
+}
+
+Stat *stat_add_as (Exp *left, Exp *right) {
+  return new(ADDAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_add_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_add_as, "add_as", this);
+  return this->value;
+}
+
+int stat_is_add_as (Stat *this) {
+  return this->type == ADDAS;
+}
+
+Stat *stat_sub_as (Exp *left, Exp *right) {
+  return new(SUBAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_sub_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_sub_as, "sub_as", this);
+  return this->value;
+}
+
+int stat_is_sub_as (Stat *this) {
+  return this->type == SUBAS;
+}
+
+Stat *stat_mul_as (Exp *left, Exp *right) {
+  return new(MULAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_mul_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_mul_as, "mul_as", this);
+  return this->value;
+}
+
+int stat_is_mul_as (Stat *this) {
+  return this->type == MULAS;
+}
+
+Stat *stat_div_as (Exp *left, Exp *right) {
+  return new(DIVAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_div_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_div_as, "div_as", this);
+  return this->value;
+}
+
+int stat_is_div_as (Stat *this) {
+  return this->type == DIVAS;
+}
+
+Stat *stat_mod_as (Exp *left, Exp *right) {
+  return new(MODAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_mod_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_mod_as, "mod_as", this);
+  return this->value;
+}
+
+int stat_is_mod_as (Stat *this) {
+  return this->type == MODAS;
+}
+
+Stat *stat_and_as (Exp *left, Exp *right) {
+  return new(ANDAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_and_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_and_as, "and_as", this);
+  return this->value;
+}
+
+int stat_is_and_as (Stat *this) {
+  return this->type == ANDAS;
+}
+
+Stat *stat_or_as (Exp *left, Exp *right) {
+  return new(ORAS, tp_new(left, right));
+}
+
+// <Exp, Exp>
+Tp *stat_get_or_as (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_or_as, "or_as", this);
+  return this->value;
+}
+
+int stat_is_or_as (Stat *this) {
+  return this->type == ORAS;
+}
+
+Stat *stat_func (Exp *value) {
+  return new(FUNCTION, value);
+}
+
+Exp *stat_get_func (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_func, "function", this);
+  return this->value;
+}
+
+int stat_is_func (Stat *this) {
+  return this->type == FUNCTION;
+}
+
+
+// stats is Arr<StatCode>
+Stat *stat_block (Arr *stats) {
+  return new(BLOCK, stats);
+}
+
+// <StatCode>
+Arr *stat_get_block (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_block, "function", this);
+  return this->value;
+}
+
+int stat_is_block (Stat *this) {
+  return this->type == BLOCK;
+}
+
+Stat *stat_block_close (void) {
+  return new(BLOCK_CLOSE, "");
+}
+
+int stat_is_block_close (Stat *this) {
+  return this->type == BLOCK_CLOSE;
+}
+
+Stat *stat_break (void) {
+  return new(BREAK, "");
+}
+
+int stat_is_break (Stat *this) {
+  return this->type == BREAK;
+}
+
+Stat *stat_continue (void) {
+  return new(CONTINUE, "");
+}
+
+int stat_is_continue (Stat *this) {
+  return this->type == CONTINUE;
+}
+
+Stat *stat_trace (int is_complete, Exp *exp) {
+  int *is = ATOMIC(sizeof(int));
+  *is = is_complete;
+  return new(TRACE, tp_new(is, exp));
+}
+
+// <int, Exp>
+Tp *stat_get_trace (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_trace, "trace", this);
+  return this->value;
+}
+
+int stat_is_trace (Stat *this) {
+  return this->type == TRACE;
+}
+
+Stat *stat_return (Exp *exp) {
+  return new(RETURN, exp);
+}
+
+Exp *stat_get_return (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_return, "return", this);
+  return this->value;
+}
+
+int stat_is_return (Stat *this) {
+  return this->type == RETURN;
+}
+
+// finally is Opt<StatCode>
+Stat *stat_try (StatCode *try, char *catch_var, StatCode *catch, Opt *finally) {
+  return new(TRY, arr_new_from(try, catch_var, catch, finally, NULL));
+}
+
+// [<StatCode>, <char>, <StatCode>, <Opt<StatCode>>]
+Arr *stat_get_try (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_try, "try", this);
+  return this->value;
+}
+
+int stat_is_try (Stat *this) {
+  return this->type == TRY;
+}
+
+// 'cond' is Opt<Exp>
+Stat *stat_while (Exp *cond, StatCode *stat) {
+  return new(WHILE, arr_new_from(cond, stat, NULL));
+}
+
+// [Opt<Exp>, <StatCode>]
+Arr *stat_get_while (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_while, "while", this);
+  return this->value;
+}
+
+int stat_is_while (Stat *this) {
+  return this->type == WHILE;
+}
+
+// 'else_stat' is Opt<StatCode>
+Stat *stat_if (Exp *cond, StatCode *if_stat, Opt *else_stat) {
+  return new(IF, arr_new_from(cond, if_stat, else_stat, NULL));
+}
+
+// [<Exp>, <StatCode>, Opt<StatCode>]
+Arr *stat_get_if (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_if, "if", this);
+  return this->value;
+}
+
+int stat_is_if (Stat *this) {
+  return this->type == IF;
+}
+
+Stat *stat_for (char *var, Exp *collection, StatCode *stat) {
+  return new(FOR, arr_new_from(var, collection, stat, NULL));
+}
+
+// [<char>, <Exp>, <StatCode>]
+Arr *stat_get_for (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_for, "for", this);
+  return this->value;
+}
+
+int stat_is_for (Stat *this) {
+  return this->type == FOR;
+}
+
+Stat *stat_for_ix (char *var_e, char *var_ix,  Exp *collection, StatCode *stat) {
+  return new(FOR_IX, arr_new_from(var_e, var_ix, collection, stat, NULL));
+}
+
+// [<char>, <char>, <Exp>, <StatCode>]
+Arr *stat_get_for_ix (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_for_ix, "for_ix", this);
+  return this->value;
+}
+
+int stat_is_for_ix (Stat *this) {
+  return this->type == FOR_IX;
+}
+
+Stat *stat_for_r (char *var, Exp *start, Exp *end, StatCode *stat) {
+  return new(FOR_R, arr_new_from(var, start, end, stat, NULL));
+}
+
+// [<char>, <Exp>, <Exp>, <StatCode>]
+Arr *stat_get_for_r (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_for_r, "for_r", this);
+  return this->value;
+}
+
+int stat_is_for_r (Stat *this) {
+  return this->type == FOR_R;
+}
+
+Stat *stat_for_rs (char *var, Exp *start, Exp *end, Exp *step, StatCode *stat) {
+  return new(FOR_RS, arr_new_from(var, start, end, step, stat, NULL));
+}
+
+// [<char>, <Exp>, <Exp>, <Exp>, <StatCode>]
+Arr *stat_get_for_rs (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_for_rs, "for_rs", this);
+  return this->value;
+}
+
+int stat_is_for_rs (Stat *this) {
+  return this->type == FOR_RS;
+}
+
+// 'entries' is Arr<Tp<Exp, StatCode>>
+Stat *stat_switch (Exp *cond, Arr *entries) {
+  return new(SWITCH, arr_new_from(cond, entries, NULL));
+}
+
+// [<Exp>, Arr<Tp<Exp, StatCode>>]
+Arr *stat_get_switch (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_switch, "switch", this);
+  return this->value;
+}
+
+int stat_is_switch (Stat *this) {
+  return this->type == SWITCH;
+}
+
+Stat *stat_import (int file_ix, char *id) {
+  int *fix = ATOMIC(sizeof(int *));
+  *fix = file_ix;
+  return new(IMPORT, arr_new_from(fix, id, NULL));
+}
+
+// [<int>, <char>]
+Arr *stat_get_import (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_import, "import", this);
+  return this->value;
+}
+
+int stat_is_import (Stat *this) {
+  return this->type == IMPORT;
+}
+
+char *stat_type_to_str (Stat *this)  {
+  switch (this->type) {
+    case END: return "eof";
+    case EMPTY: return "empty";
+    case ASSIGN: return "assign";
+    case ADDAS: return "add_as";
+    case SUBAS: return "sub_as";
+    case MULAS: return "mul_as";
+    case DIVAS: return "div_as";
+    case MODAS: return "mod_as";
+    case ANDAS: return "and_as";
+    case ORAS: return "or_as";
+    case FUNCTION: return "function";
+    case BLOCK: return "block";
+    case BLOCK_CLOSE: return "block_close";
+    case BREAK: return "break";
+    case CONTINUE: return "continue";
+    case TRACE: return "trace";
+    case RETURN: return "return";
+    case TRY: return "try";
+    case WHILE: return "while";
+    case IF: return "if";
+    case FOR: return "for";
+    case FOR_IX: return "for_ix";
+    case FOR_R: return "for_r";
+    case FOR_RS: return "for_rs";
+    case SWITCH: return "switch";
+    case IMPORT: return "import";
+  }
+  EXC_ILLEGAL_ARGUMENT("Bad statement type identifier",
+    str_f("(0 to %d)", IMPORT), str_f("%d", this->type)
+  );
+  return NULL;
+}
+
+char *stat_to_str (Stat *this) {
+    //--
+    char *fn_switch(Tp *tp) {
+      return str_f("%s : %s", exp_to_js(tp_e1(tp)), stat_to_str(tp_e2(tp)));
+    }
+
+  switch (this->type) {
+    case END: return "<eof>";
+    case EMPTY: return ";";
+    case ASSIGN: {
+      Tp *v = stat_get_assign(this);
+      return str_f("%s = %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case ADDAS: {
+      Tp *v = stat_get_add_as(this);
+      return str_f("%s += %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case SUBAS: {
+      Tp *v = stat_get_sub_as(this);
+      return str_f("%s -= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case MULAS: {
+      Tp *v = stat_get_mul_as(this);
+      return str_f("%s *= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case DIVAS: {
+      Tp *v = stat_get_div_as(this);
+      return str_f("%s /= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case MODAS: {
+      Tp *v = stat_get_mod_as(this);
+      return str_f("%s %= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case ANDAS: {
+      Tp *v = stat_get_and_as(this);
+      return str_f("%s &= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case ORAS: {
+      Tp *v = stat_get_or_as(this);
+      return str_f("%s |= %s;",
+        exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case FUNCTION: return str_f("%s;", exp_to_js(stat_get_func(this)));
+    case BLOCK: return str_f(
+      "{%s}",
+      arr_join(arr_map(
+        arr_map(stat_get_block(this), (FMAP)stat_code_stat),
+        (FMAP)stat_to_str
+      ), "")
+    );
+    case BLOCK_CLOSE: return "}";
+    case BREAK: return "break;";
+    case CONTINUE: return "continue;";
+    case TRACE: {
+      Tp *v = stat_get_trace(this);
+      return str_f("trace %s%s;",
+        *((int *)tp_e1(v)) ? ":" : "", exp_to_js(tp_e2(v))
+      );
+    }
+    case RETURN: {
+      Exp *e = stat_get_return(this);
+      if (exp_is_empty(e)) return "return;";
+      else return str_f("return %s;", exp_to_js(stat_get_return(this)));
+    }
+    case TRY: {
+      Arr *v = stat_get_try(this);
+      StatCode *finally = opt_get(arr_get(v, 3));
+      if (finally)
+        return str_f("try %s\ncatch(%s) %s\nfinally %s",
+          stat_to_str(stat_code_stat(arr_get(v, 0))),
+          arr_get(v, 1),
+          stat_to_str(stat_code_stat(arr_get(v,2))),
+          stat_to_str(stat_code_stat(finally))
+        );
+      else
+        return str_f("try %s\ncatch(%s) %s",
+          stat_to_str(stat_code_stat(arr_get(v, 0))),
+          arr_get(v, 1),
+          stat_to_str(stat_code_stat(arr_get(v,2)))
+        );
+    }
+    case WHILE: {
+      Arr *v = stat_get_while(this);
+      Exp *cond = arr_get(v, 0);
+      return str_f("while (%s) %s",
+        exp_is_empty(cond) ? "" : exp_to_js(cond),
+        stat_to_str(stat_code_stat(arr_get(v, 1)))
+      );
+    }
+    case IF: {
+      Arr *v = stat_get_if(this);
+      StatCode *else_st = opt_get(arr_get(v, 2));
+      if (else_st)
+        return str_f("if (%s) %s\nelse %s",
+          exp_to_js(arr_get(v, 0)),
+          stat_to_str(stat_code_stat(arr_get(v, 1))),
+          stat_to_str(stat_code_stat(else_st))
+        );
+      else
+        return str_f("if (%s) %s",
+          exp_to_js(arr_get(v, 0)),
+          stat_to_str(stat_code_stat(arr_get(v, 1)))
+        );
+
+    }
+    case FOR: {
+      Arr *v = stat_get_for(this);
+      return str_f("for (%s = %s) %s",
+        arr_get(v, 0),
+        exp_to_js(arr_get(v, 1)),
+        stat_to_str(stat_code_stat(arr_get(v, 2)))
+      );
+    }
+    case FOR_IX: {
+      Arr *v = stat_get_for_ix(this);
+      return str_f("for (%s, %s = %s) %s",
+        arr_get(v, 0),
+        arr_get(v, 1),
+        exp_to_js(arr_get(v, 2)),
+        stat_to_str(stat_code_stat(arr_get(v, 3)))
+      );
+    }
+    case FOR_R: {
+      Arr *v = stat_get_for_r(this);
+      return str_f("for (%s = %s : %s) %s",
+        arr_get(v, 0),
+        exp_to_js(arr_get(v, 1)),
+        exp_to_js(arr_get(v, 2)),
+        stat_to_str(stat_code_stat(arr_get(v, 3)))
+      );
+    }
+    case FOR_RS: {
+      Arr *v = stat_get_for_rs(this);
+      return str_f("for (%s = %s : %s : %s) %s",
+        arr_get(v, 0),
+        exp_to_js(arr_get(v, 1)),
+        exp_to_js(arr_get(v, 2)),
+        exp_to_js(arr_get(v, 3)),
+        stat_to_str(stat_code_stat(arr_get(v, 4)))
+      );
+    }
+    case SWITCH: {
+      Arr *v = stat_get_switch(this);
+      return str_f("switch (%s) {\n%s\n}",
+        exp_to_js(arr_get(v, 0)),
+        arr_join(arr_map(arr_get(v, 1), (FMAP)fn_switch), "\n")
+      );
+    }
+    case IMPORT: {
+      Arr *v = stat_get_import(this);
+      char *file = fileix_to_str(*((int *)arr_get(v, 0)));
+      char *alias = arr_get(v, 1);
+      if (*alias) return str_f("import \"%s\" : %s;", file, alias);
+      else return str_f("import \"%s\";", file);
+    }
+  }
+  EXC_ILLEGAL_ARGUMENT("Bad statement type identifier",
+    str_f("(0 to %d)", IMPORT), str_f("%d", this->type)
+  );
+  return NULL;
+}

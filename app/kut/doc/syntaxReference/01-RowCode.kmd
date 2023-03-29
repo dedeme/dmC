@@ -1,0 +1,29 @@
+=
+book = Kut. Syntax Reference.
+title = Row code
+withDown
+withUp
+=
+
+Kut code is written in plain text and codified in UTF-8.
+
+Kut files have the extension '.kut'.
+
+Each file produce a module.
+
+A module can make reference to other modules.
+
+The main module is that that is called in the command line. For example:
+
+<{c0 ed0
+  kut myProgram
+}>
+
+That command runs the module 'myProgram' written in the file 'myProgram.kut'
+placed in the current directory.
+
+Kut reads 'myProgram" and any other module referencied, generating syntaxis
+tokens, expressions and statements.
+
+When the main module is readd, it is executed.
+

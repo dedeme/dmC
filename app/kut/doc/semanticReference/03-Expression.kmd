@@ -1,0 +1,398 @@
+=
+title = Expression
+withDown
+withUp
+=
+
+Expression (##Exp##) is the more basic semantic unity.
+
+** Final expressions
+
+They are atomic expressions. Every expression is //solved// by ##Kut## in
+a final expression, before its corresponding statement is executed.
+
+This expressons have a //type//. Types should be indicated in commentaries
+when it is necessary.
+
+Final expressions are:
+
+*** Boolean
+
+Logical values of ##true## and ##false##.
+
+Type: ##b##.
+
+*** Int
+
+Integers of 64 bits.
+
+Type: ##i##.
+
+*** Float
+
+Floating point numbers.
+
+Type: ##f##.
+
+*** String
+
+Sequence of utf8 characters.
+
+Type: ##s##
+
+*** Function
+
+Code to be executed.
+
+Type: ##\<vars> -> <return>##
+
+Where ##<vars>## are a list, posibly empty, of variable types and ##return##
+is the type of function return. If the function returns nothing, we write
+##()##
+
+Examples:\\
+##\ -> ()\\
+\s, i -> () \\
+\s -> s##
+
+*** Object
+
+Built-in object.
+
+Type: ##<__identifier__>##
+
+There are the next object types:
+
+<{d
+  ##<bfunction>##
+    Built-in function.
+
+  ##<bmodule>##
+    Built-in module.
+
+  ##<file>##
+    Open file.
+
+  ##<iter>##
+    Iterator.
+
+  ##<module>##
+    Normal module.
+}>
+
+*** Array
+
+Expressions array. Its elements can be //not solved// expressions, therefore
+for an array to be properly //final// is necessary to solve it.
+
+Type: ##a## or ##[]## or ##[<types>]## or ##[<type>...]##
+
+<{d
+  ##a##
+    Stands for a generic array.
+
+  ##[]##
+    Stands for an empty array.
+
+  ##[<types>]##
+    Stands for an array with elements of different type. (e.g. ##[i, s]##
+    stands for an array whose first element is an intenger and the second one
+    a string.)
+
+  ##[<type>...]##
+    Stands for an array with undefined elements number (posible none) of a type.
+    (e.g. ##[i...]## stands for an array of an undefined number of integers.)
+}>
+
+*** Dictionary
+
+Map from string to other element. This elements can be //not solved//
+expressions, therefore for an dictionary to be properly //final// is necessary
+to solve it.
+
+Type: ##d## or ##{<type>}##
+
+<{d
+  ##d##
+    Stands for a generic dictionary.
+
+  ##{<type>}##
+    Stands for a dicitionary with undefined elements numer (posible none) of a
+    type. (e.g. ##{i}## stands for an array of an undefined number of integers.)
+}>
+
+** Symbol expressions
+
+Symbols are names which point to other elements.
+
+At runtime, symbols are solved in final expressions.
+
+When solving symbols and a symbol which points to a module is found, if the
+module has not been loaded yet, it is loaded in that moment.
+
+To solve a symbol is followed the next procedure:
+
+<{l1
+  Try to find it in the previuos defintions of its block.
+
+  Try in the provious defintions of upper blocks (from closer to
+  further).
+
+  Try in the top definitions of its module.
+
+  Try in the imported modules.
+
+  Try in the built-in modules.
+}>
+
+If every step fails, an expection is thrown, aborting the program.
+
+** Completion expressions
+
+They are expressions which point to an element or group of elements inside of a
+container.
+
+*** Dot completion
+
+It can be applied to:
+
+<{d
+  ##<module>## or ##<bmodule>##
+    Points to a top symbol of it.
+
+  ##d##
+    Points to a dictionary element.\\
+    It returns an array with the element pointed by key or throws an exception
+    if such element does not exist.\\
+    For expample:\\
+    ##{"a": 1, "b": 2}.a## returns ##1##.\\
+    ##{"a": 1, "b": 2}.zd## throws the exception "Key not found".\\ 
+}>
+
+*** Index-Key completion
+
+It can be applied to:
+
+<{d
+  ##s## (e.g. ##s[ix]##)
+    Returns the byte in the //ix// position, using an index of "base 0".\\
+    Index values out of range produce exceptions.\\
+    For expample ##"ab"[1]## returns ##"b"##.\\ \\
+    //Note: Be carefull with unicode characters. For example ##"aros"[3]##
+    returns "s", but ##"años"[3]## returns "o", because "ñ" consumes two
+    bytes. Moreover ##"años"[1]## and ##"años"[2]## returns unexpected
+    strings.\\
+    The built-in ##str## library has the function ##toRunes## to
+    manage utf-8 characters.//
+
+  ##a## (e.g. ##a[ix]##)
+    Returns the element in the //ix// position, using an index of "base 0".\\
+    Index values out of range produce exceptions.\\
+    For expample ##[32, 17, 11][0]## returns ##32##.\\ \\
+
+  ##d## (e.g. ##d[key]##)
+    Returns an array with the element pointed by key or throws an exception
+    if such element does not exist.\\
+    For expample:\\
+    ##{"a": 1, "b": 2}["a"]## returns ##1##.\\
+    ##{"a": 1, "b": 2}["zd"]## throws the exception "Key not found".\\ 
+}>
+
+*** Slice completion
+
+This option returns a subcontainer of a container.
+
+It has 4 forms:
+
+<{d
+  ##[:]##
+    Returns the complete collection.
+
+  ##[begin:]##
+    Returns the collection between ##begin## (inclusive) and the end.
+
+  ##[:end]##
+    Returns the collection between the beginning and ##end## (exclusive).
+
+  ##[begin:end]##
+    Returns the collection between ##begin## (inclusive) and ##end##
+    (exclusive).
+}>
+
+##begin## and ##end## are integers. Its values are forced to valid limits:
+
+<{l
+  If ##begin## or ##end## are negatives, they are changed to
+    ##//x + len(container)//##.
+
+  If ##begin## or ##end## are out of bounds, they are set to them.
+
+  If ##begin >= end## the subcollection returned is empty.
+}>
+
+Slice completion works with:
+
+<{d
+  ##s##
+    For example: \\
+    ##"abc"[:]## returns ##"abc"##\\ 
+    ##"abc"[:2]## returns ##"ab"##\\ 
+    ##"abc"[2:]## returns ##"c"##\\ 
+    ##"abc"[1:2]## returns ##"b"##\\ 
+    ##"abc"[:-1]## returns ##"ab"##\\ 
+    ##"abc"[-1:]## returns ##"c"##
+
+  ##a##
+    For example: \\
+    ##[1, 2, 3][:]## returns ##[1, 2, 3]##\\ 
+    ##[1, 2, 3][:2]## returns ##[1, 2]##\\ 
+    ##[1, 2, 3][2:]## returns ##[3]##\\ 
+    ##[1, 2, 3][1:2]## returns ##[2]##\\ 
+    ##[1, 2, 3][:-1]## returns ##[1, 2]##\\ 
+    ##[1, 2, 3][-1:]## returns ##[3]##
+}>
+
+*** Call function completion
+
+A list of expressions between parenthesis.
+
+For example: \\
+##math.maxInt()##\\
+##math.pow(3.0, 2.0)##
+
+** 'switch' expressions
+
+This expressions allow to match an expression with several others and return
+a new one.
+
+The symbol ##default## can be used to force the selection.
+
+If no expression match and there is not ##default## option, an exception is
+thrown.
+
+Examples:
+
+<{c0 ed1
+  a = switch([1, 2, 3][1]) {
+    1 : "one";
+    2 : "two";
+    3 : "three";
+    default: "none";
+  };
+  // a == "two"
+
+  b = switch([1, 2, 3][1]) {
+    1 : "one";
+    3 : "three";
+    default: "none";
+  };
+  // b == none
+
+  c = switch([1, 2, 3][1]) {
+    1 : "one";
+    3 : "three";
+  };
+  // Throws a "switch did not catch" exception.
+}>
+
+//Note: Matching expressions must be bool, int, float, string or array.//
+
+** Monary operations.
+
+*** Operator ##!##
+
+Applied to bool, string and arrays.
+
+Examples:\\
+  ##!true## -> ##false##\\ 
+  ##!false## -> ##true##\\
+  ##!"abc"## -> ##false## \\
+  ##!""## -> ##true## \\
+  ##![1, 2]## -> ##false## \\
+  ##![]## -> ##true## \\
+
+//NOTE: An empty string is considered as ##false## and a non empty one as
+##true##. Similarly an empty array is considered as ##false## and a non empty
+one as ##true##.//
+
+*** Operator ##-##
+
+Sign "minus". Applied to int and float.
+
+examples:\\
+  ##-3## -> ##-3##\\
+  ##--3## -> ##3##\\
+  ##-0.0## -> ##0.0##\\
+  ##--3.45## -> ##3.45##
+
+** Binary operations
+
+Binary operations only can be applied to expressions of the same type.
+
+*** Operator ##+##
+
+Applied to int, float, string and array.
+
+Examples:\\
+  ##2 + 3## -> ##5##\\
+  ##2.1 + 3.6## -> ##5.7##\\
+  ##"a" + "bc"## -> ##"abc"##\\
+  ##[1] + [2, 3]## -> ##[1, 2, 3]##
+
+*** Operators ##- * /##
+
+Applied to int and float.
+
+Examples:\\
+  ##2 - -2## -> ##4##\\
+  ##2 * -2## -> ##-4##\\
+  ##3 / -2## -> ##-1##\\
+  ##2.0 - -2.0## -> ##4##\\
+  ##2.0 * -2.0## -> ##4##\\
+  ##3.0 / -2.0## -> ##-1.5##
+
+*** Operator ##%##
+
+Applied to int.
+
+Example: ##15 % 7## -> ##2##
+
+*** Operators ##& |##
+
+Applied to to bool, string and arrays.
+
+Examples:\\
+  ##true & false## -> ##false##\\ 
+  ##true | false## -> ##true##\\ 
+  ##"abc" & ""## -> ##false## \\
+  ##"abc" | ""## -> ##true## \\
+  ##[] & [1, 2]## -> ##false## \\
+  ##[] | [1, 2]## -> ##true## \\
+
+//NOTE: An empty string is considered as ##false## and a non empty one as
+##true##. Similarly an empty array is considered as ##false## and a non empty
+one as ##true##.//
+
+This operators are short-circuited, that is ##e2## is not solved if the
+expression is type ##e1&e2## and ##e1## is ##false##, or if the expression is
+type ##e2|e1## and ##e1## is ##true##.
+
+Examples:\\
+  ##3 == 0 & 3 == "a"## -> ##false##\\
+  ##3 != 0 & 3 == "a"## -> throws an exception.\\
+  ##3 != 0 | 3 == "a"## -> ##true##\\
+  ##3 == 0 | 3 == "a"## -> throws an exception.
+
+** Operator ternary
+
+The conditional part can be applied to bool, string and arrays.
+
+Examples:
+  ##"ab"[0] == "a" ? 1 : 2## -> 1\\ 
+  ##"" ? 1 : 2## -> 2\\ 
+  ##[0] ? 1 : 2## -> 1
+
+//NOTE: An empty string is considered as ##false## and a non empty one as
+##true##. Similarly an empty array is considered as ##false## and a non empty
+one as ##true##.//
+

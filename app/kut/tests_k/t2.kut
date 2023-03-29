@@ -1,0 +1,105 @@
+n1 = 23;
+sys.test(n1 + 2, 25);
+A1 = [12];
+A2 = [12.0];
+A3 = [true];
+
+M = {"a": 12, "b": 12.0, "c": true};
+fn1 = \ -> return M.a;;
+fn2 = \n ->  {
+  return M.a - 4 + n1;
+};
+fn3 = \m, n -> {
+  n1 = n1 - 13 + m + n;
+  return M.a - n1;
+};
+{
+  { sys.test(n1, 23); }
+  n1 = -2;
+  sys.test(n1, -2);
+  {
+    sys.test(n1, -2);
+    n1 = 11;
+    sys.test(n1, 11);
+  }
+
+  A1! += 2;
+  sys.test(A1!, 14);
+  A1! -= -2;
+  sys.test(A1!, 16);
+  A1! *= 3;
+  sys.test(A1!, 48);
+  A1! /= 2;
+  sys.test(A1!, 24);
+  A1! %= 5;
+  sys.test(A1!, 4);
+
+  A2! += 2.0;
+  sys.test(A2!, 14.0);
+  A2! -= -2.0;
+  sys.test(A2!, 16.0);
+  A2! *= 3.0;
+  sys.test(A2!, 48.0);
+  A2! /= 2.0;
+  sys.test(A2!, 24.0);
+
+  A3! &= false;
+  sys.assert(!A3!);
+  A3! |= true;
+  sys.assert(A3!);
+
+  M["a"] += 2;
+  sys.test(M.a, 14);
+  M["a"] -= -2;
+  sys.test(M.a, 16);
+  M["a"] *= 3;
+  sys.test(M.a, 48);
+  M["a"] /= 2;
+  sys.test(M.a, 24);
+  M["a"] %= 5;
+  sys.test(M.a, 4);
+
+  M.b += 2.0;
+  sys.test(M["b"], 14.0);
+  M.b -= -2.0;
+  sys.test(M["b"], 16.0);
+  M.b *= 3.0;
+  sys.test(M["b"], 48.0);
+  M.b /= 2.0;
+  sys.test(M["b"], 24.0);
+
+  M.c &= false;
+  sys.assert(!M.c);
+  M.c |= true;
+  sys.assert(M.c);
+
+  {
+    sys.test(fn1(), 4);
+  }
+  sys.test(fn2(10), 23);
+  sys.test(fn3(15, -5), -16);
+}
+sys.test(n1, 23);
+sys.test(A1!, 4);
+sys.test(A2!, 24.0);
+sys.test(A3!, true);
+sys.test(M.a, 4);
+sys.test(M.b, 24.0);
+sys.test(M.c, true);
+
+sys.test(fn1(), 4);
+sys.test(fn2(10), 23);
+sys.test(fn3(15, -5), -16);
+
+fn1();
+
+/*
+\a -> sys.println(a);("here0");
+fnX = \ -> {
+  sys.println("here");
+  break;
+};
+fnX();
+*/
+
+
