@@ -12,6 +12,8 @@
 #include "kut/tp.h"
 #include "kut/tp3.h"
 
+typedef struct stack_Stack Stack;
+
 typedef struct function_Function Function;
 
 ///
@@ -31,22 +33,22 @@ Exp *exp_empty_return (void);
 /// Returns TRUE if 'this' is an empty-return expression.
 int exp_is_empty_return (Exp *this);
 
-/// Creates an expression of the indicated type. Value is Arr<StatCode>.
-Exp *exp_break (Arr *value);
+/// Creates an expression of the indicated type.
+Exp *exp_break (Stack *value);
 
-/// Read an Exp of the indicate type. Returns an Arr<StatCode>
+/// Read an Exp of the indicate type.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-Arr *exp_get_break (Exp *this);
+Stack *exp_get_break (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_break (Exp *this);
 
-/// Creates an expression of the indicated type. Value is Arr<StatCode>.
-Exp *exp_continue (Arr *value);
+/// Creates an expression of the indicated type.
+Exp *exp_continue (Stack *value);
 
-/// Read an Exp of the indicate type. Returns an Arr<StatCode>
+/// Read an Exp of the indicate type.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-Arr *exp_get_continue (Exp *this);
+Stack *exp_get_continue (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_continue (Exp *this);
@@ -64,6 +66,13 @@ int exp_rget_bool (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_bool (Exp *this);
+
+/// Read an Exp of type bool, string or array as boolean.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+int exp_rget_as_bool (Exp *this);
+
+/// Returns TRUE if 'this' is of type bool, string or array.
+int exp_is_as_bool (Exp *this);
 
 /// Creates an expression of the indicated type.
 Exp *exp_int (int64_t value);
@@ -112,7 +121,7 @@ Exp *exp_object (char *type, void *value);
 
 /// Read an Exp of the indicate type. Returns a Tp<char, void>
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-void *exp_get_object (char *type, Exp *this);
+void *exp_rget_object (char *type, Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_object (char *type, Exp *this);
@@ -154,6 +163,10 @@ Exp *exp_function (Function *value);
 /// Read an Exp of the indicate type.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Function *exp_get_function (Exp *this);
+
+/// Read an Exp of the indicate type.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Function *exp_rget_function (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_function (Exp *this);
@@ -404,7 +417,7 @@ int exp_is_binary (Exp *this);
 int exp_is_string (Exp *this);
 
 /// Returns TRUE if 'this' is a EXP_PR or 'EXP_PT + function call'.
-int exp_is_function_call (Exp *this);
+int exp_is_function_callx (Exp *this);
 
 /// Returns a string representation of 'this' type.
 char *exp_type_to_str (Exp *this);

@@ -53,6 +53,7 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_string(tk))
       EXC_KUT(cdr_fail_expect(cdr, "string", token_to_str(tk)));
+
     char *mod = token_get_string(tk);
     if (*mod == '/')
       EXC_KUT(cdr_fail(cdr, "Module path starts with '/'"));
@@ -62,6 +63,7 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
       EXC_KUT(cdr_fail(cdr, "Module path contains '.'"));
     if (!*mod)
       EXC_KUT(cdr_fail(cdr, "Module path is empty"));
+
     int fix = fileix_add(cdr_get_file(cdr), mod);
     if (fix == -1)
       EXC_KUT(cdr_fail(cdr, str_f("Module '%s' not found", mod)));
@@ -181,7 +183,6 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
       EXC_KUT(cdr_fail_expect(cdr, "=", token_to_str(tk)));
 
     Exp *exp1 = ex_reader_read(cdr);
-
     if (cdr_next_token_is_colon(cdr)){ // Range
       cdr_read_token(cdr);
       if (*v2)
@@ -198,12 +199,8 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
       if (!token_is_close_par(tk))
         EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
       return exp3
-        ? stat_for_rs(
-            token_get_symbol(var1), exp1, exp2, exp3, st_reader_read(cdr)
-          )
-        : stat_for_r(
-            token_get_symbol(var1), exp1, exp2, st_reader_read(cdr)
-          )
+        ? stat_for_rs(v1, exp1, exp2, exp3, st_reader_read(cdr))
+        : stat_for_r(v1, exp1, exp2, st_reader_read(cdr))
       ;
     }
 
@@ -249,12 +246,11 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
   }
 
   // No resereved symbol
-
   Exp *exp = pt_sq_pr_reader_read(exp_sym(sym), cdr);
   Token *tk = cdr_read_token(cdr);
 
   if (token_is_semicolon(tk)) {
-    if (exp_is_function_call(exp))
+    if (exp_is_pr(exp))
       return stat_func(exp);
     EXC_KUT(cdr_fail_expect(cdr, "Function calling", exp_to_js(exp)));
   }
@@ -314,7 +310,7 @@ StatCode *st_reader_read(Cdr *cdr) {
     int nline = cdr_get_next_nline(cdr);
     Exp *exp = ex_reader_read1(cdr);
     exp = pt_sq_pr_reader_read(exp, cdr);
-    if (exp_is_function_call(exp)) {
+    if (exp_is_pr(exp)) {
       Token *tk = cdr_read_token(cdr);
       if (!token_is_semicolon(tk))
         EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));

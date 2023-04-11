@@ -6,6 +6,7 @@
 #ifndef MAIN_H
   #define MAIN_H
 
+#include "kut/thread.h"
 #include "kut/arr.h"
 
 ///

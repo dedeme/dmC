@@ -7,11 +7,13 @@
 #include "kut/path.h"
 #include "fileix.h"
 #include "modules.h"
+#include "heaps.h"
 #include "reader/reader.h"
 #include "reader/cdr/cdr.h"
 #include "checker/checker.h"
 #include "runner/runner.h"
 #include "runner/fail.h"
+#include "runner/stack.h"
 #include "DEFS.h"
 
 // <char>
@@ -22,7 +24,7 @@ static char *help =
   "\n     kut -v"
   "\n       Shows Kut version."
   "\n     kut -c <file>"
-  "\n       Tests syntaxis of <file>."
+  "\n       Checks syntaxis of <file>."
   "\n     kut <file> [args]"
   "\n       Executes <file> with opational arguments."
   "\n     Examples:"
@@ -66,23 +68,44 @@ int main(int argc, char *argv[]) {
 
   TRY {
     int fix = fileix_add(-1, path_base(p));
-    if (fix < 0)
+    if (fix < 0) {
+      if (str_ends(p, ".kut"))
+        EXC_KUT(str_f("Module '%s' not found (modules can not have dots)", p));
       EXC_KUT(str_f("Module '%s' not found", p));
+    }
     char *kut_code = fileix_read(fix);
     modules_add(fix);
     Module *mod = reader_read_main_block(cdr_new(fix, kut_code));
     modules_set(fix, mod);
     if (check){
-      checker_run();
-    } else {
-      // <StatCode>
-      Arr *stack = arr_new();
-      // <Heap>
-      Arr *heaps = arr_new();
-      arr_push(heaps, module_get_heap(mod));
+      // READS EVERY MODULE
+      // Module
+      Arr *imp_mods = arr_new_from(mod, NULL);
+      while (arr_size(imp_mods)) {
+        Module *md = arr_pop(imp_mods);
+        EACH(map_to_array(module_get_imports(md)), Kv, sym_fix) {
+          int fix2 = *((int *)kv_value(sym_fix));
+          Module *old_md = opt_get(modules_get_ok(fix2));
+          if (!old_md) {
+            char *kut_code = fileix_read(fix2);
+            Module *new_md = reader_read_main_block(cdr_new(fix2, kut_code));
+            modules_set(fix2, new_md);
+            arr_push(imp_mods, new_md);
+          }
+        }_EACH
+      }
 
+      //CHEKS MODULES
+      // oomd is Opt<Opt<Module>>
+      EACH(modules_get_array(), Opt, oomd) {
+        Module *md = opt_get(opt_get(oomd));
+        checker_run(_i, md);
+      }_EACH
+    } else {
       Exp *rs = runner_run(
-        stack, module_get_imports(mod), module_get_heap0(mod), heaps,
+        stack_new(),
+        module_get_imports(mod), module_get_heap0(mod),
+        heaps_new(module_get_heap(mod)),
         module_get_code(mod)
       );
       if (exp_is_break(rs))
@@ -97,12 +120,11 @@ int main(int argc, char *argv[]) {
   } CATCH (e) {
     char *msg = exc_msg(e);
     msg = str_right(msg, str_index(msg, ": ") + 2);
-    msg = str_replace(msg, "\n----", "\n");
     puts(msg);
   } _TRY
 }
 
-
+// <char>
 Arr *main_args(void) {
   return args;
 }

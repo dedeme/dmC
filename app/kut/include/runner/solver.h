@@ -8,15 +8,16 @@
 
 #include "kut/map.h"
 #include "heap0.h"
+#include "heaps.h"
 #include "stat.h"
 
 /// Solve an expression.
 /// The expression returned is not empty nor break nor continue.
 ///   imports: Map<int>. Module imports.
 ///   hp0: Module heap of not solved symbols.
-///   hps: Arr<Heap>. Module heaps of solved symbols.
+///   hps: Heaps of solved symbols.
 ///   exp: Expression to solve.
-Exp *solver_solve(Map *imports, Heap0 *hp0, Arr *heaps, Exp *exp);
+Exp *solver_solve(Map *imports, Heap0 *hp0, Heaps *heaps, Exp *exp);
 
 /// Solve an expression without symbols.
 /// The expression returned is not empty nor break nor continue.

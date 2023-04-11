@@ -303,14 +303,19 @@ Exp *ex_reader_read1 (Cdr *cdr) {
 
   if (token_is_backslash(tk)) { // \ -------------------------------------------
     // <char>
-    Arr *vars = arr_new();
+    Arr *pars = arr_new();
     if (cdr_next_token_is_arrow(cdr)) {
       cdr_read_token(cdr);
     } else {
       for(;;) {
         Token *tk = cdr_read_token(cdr);
         if (token_is_symbol(tk)) {
-          arr_push(vars, token_get_symbol(tk));
+          char *s = token_get_symbol(tk);
+          EACH(pars, char, s2) {
+            if (!strcmp(s2, s))
+              EXC_KUT(cdr_fail(cdr, str_f("Duplicate parameter '%s'", s)));
+          }_EACH
+          arr_push(pars, s);
           tk = cdr_read_token(cdr);
           if (token_is_comma(tk)) continue;
           if (token_is_arrow(tk)) break;
@@ -320,7 +325,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       }
     }
 
-    return exp_function(function_new(vars, st_reader_read(cdr)));
+    return exp_function(function_new(pars, st_reader_read(cdr)));
   }
 
   // Others --------------------------------------------------------------------

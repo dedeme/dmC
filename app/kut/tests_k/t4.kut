@@ -1,4 +1,4 @@
-import "sub/s1";
+import "sub/s1" : ss;
 
-sys.test(s1.hello("world"), "hello world");
-sys.println(s1.hello("world"));
+sys.test(ss.hello("world"), "hello world");
+

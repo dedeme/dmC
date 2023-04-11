@@ -4,6 +4,7 @@
 #include "heap_tests.h"
 #include "kut/DEFS.h"
 #include "heap.h"
+#include "heaps.h"
 #include "exp.h"
 
 void heap_tests () {
@@ -23,18 +24,12 @@ void heap_tests () {
   Heap *heap2 = heap_new();
   assert(heap_add(heap2, "val", exp_int(5)));
 
-  // <Heap>
-  Arr *heaps = arr_new();
-  // <Heap>
-  Arr *heaps1 = heap_add_to_arr(heap2, heaps);
-  // <Heap>
-  Arr *heaps2 = heap_add_to_arr(heap, heaps1);
-  TESTI(arr_size(heaps), 0);
-  TESTI(arr_size(heaps1), 1);
-  TESTI(arr_size(heaps2), 2);
-  TESTI(exp_get_int(opt_get(heap_get_exp(heaps1, "val"))), 5);
-  TESTI(exp_get_int(opt_get(heap_get_exp(heaps2, "val"))), 3);
-  assert(!opt_get(heap_get_exp(heaps2, "va")));
+  Heaps *heaps1 = heaps_new(heap2);
+  Heaps *heaps2 = heaps_add(heaps1, heap);
+
+  TESTI(exp_get_int(opt_get(tp_e1(heaps_get(heaps1, "val")))), 5);
+  TESTI(exp_get_int(opt_get(tp_e1(heaps_get(heaps2, "val")))), 3);
+  assert(!opt_get(tp_e1(heaps_get(heaps2, "va"))));
 
   puts("  ... Finished");
 }

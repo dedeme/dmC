@@ -107,15 +107,24 @@ contain dots, finish with <code>/</code> nor be an empty string.</p>
 <h3>for</h3>
 <p>Scheme1: <code>for ( TkSymbol1 <span class='kmd-fm'>, TkSymbol2</span>? = Exp ) Stat</code> <br> <br>
 Scheme2: <code>for ( TkSymbol = Exp1 : Exp2 <span class='kmd-fm'>: Exp3</span>? ) Stat</code></p>
-<p>In the Scheme1 <code>Exp</code> is an array or iterator, <code>TkSymbol1</code> is bound to
-each element and <code>TkSymbol2</code> to its index.</p>
+<p>In the Scheme1 <code>Exp</code> is an string, array, dictionary or iterator,
+<code>TkSymbol1</code> is bound to each element and <code>TkSymbol2</code> to its index or, in
+case of dictionary, to its key.</p>
 <p>In the Scheme2 <code>Exp1</code>, <code>Exp2</code> and <code>Exp3</code> solve to an integer whose value
 is bound to <code>TkSymbol</code>.</p>
-<p>Examples:<br>
+<p>Examples of scheme1:<br>
+<code>for (e = "av") sys.println(e);</code><br>
 <code>for (e = ["a", "v"]) sys.println(e);</code><br>
-<code>for (e, i = ["a", "v"]) sys.println(e + "->" + math.toStr(i));</code><br>
-<code>for (i = [0 : 12]) { sys.println(math.toStr(i)); }</code><br>
-<code>for (i = [0 : 12 : 2]) sys.println(math.toStr(i));</code></p>
+<code>for (e, i = ["a", "v"]) sys.println(math.toStr(i) + "->" + e);</code><br>
+<code>for (e = {"a": 1, "v": 2}) sys.println(e);</code><br>
+<code>for (e, k = {"a": 1, "v": 2}) sys.println(k + "->" + math.toStr(e));</code><br>
+<code>for (i = [0 : 12]) { sys.println(i); }</code><br>
+<code>for (i = [0 : 12 : 2]) sys.println(i);</code> <br>
+<code>for (e, i = [0 : 12 : 2]) sys.println(math.toStr(i) + "->" + math.toStr(e));</code></p>
+<p>Examples of scheme2:<br>
+<code>for (i = 0 : 12) { sys.println(math.toStr(i)); }</code><br>
+<code>for (i = 0 : 12 : 2) sys.println(math.toStr(i));</code> <br>
+<code>for (i = 12 : 6 : -2) sys.println(math.toStr(i));</code></p>
 <h3>switch</h3>
 <p>Scheme: <code>switch ( Exp ) { <span class='kmd-fm'>Exp:Stat;</span>* <span class='kmd-fm'>default:Stat;</span>? }</code></p>
 <p>Example: <code>switch (v) { 3 : return 3 * 2; default: return 25; }</code></p>

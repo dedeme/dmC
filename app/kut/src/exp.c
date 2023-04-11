@@ -6,6 +6,7 @@
 #include "DEFS.h"
 #include "function.h"
 #include "runner/fail.h"
+#include "runner/stack.h"
 
 enum exp_Exp_t {
   EXP_BREAK, EXP_CONTINUE,
@@ -38,10 +39,10 @@ static char *type_to_str (Exp_t type) {
     case EXP_BOOL: return "bool";
     case EXP_INT: return "int";
     case EXP_FLOAT: return "float";
-    case EXP_STRING: return "string";
+    case EXP_STRING: return "str";
     case EXP_OBJECT: return "object";
-    case EXP_ARR: return "array";
-    case EXP_MAP: return "dictionary";
+    case EXP_ARR: return "arr";
+    case EXP_MAP: return "dic";
     case EXP_FUNC: return "function";
     case EXP_SYM: return "symbol";
     case EXP_RANGE: return "range";
@@ -96,13 +97,11 @@ int exp_is_empty_return (Exp *this) {
   return this == &empty_return_exp;
 }
 
-// value is Arr<StatCode>
-Exp *exp_break (Arr *value) {
+Exp *exp_break (Stack *value) {
   return new(EXP_BREAK, value);
 }
 
-// Returns an Arr<CodeSata>
-Arr *exp_get_break (Exp *this) {
+Stack *exp_get_break (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_break, "break", this);
   return this->value;
 }
@@ -111,13 +110,11 @@ int exp_is_break (Exp *this) {
   return this->type == EXP_BREAK;
 }
 
-// value is Arr<StatCode>
-Exp *exp_continue (Arr *value) {
+Exp *exp_continue (Stack *value) {
   return new(EXP_CONTINUE, value);
 }
 
-// Returns an Arr<CodeSata>
-Arr *exp_get_continue (Exp *this) {
+Stack *exp_get_continue (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_continue, "continue", this);
   return this->value;
 }
@@ -140,11 +137,23 @@ int exp_get_bool (Exp *this) {
 int exp_rget_bool (Exp *this) {
   if (this->type == EXP_BOOL) return *((int *)this->value);
   EXC_KUT(fail_type("bool", this));
+  return 0; // Unreachable.
+}
+
+int exp_is_bool(Exp *this) {
+  return this->type == EXP_BOOL;
+}
+
+int exp_rget_as_bool (Exp *this) {
+  if (this->type == EXP_BOOL) return *((int *)this->value) ? TRUE : FALSE;
+  if (this->type == EXP_STRING) return *((char *)this->value) ? TRUE : FALSE;
+  if (this->type == EXP_ARR) return arr_size(this->value) ? TRUE : FALSE;
+  EXC_KUT(fail_type("bool, string or array", this));
   return 0; // Unreachable
 }
 
-int exp_is_bool (Exp *this) {
-  return this->type == EXP_BOOL;
+int exp_is_as_bool (Exp *this) {
+  return this->type == (EXP_BOOL | EXP_STRING | EXP_ARR);
 }
 
 Exp *exp_int (int64_t value) {
@@ -212,7 +221,7 @@ Exp *exp_object (char *type, void *value) {
   return new(EXP_OBJECT, tp_new(type, value));
 }
 
-void *exp_get_object (char *type, Exp *this) {
+void *exp_rget_object (char *type, Exp *this) {
   if (!exp_is_object(type, this))
     EXC_ILLEGAL_ARGUMENT(
       "Bad expression type",
@@ -223,7 +232,9 @@ void *exp_get_object (char *type, Exp *this) {
 }
 
 int exp_is_object (char *type, Exp *this) {
-  return this->type == EXP_OBJECT && str_eq((char *)tp_e1(this->value), type);
+  return !exp_is_empty(this) && !exp_is_empty_return(this) &&
+    this->type == EXP_OBJECT && str_eq((char *)tp_e1(this->value), type)
+  ;
 }
 
 int exp_is_some_object (Exp *this) {
@@ -279,6 +290,12 @@ Exp *exp_function (Function *value) {
 Function *exp_get_function (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_function, "function", this);
   return this->value;
+}
+
+Function *exp_rget_function (Exp *this) {
+  if (this->type == EXP_FUNC) return this->value;
+  EXC_KUT(fail_type("function", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_function (Exp *this) {
@@ -639,13 +656,16 @@ int exp_is_function_call (Exp *this) {
   switch (this->type) {
     case EXP_PR:
       return TRUE;
-    case EXP_PT:
-      return exp_is_function_call(arr_get(this->value, 1));
+//    case EXP_PT:
+//      return exp_is_function_call(tp_e1(this->value));
     default: return FALSE;
   }
 }
 
 char *exp_type_to_str (Exp *this) {
+  if (exp_is_empty(this)) return this->value;
+  if (exp_is_empty_return(this)) return this->value;
+
   if (this->type == EXP_OBJECT)
     return str_f("%s%s", type_to_str(this->type), (char *)tp_e1(this->value));
 
@@ -660,7 +680,7 @@ char *exp_to_str (Exp *this) {
     }
     // tp is Tp<Exp, Exp>
     char *fn_switch(Tp *tp) {
-      return str_f("%s: %s", exp_to_js(tp_e1(tp)), exp_to_js(tp_e2(tp)));
+      return str_f("%s: %s;", exp_to_js(tp_e1(tp)), exp_to_js(tp_e2(tp)));
     }
 
   if (exp_is_empty(this)) return this->value;
@@ -737,7 +757,7 @@ char *exp_to_str (Exp *this) {
       return str_f(
         "switch(%s){%s}",
         exp_to_str(tp_e1(tp)),
-        arr_join(arr_map(tp_e2(tp), (FMAP)fn_switch), "\n")
+        arr_join(arr_map(tp_e2(tp), (FMAP)fn_switch), "")
       );
     }
     case EXP_NOT:

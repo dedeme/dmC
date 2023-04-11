@@ -6,26 +6,9 @@
 #include "kut/DEFS.h"
 #include "fileix.h"
 
-// Returns Arr<char>. stack is Arr<Stat>
-Arr *fail_stack_to_str (Arr *stack) {
-  Arr *r = arr_new();
-  int ix = arr_size(stack) - 1;
-  for (int i = 0; i < 15; ++i, --ix) {
-    if (ix < 0) break;
-
-    StatCode *st = arr_get(stack, ix);
-    arr_push(r, str_f(
-      "%s:%d:",
-      fileix_to_fail(stat_code_file_ix(st)),
-      stat_code_line(st)
-    ));
-  }
-  return r;
-}
-
-char *fail_add_stack (char *msg, Arr *stack) {
+char *fail_add_stack (char *msg, Stack *stack) {
   // <char>
-  Arr *r = fail_stack_to_str(stack);
+  Arr *r = stack_to_arr(stack);
   arr_insert(r, 0, msg);
   return arr_join(r, "\n  ");
 }

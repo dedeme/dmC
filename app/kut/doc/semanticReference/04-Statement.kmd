@@ -93,17 +93,27 @@ Examples:\\
 Scheme1: ##for ( TkSymbol1 ||, TkSymbol2||? = Exp ) Stat## \\ \\
 Scheme2: ##for ( TkSymbol = Exp1 : Exp2 ||: Exp3||? ) Stat##
 
-In the Scheme1 ##Exp## is an array or iterator, ##TkSymbol1## is bound to
-each element and ##TkSymbol2## to its index.
+In the Scheme1 ##Exp## is an string, array, dictionary or iterator,
+##TkSymbol1## is bound to each element and ##TkSymbol2## to its index or, in
+case of dictionary, to its key.
 
 In the Scheme2 ##Exp1##, ##Exp2## and ##Exp3## solve to an integer whose value
 is bound to ##TkSymbol##.
 
-Examples:\\
+Examples of scheme1:\\
+##for (e = "av") sys.println(e);##\\
 ##for (e = ["a", "v"]) sys.println(e);##\\
-##for (e, i = ["a", "v"]) sys.println(e + "->" + math.toStr(i));##\\
-##for (i = [0 : 12]) { sys.println(math.toStr(i)); }##\\
-##for (i = [0 : 12 : 2]) sys.println(math.toStr(i));##
+##for (e, i = ["a", "v"]) sys.println(math.toStr(i) + "->" + e);##\\
+##for (e = {"a": 1, "v": 2}) sys.println(e);##\\
+##for (e, k = {"a": 1, "v": 2}) sys.println(k + "->" + math.toStr(e));##\\
+##for (i = [0 : 12]) { sys.println(i); }##\\
+##for (i = [0 : 12 : 2]) sys.println(i);## \\
+##for (e, i = [0 : 12 : 2]) sys.println(math.toStr(i) + "->" + math.toStr(e));##
+
+Examples of scheme2:\\
+##for (i = 0 : 12) { sys.println(math.toStr(i)); }##\\
+##for (i = 0 : 12 : 2) sys.println(math.toStr(i));## \\
+##for (i = 12 : 6 : -2) sys.println(math.toStr(i));##
 
 *** switch
 

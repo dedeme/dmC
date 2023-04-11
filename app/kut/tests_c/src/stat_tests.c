@@ -26,73 +26,73 @@ void stat_tests () {
 
   Stat *asg = stat_assign(exp_sym("a"), exp_int(3));
   assert(stat_is_assign(asg));
-  // [<Exp>, <Exp>]
-  Arr *asg_v = stat_get_assign(asg);
-  TEST(exp_get_sym(arr_get(asg_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(asg_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *asg_v = stat_get_assign(asg);
+  TEST(exp_get_sym(tp_e1(asg_v)), "a");
+  TESTI(exp_get_int(tp_e2(asg_v)), 3);
   TEST(stat_to_str(asg), "a = 3;");
   TEST(stat_type_to_str(asg), "assign");
 
   Stat *add_as = stat_add_as(exp_sym("a"), exp_int(3));
   assert(stat_is_add_as(add_as));
-  // [<Exp>, <Exp>]
-  Arr *add_as_v = stat_get_add_as(add_as);
-  TEST(exp_get_sym(arr_get(add_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(add_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *add_as_v = stat_get_add_as(add_as);
+  TEST(exp_get_sym(tp_e1(add_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(add_as_v)), 3);
   TEST(stat_to_str(add_as), "a += 3;");
   TEST(stat_type_to_str(add_as), "add_as");
 
   Stat *sub_as = stat_sub_as(exp_sym("a"), exp_int(3));
   assert(stat_is_sub_as(sub_as));
-  // [<Exp>, <Exp>]
-  Arr *sub_as_v = stat_get_sub_as(sub_as);
-  TEST(exp_get_sym(arr_get(sub_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(sub_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *sub_as_v = stat_get_sub_as(sub_as);
+  TEST(exp_get_sym(tp_e1(sub_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(sub_as_v)), 3);
   TEST(stat_to_str(sub_as), "a -= 3;");
   TEST(stat_type_to_str(sub_as), "sub_as");
 
   Stat *mul_as = stat_mul_as(exp_sym("a"), exp_int(3));
   assert(stat_is_mul_as(mul_as));
-  // [<Exp>, <Exp>]
-  Arr *mul_as_v = stat_get_mul_as(mul_as);
-  TEST(exp_get_sym(arr_get(mul_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(mul_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *mul_as_v = stat_get_mul_as(mul_as);
+  TEST(exp_get_sym(tp_e1(mul_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(mul_as_v)), 3);
   TEST(stat_to_str(mul_as), "a *= 3;");
   TEST(stat_type_to_str(mul_as), "mul_as");
 
   Stat *div_as = stat_div_as(exp_sym("a"), exp_int(3));
   assert(stat_is_div_as(div_as));
-  // [<Exp>, <Exp>]
-  Arr *div_as_v = stat_get_div_as(div_as);
-  TEST(exp_get_sym(arr_get(div_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(div_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *div_as_v = stat_get_div_as(div_as);
+  TEST(exp_get_sym(tp_e1(div_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(div_as_v)), 3);
   TEST(stat_to_str(div_as), "a /= 3;");
   TEST(stat_type_to_str(div_as), "div_as");
 
   Stat *mod_as = stat_mod_as(exp_sym("a"), exp_int(3));
   assert(stat_is_mod_as(mod_as));
-  // [<Exp>, <Exp>]
-  Arr *mod_as_v = stat_get_mod_as(mod_as);
-  TEST(exp_get_sym(arr_get(mod_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(mod_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *mod_as_v = stat_get_mod_as(mod_as);
+  TEST(exp_get_sym(tp_e1(mod_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(mod_as_v)), 3);
   TEST(stat_to_str(mod_as), "a %= 3;");
   TEST(stat_type_to_str(mod_as), "mod_as");
 
   Stat *and_as = stat_and_as(exp_sym("a"), exp_int(3));
   assert(stat_is_and_as(and_as));
-  // [<Exp>, <Exp>]
-  Arr *and_as_v = stat_get_and_as(and_as);
-  TEST(exp_get_sym(arr_get(and_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(and_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *and_as_v = stat_get_and_as(and_as);
+  TEST(exp_get_sym(tp_e1(and_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(and_as_v)), 3);
   TEST(stat_to_str(and_as), "a &= 3;");
   TEST(stat_type_to_str(and_as), "and_as");
 
   Stat *or_as = stat_or_as(exp_sym("a"), exp_int(3));
   assert(stat_is_or_as(or_as));
-  // [<Exp>, <Exp>]
-  Arr *or_as_v = stat_get_or_as(or_as);
-  TEST(exp_get_sym(arr_get(or_as_v, 0)), "a");
-  TESTI(exp_get_int(arr_get(or_as_v, 1)), 3);
+  // <<Exp>, <Exp>>
+  Tp *or_as_v = stat_get_or_as(or_as);
+  TEST(exp_get_sym(tp_e1(or_as_v)), "a");
+  TESTI(exp_get_int(tp_e2(or_as_v)), 3);
   TEST(stat_to_str(or_as), "a |= 3;");
   TEST(stat_type_to_str(or_as), "or_as");
 
@@ -105,13 +105,13 @@ void stat_tests () {
   Stat *block = stat_block(arr_new());
   assert(stat_is_block(block));
   assert(arr_empty(stat_get_block(block)));
-  TEST(stat_to_str(block), "{\n\n}");
+  TEST(stat_to_str(block), "{}");
   TEST(stat_type_to_str(block), "block");
 
   Stat *block2 = stat_block(arr_new_from(stat_code_new(0, 1, stat_empty()), NULL));
   assert(stat_is_block(block2));
   assert(stat_is_empty(stat_code_stat(arr_get(stat_get_block(block2), 0))));
-  TEST(stat_to_str(block2), "{\n;\n}");
+  TEST(stat_to_str(block2), "{;}");
   TEST(stat_type_to_str(block2), "block");
 
   Stat *block_close = stat_block_close();
@@ -136,12 +136,6 @@ void stat_tests () {
   TEST(exp_to_str(tp_e2(trace_tp)), "a");
   TEST(stat_to_str(trace), "trace a;");
   TEST(stat_type_to_str(trace), "trace");
-
-  Stat *assertv = stat_assert(exp_sym("a"));
-  assert(stat_is_assert(assertv));
-  TEST(exp_to_str(stat_get_assert(assertv)), "a");
-  TEST(stat_to_str(assertv), "assert a;");
-  TEST(stat_type_to_str(assertv), "assert");
 
   Stat *returnv = stat_return(exp_sym("a"));
   assert(stat_is_return(returnv));

@@ -44,11 +44,11 @@
       }
 
   #else
+    #define TEST_TOKEN_TYPE_ERROR(fn_is, expected, exp)
 
     #define TEST_EXP_TYPE_ERROR(fn_is, expected, exp)
 
     #define TEST_STAT_TYPE_ERROR(fn_is, expected, stat)
-
   #endif
 
   ///

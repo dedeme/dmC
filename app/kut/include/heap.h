@@ -28,16 +28,4 @@ Map *heap_get (Heap *this);
 /// does nothing and returns FALSE.
 int heap_add (Heap *this, char *symbol, Exp *exp);
 
-/// Returns the expression Opt<Exp> matching 'symbol', searching in heaps from
-/// heaps[0] to heaps[end].
-/// If the symbol is not found, it returns 'opt_none()'.
-///   heaps: Arr<Heap>.
-///   symbol: Symbol to search.
-Opt *heap_get_exp (Arr *heaps, char *symbol);
-
-/// Returns a new Arr<Heap> adding 'this' to the beginning (as new_heaps[0]).
-///   this: The head to add.
-///   heaps: Arr<Heap>
-Arr *heap_add_to_arr (Heap *this, Arr *heaps);
-
 #endif

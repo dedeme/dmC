@@ -26,7 +26,7 @@ void barber_run (void) {
 	while (!end) {
 		char *cl = "";
       //
-      void fn (void) {
+      void fn (void *value) {
         if (clock_is_time_over() && shop_is_open()) {
           puts("Barber: Close barbery");
           shop_close();
@@ -41,12 +41,12 @@ void barber_run (void) {
           }
         } else {
             //--
-            void fn (void) { sleeping = FALSE; }
-          thread_sync(fn);
+            void fn (void *value) { sleeping = FALSE; }
+          thread_sync2(fn, NULL);
           cl = shop_barber_take_a_client();
         }
       }
-    thread_sync(fn);
+    thread_sync2(fn, NULL);
 		if (!str_eq(cl, "")) {
 			cut_hair(cl);
 		} else if (!end) {

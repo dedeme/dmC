@@ -4,7 +4,337 @@
 #include "mods/md_arr.h"
 #include "exp.h"
 #include "DEFS.h"
+#include "function.h"
+#include "obj.h"
 #include "runner/fail.h"
+#include "runner/solver.h"
+#include "runner/runner.h"
+
+// (\a, \*->b) -> b
+static Exp *all (Arr *exps) {
+  CHECK_PARS ("arr.all", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+      EACH(a, Exp, e) {
+        if (!exp_rget_as_bool(bf(arr_new_from(e, NULL))))
+          return exp_bool(FALSE);
+      }_EACH
+      return exp_bool(TRUE);
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*->b) -> b
+static Exp *any (Arr *exps) {
+  CHECK_PARS ("arr.any", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+      EACH(a, Exp, e) {
+        if (exp_rget_as_bool(bf(arr_new_from(e, NULL))))
+          return exp_bool(TRUE);
+      }_EACH
+      return exp_bool(FALSE);
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \a -> ()
+static Exp *clear (Arr *exps) {
+  CHECK_PARS ("arr.clear", 1, exps);
+  arr_clear(exp_rget_array(arr_get(exps, 0)));
+  return exp_empty();
+}
+
+// \a -> a
+static Exp *copy (Arr *exps) {
+  CHECK_PARS ("arr.copy", 1, exps);
+  return exp_array(arr_copy(exp_rget_array(arr_get(exps, 0))));
+}
+
+// \a, i -> a
+static Exp *drop (Arr *exps) {
+  CHECK_PARS ("arr.drop", 2, exps);
+  return exp_array(arr_drop(
+    exp_rget_array(arr_get(exps, 0)), exp_rget_int(arr_get(exps, 1))
+  ));
+}
+
+// (\a, \*->b) -> a
+static Exp *drop_while (Arr *exps) {
+  CHECK_PARS ("arr.dropWhile", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) {return exp_rget_bool(bf(arr_new_from(e, NULL))); }
+      return exp_array(arr_dropf(a, (FPRED)fn2));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*, *->b) -> [a, a]
+static Exp *duplicates (Arr *exps) {
+  CHECK_PARS ("arr.duplicates", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = arr_copy(exp_rget_array(arr_get(exps, 0)));
+        //--
+        int feq (Exp *e1, Exp *e2) {
+          return exp_rget_bool(bf(arr_new_from(e1, e2, NULL)));
+        }
+      // <Exp>
+      Arr *rest = arr_duplicates(a, (FEQ)feq);
+      return exp_array(arr_new_from(
+        exp_array(a), exp_array(rest), NULL
+      ));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*->()) -> ()
+static Exp *each (Arr *exps) {
+  CHECK_PARS ("arr.each", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        void f (Exp *e) { bf(arr_new_from(e, NULL)); }
+      arr_each(a, (FPROC)f);
+      return exp_empty();
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*,i->()) -> ()
+static Exp *each_ix (Arr *exps) {
+  CHECK_PARS ("arr.eachIx", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        void f (Exp *e, int ix) { bf(arr_new_from(e, exp_int(ix), NULL)); }
+      arr_each_ix(a, (void (*)(void *, int))f);
+      return exp_empty();
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*->b) -> a
+static Exp *filter (Arr *exps) {
+  CHECK_PARS ("arr.filter", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL))); }
+      return exp_array(arr_filter_to(a, (FPRED)fn2));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*->b) -> ()
+static Exp *filter_in (Arr *exps) {
+  CHECK_PARS ("arr.filterIn", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
+        }
+      arr_filter_in(a, (FPRED)fn2);
+      return exp_empty();
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// (\a, \*->b) -> ([] | [*])
+static Exp *find (Arr *exps) {
+  CHECK_PARS ("arr.find", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
+        }
+      Exp *e = opt_get(arr_find(a, (FPRED)fn2));
+      if (e) return exp_array(arr_new_from(e, NULL));
+      return exp_array(arr_new());
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \<iter> -> a
+static Exp *from_iter (Arr *exps) {
+  CHECK_PARS ("arr.fromIter", 1, exps);
+  // <Exp>
+  It *it = obj_rget_iter(arr_get(exps, 0));
+  return exp_array(arr_from_it(it));
+}
+
+// (\a, \*->b) -> i
+static Exp *findex (Arr *exps) {
+  CHECK_PARS ("arr.index", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
+        }
+      return exp_int(arr_index(a, (FPRED)fn2));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \[s...], s -> s
+static Exp *join (Arr *exps) {
+  CHECK_PARS ("arr.join", 2, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  char *sep = exp_rget_string(arr_get(exps, 1));
+    //--
+    char *fn (Exp *e) { return exp_rget_string(e); }
+  return exp_string(arr_join(arr_map(a, (FMAP)fn), sep));
+}
+
+// (\a, \*->*) -> a
+static Exp *map (Arr *exps) {
+  CHECK_PARS ("arr.map", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        Exp *fn2 (Exp *e) { return bf(arr_new_from(e, NULL)); }
+      return exp_array(arr_map(a, (FMAP)fn2));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \i, b | i | f | s -> a
+static Exp *new (Arr *exps) {
+  CHECK_PARS ("arr.new", 2, exps);
+  int64_t n = exp_rget_int(arr_get(exps, 0));
+  if (n < 0) n = 0;
+  Exp *e = arr_get(exps, 1);
+  // <Exp>
+  Arr *r = arr_new_bf(n + 1);
+  if (exp_is_bool(e)) {
+    int v = exp_get_bool(e);
+    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_bool(v));
+  } else if (exp_is_int(e)) {
+    int64_t v = exp_get_int(e);
+    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_int(v));
+  } else if (exp_is_float(e)) {
+    double v = exp_get_float(e);
+    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_float(v));
+  } else if (exp_is_string(e)) {
+    char *v = exp_get_string(e);
+    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_string(v));
+  } else {
+    EXC_ILLEGAL_ARGUMENT(
+      "Bad expression type",
+      "bool, int, float or string",
+      str_f("%s (%s)", exp_type_to_str(e), exp_to_str(e))
+    );
+  }
+  return exp_array(r);
+}
+
+// \a -> *
+static Exp *peek (Arr *exps) {
+  CHECK_PARS ("arr.peek", 1, exps);
+  return arr_peek(exp_rget_array(arr_get(exps, 0)));
+}
+
+// \a -> *
+static Exp *pop (Arr *exps) {
+  CHECK_PARS ("arr.pop", 1, exps);
+  return arr_pop(exp_rget_array(arr_get(exps, 0)));
+}
+
+// \a, * -> ()
+static Exp *push (Arr *exps) {
+  CHECK_PARS ("arr.push", 2, exps);
+  arr_push(exp_rget_array(arr_get(exps, 0)), arr_get(exps, 1));
+  return exp_empty();
+}
+
+// \(a, *, \*,*->*) -> *
+static Exp *reduce (Arr *exps) {
+  CHECK_PARS ("arr.reduce", 3, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+      Exp *e = arr_get(exps, 1);
+        //--
+        Exp *fn2 (Exp *r, Exp *e) { return bf(arr_new_from(r, e, NULL)); }
+      return arr_reduce(a, e, (void*(*)(void *, void *))fn2);
+    }
+  return runner_fn(arr_get(exps, 2), fn);
+}
+
+// \a, i -> *
+static Exp *fremove (Arr *exps) {
+  CHECK_PARS ("arr.remove", 2, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Exp *e = arr_get(a, ix);
+  arr_remove(a, ix);
+  return e;
+}
+
+// \a -> a
+static Exp *reverse (Arr *exps) {
+  CHECK_PARS ("arr.reverse", 1, exps);
+  // <Exp>
+  Arr *a = arr_copy(exp_rget_array(arr_get(exps, 0)));
+  arr_reverse(a);
+  return exp_array(a);
+}
+
+// \a -> ()
+static Exp *reverse_in (Arr *exps) {
+  CHECK_PARS ("arr.reverseIn", 1, exps);
+  arr_reverse(exp_rget_array(arr_get(exps, 0)));
+  return exp_empty();
+}
+
+// \a -> *
+static Exp *shift (Arr *exps) {
+  CHECK_PARS ("arr.shift", 1, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *e = NULL;
+  TRY {
+    e = arr_get(a, 0);
+  } CATCH (ex) {
+    ex = ex;
+  }_TRY
+  if (!e) EXC_ILLEGAL_STATE("Array is empty");
+  arr_remove(a, 0);
+  return e;
+}
+
+// \a -> ()
+static Exp *shuffle (Arr *exps) {
+  CHECK_PARS ("arr.shuffle", 1, exps);
+  arr_shuffle(exp_rget_array(arr_get(exps, 0)));
+  return exp_empty();
+}
 
 // \a -> i
 static Exp *size (Arr *exps) {
@@ -12,8 +342,93 @@ static Exp *size (Arr *exps) {
   return exp_int(arr_size(exp_rget_array(arr_get(exps, 0))));
 }
 
+// (\a, \*,*->b) -> ()
+static Exp *sort (Arr *exps) {
+  CHECK_PARS ("arr.sort", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e1, Exp *e2) {
+          // e2 and e1 are transposed because 'arr_sort' use 'greater' insted 'less'.
+          return exp_rget_bool(bf(arr_new_from(e2, e1,  NULL)));
+        }
+      arr_sort(a, (FEQ)fn2);
+      return exp_empty();
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \a, i -> a
+static Exp *take (Arr *exps) {
+  CHECK_PARS ("arr.take", 2, exps);
+  return exp_array(arr_take(
+    exp_rget_array(arr_get(exps, 0)), exp_rget_int(arr_get(exps, 1))
+  ));
+}
+
+// (\a, \*->b) -> a
+static Exp *take_while (Arr *exps) {
+  CHECK_PARS ("arr.takeWhile", 2, exps);
+    //--
+    Exp *fn (Bfunction bf) {
+      // <Exp>
+      Arr *a = exp_rget_array(arr_get(exps, 0));
+        //--
+        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
+        }
+      return exp_array(arr_takef(a, (FPRED)fn2));
+    }
+  return runner_fn(arr_get(exps, 1), fn);
+}
+
+// \a -> <iter>
+static Exp *to_iter (Arr *exps) {
+  CHECK_PARS ("arr.toIter", 1, exps);
+  return obj_iter(arr_to_it(exp_rget_array(arr_get(exps, 0))));
+}
+
+// \a, * -> ()
+static Exp *unshift (Arr *exps) {
+  CHECK_PARS ("arr.unshift", 2, exps);
+  arr_insert(exp_rget_array(arr_get(exps, 0)), 0, arr_get(exps, 1));
+  return exp_empty();
+}
+
 Bfunction md_arr_get (char *fname) {
+  if (!strcmp(fname, "all")) return all;
+  if (!strcmp(fname, "any")) return any;
+  if (!strcmp(fname, "clear")) return clear;
+  if (!strcmp(fname, "copy")) return copy;
+  if (!strcmp(fname, "drop")) return drop;
+  if (!strcmp(fname, "dropWhile")) return drop_while;
+  if (!strcmp(fname, "duplicates")) return duplicates;
+  if (!strcmp(fname, "each")) return each;
+  if (!strcmp(fname, "eachIx")) return each_ix;
+  if (!strcmp(fname, "filter")) return filter;
+  if (!strcmp(fname, "filterIn")) return filter_in;
+  if (!strcmp(fname, "find")) return find;
+  if (!strcmp(fname, "fromIter")) return from_iter;
+  if (!strcmp(fname, "index")) return findex;
+  if (!strcmp(fname, "join")) return join;
+  if (!strcmp(fname, "map")) return map;
+  if (!strcmp(fname, "new")) return new;
+  if (!strcmp(fname, "peek")) return peek;
+  if (!strcmp(fname, "pop")) return pop;
+  if (!strcmp(fname, "push")) return push;
+  if (!strcmp(fname, "reduce")) return reduce;
+  if (!strcmp(fname, "remove")) return fremove;
+  if (!strcmp(fname, "reverse")) return reverse;
+  if (!strcmp(fname, "reverseIn")) return reverse_in;
+  if (!strcmp(fname, "shift")) return shift;
+  if (!strcmp(fname, "shuffle")) return shuffle;
   if (!strcmp(fname, "size")) return size;
+  if (!strcmp(fname, "sort")) return sort;
+  if (!strcmp(fname, "take")) return take;
+  if (!strcmp(fname, "takeWhile")) return take_while;
+  if (!strcmp(fname, "toIter")) return to_iter;
+  if (!strcmp(fname, "unshift")) return unshift;
   EXC_KUT(fail_bfunction("arr", fname));
   return NULL; // Unreachable
 }

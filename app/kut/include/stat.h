@@ -188,10 +188,11 @@ Arr *stat_get_try (Stat *this);
 /// Returns TRUE if 'this' match the type.
 int stat_is_try (Stat *this);
 
-/// Creates a statement of the indicated type.
+/// Creates a statement of the indicated type. 'cond' can be an empty expression.
 Stat *stat_while (Exp *cond, StatCode *stat);
 
-/// Read a Stat of the indicate type. Returns an Arr[Exp, <StatCode>]
+/// Read a Stat of the indicate type. Returns an Arr[Exp, <StatCode>]. Exp can
+/// be an empty expression.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_while (Stat *this);
 

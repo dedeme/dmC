@@ -18,7 +18,10 @@ void modules_add (int ix) {
     REPEAT(inc) {
       arr_push(a, opt_none());
     }_REPEAT
+  } else if (opt_get(arr_get(a, ix))) {
+    return;
   }
+
   arr_set(a, ix, opt_some(opt_none()));
 }
 

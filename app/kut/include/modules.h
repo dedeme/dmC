@@ -46,7 +46,7 @@ Opt *modules_get(int ix);
 ///   ix: Index of mudule (and module file)
 Opt *modules_get_ok(int ix);
 
-/// Returns a copy of the modules array.
+/// Returns Arr<Opt<Opt<Module>>> with a copy of the modules array.
 Arr *modules_get_array(void);
 
 #endif

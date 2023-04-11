@@ -20,16 +20,3 @@ int heap_add (Heap *this, char *symbol, Exp *exp) {
   return TRUE;
 }
 
-Opt *heap_get_exp (Arr *heaps, char *symbol) {
-  EACH(heaps, Heap, h) {
-    Opt *e = map_get((Map *)h, symbol);
-    if (opt_get(e)) return e;
-  }_EACH
-  return opt_none();
-}
-
-Arr *heap_add_to_arr (Heap *this, Arr *heaps) {
-  Arr *r = arr_copy(heaps);
-  arr_insert(r, 0, this);
-  return r;
-}

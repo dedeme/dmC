@@ -6,6 +6,7 @@
 #include "exp.h"
 #include "kut/arr.h"
 #include "kut/map.h"
+#include "runner/stack.h"
 
 void exp_tests () {
   puts(">>> exp:");
@@ -13,16 +14,16 @@ void exp_tests () {
   Exp *empty = exp_empty();
   assert(exp_is_empty(empty));
 
-  Exp *br = exp_break(arr_new());
+  Exp *br = exp_break(stack_new());
   assert(exp_is_break(br));
-  TESTI(arr_size(exp_get_break(br)), 0);
+  TESTI(arr_size(stack_to_arr(exp_get_break(br))), 0);
   TEST(exp_to_str(br), "break");
   TEST(exp_to_js(br), "break");
   TEST(exp_type_to_str(br), "break");
 
-  Exp *ct = exp_continue(arr_new());
+  Exp *ct = exp_continue(stack_new());
   assert(exp_is_continue(ct));
-  TESTI(arr_size(exp_get_continue(ct)), 0);
+  TESTI(arr_size(stack_to_arr(exp_get_continue(ct))), 0);
   TEST(exp_to_str(ct), "continue");
   TEST(exp_to_js(ct), "continue");
   TEST(exp_type_to_str(ct), "continue");
@@ -53,11 +54,10 @@ void exp_tests () {
   TEST(exp_get_string(s), "ab\\c");
   TEST(exp_to_str(s), "ab\\c");
   TEST(exp_to_js(s), "\"ab\\\\c\"");
-  TEST(exp_type_to_str(s), "string");
+  TEST(exp_type_to_str(s), "str");
 
   Exp *o = exp_object("<nil>", NULL);
   assert(exp_is_object("<nil>", o));
-  assert(!exp_get_object("<nil>", o));
   TEST(exp_to_str(o), "object<nil>:0");
   TEST(exp_to_js(o), "object<nil>:0");
   TEST(exp_type_to_str(o), "object<nil>");
@@ -68,7 +68,7 @@ void exp_tests () {
   TEST(arr_join(arr_map(exp_get_array(a), (FMAP)exp_get_string), "-"), "a-b-c");
   TEST(exp_to_str(a), "[\"a\", \"b\", \"c\"]");
   TEST(exp_to_js(a), "[\"a\", \"b\", \"c\"]");
-  TEST(exp_type_to_str(a), "array");
+  TEST(exp_type_to_str(a), "arr");
 
   Map *mp = map_new();
   map_put(mp, "one", exp_string("a"));
@@ -80,8 +80,8 @@ void exp_tests () {
   TEST(exp_get_string(opt_get(map_get(mp2, "one"))), "a");
   TEST(exp_get_string(opt_get(map_get(mp2, "two"))), "b");
   TEST(exp_get_string(opt_get(map_get(mp2, "three"))), "c");
-  TEST(exp_to_str(m), "{one: \"a\", two: \"b\", three: \"c\"}");
-  TEST(exp_type_to_str(m), "map");
+  TEST(exp_to_str(m), "{\"one\": \"a\", \"two\": \"b\", \"three\": \"c\"}");
+  TEST(exp_type_to_str(m), "dic");
 
   Exp *sy = exp_sym("abc");
   assert(exp_is_sym(sy));
@@ -166,8 +166,8 @@ void exp_tests () {
   TEST(exp_get_string(tp_e2(arr_get(sw_cl, 0))), "a");
   TESTI(exp_get_sym(tp_e1(arr_get(sw_cl, 1))), "default");
   TEST(exp_get_string(tp_e2(arr_get(sw_cl, 1))), "b");
-  TEST(exp_to_str(sw), "switch(cond){\n1: \"a\"\ndefault: \"b\"\n}");
-  TEST(exp_to_js(sw), "switch(cond){\n1: \"a\"\ndefault: \"b\"\n}");
+  TEST(exp_to_str(sw), "switch(cond){1: \"a\";default: \"b\";}");
+  TEST(exp_to_js(sw), "switch(cond){1: \"a\";default: \"b\";}");
   TEST(exp_type_to_str(sw), "switch");
 
   Exp *nt = exp_not(exp_sym("true"));

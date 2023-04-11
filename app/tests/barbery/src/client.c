@@ -20,10 +20,10 @@ static void run (char *client) {
 		msg("Go out because barbery is full");
 	} else {
       //--
-      void fn (void) {
+      void fn (void *value) {
         shop_client_take_a_sit(client);
       }
-    thread_sync(fn);
+    thread_sync2(fn, NULL);
 	}
 }
 

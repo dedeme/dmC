@@ -37,9 +37,7 @@ char *read_unicode (Cdr *cdr) {
   unsigned *r = ATOMIC(sizeof(unsigned) + sizeof(unsigned));
   r[0] = r0;
   r[1] = 0;
-  // <char>
-  Opt *rst_op = str_from_unicode(r);
-  char *rst = opt_get(rst_op);
+  char *rst = str_from_unicode(r);
   if (!rst)
     EXC_KUT(cdr_fail_line(cdr, str_f(
       "Bad unicode sequence (\\u%s).", buf_str(bf)

@@ -209,7 +209,7 @@ Stat *stat_block (Arr *stats) {
 
 // <StatCode>
 Arr *stat_get_block (Stat *this) {
-  TEST_STAT_TYPE_ERROR(stat_is_block, "function", this);
+  TEST_STAT_TYPE_ERROR(stat_is_block, "block", this);
   return this->value;
 }
 
@@ -285,12 +285,10 @@ int stat_is_try (Stat *this) {
   return this->type == TRY;
 }
 
-// 'cond' is Opt<Exp>
 Stat *stat_while (Exp *cond, StatCode *stat) {
   return new(WHILE, arr_new_from(cond, stat, NULL));
 }
 
-// [Opt<Exp>, <StatCode>]
 Arr *stat_get_while (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_while, "while", this);
   return this->value;

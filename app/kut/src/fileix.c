@@ -23,44 +23,43 @@ char *fileix_get_root (void) {
 }
 
 int fileix_add(int fix, char *ipath) {
+  char *new_path = opt_get(path_canonical(
+    path_cat(root, str_f("%s.kut", ipath), NULL)
+  ));
   if (fix != -1) {
-    char *new_path = path_cat(path_parent(arr_get(paths,  fix)), ipath, NULL);
-    if (file_exists(path_cat(root, str_f("%s.kut", new_path), NULL))) {
-      ipath = new_path;
+    char *opt_path = opt_get(path_canonical(str_f(
+      "%s.kut",
+      path_cat(path_parent(arr_get(paths,  fix)), ipath, NULL
+    ))));
+    if (opt_path) {
+      new_path = opt_path;
     }
   }
-  if (!file_exists(path_cat(root, str_f("%s.kut", ipath), NULL))) return -1;
+  if (!new_path) return -1;
 
   EACH(paths, char, p) {
-    if (str_eq(p, ipath)) return _i;
+    if (str_eq(p, new_path)) return _i;
   }_EACH
 
-  arr_push(paths, ipath);
+  arr_push(paths, new_path);
   return arr_size(paths) - 1;
 }
 
 char *fileix_to_str (int ix) {
   if (ix < 0) return "Built-in";
-  char *s = path_cat(root, arr_get(paths, ix), NULL);
+  char *s = str_left(arr_get(paths, ix), - 4);
   if (strlen(s) > 50) s = str_f("...%s", str_right(s, -47));
   return s;
 }
 
 char *fileix_to_fail (int ix) {
   if (ix < 0) return "Built-in";
-  char *s = path_cat(root, arr_get(paths, ix), NULL);
-  if (*s != '/')  s = path_cat(file_wd(), s, NULL);
-
-  s = str_f("%s.kut", s);
-  char *r = opt_get(path_canonical(s));
-  if (!r) r = s;
-  return r;
+  return arr_get(paths, ix);
 }
 
 /// Read the file with index 'ix'
 /// <char>
 char *fileix_read (int ix) {
-  char *p = path_cat(root, arr_get(paths, ix), NULL);
-  return file_read(str_f("%s.kut", p));
+  return file_read(arr_get(paths, ix));
 }
 

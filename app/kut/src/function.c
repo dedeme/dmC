@@ -12,18 +12,19 @@ struct function_Function {
   Map *imports;
   Heap0 *heap0;
   // <Heap>
-  Arr *heaps;
+  Heaps *heaps;
   // <char>
-  Arr *vars;
+  Arr *pars;
   StatCode *stat;
 };
 
-Function *function_new (Arr *vars, StatCode *stat) {
+// pars is Arr<char>
+Function *function_new (Arr *pars, StatCode *stat) {
   Function *this = MALLOC(Function);
   this->imports = map_new();
   this->heap0 = heap0_new();
-  this->heaps = arr_new();
-  this->vars = vars;
+  this->heaps = heaps_new(heap_new());
+  this->pars = pars;
   this->stat = stat;
   return this;
 }
@@ -37,14 +38,13 @@ Heap0 *function_get_heap0 (Function *this) {
   return this->heap0;
 }
 
-// <Heap>
-Arr *function_get_heaps (Function *this) {
+Heaps *function_get_heaps (Function *this) {
   return this->heaps;
 }
 
 // <char>
-Arr *function_get_vars (Function *this) {
-  return this->vars;
+Arr *function_get_pars (Function *this) {
+  return this->pars;
 }
 
 StatCode *function_get_stat (Function *this) {
@@ -54,28 +54,28 @@ StatCode *function_get_stat (Function *this) {
 //  imports is Map<int>
 //  heaps is Arr<Heap>
 Function *function_set_context (
-  Function *old, Map *imports, Heap0 *heap0, Arr *heaps
+  Function *old, Map *imports, Heap0 *heap0, Heaps *heaps
 ) {
   Function *this = MALLOC(Function);
   this->imports = imports;
   this->heap0 = heap0;
   this->heaps = heaps;
-  this->vars = old->vars;
+  this->pars = old->pars;
   this->stat = old->stat;
   return this;
 }
 
 Exp *function_run (Function *this, Arr *pars) {
-  CHECK_PARS("<function>", arr_size(this->vars), pars);
+  CHECK_PARS("<function>", arr_size(this->pars), pars);
 
   Heap *hp = heap_new();
-  EACH(this->vars, char, vname) {
-    heap_add(hp, vname, arr_get(pars, _i));
+  EACH(this->pars, char, p) {
+    heap_add(hp, p, arr_get(pars, _i));
   }_EACH
 
-  Exp* r = runner_run_stat(
-    arr_new(),
-    this->imports, this->heap0, heap_add_to_arr(hp, this->heaps),
+  Exp *r = runner_run_stat(
+    stack_new(),
+    this->imports, this->heap0, heaps_add(this->heaps, hp),
     this->stat
   );
   if (exp_is_break(r))
@@ -100,7 +100,7 @@ Exp *function_to_exp (Function *this, Arr *params) {
 char *function_to_str (Function *this) {
   return str_f(
     "(\\%s -> %s)",
-    arr_join(this->vars, ", "),
+    arr_join(this->pars, ", "),
     stat_to_str(stat_code_stat(this->stat))
   );
 }

@@ -31,3 +31,6 @@ int main(int argc, char *argv[]) {
   cdr_tests();
 }
 
+Arr *main_args(void) {
+  return arr_new();
+}

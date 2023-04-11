@@ -7,12 +7,12 @@
   #define RUNNER_FAIL_H
 
 #include "exp.h"
-#include "kut/arr.h"
+#include "runner/stack.h"
 
 /// Adds 'stack trace' to message.
 ///   msg  : Main message.
-///   stack: Arr<StatCode>. Stack trace.
-char *fail_add_stack (char *msg, Arr *stack);
+///   stack: Stack trace.
+char *fail_add_stack (char *msg, Stack *stack);
 
 /// Returns a message for type error.
 ///   expected: Expected type (e.g. "int" or "int, string")

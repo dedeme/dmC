@@ -117,7 +117,7 @@ Type: ##d## or ##{<type>}##
     Stands for a generic dictionary.
 
   ##{<type>}##
-    Stands for a dicitionary with undefined elements numer (posible none) of a
+    Stands for a dicitionary with undefined elements number (posible none) of a
     type. (e.g. ##{i}## stands for an array of an undefined number of integers.)
 }>
 

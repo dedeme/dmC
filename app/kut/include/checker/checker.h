@@ -6,7 +6,11 @@
 #ifndef CHECKER_CHECKER_H
   #define CHECKER_CHECKER_H
 
-/// Automatic checking of loaded modules and its dependencies.
-void checker_run (void);
+#include "module.h"
+
+/// Check a module. This function must be called after reading every module.
+///   fix: Number module-file.
+///   md : Module to check.
+void checker_run (int fix, Module *md);
 
 #endif
