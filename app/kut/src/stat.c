@@ -1,21 +1,22 @@
 // Copyright 05-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "stat.h"
 #include "DEFS.h"
+#include "stat.h"
 #include "fileix.h"
+#include "symix.h"
 
 #undef TRY
 
 
 enum stat_Stat_t {
-  END, EMPTY,
+  END,
   ASSIGN, ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS,
   FUNCTION, BLOCK,
   BLOCK_CLOSE, BREAK, CONTINUE,
   TRACE, RETURN,
   TRY, WHILE, IF, FOR, FOR_IX, FOR_R, FOR_RS, SWITCH,
-  IMPORT
+  IMPORT, EXPORT
 };
 
 typedef enum stat_Stat_t Stat_t;
@@ -65,15 +66,6 @@ Stat *stat_end (void) {
 
 int stat_is_end (Stat *this) {
   return this == &end_stat;
-}
-
-static Stat empty_stat = { .type = EMPTY, .value = "" };
-Stat *stat_empty (void) {
-  return &empty_stat;
-}
-
-int stat_is_empty (Stat *this) {
-  return this == &empty_stat;
 }
 
 Stat *stat_assign (Exp *left, Exp *right) {
@@ -271,11 +263,13 @@ int stat_is_return (Stat *this) {
 }
 
 // finally is Opt<StatCode>
-Stat *stat_try (StatCode *try, char *catch_var, StatCode *catch, Opt *finally) {
-  return new(TRY, arr_new_from(try, catch_var, catch, finally, NULL));
+Stat *stat_try (StatCode *try, int catch_var, StatCode *catch, Opt *finally) {
+  int *var = ATOMIC(sizeof(int));
+  *var = catch_var;
+  return new(TRY, arr_new_from(try, var, catch, finally, NULL));
 }
 
-// [<StatCode>, <char>, <StatCode>, <Opt<StatCode>>]
+// [<StatCode>, <int>, <StatCode>, <Opt<StatCode>>]
 Arr *stat_get_try (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_try, "try", this);
   return this->value;
@@ -313,11 +307,13 @@ int stat_is_if (Stat *this) {
   return this->type == IF;
 }
 
-Stat *stat_for (char *var, Exp *collection, StatCode *stat) {
-  return new(FOR, arr_new_from(var, collection, stat, NULL));
+Stat *stat_for (int var, Exp *collection, StatCode *stat) {
+  int *v = ATOMIC(sizeof(int));
+  *v = var;
+  return new(FOR, arr_new_from(v, collection, stat, NULL));
 }
 
-// [<char>, <Exp>, <StatCode>]
+// [<int>, <Exp>, <StatCode>]
 Arr *stat_get_for (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_for, "for", this);
   return this->value;
@@ -327,11 +323,15 @@ int stat_is_for (Stat *this) {
   return this->type == FOR;
 }
 
-Stat *stat_for_ix (char *var_e, char *var_ix,  Exp *collection, StatCode *stat) {
-  return new(FOR_IX, arr_new_from(var_e, var_ix, collection, stat, NULL));
+Stat *stat_for_ix (int var_e, int var_ix,  Exp *collection, StatCode *stat) {
+  int *v1 = ATOMIC(sizeof(int));
+  *v1 = var_e;
+  int *v2 = ATOMIC(sizeof(int));
+  *v2 = var_ix;
+  return new(FOR_IX, arr_new_from(v1, v2, collection, stat, NULL));
 }
 
-// [<char>, <char>, <Exp>, <StatCode>]
+// [<int>, <int>, <Exp>, <StatCode>]
 Arr *stat_get_for_ix (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_for_ix, "for_ix", this);
   return this->value;
@@ -341,11 +341,13 @@ int stat_is_for_ix (Stat *this) {
   return this->type == FOR_IX;
 }
 
-Stat *stat_for_r (char *var, Exp *start, Exp *end, StatCode *stat) {
-  return new(FOR_R, arr_new_from(var, start, end, stat, NULL));
+Stat *stat_for_r (int var, Exp *start, Exp *end, StatCode *stat) {
+  int *v = ATOMIC(sizeof(int));
+  *v = var;
+  return new(FOR_R, arr_new_from(v, start, end, stat, NULL));
 }
 
-// [<char>, <Exp>, <Exp>, <StatCode>]
+// [<int>, <Exp>, <Exp>, <StatCode>]
 Arr *stat_get_for_r (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_for_r, "for_r", this);
   return this->value;
@@ -355,11 +357,13 @@ int stat_is_for_r (Stat *this) {
   return this->type == FOR_R;
 }
 
-Stat *stat_for_rs (char *var, Exp *start, Exp *end, Exp *step, StatCode *stat) {
-  return new(FOR_RS, arr_new_from(var, start, end, step, stat, NULL));
+Stat *stat_for_rs (int var, Exp *start, Exp *end, Exp *step, StatCode *stat) {
+  int *v = ATOMIC(sizeof(int));
+  *v = var;
+  return new(FOR_RS, arr_new_from(v, start, end, step, stat, NULL));
 }
 
-// [<char>, <Exp>, <Exp>, <Exp>, <StatCode>]
+// [<int>, <Exp>, <Exp>, <Exp>, <StatCode>]
 Arr *stat_get_for_rs (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_for_rs, "for_rs", this);
   return this->value;
@@ -369,12 +373,12 @@ int stat_is_for_rs (Stat *this) {
   return this->type == FOR_RS;
 }
 
-// 'entries' is Arr<Tp<Exp, StatCode>>
+// 'entries' is Arr<Tp<Arr<Exp>, StatCode>>
 Stat *stat_switch (Exp *cond, Arr *entries) {
   return new(SWITCH, arr_new_from(cond, entries, NULL));
 }
 
-// [<Exp>, Arr<Tp<Exp, StatCode>>]
+// [<Exp>, Arr<Tp<Arr<Exp>, StatCode>>]
 Arr *stat_get_switch (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_switch, "switch", this);
   return this->value;
@@ -384,13 +388,13 @@ int stat_is_switch (Stat *this) {
   return this->type == SWITCH;
 }
 
-Stat *stat_import (int file_ix, char *id) {
-  int *fix = ATOMIC(sizeof(int *));
-  *fix = file_ix;
-  return new(IMPORT, arr_new_from(fix, id, NULL));
+Stat *stat_import (char *module_path, int id) {
+  int *id2 = ATOMIC(sizeof(int *));
+  *id2 = id;
+  return new(IMPORT, arr_new_from(module_path, id2, NULL));
 }
 
-// [<int>, <char>]
+// [<char>, <int>]
 Arr *stat_get_import (Stat *this) {
   TEST_STAT_TYPE_ERROR(stat_is_import, "import", this);
   return this->value;
@@ -400,10 +404,18 @@ int stat_is_import (Stat *this) {
   return this->type == IMPORT;
 }
 
+static Stat export_stat = { .type = EXPORT, .value = "<export>" };
+Stat *stat_export (void) {
+  return &export_stat;
+}
+
+int stat_is_export (Stat *this) {
+  return this == &export_stat;
+}
+
 char *stat_type_to_str (Stat *this)  {
   switch (this->type) {
     case END: return "eof";
-    case EMPTY: return "empty";
     case ASSIGN: return "assign";
     case ADDAS: return "add_as";
     case SUBAS: return "sub_as";
@@ -428,22 +440,28 @@ char *stat_type_to_str (Stat *this)  {
     case FOR_RS: return "for_rs";
     case SWITCH: return "switch";
     case IMPORT: return "import";
+    case EXPORT: return "export";
   }
   EXC_ILLEGAL_ARGUMENT("Bad statement type identifier",
-    str_f("(0 to %d)", IMPORT), str_f("%d", this->type)
+    str_f("(0 to %d)", EXPORT), str_f("%d", this->type)
   );
   return NULL;
 }
 
 char *stat_to_str (Stat *this) {
     //--
+    // tp is Tp<Arr<Exp>, Stat>
     char *fn_switch(Tp *tp) {
-      return str_f("%s : %s", exp_to_js(tp_e1(tp)), stat_to_str(tp_e2(tp)));
+      /// Exp
+      Arr *conds = tp_e1(tp);
+        //--
+        char *fn_map(Exp *exp) { return exp_to_js(exp); }
+      char *sconds = arr_join(arr_map(conds, (FMAP)fn_map), ", ");
+      return str_f("%s : %s", sconds, stat_to_str(tp_e2(tp)));
     }
 
   switch (this->type) {
     case END: return "<eof>";
-    case EMPTY: return ";";
     case ASSIGN: {
       Tp *v = stat_get_assign(this);
       return str_f("%s = %s;",
@@ -520,14 +538,14 @@ char *stat_to_str (Stat *this) {
       if (finally)
         return str_f("try %s\ncatch(%s) %s\nfinally %s",
           stat_to_str(stat_code_stat(arr_get(v, 0))),
-          arr_get(v, 1),
+          symix_get(*((int *)arr_get(v, 1))),
           stat_to_str(stat_code_stat(arr_get(v,2))),
           stat_to_str(stat_code_stat(finally))
         );
       else
         return str_f("try %s\ncatch(%s) %s",
           stat_to_str(stat_code_stat(arr_get(v, 0))),
-          arr_get(v, 1),
+          symix_get(*((int *)arr_get(v, 1))),
           stat_to_str(stat_code_stat(arr_get(v,2)))
         );
     }
@@ -558,7 +576,7 @@ char *stat_to_str (Stat *this) {
     case FOR: {
       Arr *v = stat_get_for(this);
       return str_f("for (%s = %s) %s",
-        arr_get(v, 0),
+        symix_get(*((int *)arr_get(v, 0))),
         exp_to_js(arr_get(v, 1)),
         stat_to_str(stat_code_stat(arr_get(v, 2)))
       );
@@ -566,8 +584,8 @@ char *stat_to_str (Stat *this) {
     case FOR_IX: {
       Arr *v = stat_get_for_ix(this);
       return str_f("for (%s, %s = %s) %s",
-        arr_get(v, 0),
-        arr_get(v, 1),
+        symix_get(*((int *)arr_get(v, 0))),
+        symix_get(*((int *)arr_get(v, 1))),
         exp_to_js(arr_get(v, 2)),
         stat_to_str(stat_code_stat(arr_get(v, 3)))
       );
@@ -575,7 +593,7 @@ char *stat_to_str (Stat *this) {
     case FOR_R: {
       Arr *v = stat_get_for_r(this);
       return str_f("for (%s = %s : %s) %s",
-        arr_get(v, 0),
+        symix_get(*((int *)arr_get(v, 0))),
         exp_to_js(arr_get(v, 1)),
         exp_to_js(arr_get(v, 2)),
         stat_to_str(stat_code_stat(arr_get(v, 3)))
@@ -584,7 +602,7 @@ char *stat_to_str (Stat *this) {
     case FOR_RS: {
       Arr *v = stat_get_for_rs(this);
       return str_f("for (%s = %s : %s : %s) %s",
-        arr_get(v, 0),
+        symix_get(*((int *)arr_get(v, 0))),
         exp_to_js(arr_get(v, 1)),
         exp_to_js(arr_get(v, 2)),
         exp_to_js(arr_get(v, 3)),
@@ -600,14 +618,15 @@ char *stat_to_str (Stat *this) {
     }
     case IMPORT: {
       Arr *v = stat_get_import(this);
-      char *file = fileix_to_str(*((int *)arr_get(v, 0)));
-      char *alias = arr_get(v, 1);
+      char *file = arr_get(v, 0);
+      char *alias = symix_get(*((int *)arr_get(v, 1)));
       if (*alias) return str_f("import \"%s\" : %s;", file, alias);
       else return str_f("import \"%s\";", file);
     }
+    case EXPORT: return "<export>";
   }
   EXC_ILLEGAL_ARGUMENT("Bad statement type identifier",
-    str_f("(0 to %d)", IMPORT), str_f("%d", this->type)
+    str_f("(0 to %d)", EXPORT), str_f("%d", this->type)
   );
   return NULL;
 }

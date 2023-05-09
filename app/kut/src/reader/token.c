@@ -1,22 +1,33 @@
 // Copyright 07-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "reader/token.h"
 #include "DEFS.h"
+#include "reader/token.h"
+#include "kut/dec.h"
 #include "kut/js.h"
-
-enum token_Token_t {
-  TOKEN_BOOL, TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING,
-  TOKEN_LINE_COMMENT, TOKEN_COMMENT, TOKEN_SYMBOL, TOKEN_OPERATOR
-};
-
-typedef enum token_Token_t Token_t;
+#include "symix.h"
 
 
-struct token_Token {
-  Token_t type;
-  void *value;
-};
+static Token *newb(Token_t type, int value) {
+  Token *this = MALLOC(Token);
+  this->type = type;
+  this->b = value;
+  return this;
+}
+
+static Token *newi(Token_t type, int64_t value) {
+  Token *this = MALLOC(Token);
+  this->type = type;
+  this->i = value;
+  return this;
+}
+
+static Token *newd(Token_t type, double value) {
+  Token *this = MALLOC(Token);
+  this->type = type;
+  this->d = value;
+  return this;
+}
 
 static Token *new(Token_t type, void *value) {
   Token *this = MALLOC(Token);
@@ -26,168 +37,83 @@ static Token *new(Token_t type, void *value) {
 }
 
 Token *token_bool (int value) {
-  int *val = ATOMIC(sizeof(int));
-  *val = value;
-  return new(TOKEN_BOOL, val);
+  return newb(TOKEN_BOOL, value);
 }
 
-int token_get_bool (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_bool, "Bool", this);
-  return *((int *)this->value);
-}
-
-/// Returns TRUE if 'this' match the type.
-int token_is_bool (Token *this) {
-  return this->type == TOKEN_BOOL;
-}
 
 Token *token_int (int64_t value) {
-  int64_t *val = ATOMIC(sizeof(int64_t));
-  *val = value;
-  return new(TOKEN_INT, val);
-}
-
-int64_t token_get_int (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_int, "Int", this);
-  return *((int64_t *)this->value);
-}
-
-int token_is_int(Token *this) {
-  return this->type == TOKEN_INT;
+  return newi(TOKEN_INT, value);
 }
 
 Token *token_float (double value) {
-  double *val = ATOMIC(sizeof(double));
-  *val = value;
-  return new(TOKEN_FLOAT, val);
-}
-
-double token_get_float (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_float, "Float", this);
-  return *((double *)this->value);
-}
-
-/// Returns TRUE if 'this' match the type.
-int token_is_float (Token *this) {
-  return this->type == TOKEN_FLOAT;
+  return newd(TOKEN_FLOAT, value);
 }
 
 Token *token_string (char *value) {
   return new(TOKEN_STRING, value);
 }
 
-char *token_get_string (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_string, "String", this);
-  return this->value;
-}
-
-int token_is_string (Token *this) {
-  return this->type == TOKEN_STRING;
-}
-
 Token *token_line_comment (char *value) {
   return new(TOKEN_LINE_COMMENT, value);
-}
-
-char *token_get_line_comment (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_line_comment, "Line_comment", this);
-  return this->value;
-}
-
-int token_is_line_comment (Token *this) {
-  return this->type == TOKEN_LINE_COMMENT;
 }
 
 Token *token_comment (char *value) {
   return new(TOKEN_COMMENT, value);
 }
 
-char *token_get_comment (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_comment, "Comment", this);
-  return this->value;
-}
-
-int token_is_comment (Token *this) {
-  return this->type == TOKEN_COMMENT;
-}
-
 Token *token_symbol (char *value) {
-  return new(TOKEN_SYMBOL, value);
-}
-
-char *token_get_symbol (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_symbol, "Symbol", this);
-  return this->value;
-}
-
-int token_is_symbol (Token *this) {
-  return this->type == TOKEN_SYMBOL;
+  return newb(TOKEN_SYMBOL, symix_add(value));
 }
 
 Token *token_operator (char *value) {
   return new(TOKEN_OPERATOR, value);
 }
 
-char *token_get_operator (Token *this) {
-  TEST_TOKEN_TYPE_ERROR(token_is_operator, "Operator", this);
-  return this->value;
-}
-
-int token_is_operator (Token *this) {
-  return this->type == TOKEN_OPERATOR;
-}
-
 int token_is_unary (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "!") || !strcmp(v, "-");
-  }
-  return FALSE;
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    (!strcmp(v, "!") || !strcmp(v, "-"))
+  ;
 }
 
 int token_is_binary (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "*") || !strcmp(v, "/") || !strcmp(v, "%") ||
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    ( !strcmp(v, "*") || !strcmp(v, "/") || !strcmp(v, "%") ||
       !strcmp(v, "+") || !strcmp(v, "-") || !strcmp(v, "==") ||
       !strcmp(v, "!=") || !strcmp(v, ">") || !strcmp(v, ">=") ||
       !strcmp(v, "<") || !strcmp(v, "<=") || !strcmp(v, "&") ||
-      !strcmp(v, "|");
-  }
-  return FALSE;
+      !strcmp(v, "|")
+    );
 }
 
 int token_is_binary1 (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "*") || !strcmp(v, "/") || !strcmp(v, "%");
-  }
-  return FALSE;
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    (!strcmp(v, "*") || !strcmp(v, "/") || !strcmp(v, "%"))
+  ;
 }
 
 int token_is_binary2 (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "+") || !strcmp(v, "-");
-  }
-  return FALSE;
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    (!strcmp(v, "+") || !strcmp(v, "-"))
+  ;
 }
 
 int token_is_binary3 (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "==") || !strcmp(v, "!=") || !strcmp(v, ">") ||
-      !strcmp(v, ">=") || !strcmp(v, "<") || !strcmp(v, "<=");
-  }
-  return FALSE;
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    ( !strcmp(v, "==") || !strcmp(v, "!=") || !strcmp(v, ">") ||
+      !strcmp(v, ">=") || !strcmp(v, "<") || !strcmp(v, "<=")
+    );
 }
 
 int token_is_binary4 (Token *this) {
-  if (this->type == TOKEN_OPERATOR) {
-    char *v = this->value;
-    return !strcmp(v, "&") || !strcmp(v, "|");
-  }
-  return FALSE;
+  char *v = this->value;
+  return this->type == TOKEN_OPERATOR &&
+    (!strcmp(v, "&") || !strcmp(v, "|"))
+  ;
 }
 
 int token_is_ternary (Token *this) {
@@ -266,15 +192,15 @@ int token_is_close_bracket (Token *this) {
 }
 
 int token_is_else (Token *this) {
-  return this->type == TOKEN_SYMBOL && !strcmp(this->value, "else");
+  return this->type == TOKEN_SYMBOL && this->b == symix_ELSE;
 }
 
 int token_is_catch (Token *this) {
-  return this->type == TOKEN_SYMBOL && !strcmp(this->value, "catch");
+  return this->type == TOKEN_SYMBOL && this->b == symix_CATCH;
 }
 
 int token_is_finally (Token *this) {
-  return this->type == TOKEN_SYMBOL && !strcmp(this->value, "finally");
+  return this->type == TOKEN_SYMBOL && this->b == symix_FINALLY;
 }
 
 char *token_type_to_str (Token *this) {
@@ -296,13 +222,13 @@ char *token_type_to_str (Token *this) {
 
 char *token_to_str (Token *this) {
   switch (this->type) {
-    case TOKEN_BOOL: return str_f("Bool: %s", js_wb(*((int *)this->value)));
-    case TOKEN_INT: return str_f("Int: %s", js_wl(*((int64_t *)this->value)));
-    case TOKEN_FLOAT: return str_f("Float: %s", js_wf(*((double *)this->value), 6));
+    case TOKEN_BOOL: return str_f("Bool: %s", this->b ? "true" : "false");
+    case TOKEN_INT: return str_f("Int: %s", dec_itos(this->i));
+    case TOKEN_FLOAT: return str_f("Float: %s", dec_ftos(this->d, 9));
     case TOKEN_STRING: return str_f("String: %s", js_ws(this->value));
     case TOKEN_LINE_COMMENT: return str_f("Line_comment: %s", this->value);
     case TOKEN_COMMENT: return str_f("Comment: %s", this->value);
-    case TOKEN_SYMBOL: return str_f("Symbol: %s", this->value);
+    case TOKEN_SYMBOL: return str_f("Symbol: %s", symix_get(this->b));
     case TOKEN_OPERATOR: return str_f("Operator: %s", this->value);
   }
   EXC_ILLEGAL_ARGUMENT("Bad token type identifier",

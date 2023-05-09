@@ -1,10 +1,12 @@
 // Copyright 04-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "exp.h"
 #include "kut/js.h"
-#include "DEFS.h"
+#include "kut/dec.h"
 #include "function.h"
+#include "symix.h"
 #include "runner/fail.h"
 #include "runner/stack.h"
 
@@ -26,7 +28,12 @@ typedef enum exp_Exp_t Exp_t;
 
 struct exp_Exp {
   Exp_t type;
-  void *value;
+  union {
+    int b;
+    int64_t i;
+    double d;
+    void *value;
+  };
 };
 
 static Exp empty_exp = { .type = EXP_OBJECT, .value = "<empty expression>" };
@@ -72,6 +79,27 @@ static char *type_to_str (Exp_t type) {
     str_f("(0 to %d)", EXP_TERNARY), str_f("%d", type)
   );
   return NULL;
+}
+
+static Exp *newb(Exp_t type, int value) {
+  Exp *this = MALLOC(Exp);
+  this->type = type;
+  this->b = value;
+  return this;
+}
+
+static Exp *newi(Exp_t type, int64_t value) {
+  Exp *this = MALLOC(Exp);
+  this->type = type;
+  this->i = value;
+  return this;
+}
+
+static Exp *newd(Exp_t type, double value) {
+  Exp *this = MALLOC(Exp);
+  this->type = type;
+  this->d = value;
+  return this;
 }
 
 static Exp *new(Exp_t type, void *value) {
@@ -124,18 +152,16 @@ int exp_is_continue (Exp *this) {
 }
 
 Exp *exp_bool (int value) {
-  int *val = ATOMIC(sizeof(int));
-  *val = value;
-  return new(EXP_BOOL, val);
+  return newb(EXP_BOOL, value);
 }
 
 int exp_get_bool (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_bool, "bool", this);
-  return *((int *)this->value);
+  return this->b;
 }
 
 int exp_rget_bool (Exp *this) {
-  if (this->type == EXP_BOOL) return *((int *)this->value);
+  if (this->type == EXP_BOOL) return this->b;
   EXC_KUT(fail_type("bool", this));
   return 0; // Unreachable.
 }
@@ -145,7 +171,7 @@ int exp_is_bool(Exp *this) {
 }
 
 int exp_rget_as_bool (Exp *this) {
-  if (this->type == EXP_BOOL) return *((int *)this->value) ? TRUE : FALSE;
+  if (this->type == EXP_BOOL) return this->b ? TRUE : FALSE;
   if (this->type == EXP_STRING) return *((char *)this->value) ? TRUE : FALSE;
   if (this->type == EXP_ARR) return arr_size(this->value) ? TRUE : FALSE;
   EXC_KUT(fail_type("bool, string or array", this));
@@ -157,18 +183,16 @@ int exp_is_as_bool (Exp *this) {
 }
 
 Exp *exp_int (int64_t value) {
-  int64_t *val = ATOMIC(sizeof(int64_t));
-  *val = value;
-  return new(EXP_INT, val);
+  return newi(EXP_INT, value);
 }
 
 int64_t exp_get_int (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_int, "int", this);
-  return *((int64_t *)this->value);
+  return this->i;
 }
 
 int64_t exp_rget_int (Exp *this) {
-  if (this->type == EXP_INT) return *((int64_t *)this->value);
+  if (this->type == EXP_INT) return this->i;
   EXC_KUT(fail_type("int", this));
   return 0; // Unreachable.
 }
@@ -178,18 +202,16 @@ int exp_is_int(Exp *this) {
 }
 
 Exp *exp_float (double value) {
-  double *val = ATOMIC(sizeof(double));
-  *val = value;
-  return new(EXP_FLOAT, val);
+  return newd(EXP_FLOAT, value);
 }
 
 double exp_get_float (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_float, "float", this);
-  return *((double *)this->value);
+  return this->d;
 }
 
 double exp_rget_float (Exp *this) {
-  if (this->type == EXP_FLOAT) return *((double *)this->value);
+  if (this->type == EXP_FLOAT) return this->d;
   EXC_KUT(fail_type("float", this));
   return 0.0; // Unreachable.
 }
@@ -302,19 +324,19 @@ int exp_is_function (Exp *this) {
   return this->type == EXP_FUNC;
 }
 
-Exp *exp_sym (char *value) {
-   return new(EXP_SYM, value);
+Exp *exp_sym (int value) {
+   return newb(EXP_SYM, value);
 }
 
-char *exp_get_sym (Exp *this) {
+int exp_get_sym (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_sym, "symbol", this);
-  return this->value;
+  return this->b;
 }
 
-char *exp_rget_sym (Exp *this) {
-  if (this->type == EXP_SYM) return this->value;
+int exp_rget_sym (Exp *this) {
+  if (this->type == EXP_SYM) return this->b;
   EXC_KUT(fail_type("symbol", this));
-  return NULL; // Unreachable.
+  return 0; // Unreachable.
 }
 
 int exp_is_sym (Exp *this) {
@@ -394,7 +416,7 @@ Exp *exp_switch (Exp *cond, Arr *cases) {
   return new(EXP_SWITCH, tp_new(cond, cases));
 }
 
-// <Exp, Arr<Tp<Exp, Exp>>>
+// <Exp, Arr<Tp<[Exp...], Exp>>>
 Tp *exp_get_switch (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_switch, "switch", this);
   return this->value;
@@ -652,16 +674,6 @@ int exp_is_binary (Exp *this) {
   }
 }
 
-int exp_is_function_call (Exp *this) {
-  switch (this->type) {
-    case EXP_PR:
-      return TRUE;
-//    case EXP_PT:
-//      return exp_is_function_call(tp_e1(this->value));
-    default: return FALSE;
-  }
-}
-
 char *exp_type_to_str (Exp *this) {
   if (exp_is_empty(this)) return this->value;
   if (exp_is_empty_return(this)) return this->value;
@@ -678,9 +690,14 @@ char *exp_to_str (Exp *this) {
     char *fn_map(Kv *kv) {
       return str_f("\"%s\": %s", kv_key(kv), exp_to_js(kv_value(kv)));
     }
-    // tp is Tp<Exp, Exp>
+    // tp is Tp<Arr<Exp>, Exp>
     char *fn_switch(Tp *tp) {
-      return str_f("%s: %s;", exp_to_js(tp_e1(tp)), exp_to_js(tp_e2(tp)));
+      /// Exp
+      Arr *conds = tp_e1(tp);
+        //--
+        char *fn_map(Exp *exp) { return exp_to_js(exp); }
+      char *sconds = arr_join(arr_map(conds, (FMAP)fn_map), ", ");
+      return str_f("%s: %s;", sconds, exp_to_js(tp_e2(tp)));
     }
 
   if (exp_is_empty(this)) return this->value;
@@ -694,11 +711,11 @@ char *exp_to_str (Exp *this) {
     case EXP_STRING:
       return this->value;
     case EXP_INT:
-      return js_wl(*((int64_t *)this->value));
+      return dec_itos(this->i);
     case EXP_BOOL:
-      return js_wb(*((int *)this->value));
+      return this->b ? "true" : "false";
     case EXP_FLOAT:
-      return js_wf(*((double *)this->value), 6);
+      return dec_ftos(this->d, 9);
     case EXP_OBJECT:
       return str_f("%s:%ld", exp_type_to_str(this), (long)tp_e2(this->value));
     case EXP_ARR:
@@ -711,7 +728,7 @@ char *exp_to_str (Exp *this) {
     case EXP_FUNC:
       return function_to_str(this->value);
     case EXP_SYM :
-      return exp_get_sym(this);
+      return symix_get(exp_get_sym(this));
     case EXP_RANGE: {
       // <Exp, Exp, Exp>
       Tp3 *tp = exp_get_range(this);
@@ -844,5 +861,11 @@ char *exp_to_str (Exp *this) {
 }
 
 char *exp_to_js (Exp *this) {
-  return (exp_is_string(this)) ? js_ws(this->value) : exp_to_str(this);
+    //--
+    char *fmtf(char *n) { return dec_digits(n) ? str_f("%s.0", n) : n; }
+  return exp_is_string(this)
+    ? js_ws(this->value)
+    : exp_is_float(this)
+      ? fmtf(dec_ftos(this->d, 9))
+      : exp_to_str(this);
 }

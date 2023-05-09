@@ -4,6 +4,7 @@
 #include "exp_tests.h"
 #include "kut/DEFS.h"
 #include "exp.h"
+#include "symix.h"
 #include "kut/arr.h"
 #include "kut/map.h"
 #include "runner/stack.h"
@@ -83,9 +84,9 @@ void exp_tests () {
   TEST(exp_to_str(m), "{\"one\": \"a\", \"two\": \"b\", \"three\": \"c\"}");
   TEST(exp_type_to_str(m), "dic");
 
-  Exp *sy = exp_sym("abc");
+  Exp *sy = exp_sym(symix_add("abc"));
   assert(exp_is_sym(sy));
-  TEST(exp_get_sym(sy), "abc");
+  TESTI(exp_get_sym(sy), symix_add("abc"));
   TEST(exp_to_str(sy), "abc");
   TEST(exp_to_js(sy), "abc");
   TEST(exp_type_to_str(sy), "symbol");
@@ -99,29 +100,29 @@ void exp_tests () {
   TEST(exp_to_js(ran), "[11:22]");
   TEST(exp_type_to_str(ran), "range");
 
-  Exp *pt = exp_pt(exp_sym("class"), exp_sym("func"));
+  Exp *pt = exp_pt(exp_sym(symix_add("class")), exp_sym(symix_add("func")));
   assert(exp_is_pt(pt));
   Tp *pt_v = exp_get_pt(pt);
-  TEST(exp_get_sym(tp_e1(pt_v)), "class");
-  TEST(exp_get_sym(tp_e2(pt_v)), "func");
+  TEST(symix_get(exp_get_sym(tp_e1(pt_v))), "class");
+  TEST(symix_get(exp_get_sym(tp_e2(pt_v))), "func");
   TEST(exp_to_str(pt), "class.func");
   TEST(exp_to_js(pt), "class.func");
   TEST(exp_type_to_str(pt), "point");
 
-  Exp *sq = exp_sq(exp_sym("map"), exp_string("key"));
+  Exp *sq = exp_sq(exp_sym(symix_add("map")), exp_string("key"));
   assert(exp_is_sq(sq));
   Tp *sq_v = exp_get_sq(sq);
-  TEST(exp_get_sym(tp_e1(sq_v)), "map");
+  TEST(symix_get(exp_get_sym(tp_e1(sq_v))), "map");
   TEST(exp_get_string(tp_e2(sq_v)), "key");
   TEST(exp_to_str(sq), "map[\"key\"]");
   TEST(exp_to_js(sq), "map[\"key\"]");
   TEST(exp_type_to_str(sq), "square");
 
   Arr *args0 = arr_new();
-  Exp *pr = exp_pr(exp_sym("func"), args0);
+  Exp *pr = exp_pr(exp_sym(symix_add("func")), args0);
   assert(exp_is_pr(pr));
   Tp *pr_v = exp_get_pr(pr);
-  TEST(exp_get_sym(tp_e1(pr_v)), "func");
+  TEST(symix_get(exp_get_sym(tp_e1(pr_v))), "func");
   Arr *args02 = tp_e2(pr_v);
   TESTI(arr_size(args02), 0);
   TEST(exp_to_str(pr), "func()");
@@ -129,10 +130,10 @@ void exp_tests () {
   TEST(exp_type_to_str(pr), "parenthesis");
 
   Arr *args1 = arr_new_from(exp_string("a"), NULL);
-  pr = exp_pr(exp_sym("func"), args1);
+  pr = exp_pr(exp_sym(symix_add("func")), args1);
   assert(exp_is_pr(pr));
   pr_v = exp_get_pr(pr);
-  TEST(exp_get_sym(tp_e1(pr_v)), "func");
+  TEST(symix_get(exp_get_sym(tp_e1(pr_v))), "func");
   Arr *args12 = tp_e2(pr_v);
   TESTI(arr_size(args12), 1);
   TEST(exp_get_string(arr_get(args12, 0)), "a")
@@ -141,10 +142,10 @@ void exp_tests () {
   TEST(exp_type_to_str(pr), "parenthesis");
 
   Arr *args3 = arr_new_from(exp_string("a"), exp_int(1), exp_string("c"), NULL);
-  pr = exp_pr(exp_sym("func"), args3);
+  pr = exp_pr(exp_sym(symix_add("func")), args3);
   assert(exp_is_pr(pr));
   pr_v = exp_get_pr(pr);
-  TEST(exp_get_sym(tp_e1(pr_v)), "func");
+  TEST(symix_get(exp_get_sym(tp_e1(pr_v))), "func");
   Arr *args32 = tp_e2(pr_v);
   TESTI(arr_size(args32), 3);
   TEST(exp_get_string(arr_get(args32, 0)), "a")
@@ -155,24 +156,24 @@ void exp_tests () {
   TEST(exp_type_to_str(pr), "parenthesis");
 
   Tp *tp1 = tp_new(exp_int(1), exp_string("a"));
-  Tp *tp2 = tp_new(exp_sym("default"), exp_string("b"));
+  Tp *tp2 = tp_new(exp_sym(symix_add("default")), exp_string("b"));
   Arr *swa = arr_new_from(tp1, tp2, NULL);
-  Exp *sw = exp_switch(exp_sym("cond"), swa);
+  Exp *sw = exp_switch(exp_sym(symix_add("cond")), swa);
   assert(exp_is_switch(sw));
   Tp *sw_v = exp_get_switch(sw);
-  TEST(exp_get_sym(tp_e1(sw_v)), "cond");
+  TEST(symix_get(exp_get_sym(tp_e1(sw_v))), "cond");
   Arr *sw_cl = tp_e2(sw_v);
   TESTI(exp_get_int(tp_e1(arr_get(sw_cl, 0))), 1);
   TEST(exp_get_string(tp_e2(arr_get(sw_cl, 0))), "a");
-  TESTI(exp_get_sym(tp_e1(arr_get(sw_cl, 1))), "default");
+  TESTI(exp_get_sym(tp_e1(arr_get(sw_cl, 1))), symix_add("default"));
   TEST(exp_get_string(tp_e2(arr_get(sw_cl, 1))), "b");
   TEST(exp_to_str(sw), "switch(cond){1: \"a\";default: \"b\";}");
   TEST(exp_to_js(sw), "switch(cond){1: \"a\";default: \"b\";}");
   TEST(exp_type_to_str(sw), "switch");
 
-  Exp *nt = exp_not(exp_sym("true"));
+  Exp *nt = exp_not(exp_sym(symix_add("true")));
   assert(exp_is_not(nt));
-  TEST(exp_get_sym(exp_get_not(nt)), "true");
+  TEST(symix_get(exp_get_sym(exp_get_not(nt))), "true");
   TEST(exp_to_str(nt), "!true");
   TEST(exp_to_js(nt), "!true");
   TEST(exp_type_to_str(nt), "not");
@@ -229,20 +230,20 @@ void exp_tests () {
   TEST(exp_to_js(mod), "1%2");
   TEST(exp_type_to_str(mod), "mod");
 
-  Exp *and = exp_and(exp_sym("false"), exp_sym("true"));
+  Exp *and = exp_and(exp_sym(symix_add("false")), exp_sym(symix_add("true")));
   assert(exp_is_and(and));
   Tp *and_v = exp_get_and(and);
-  TEST(exp_get_sym(tp_e1(and_v)), "false");
-  TEST(exp_get_sym(tp_e2(and_v)), "true");
+  TEST(symix_get(exp_get_sym(tp_e1(and_v))), "false");
+  TEST(symix_get(exp_get_sym(tp_e2(and_v))), "true");
   TEST(exp_to_str(and), "false&true");
   TEST(exp_to_js(and), "false&true");
   TEST(exp_type_to_str(and), "and");
 
-  Exp *or = exp_or(exp_sym("false"), exp_sym("true"));
+  Exp *or = exp_or(exp_sym(symix_add("false")), exp_sym(symix_add("true")));
   assert(exp_is_or(or));
   Tp *or_v = exp_get_or(or);
-  TEST(exp_get_sym(tp_e1(or_v)), "false");
-  TEST(exp_get_sym(tp_e2(or_v)), "true");
+  TEST(symix_get(exp_get_sym(tp_e1(or_v))), "false");
+  TEST(symix_get(exp_get_sym(tp_e2(or_v))), "true");
   TEST(exp_to_str(or), "false|true");
   TEST(exp_to_js(or), "false|true");
   TEST(exp_type_to_str(or), "or");
@@ -283,28 +284,28 @@ void exp_tests () {
   TEST(exp_to_js(less_eq), "1<=2");
   TEST(exp_type_to_str(less_eq), "less_eq");
 
-  Exp *eq = exp_eq(exp_sym("false"), exp_sym("true"));
+  Exp *eq = exp_eq(exp_sym(symix_add("false")), exp_sym(symix_add("true")));
   assert(exp_is_eq(eq));
   Tp *eq_v = exp_get_eq(eq);
-  TEST(exp_get_sym(tp_e1(eq_v)), "false");
-  TEST(exp_get_sym(tp_e2(eq_v)), "true");
+  TEST(symix_get(exp_get_sym(tp_e1(eq_v))), "false");
+  TEST(symix_get(exp_get_sym(tp_e2(eq_v))), "true");
   TEST(exp_to_str(eq), "false==true");
   TEST(exp_to_js(eq), "false==true");
   TEST(exp_type_to_str(eq), "eq");
 
-  Exp *neq = exp_neq(exp_sym("false"), exp_sym("true"));
+  Exp *neq = exp_neq(exp_sym(symix_add("false")), exp_sym(symix_add("true")));
   assert(exp_is_neq(neq));
   Tp *neq_v = exp_get_neq(neq);
-  TEST(exp_get_sym(tp_e1(neq_v)), "false");
-  TEST(exp_get_sym(tp_e2(neq_v)), "true");
+  TEST(symix_get(exp_get_sym(tp_e1(neq_v))), "false");
+  TEST(symix_get(exp_get_sym(tp_e2(neq_v))), "true");
   TEST(exp_to_str(neq), "false!=true");
   TEST(exp_to_js(neq), "false!=true");
   TEST(exp_type_to_str(neq), "neq");
 
-  Exp *ter = exp_ternary(exp_sym("cond"), exp_int(1), exp_int(2));
+  Exp *ter = exp_ternary(exp_sym(symix_add("cond")), exp_int(1), exp_int(2));
   assert(exp_is_ternary(ter));
   Tp3 *ter_v = exp_get_ternary(ter);
-  TEST(exp_get_sym(tp3_e1(ter_v)), "cond");
+  TEST(symix_get(exp_get_sym(tp3_e1(ter_v))), "cond");
   TESTI(exp_get_int(tp3_e2(ter_v)), 1);
   TESTI(exp_get_int(tp3_e3(ter_v)), 2);
   TEST(exp_to_str(ter), "cond?1:2");

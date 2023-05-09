@@ -1,10 +1,10 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_dic.h"
 #include "kut/it.h"
 #include "exp.h"
-#include "DEFS.h"
 #include "obj.h"
 #include "runner/fail.h"
 

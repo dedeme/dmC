@@ -1,6 +1,7 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "obj.h"
 #include "exp.h"
 
@@ -26,12 +27,15 @@ int obj_is_module (Exp *this) {
   return exp_is_object(module, this);
 }
 
-Exp *obj_bmodule (char *value) {
-  return exp_object(bmodule, value);
+Exp *obj_bmodule (int value) {
+  int *v = (int *)ATOMIC(sizeof(int));
+  *v = value;
+  return exp_object(bmodule, v);
 }
 
-char *obj_rget_bmodule (Exp *this) {
-  return exp_rget_object(bmodule, this);
+int obj_rget_bmodule (Exp *this) {
+  int *v = exp_rget_object(bmodule, this);
+  return *v;
 }
 
 int obj_is_bmodule (Exp *this) {

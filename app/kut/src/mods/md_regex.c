@@ -1,11 +1,12 @@
 // Copyright 07-Apr-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_regex.h"
 #include "kut/regex.h"
 #include "exp.h"
+#include "obj.h"
 #include "function.h"
-#include "DEFS.h"
 #include "runner/fail.h"
 #include "runner/runner.h"
 
@@ -42,23 +43,23 @@ static Exp *replace (Arr *exps) {
 // \s, s, (\s->s) -> s
 static Exp *replacef (Arr *exps) {
   CHECK_PARS ("regex.replace", 3, exps);
+  char *rg = exp_rget_string(arr_get(exps, 1));
+  Exp *fn = arr_get(exps, 2);
     //--
-    Exp *fn (Bfunction bf) {
-      char *rg = exp_rget_string(arr_get(exps, 1));
-        //--
-        char *c_fn (char *match) {
-          return exp_rget_string(bf(arr_new_from(exp_string(match), NULL)));
-        }
-      char *r = opt_get(regex_replacef(
-        rg,
-        exp_rget_string(arr_get(exps, 0)),
-        c_fn
-      ));
-      if (r) return exp_string(r);
-      EXC_KUT(str_f("Fail of regular expression:\n%s", rg));
-      return NULL; // Unreachable
+    char *c_fn (char *match) {
+      // Exp
+      Arr *ps = arr_new_from(exp_string(match), NULL);
+      FRUN(rs, fn, ps);
+      return exp_rget_string(rs);
     }
-  return runner_fn(arr_get(exps, 2), fn);
+  char *r = opt_get(regex_replacef(
+    rg,
+    exp_rget_string(arr_get(exps, 0)),
+    c_fn
+  ));
+  if (r) return exp_string(r);
+  EXC_KUT(str_f("Fail of regular expression:\n%s", rg));
+  return NULL; // Unreachable
 }
 
 Bfunction md_regex_get (char *fname) {

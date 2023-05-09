@@ -1,21 +1,22 @@
 // Copyright 07-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "module.h"
-#include "kut/DEFS.h"
 
 struct module_Module {
-  // <int>
-  Map *imports;
+  Imports *imports;
+  Exports *exports;
   Heap0 *heap0;
   Heap *heap;
   // <StatCode>
   Arr *code;
 };
 
-Module *module_new (Map *imports, Heap0 *hp0, Arr *code) {
+Module *module_new (Imports *imports, Exports *exports, Heap0 *hp0, Arr *code) {
   Module *this = MALLOC(Module);
   this->imports = imports;
+  this->exports = exports;
   this->heap0 = hp0;
   this->heap = heap_new();
   this->code = code;
@@ -23,8 +24,12 @@ Module *module_new (Map *imports, Heap0 *hp0, Arr *code) {
 }
 
 // <int>
-Map *module_get_imports(Module *this) {
+Imports *module_get_imports(Module *this) {
   return this->imports;
+}
+
+Exports *module_get_exports(Module *this) {
+  return this->exports;
 }
 
 Heap0 *module_get_heap0(Module *this) {

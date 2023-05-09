@@ -1,8 +1,8 @@
 // Copyright 22-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "runner/solver.h"
-#include "kut/DEFS.h"
 #include "kut/dec.h"
 #include "kut/thread.h"
 #include "DEFS.h"
@@ -11,9 +11,12 @@
 #include "heap.h"
 #include "modules.h"
 #include "bmodule.h"
+#include "imports.h"
 #include "obj.h"
+#include "symix.h"
 #include "runner/fail.h"
 #include "runner/solver.h"
+#include "runner/runner.h"
 #include "reader/reader.h"
 #include "mods/md_str.h"
 #include "mods/md_arr.h"
@@ -57,7 +60,7 @@ static Opt *range_next_down (solver_range2_O *o) {
 // ----------------------------------------------------------------------------
 
 // stk is Arr<StatCode>, is is Map<int>
-Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
+Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
   if (exp_is_bool(exp)) {
     return exp;
   }
@@ -92,7 +95,8 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     ));
   }
   if (exp_is_sym(exp)) {
-    char *sym = exp_get_sym(exp);
+    int sym = exp_get_sym(exp);
+
     // <Opt<Exp>, Heap|NULL>
     Tp *ex_hp = heaps_get(hs, sym);
     Exp *r = opt_get(tp_e1(ex_hp));
@@ -101,7 +105,7 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
 
     if (r) return r;
 
-    Heap0Entry *e = opt_get(map_get(heap0_get(h0), sym));
+    Heap0Entry *e = opt_get(heap0_get(h0, sym));
 
     // IN HEAP0
 
@@ -111,23 +115,38 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       return r;
     }
 
-    int *md_ix = opt_get(map_get(is, sym));
+    int fix = imports_get_fix(is, sym);
 
     // IN IMPORTS
 
-    if (md_ix) {
+    if (fix != -1) {
       Module *md;
         //--
         void fn (void) {
-          int fix = *md_ix;
           md = opt_get(modules_get_ok(fix));
           if (md) return;
 
           char *kut_code = fileix_read(fix);
           md = reader_read_main_block(cdr_new(fix, kut_code));
           modules_set(fix, md);
+          Exp *rs = runner_run(
+            TRUE,
+            stack_new(),
+            module_get_imports(md), module_get_heap0(md),
+            heaps_new(module_get_heap(md)),
+            module_get_code(md)
+          );
+          if (exp_is_break(rs))
+            EXC_KUT(fail_add_stack(
+              "'break' without 'while' or 'for'", exp_get_break(rs)
+            ));
+          if (exp_is_continue(rs))
+            EXC_KUT(fail_add_stack(
+              "'continue' without 'while' or 'for'", exp_get_continue(rs)
+            ));
         }
       thread_sync(fn);
+
       return obj_module(md);
     }
 
@@ -137,7 +156,7 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
 
     // NOT FOUND
 
-    EXC_KUT(str_f("Symbol '%s' not found.", sym));
+    EXC_KUT(str_f("Symbol '%s' not found.", symix_get(sym)));
   }
   if (exp_is_range(exp)) {
     // <Exp, Exp, Exp>
@@ -171,14 +190,15 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *ex0 = solver_solve(is, h0, hs, tp_e1(v));
     if (obj_is_module(ex0)) {
       Module *md = obj_rget_module(ex0);
-      exp_rget_sym(tp_e2(v)); // test fi tp_e2(v) is symbol.
-
-      return solver_solve(
-        module_get_imports(md),
-        module_get_heap0(md),
-        heaps_new(module_get_heap(md)),
-        tp_e2(v)
-      );
+      int sym = exp_rget_sym(tp_e2(v)); // test fi tp_e2(v) is symbol.
+      if (exports_contains(module_get_exports(md), sym))
+        return solver_solve(
+          module_get_imports(md),
+          module_get_heap0(md),
+          heaps_new(module_get_heap(md)),
+          tp_e2(v)
+        );
+      EXC_KUT(str_f("Symbol '%s' not found", symix_get(sym)));
     }
     if (obj_is_bmodule(ex0)) {
       return obj_bfunction(bmodule_get_function(
@@ -187,7 +207,7 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       ));
     }
     if (exp_is_map(ex0)) {
-      char *key = exp_rget_sym(tp_e2(v));
+      char *key = symix_get(exp_rget_sym(tp_e2(v)));
       return md_dic_fget(exp_get_map(ex0), key);
     }
     EXC_KUT(fail_type("module or dictionary", ex0));
@@ -258,18 +278,28 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     EXC_KUT(fail_type("function or <bfunction>", ex0));
   }
   if (exp_is_switch(exp)) {
-    // <Exp, Arr<Tp<Exp, Exp>>>
+    // <Exp, Arr<Tp<Arr<Exp>, Exp>>>
     Tp *v = exp_get_switch(exp);
     Exp *cond = solver_solve(is, h0, hs, tp_e1(v));
 
-    // e is Tp<Exp, Exp>
+    // e is Tp<Arr<Exp>, Exp>
     EACH(tp_e2(v), Tp, e) {
-      Exp *exp1 = tp_e1(e);
-      if (exp_is_sym(exp1) && !strcmp(exp_get_sym(exp1), "default"))
-        return solver_solve(is, h0, hs, tp_e2(e));
+      // Exp
+      Arr *exps = tp_e1(e);
+      int ok = FALSE;
+      EACH(exps, Exp, exp) {
+        if (exp_is_sym(exp) && exp_get_sym(exp) == symix_DEFAULT)
+          return solver_solve(is, h0, hs, tp_e2(e));
 
-      Exp *cond2 = solver_solve(is, h0, hs, exp1);
-      if (exp_rget_as_bool(solver_solve_isolate(exp_eq(cond, cond2))))
+        Exp *cond2 = solver_solve(is, h0, hs, exp);
+        if (exp_rget_as_bool(solver_solve_isolate(exp_eq(cond, cond2)))) {
+          ok = TRUE;
+          break;
+        }
+
+      }_EACH
+
+      if (ok)
         return solver_solve(is, h0, hs, tp_e2(e));
     }_EACH
     EXC_KUT(str_f("switch did not catch '%s'", exp_to_js(cond)));
@@ -507,5 +537,5 @@ Exp *solver_solve(Map *is, Heap0 *h0, Heaps *hs, Exp *exp) {
 }
 
 Exp *solver_solve_isolate(Exp *exp) {
-  return solver_solve(map_new(), heap0_new(), heaps_new(heap_new()), exp);
+  return solver_solve(imports_new(), heap0_new(), heaps_new(heap_new()), exp);
 }

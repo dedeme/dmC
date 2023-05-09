@@ -18,11 +18,11 @@ void fileix_tests () {
   int l1_ix3 = fileix_add(l2_ix1, "lib/l1");
 
 
-  TEST(fileix_to_str(main_ix), "data/main");
+  TEST(fileix_to_str(main_ix), "/home/deme/dm/dmC/app/kut/tests_c/data/main");
   TEST(fileix_to_fail(main_ix), "/home/deme/dm/dmC/app/kut/tests_c/data/main.kut");
-  TEST(fileix_to_str(t0_ix1), "data/t0");
+  TEST(fileix_to_str(t0_ix1), "/home/deme/dm/dmC/app/kut/tests_c/data/t0");
   TEST(fileix_to_fail(t0_ix1), "/home/deme/dm/dmC/app/kut/tests_c/data/t0.kut");
-  TEST(fileix_to_str(l1_ix1), "data/lib/l1");
+  TEST(fileix_to_str(l1_ix1), "/home/deme/dm/dmC/app/kut/tests_c/data/lib/l1");
   TEST(fileix_to_fail(l1_ix1), "/home/deme/dm/dmC/app/kut/tests_c/data/lib/l1.kut");
 
   TESTI(l1_ix1, l1_ix2);

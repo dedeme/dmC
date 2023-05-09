@@ -1,6 +1,7 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_math.h"
 #include <float.h>
 #include <limits.h>
@@ -9,7 +10,6 @@
 #include "kut/dec.h"
 #include "kut/sys.h"
 #include "exp.h"
-#include "DEFS.h"
 #include "runner/fail.h"
 
 // returns [f]|[]
@@ -167,7 +167,7 @@ static Exp *is_digits (Arr *exps) {
   return exp_bool(dec_digits(exp_rget_string(arr_get(exps, 0))));
 }
 
-// \i -> s
+// \i -> f
 static Exp *itof (Arr *exps) {
   CHECK_PARS ("math.itof", 1, exps);
   return exp_float(exp_rget_int(arr_get(exps, 0)));

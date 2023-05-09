@@ -13,10 +13,10 @@ typedef struct cksym_Cksym Cksym;
 ///   id: Symbol identifier.
 ///   fix: Code file index.
 ///   nline: Line where 'id' appears for first time.
-Cksym *cksym_new (char *id, int fix, int nline);
+Cksym *cksym_new (int id, int fix, int nline);
 
 /// Symbol identifier.
-char *cksym_get_id (Cksym *this);
+int cksym_get_id (Cksym *this);
 
 /// Code file index.
 int cksym_get_fix (Cksym *this);

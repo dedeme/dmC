@@ -1,8 +1,8 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "bmodule.h"
 #include "DEFS.h"
+#include "bmodule.h"
 #include "runner/fail.h"
 #include "mods/md_arr.h"
 #include "mods/md_bytes.h"
@@ -20,24 +20,16 @@
 #include "mods/md_tcp.h"
 #include "mods/md_thread.h"
 #include "mods/md_time.h"
+#include "symix.h"
 
-static const char *modules[] = {
-  "arr", "b64", "bytes", "cryp", "dic", "iter", "js", "file",
-	"math", "path", "regex", "str", "sys", "tcp", "thread", "time",
-  NULL
-};
-
-int bmodule_exists (char *md_name) {
-  const char **p = modules;
-  while (*p) {
-    if (!strcmp(*p, md_name)) return TRUE;
-    ++p;
-  }
-  return FALSE;
+int bmodule_exists (int md_sym) {
+  return md_sym > symix_ENUM_SEPARATOR && md_sym < symix_ENUM_END;
 }
 
 // <Bfunction>
-Bfunction bmodule_get_function (char *md, char *fn) {
+Bfunction bmodule_get_function (int md_sym, int fn_sym) {
+  char *md = symix_get(md_sym);
+  char *fn = symix_get(fn_sym);
   if (!strcmp(md, "arr")) return md_arr_get(fn);
   if (!strcmp(md, "bytes")) return md_bytes_get(fn);
   if (!strcmp(md, "b64")) return md_b64_get(fn);

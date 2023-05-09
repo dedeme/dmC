@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "kut/DEFS.h"
 #include "kut/sys.h"
+#include "symix.h"
 #include "fileix.h"
 #include "modules.h"
 #include "fileix_tests.h"
@@ -18,6 +19,7 @@
 
 int main(int argc, char *argv[]) {
   sys_init();
+  symix_init();
   fileix_init();
   modules_init();
 

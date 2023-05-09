@@ -1,22 +1,23 @@
 // Copyright 14-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "checker/checker.h"
-#include "kut/DEFS.h"
 #include "stat.h"
 #include "fileix.h"
 #include "function.h"
 #include "modules.h"
 #include "bmodule.h"
+#include "symix.h"
 #include "checker/layers.h"
 
 // 'code' is Arr<StatCode>
-static void check_block (int isInternal, Layers *layers, Map *is, Arr *code);
+static void check_block (int isInternal, Layers *layers, Imports *is, Arr *code);
 // 'is' is Map<int>
-static void check_st(Layers *layers, Map* is, StatCode *st_cd);
+static void check_st(Layers *layers, Imports* is, StatCode *st_cd);
 
 // 'is' is Map<int>
-static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
+static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp) {
   if (exp_is_array(exp)) {
     EACH(exp_rget_array(exp), Exp, e) {
       check_exp(layers, fix, nline, is, e);
@@ -31,7 +32,7 @@ static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
     StatCode *st_cd = function_get_stat(fn);
     //Cksym
     Arr *syms = arr_new();
-    EACH(function_get_pars(fn), char, p) {
+    EACHI(function_get_pars(fn), p) {
       arr_push(syms, cksym_new(p, fix, stat_code_line(st_cd)));
     }_EACH
     layers = layers_add(layers, layer_new(FALSE, syms));
@@ -51,16 +52,16 @@ static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
     // <Exp, Exp>
     Tp *v = exp_get_pt(exp);
     Exp *exp1 = tp_e1(v);
-    char *sym2 = exp_rget_sym(tp_e2(v));
+    int sym2 = exp_rget_sym(tp_e2(v));
     if (exp_is_sym(exp1)) {
-      char *sym1 = exp_rget_sym(exp1);
+      int sym1 = exp_rget_sym(exp1);
       if (bmodule_exists(sym1)) {
         TRY {
           bmodule_get_function(sym1, sym2);
         } CATCH (e) {
           if (e) printf(
             "%s:%d: Function '%s.%s' not found\n",
-            fileix_to_fail(fix), nline, sym1, sym2
+            fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2)
           );
         }_TRY
       } else {
@@ -69,18 +70,10 @@ static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
         );
         if (r >= 0) {
           Module *md = opt_get(modules_get_ok(r));
-          int ok = FALSE;
-          // 'e' is Map<Heap0Entry>
-          EACH(map_to_array(heap0_get(module_get_heap0(md))), Tp, e) {
-            if (!strcmp(tp_e1(e), sym2)) {
-              ok = TRUE;
-              break;
-            }
-          }_EACH
-          if (!ok)
+          if (!exports_contains(module_get_exports(md), sym2))
             printf(
               "%s:%d: Symbol '%s.%s' not found\n",
-              fileix_to_fail(fix), nline, sym1, sym2
+              fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2)
             );
         }
       }
@@ -113,7 +106,7 @@ static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
     // 'e' is Tp<Exp, Exp>
     EACH(tp_e2(v), Tp, e) {
       Exp *exp = tp_e1(e);
-      if (!exp_is_sym(exp) || strcmp(exp_rget_sym(exp), "default"))
+      if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
         check_exp(layers, fix, nline, is, tp_e1(e));
       check_exp(layers, fix, nline, is, tp_e2(e));
     }_EACH
@@ -196,7 +189,7 @@ static void check_exp(Layers *layers, int fix, int nline, Map *is, Exp *exp) {
 }
 
 // 'is' is Map<int>
-static void check_st(Layers *layers, Map *is, StatCode *st_cd) {
+static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
   int fix = stat_code_file_ix(st_cd);
   int line = stat_code_line(st_cd);
   Stat *st = stat_code_stat(st_cd);
@@ -255,10 +248,10 @@ static void check_st(Layers *layers, Map *is, StatCode *st_cd) {
   } else if (stat_is_return(st)) {
     check_exp(layers, fix, line, is,stat_get_return(st));
   } else if (stat_is_try(st)) {
-    // [<StatCode>, <char>, <StatCode>, <Opt<StatCode>>]
+    // [<StatCode>, <int>, <StatCode>, <Opt<StatCode>>]
     Arr *v = stat_get_try(st);
     check_st(layers, is, arr_get(v, 0));
-    char *param = arr_get(v, 1);
+    int param = *((int *)arr_get(v, 1));
     StatCode *catch_st = arr_get(v, 2);
     Cksym *new_sym = cksym_new(param, fix, stat_code_line(catch_st));
     check_st(
@@ -282,45 +275,50 @@ static void check_st(Layers *layers, Map *is, StatCode *st_cd) {
     StatCode *else_st = opt_get(arr_get(v, 2));
     if (else_st) check_st(layers, is, else_st);
   } else if (stat_is_for(st)) {
-    // [<char>, <Exp>, <StatCode>]
+    // [<int>, <Exp>, <StatCode>]
     Arr *v = stat_get_for(st);
+    int param = *((int *)arr_get(v, 0));
     check_exp(layers, fix, line, is, arr_get(v, 1));
     StatCode *for_st = arr_get(v, 2);
-    Cksym *new_sym = cksym_new(arr_get(v, 0), fix, stat_code_line(for_st));
+    Cksym *new_sym = cksym_new(param, fix, stat_code_line(for_st));
     check_st(
       layers_add(layers, layer_new(FALSE, arr_new_from(new_sym, NULL))),
       is, for_st
     );
   } else if (stat_is_for_ix(st)) {
-    // [<char>, <char>, <Exp>, <StatCode>]
+    // [<int>, <int>, <Exp>, <StatCode>]
     Arr *v = stat_get_for_ix(st);
+    int param1 = *((int *)arr_get(v, 0));
+    int param2 = *((int *)arr_get(v, 1));
     check_exp(layers, fix, line, is, arr_get(v, 2));
     StatCode *for_st = arr_get(v, 3);
-    Cksym *new_sym1 = cksym_new(arr_get(v, 0), fix, stat_code_line(for_st));
-    Cksym *new_sym2 = cksym_new(arr_get(v, 1), fix, stat_code_line(for_st));
+    Cksym *new_sym1 = cksym_new(param1, fix, stat_code_line(for_st));
+    Cksym *new_sym2 = cksym_new(param2, fix, stat_code_line(for_st));
     check_st(
       layers_add(layers, layer_new(FALSE, arr_new_from(new_sym1, new_sym2, NULL))),
       is, for_st
     );
   } else if (stat_is_for_r(st)) {
-    // [<char>, <Exp>, <Exp>, <StatCode>]
+    // [<int>, <Exp>, <Exp>, <StatCode>]
     Arr *v = stat_get_for_r(st);
+    int param = *((int *)arr_get(v, 0));
     check_exp(layers, fix, line, is, arr_get(v, 1));
     check_exp(layers, fix, line, is, arr_get(v, 2));
     StatCode *for_st = arr_get(v, 3);
-    Cksym *new_sym = cksym_new(arr_get(v, 0), fix, stat_code_line(for_st));
+    Cksym *new_sym = cksym_new(param, fix, stat_code_line(for_st));
     check_st(
       layers_add(layers, layer_new(FALSE, arr_new_from(new_sym, NULL))),
       is, for_st
     );
   } else if (stat_is_for_rs(st)) {
-    // [<char>, <Exp>, <Exp>, <Exp>, <StatCode>]
+    // [<int>, <Exp>, <Exp>, <Exp>, <StatCode>]
     Arr *v = stat_get_for_rs(st);
+    int param = *((int *)arr_get(v, 0));
     check_exp(layers, fix, line, is, arr_get(v, 1));
     check_exp(layers, fix, line, is, arr_get(v, 2));
     check_exp(layers, fix, line, is, arr_get(v, 3));
     StatCode *for_st = arr_get(v, 4);
-    Cksym *new_sym = cksym_new(arr_get(v, 0), fix, stat_code_line(for_st));
+    Cksym *new_sym = cksym_new(param, fix, stat_code_line(for_st));
     check_st(
       layers_add(layers, layer_new(FALSE, arr_new_from(new_sym, NULL))),
       is, for_st
@@ -333,7 +331,7 @@ static void check_st(Layers *layers, Map *is, StatCode *st_cd) {
     EACH(arr_get(v, 1), Tp, exp_st) {
       StatCode *st_cd = tp_e2(exp_st);
       Exp *exp = tp_e1(exp_st);
-      if (!exp_is_sym(exp) || strcmp(exp_rget_sym(exp), "default"))
+      if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
         check_exp(layers, fix, stat_code_line(st_cd), is, tp_e1(exp_st));
       check_st(layers, is, st_cd);
     }_EACH
@@ -341,7 +339,7 @@ static void check_st(Layers *layers, Map *is, StatCode *st_cd) {
 }
 
 // 'is' is Map<int>, 'code' is Arr<StatCode>
-static void check_block (int isInternal, Layers *layers, Map *is, Arr *code) {
+static void check_block (int isInternal, Layers *layers, Imports *is, Arr *code) {
   if (isInternal) layers = layers_add(layers, layer_new(TRUE, arr_new()));
 
   EACH(code, StatCode, st_cd) {
@@ -353,7 +351,7 @@ static void check_block (int isInternal, Layers *layers, Map *is, Arr *code) {
       printf(
         "%s:%d: Symbol '%s' not used\n",
         fileix_to_fail(cksym_get_fix(sym)), cksym_get_nline(sym),
-        cksym_get_id(sym)
+        symix_get(cksym_get_id(sym))
       );
     }_EACH
   }
@@ -362,9 +360,8 @@ static void check_block (int isInternal, Layers *layers, Map *is, Arr *code) {
 void checker_run (int fix, Module *md) {
   // Cksym
   Arr *syms = arr_new();
-  // v is a Tp<char, Heap0Entry>
-  EACH(map_to_array(heap0_get(module_get_heap0(md))), Tp, v) {
-    arr_push(syms, cksym_new(tp_e1(v), fix, heap0_entry_nline(tp_e2(v))));
+  EACH(heap0_get_array(module_get_heap0(md)), Heap0Entry, v) {
+    arr_push(syms, cksym_new(heap0_entry_symbol(v), fix, heap0_entry_nline(v)));
   }_EACH
 
   Layer *layer = layer_new(FALSE, syms);

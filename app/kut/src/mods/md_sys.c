@@ -1,12 +1,12 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_sys.h"
 #include "kut/rs.h"
 #include "kut/sys.h"
 #include "main.h"
 #include "exp.h"
-#include "DEFS.h"
 #include "reader/cdr/cdr.h"
 #include "reader/ex_reader.h"
 #include "runner/fail.h"
@@ -68,10 +68,22 @@ static Exp *eval (Arr *exps) {
   return solver_solve_isolate(exp);
 }
 
+// \i -> ()
+static Exp *fexit (Arr *exps) {
+  CHECK_PARS ("sys.exit", 1, exps);
+  exit(exp_rget_int(arr_get(exps, 0)));
+}
+
 // \-> s
 static Exp *home (Arr *exps) {
   CHECK_PARS ("sys.home", 0, exps);
   return exp_string(sys_user_home());
+}
+
+// \* -> *
+static Exp *id (Arr *exps) {
+  CHECK_PARS ("sys.id", 1, exps);
+  return arr_get(exps, 0);
 }
 
 // \-> s
@@ -84,12 +96,6 @@ static Exp *get_locale (Arr *exps) {
 static Exp *main_path (Arr *exps) {
   CHECK_PARS ("sys.mainPath", 0, exps);
   return exp_string(str_f("%s.kut", arr_get(main_args(), 1)));
-}
-
-// \i -> ()
-static Exp *fexit (Arr *exps) {
-  CHECK_PARS ("sys.exit", 1, exps);
-  exit(exp_rget_int(arr_get(exps, 0)));
 }
 
 // \* -> ()
@@ -127,7 +133,7 @@ static Exp *set_locale (Arr *exps) {
 }
 
 // \i-> ()
-static Exp *sleep (Arr *exps) {
+static Exp *f_sleep (Arr *exps) {
   CHECK_PARS ("sys.sleep", 1, exps);
   sys_sleep(exp_rget_int(arr_get(exps, 0)));
   return exp_empty();
@@ -140,9 +146,8 @@ static Exp *test (Arr *exps) {
   Exp *ex1 = arr_get(exps, 1);
   if (exp_rget_bool(solver_solve_isolate(exp_eq(ex0, ex1)))) return exp_empty();
 
-  EXC_KUT(str_f("Test failed.\n  Expected: %s (%s)\n    Actual: %s (%s)",
-    exp_to_str(ex1), exp_type_to_str(ex1),
-    exp_to_str(ex0), exp_type_to_str(ex0)
+  EXC_KUT(str_f("Test failed.\n  Expected: %s\n    Actual: %s",
+    exp_to_js(ex1), exp_to_js(ex0)
   ));
   return NULL; // Unreachable
 }
@@ -181,13 +186,14 @@ Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "exit")) return fexit;
   if (!strcmp(fname, "getLocale")) return get_locale;
   if (!strcmp(fname, "home")) return home;
+  if (!strcmp(fname, "id")) return id;
   if (!strcmp(fname, "mainPath")) return main_path;
   if (!strcmp(fname, "print")) return print;
   if (!strcmp(fname, "printError")) return print_error;
   if (!strcmp(fname, "println")) return println;
   if (!strcmp(fname, "readLine")) return read_line;
   if (!strcmp(fname, "setLocale")) return set_locale;
-  if (!strcmp(fname, "sleep")) return sleep;
+  if (!strcmp(fname, "sleep")) return f_sleep;
   if (!strcmp(fname, "test")) return test;
   if (!strcmp(fname, "throw")) return throw;
   if (!strcmp(fname, "toStr")) return to_str;

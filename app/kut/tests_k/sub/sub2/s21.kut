@@ -1,2 +1,4 @@
+import "t4";
 
+///
 hello = \n -> return "hello " + n;;

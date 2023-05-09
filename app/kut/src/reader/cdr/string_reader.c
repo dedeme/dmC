@@ -1,9 +1,9 @@
 // Copyright 08-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "reader/cdr/string_reader.h"
 #include "kut/buf.h"
-#include "DEFS.h"
 
 char *read_unicode (Cdr *cdr) {
   int from_hex(char *r, char ch) {
@@ -86,6 +86,9 @@ Token *read_single_string(Cdr *cdr, char ch) {
     if (ch == 0) EXC_KUT(cdr_fail_line(
         cdr, "Unclosed quotes.", cdr_get_next_nline(cdr)
       ));
+    if (ch == '\n') EXC_KUT(cdr_fail_line(
+        cdr, "Unclosed quotes.", cdr_get_next_nline(cdr) - 1
+      ));
     if (ch == close) return token_string(str_new(buf_str(bf)));
     if (ch == '\\') {
       char *tx = read_escape(cdr, close);
@@ -142,11 +145,13 @@ Token *read_multi_string(Cdr *cdr, int nline) {
                 buf_cadd(bf, '"');
                 buf_cadd(bf, ch);
             }
+            break;
           }
           default:
             buf_cadd(bf, '"');
             buf_cadd(bf, ch);
         }
+        break;
       }
       default:
         buf_cadd(bf, ch);

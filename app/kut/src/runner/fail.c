@@ -1,9 +1,9 @@
 // Copyright 14-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "runner/fail.h"
 #include "stat.h"
-#include "kut/DEFS.h"
 #include "fileix.h"
 
 char *fail_add_stack (char *msg, Stack *stack) {

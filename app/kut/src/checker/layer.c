@@ -1,8 +1,8 @@
 // Copyright 31-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "checker/layer.h"
-#include "kut/DEFS.h"
 
 struct layer_Layer {
   int user_control;

@@ -6,6 +6,7 @@
 #ifndef MODS_MD_THREAD_H
   #define MODS_MD_THREAD_H
 
+#include "kut/thread.h"
 #include "bfunction.h"
 
 /// Returns Bfunction with name 'fmane'.

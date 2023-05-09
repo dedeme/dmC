@@ -671,3 +671,20 @@ switch (3 + 2) {
   default : Str! = sys.throw("fail");
 }
 sys.test(Str!, "5");
+
+Str! = "";
+switch (3 + 2) {
+  3           : Str! = sys.throw("error");
+  20, 30 / 6  : Str! = "5";
+  default     : Str! = sys.throw("fail");
+}
+sys.test(Str!, "5");
+
+Str! = "";
+switch (3 + 2) {
+  3           : Str! = sys.throw("error");
+  30 / 6, 20  : Str! = "5";
+  default     : Str! = sys.throw("fail");
+}
+sys.test(Str!, "5");
+

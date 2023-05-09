@@ -1,13 +1,13 @@
 // Copyright 07-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "reader/cdr/cdr.h"
 #include "reader/cdr/number_reader.h"
 #include "reader/cdr/comment_reader.h"
 #include "reader/cdr/string_reader.h"
 #include "kut/buf.h"
 #include "fileix.h"
-#include "DEFS.h"
 
 static char *opChs = ";=,.()+-*/!<>[]{}%&|?:\\";
 
@@ -16,8 +16,8 @@ struct cdr_Cdr {
   char *pcode;
   int fix;
   int nline;
-  Token *next_tk;
-  int next_nline; // Can be NULL
+  Token *next_tk; // Can be NULL
+  int next_nline;
 };
 
 static Token *read_symbol (Cdr *this, char ch) {
@@ -84,9 +84,11 @@ static Token *read_token (Cdr *this) {
       return NULL;
     case '/': {
       Token *tk = comment_reader_read(this);
-      return token_is_operator(tk)
+      return tk->type == TOKEN_OPERATOR
         ? read_operator(this, '/') // Operator '/'
-        : read_token(this) // Skip comment
+        : str_starts(tk->value, "///")
+          ? tk
+          : read_token(this) // Skip comment
       ;
     }
     case '\'':

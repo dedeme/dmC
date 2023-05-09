@@ -8,11 +8,11 @@
 
 #include "bfunction.h"
 
-/// Returns TRUE if 'md_name' is a valid module name.
-int bmodule_exists (char *md_name);
+/// Returns TRUE if 'md_name' is a valid module symbol.
+int bmodule_exists (int md_sym);
 
-/// Returns the function 'fn' of module 'md'.
+/// Returns the function 'fn_sym' of module 'md_sym'.
 /// Throws EXC_KUT if 'fn' does not exist.
-Bfunction bmodule_get_function (char *md, char *fn);
+Bfunction bmodule_get_function (int md_sym, int fn_sym);
 
 #endif

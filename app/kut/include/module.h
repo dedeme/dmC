@@ -8,17 +8,23 @@
 
 #include "heap0.h"
 #include "heap.h"
+#include "imports.h"
+#include "exports.h"
 
 typedef struct module_Module Module;
 
 /// Constructor.
-///   imports: Map<int>. Link every import symbol with the matching file index.
+///   imports: Link every import symbol with the matching file index.
+///   exports: Symbols to export.
 ///   hp0    : Module heap.
 ///   code   : Arr<Statement>. Statement list.
-Module *module_new (Map *imports, Heap0 *hp0, Arr *code);
+Module *module_new (Imports *imports, Exports *exports, Heap0 *hp0, Arr *code);
 
-/// Returns Map<int>
-Map *module_get_imports(Module *this);
+///
+Imports *module_get_imports(Module *this);
+
+///
+Exports *module_get_exports(Module *this);
 
 ///
 Heap0 *module_get_heap0(Module *this);

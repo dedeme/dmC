@@ -1,13 +1,14 @@
 // Copyright 03-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "fileix.h"
 #include "DEFS.h"
+#include "fileix.h"
 #include "kut/path.h"
 #include "kut/file.h"
 #include "kut/opt.h"
 
 static char *root = "./";
+// <char>
 static Arr *paths;
 
 void fileix_init(void) {
@@ -15,7 +16,7 @@ void fileix_init(void) {
 }
 
 void fileix_set_root (char *froot) {
-  root = froot;
+  root = *froot ? froot : "./";
 }
 
 char *fileix_get_root (void) {

@@ -5,14 +5,15 @@
 #include "kut/DEFS.h"
 #include "module.h"
 #include "modules.h"
+#include "imports.h"
 
 void module_tests () {
   puts(">>> module:");
 
-  Module *md = module_new(map_new(), heap0_new(), arr_new());
-  TESTI(map_size(module_get_imports(md)), 0);
-  TESTI(map_size(heap_get(module_get_heap(md))), 0);
-  TESTI(map_size(heap0_get(module_get_heap0(md))), 0);
+  Module *md = module_new(imports_new(), heap0_new(), arr_new());
+  TESTI(arr_size(imports_get_array(module_get_imports(md))), 0);
+  TESTI(arr_size(heap_get_array(module_get_heap(md))), 0);
+  TESTI(arr_size(heap0_get_array(module_get_heap0(md))), 0);
   TESTI(arr_size(module_get_code(md)), 0);
 
   modules_add(1);

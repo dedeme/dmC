@@ -1,10 +1,10 @@
 // Copyright 08-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "reader/cdr/comment_reader.h"
 #include "kut/buf.h"
 #include "kut/str.h"
-#include "DEFS.h"
 
 static Token *read_line_comment(Cdr *cdr, Buf *bf) {
   char ch;
@@ -31,6 +31,8 @@ static Token *read_long_comment(Cdr *cdr, Buf *bf) {
       case '*': {
         char ch2 = cdr_read_char(cdr);
         switch (ch2) {
+          case 0:
+            EXC_KUT(cdr_fail_line(cdr, "Unclosed comment.", nline));
           case '/':
             buf_add(bf, "*/");
             return token_comment(str_new(buf_str(bf)));

@@ -1,9 +1,9 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_arr.h"
 #include "exp.h"
-#include "DEFS.h"
 #include "function.h"
 #include "obj.h"
 #include "runner/fail.h"
@@ -13,33 +13,29 @@
 // (\a, \*->b) -> b
 static Exp *all (Arr *exps) {
   CHECK_PARS ("arr.all", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-      EACH(a, Exp, e) {
-        if (!exp_rget_as_bool(bf(arr_new_from(e, NULL))))
-          return exp_bool(FALSE);
-      }_EACH
-      return exp_bool(TRUE);
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_bool(arr_all(a, (FPRED)fn2));
 }
 
 // (\a, \*->b) -> b
 static Exp *any (Arr *exps) {
   CHECK_PARS ("arr.any", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-      EACH(a, Exp, e) {
-        if (exp_rget_as_bool(bf(arr_new_from(e, NULL))))
-          return exp_bool(TRUE);
-      }_EACH
-      return exp_bool(FALSE);
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_bool(arr_any(a, (FPRED)fn2));
 }
 
 // \a -> ()
@@ -66,112 +62,110 @@ static Exp *drop (Arr *exps) {
 // (\a, \*->b) -> a
 static Exp *drop_while (Arr *exps) {
   CHECK_PARS ("arr.dropWhile", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) {return exp_rget_bool(bf(arr_new_from(e, NULL))); }
-      return exp_array(arr_dropf(a, (FPRED)fn2));
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_array(arr_dropf(a, (FPRED)fn2));
 }
 
 // (\a, \*, *->b) -> [a, a]
 static Exp *duplicates (Arr *exps) {
   CHECK_PARS ("arr.duplicates", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = arr_copy(exp_rget_array(arr_get(exps, 0)));
-        //--
-        int feq (Exp *e1, Exp *e2) {
-          return exp_rget_bool(bf(arr_new_from(e1, e2, NULL)));
-        }
-      // <Exp>
-      Arr *rest = arr_duplicates(a, (FEQ)feq);
-      return exp_array(arr_new_from(
-        exp_array(a), exp_array(rest), NULL
-      ));
+    int fn2 (Exp *e1, Exp *e2) {
+      Arr *ps = arr_new_from(e1, e2,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  // <Exp>
+  Arr *rest = arr_duplicates(a, (FEQ)fn2);
+  return exp_array(arr_new_from(
+    exp_array(a), exp_array(rest), NULL
+  ));
 }
 
 // (\a, \*->()) -> ()
 static Exp *each (Arr *exps) {
   CHECK_PARS ("arr.each", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        void f (Exp *e) { bf(arr_new_from(e, NULL)); }
-      arr_each(a, (FPROC)f);
-      return exp_empty();
+    void fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      else EXC_KUT(fail_type("function", fn));
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  arr_each(a, (FPROC)fn2);
+  return exp_empty();
 }
 
 // (\a, \*,i->()) -> ()
 static Exp *each_ix (Arr *exps) {
   CHECK_PARS ("arr.eachIx", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        void f (Exp *e, int ix) { bf(arr_new_from(e, exp_int(ix), NULL)); }
-      arr_each_ix(a, (void (*)(void *, int))f);
-      return exp_empty();
+    void fn2 (Exp *e, int ix) {
+      Arr *ps = arr_new_from(e, exp_int(ix),  NULL);
+      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      else EXC_KUT(fail_type("function", fn));
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  arr_each_ix(a, (void (*)(void *, int))fn2);
+  return exp_empty();
 }
 
 // (\a, \*->b) -> a
 static Exp *filter (Arr *exps) {
   CHECK_PARS ("arr.filter", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL))); }
-      return exp_array(arr_filter_to(a, (FPRED)fn2));
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_array(arr_filter_to(a, (FPRED)fn2));
 }
 
 // (\a, \*->b) -> ()
 static Exp *filter_in (Arr *exps) {
   CHECK_PARS ("arr.filterIn", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
-        }
-      arr_filter_in(a, (FPRED)fn2);
-      return exp_empty();
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  arr_filter_in(a, (FPRED)fn2);
+  return exp_empty();
 }
 
 // (\a, \*->b) -> ([] | [*])
 static Exp *find (Arr *exps) {
   CHECK_PARS ("arr.find", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
-        }
-      Exp *e = opt_get(arr_find(a, (FPRED)fn2));
-      if (e) return exp_array(arr_new_from(e, NULL));
-      return exp_array(arr_new());
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  Exp *e = opt_get(arr_find(a, (FPRED)fn2));
+  if (e) return exp_array(arr_new_from(e, NULL));
+  return exp_array(arr_new());
 }
 
 // \<iter> -> a
@@ -185,16 +179,15 @@ static Exp *from_iter (Arr *exps) {
 // (\a, \*->b) -> i
 static Exp *findex (Arr *exps) {
   CHECK_PARS ("arr.index", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
-        }
-      return exp_int(arr_index(a, (FPRED)fn2));
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_int(arr_index(a, (FPRED)fn2));
 }
 
 // \[s...], s -> s
@@ -211,15 +204,15 @@ static Exp *join (Arr *exps) {
 // (\a, \*->*) -> a
 static Exp *map (Arr *exps) {
   CHECK_PARS ("arr.map", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        Exp *fn2 (Exp *e) { return bf(arr_new_from(e, NULL)); }
-      return exp_array(arr_map(a, (FMAP)fn2));
+    Exp *fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return rs;
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_array(arr_map(a, (FMAP)fn2));
 }
 
 // \i, b | i | f | s -> a
@@ -274,16 +267,16 @@ static Exp *push (Arr *exps) {
 // \(a, *, \*,*->*) -> *
 static Exp *reduce (Arr *exps) {
   CHECK_PARS ("arr.reduce", 3, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *e = arr_get(exps, 1);
+  Exp *fn = arr_get(exps, 2);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-      Exp *e = arr_get(exps, 1);
-        //--
-        Exp *fn2 (Exp *r, Exp *e) { return bf(arr_new_from(r, e, NULL)); }
-      return arr_reduce(a, e, (void*(*)(void *, void *))fn2);
+    Exp *fn2 (Exp *e1, Exp *e2) {
+      Arr *ps = arr_new_from(e1, e2,  NULL);
+      FRUN(rs, fn, ps);
+      return rs;
     }
-  return runner_fn(arr_get(exps, 2), fn);
+  return arr_reduce(a, e, (void*(*)(void *, void *))fn2);
 }
 
 // \a, i -> *
@@ -345,19 +338,17 @@ static Exp *size (Arr *exps) {
 // (\a, \*,*->b) -> ()
 static Exp *sort (Arr *exps) {
   CHECK_PARS ("arr.sort", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e1, Exp *e2) {
-          // e2 and e1 are transposed because 'arr_sort' use 'greater' insted 'less'.
-          return exp_rget_bool(bf(arr_new_from(e2, e1,  NULL)));
-        }
-      arr_sort(a, (FEQ)fn2);
-      return exp_empty();
+    int fn2 (Exp *e1, Exp *e2) {
+      // e2 and e1 are transposed because 'arr_sort' use 'greater' insted 'less'.
+      Arr *ps = arr_new_from(e2, e1,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  arr_sort(a, (FEQ)fn2);
+  return exp_empty();
 }
 
 // \a, i -> a
@@ -371,16 +362,15 @@ static Exp *take (Arr *exps) {
 // (\a, \*->b) -> a
 static Exp *take_while (Arr *exps) {
   CHECK_PARS ("arr.takeWhile", 2, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Exp *fn = arr_get(exps, 1);
     //--
-    Exp *fn (Bfunction bf) {
-      // <Exp>
-      Arr *a = exp_rget_array(arr_get(exps, 0));
-        //--
-        int fn2 (Exp *e) { return exp_rget_bool(bf(arr_new_from(e, NULL)));
-        }
-      return exp_array(arr_takef(a, (FPRED)fn2));
+    int fn2 (Exp *e) {
+      Arr *ps = arr_new_from(e,  NULL);
+      FRUN(rs, fn, ps);
+      return exp_get_bool(rs);
     }
-  return runner_fn(arr_get(exps, 1), fn);
+  return exp_array(arr_takef(a, (FPRED)fn2));
 }
 
 // \a -> <iter>

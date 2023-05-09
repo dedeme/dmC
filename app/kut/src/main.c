@@ -1,11 +1,13 @@
 // Copyright 27-Jan-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "main.h"
 #include <signal.h>
 #include "kut/sys.h"
 #include "kut/path.h"
 #include "fileix.h"
+#include "symix.h"
 #include "modules.h"
 #include "heaps.h"
 #include "reader/reader.h"
@@ -14,7 +16,6 @@
 #include "runner/runner.h"
 #include "runner/fail.h"
 #include "runner/stack.h"
-#include "DEFS.h"
 
 // <char>
 static Arr *args;
@@ -54,14 +55,16 @@ int main(int argc, char *argv[]) {
   int check = FALSE;
   char *p = argv[1];
   if (str_eq(p, "-v")) {
-    puts("Kut version v2023.02");
+    puts("Kut version v2023.04");
     return 0;
   } else if (argc == 3 && str_eq(p, "-c")) {
     check = TRUE;
     p = argv[2];
   }
 
+  GC_INIT();
   sys_init();
+  symix_init();
   fileix_init();
   modules_init();
   fileix_set_root(path_parent(p));
@@ -83,8 +86,8 @@ int main(int argc, char *argv[]) {
       Arr *imp_mods = arr_new_from(mod, NULL);
       while (arr_size(imp_mods)) {
         Module *md = arr_pop(imp_mods);
-        EACH(map_to_array(module_get_imports(md)), Kv, sym_fix) {
-          int fix2 = *((int *)kv_value(sym_fix));
+        EACH(imports_get_array(module_get_imports(md)), ImportsEntry, sym_fix) {
+          int fix2 = imports_entry_fix(sym_fix);
           Module *old_md = opt_get(modules_get_ok(fix2));
           if (!old_md) {
             char *kut_code = fileix_read(fix2);
@@ -103,6 +106,7 @@ int main(int argc, char *argv[]) {
       }_EACH
     } else {
       Exp *rs = runner_run(
+        TRUE,
         stack_new(),
         module_get_imports(mod), module_get_heap0(mod),
         heaps_new(module_get_heap(mod)),

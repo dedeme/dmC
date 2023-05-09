@@ -1,8 +1,8 @@
 // Copyright 07-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "modules.h"
-#include "kut/DEFS.h"
 #include "kut/arr.h"
 
 // Opt<Opt<Module>>

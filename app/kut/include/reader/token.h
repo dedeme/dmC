@@ -8,88 +8,47 @@
 
 #include <stdint.h>
 
+enum token_Token_t {
+  TOKEN_BOOL, TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING,
+  TOKEN_LINE_COMMENT, TOKEN_COMMENT, TOKEN_SYMBOL, TOKEN_OPERATOR
+};
+typedef enum token_Token_t Token_t;
+
 /// Token structure.
-typedef struct token_Token Token;
+typedef struct token_Token {
+  Token_t type;
+  union {
+    int b;
+    int64_t i;
+    double d;
+    void *value;
+  };
+} Token;
 
 /// Creates a token of the indicated type.
 Token *token_bool (int value);
 
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-int token_get_bool (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_bool (Token *this);
 
 /// Creates a token of the indicated type.
 Token *token_int (int64_t value);
 
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-int64_t token_get_int (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_int (Token *this);
-
 /// Creates a token of the indicated type.
 Token *token_float (double value);
-
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-double token_get_float (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_float (Token *this);
 
 /// Creates a token of the indicated type.
 Token *token_string (char *value);
 
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *token_get_string (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_string (Token *this);
-
 /// Creates a token of the indicated type.
 Token *token_line_comment (char *value);
-
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *token_get_line_comment (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_line_comment (Token *this);
 
 /// Creates a token of the indicated type.
 Token *token_comment (char *value);
 
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *token_get_comment (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_comment (Token *this);
-
 /// Creates a token of the indicated type.
 Token *token_symbol (char *value);
 
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *token_get_symbol (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_symbol (Token *this);
-
 /// Creates a token of the indicated type.
 Token *token_operator (char *value);
-
-/// Read an Token of the indicate type.
-/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *token_get_operator (Token *this);
-
-/// Returns TRUE if 'this' match the type.
-int token_is_operator (Token *this);
 
 /// Returns TRUE if 'this' is an unary operator.
 int token_is_unary (Token *this);

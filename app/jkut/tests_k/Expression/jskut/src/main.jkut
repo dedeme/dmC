@@ -1,0 +1,392 @@
+
+a =
+    12
+;
+sys.test(a, 12);
+sys.test(12, a);
+
+b1 = true & true;
+sys.assert(b1);
+b2 = true
+  & false;
+sys.assert(!b2);
+b3 = false &
+  true;
+sys.assert(!b3);
+b4 = false
+  &
+  false;
+sys.assert(!b4);
+b5 = true | true;
+sys.assert(b5);
+b6 = true | false;
+sys.assert(b6);
+b7 = false | true;
+sys.assert(b7);
+b8 = false | false;
+sys.assert(!b8);
+
+sum1 = 2 + 1;
+sys.test(sum1, 3);
+sum2 = 2.5
+  +
+    1.4
+    ;
+sys.test(sum2, 3.9);
+sum3 = "a" + "b";
+sys.test(sum3, "ab");
+sum4 = "a" + "";
+sys.test(sum4, "a");
+
+sub1 = 2 - 1;
+sys.test(sub1, 1);
+sub2 = 2.5
+  -
+    1.4
+    ;
+sys.test(sub2, 1.1);
+
+mul1 = 12 * 5;
+sys.test(mul1, 60);
+mul2 = 22.52
+  *
+    10
+    ;
+sys.test(mul2, 225.2);
+
+div1 = 12 / 5;
+sys.test(div1, 2.4);
+div2 = 22.52
+  /
+    10
+    ;
+sys.test(div2, 2.252);
+
+mod1 = 14 % 5;
+sys.test(mod1, 4);
+mod2 = 22.52
+  %
+    10
+    ;
+sys.test(mod2, 2.52);
+
+sys.test(sys.toStr(true), "true");
+sys.test(sys.toStr(false), "false");
+sys.test(sys.toStr(!false), "true");
+sys.test(sys.toStr(
+  !
+  true
+), "false");
+
+sys.test(sys.toStr(0), "0");
+sys.test(sys.toStr(1_234), "1234");
+sys.test(sys.toStr(0564), "564");
+
+sys.test(sys.toStr(1.2300), "1.23");
+sys.test(sys.toStr(1_586.235e2), "158623.5");
+sys.test(sys.toStr(- 1.2300), "-1.23");
+sys.test(sys.toStr(-1_586.235e2), "-158623.5");
+sys.test(sys.toStr(0.0), "0");
+sys.test(sys.toStr(0.012), "0.012");
+
+sys.test(sys.toStr(""), "");
+sys.test(sys.toStr("abc"), "abc");
+
+sys.test(sys.toStr([]), "[]");
+sys.test(sys.toStr(["a" ]), "[\"a\"]");
+sys.test(sys.toStr([ 1 ,
+  2, 3 ]), "[1,2,3]");
+
+sys.test(sys.toStr({}), "{}");
+sys.test(sys.toStr({"a": 1}), '{"a":1}');
+sys.test(sys.toStr({"a": 1, "b": 2, "c": 3}), '{"a":1,"b":2,"c":3}');
+sys.test({"a": 1, "b": 2, "c": 3}, {"a": 1, "b": 2, "c": 3});
+
+sys.test(sys.toStr(\-> {}), "()=> {}");
+sys.test(sys.toStr(\-> sys.println("");), '()=> { sys.println("");}');
+sys.test(sys.toStr(\a, b -> {
+    c = a + b;
+    return c;
+  }), '(a, b) => {\n    const c = sys.$checkNull(a + b);\n    return c;\n  }');
+
+sys.test({"a": 1, "b": 2}.a, 1);
+//sys.test({"a": 1, "b": 2}.ax, 1);
+
+sys.test("ab"[1], "b");
+sys.test("aros"[3],"s");
+sys.test("años"[2], "o");
+
+sys.test({"a": 1, "b": 2}["a"], 1);
+// sys.test({"a": 1, "b": 2}["ax"], 1);
+
+sys.test("abc"[:], "abc");
+sys.test("abc"[:2], "ab");
+sys.test("abc"[2:], "c");
+sys.test("abc"[1:2], "b");
+sys.test("abc"[:-1], "ab");
+sys.test("abc"[-1:], "c");
+
+sys.test([1, 2, 3][:], [1, 2, 3]);
+sys.test([1, 2, 3][:2], [1, 2]);
+sys.test([1, 2, 3][2:], [3]);
+sys.test([1, 2, 3][1:2], [2]);
+sys.test([1, 2, 3][:-1], [1, 2]);
+sys.test([1, 2, 3][-1:], [3]);
+
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : "one";
+    2 : "two";
+    3 : "three";
+    default: "none";
+  }, "two"
+);
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : "one";
+    3 : "three";
+    default: "none";
+  }, "none"
+);
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : "one";
+    2, 15 : "two";
+    3 : "three";
+    default: "None";
+  }, "two"
+);
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : "one";
+    15, 2, 33 : "two";
+    3 : "three";
+    default: "None";
+  }, "two"
+);
+
+sys.test(!true, false);
+sys.test(!false, true);
+sys.test(!"abc", false);
+sys.test(!"", true);
+sys.test(![1, 2], false);
+sys.test(![], true);
+
+sys.test(-3, -3);
+sys.test(--3, 3);
+sys.test(-0.0, 0.0);
+sys.test(--3.45, 3.45);
+
+sys.test(2 + 3, 5);
+sys.test(2.1 + 3.6, 5.7);
+sys.test("a" + "bc", "abc");
+sys.test("" + "bc", "bc");
+sys.test("bc" + "", "bc");
+
+sys.test(2 - -2, 4);
+sys.test(2 * -2, -4);
+sys.test(3 / -2, -1.5);
+sys.test(2.0 - -2.0, 4.0);
+sys.test(2.0 * -2.0, -4.0);
+sys.test(3.0 / -2.0, -1.5);
+
+sys.test(15 % 7, 1);
+
+sys.test(true & false, false);
+sys.test(true | 4/0, true);
+sys.test("abc" & "", false);
+sys.test("abc" | "", true);
+sys.test([] & 4/0, false);
+sys.test([] | [1, 2], true);
+sys.test(3 == 0 & 3 == "a", false);
+sys.test(3 != 0 | 3 == "a", true);
+
+sys.test("ab"[0] == "a" ? 1 : 2, 1);
+sys.test("" ? 1 : 2, 2);
+sys.test([0] ? 1 : 2, 1);
+
+sys.test(4 - 2 - 2, 0);
+sys.test(4 - (2 - 2), 4);
+sys.test(4 + 3 * 2, 10);
+sys.test((4 + 3) * 2, 14);
+sys.test((4 + -3) * 2, 2);
+sys.test(3 + 2 > 3 + 1, true);
+sys.test(3 + 2 < 3 + 1 ? 2 == 4 + 12 : 16, 16);
+sys.test(3 + 2 < 3 + 1 ? 4/0 : 16, 16);
+sys.test(3 + 2 > 3 + 1 ? 2 == 4 + 12 : 16,  false);
+sys.test(3 + 2 > 3 + 1 ? 2 == 4 + 12 : 4/0, false);
+
+sys.assert(true == true);
+sys.assert(true != false);
+
+sys.assert(34 == 34);
+sys.assert(34 != 35);
+sys.assert(34 != -34);
+sys.assert(0 == -0);
+
+sys.assert(12.5 == 12.5);
+sys.assert(12.6 != 12.5);
+sys.assert(12.5 != -12.5);
+sys.assert(0.0 == -0.0);
+
+sys.assert(5 > 4);
+sys.assert(5 >= 4);
+sys.assert(4 >= 2 + 2);
+sys.assert(-4 < 4);
+sys.assert(-4 <= 4);
+sys.assert(-4 <= -4);
+
+
+sys.assert("" == "");
+sys.assert("" != "abc");
+sys.assert("abc" == "abc");
+sys.assert("abc" != "a");
+sys.assert("abc" != "bbc");
+
+sys.assert("a" > "");
+sys.assert("a" >= "");
+sys.assert("a" >= "a");
+sys.assert("ab" < "b");
+sys.assert("ab" <= "b");
+sys.assert("ab" <= "ab");
+
+sys.assert([] == []);
+sys.assert([] != [1, 2]);
+sys.assert([1,2] == [1, 2]);
+sys.assert([1, 2] != [1]);
+sys.assert([1, 2] != [1, 1]);
+
+sys.assert({} == {});
+sys.assert({} != {"a": 1, "b": 2});
+sys.assert({"a": 1, "b": 2} == {"a": 1, "b": 1 + 1});
+sys.assert({"a": 1, "b": 2} != {"a": 1});
+sys.assert({"a": 1, "b": 2} != {"a": 1, "b": 1});
+
+///
+n1 = 23;
+sys.test(n1 + 2, 25);
+A1 = [12];
+A2 = [12.0];
+A3 = [true];
+
+M = {"a": 12, "b": 12.0, "c": true};
+fn1 = \ -> return M.a;;
+fn2 = \n ->  {
+  return M.a - 4 + n1;
+};
+fn3 = \m, n -> {
+  n2 = n1 - 13 + m + n;
+  return M.a - n2;
+};
+n2 = n1;
+{
+  { sys.test(n2, 23); }
+  n1 = -2;
+  sys.test(n1, -2);
+  {
+    sys.test(n1, fn1());
+    n2 = 11;
+    sys.test(n2, 11);
+  }
+
+  fn1 = \-> return -2;; // Redefinition of fn1
+
+  A1! += 2;
+  sys.test(A1!, 14);
+  A1! -= -2;
+  sys.test(A1!, 16);
+  A1! *= 3;
+  sys.test(A1!, 48);
+  A1! /= 2;
+  sys.test(A1!, 24);
+  A1! %= 5;
+  sys.test(A1!, 4);
+
+  A2! += 2.0;
+  sys.test(A2!, 14.0);
+  A2! -= -2.0;
+  sys.test(A2!, 16.0);
+  A2! *= 3.0;
+  sys.test(A2!, 48.0);
+  A2! /= 2.0;
+  sys.test(A2!, 24.0);
+
+  A3! &= false;
+  sys.assert(!A3!);
+  A3! |= true;
+  sys.assert(A3!);
+
+  M["a"] += 2;
+  sys.test(M.a, 14);
+  M["a"] -= -2;
+  sys.test(M.a, 16);
+  M["a"] *= 3;
+  sys.test(M.a, 48);
+  M["a"] /= 2;
+  sys.test(M.a, 24);
+  M["a"] %= 5;
+  sys.test(M.a, 4);
+
+  M.b += 2.0;
+  sys.test(M["b"], 14.0);
+  M.b -= -2.0;
+  sys.test(M["b"], 16.0);
+  M.b *= 3.0;
+  sys.test(M["b"], 48.0);
+  M.b /= 2.0;
+  sys.test(M["b"], 24.0);
+
+  M.c &= false;
+  sys.assert(!M.c);
+  M.c |= true;
+  sys.assert(M.c);
+
+  {
+    sys.test(fn1(), -2);
+  }
+  sys.test(fn2(10), 23);
+  sys.test(fn3(15, -5), -16);
+}
+sys.test(n1, 23);
+sys.test(A1!, 4);
+sys.test(A2!, 24.0);
+sys.test(A3!, true);
+sys.test(M.a, 4);
+sys.test(M.b, 24.0);
+sys.test(M.c, true);
+
+sys.test(fn1(), 4);
+sys.test(fn2(10), 23);
+sys.test(fn3(15, -5), -16);
+
+fn1();
+
+fn4 = \-> sys.test(fn5(), "ok");;
+fn4();
+
+fn5 = \-> return "ok";;
+
+sys.test(class Number('123'), 123);
+
+d = new Date('December 17, 1995 03:24:00');
+sys.test(class Number(d), 819167040000);
+sys.test(null d.getTime(), [819167040000]);
+sys.test(null d["timex"], []);
+
+sys.test(eval "\"a\\\"b\\\"c\\n\"", "a\"b\"c\n");
+sys.test(eval
+
+"""
+ "This is the thing"
+
+ """
+
+
+
+
+
+, "This is the thing");
+
+
+
+trace "End expression tests ok at line 392";

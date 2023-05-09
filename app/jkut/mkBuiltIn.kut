@@ -1,0 +1,174 @@
+// Copyright 29-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+sourceDir = "$js";
+hDir = "include/builtin";
+cDir = "src/builtin";
+
+months = [
+  "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+  "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+date = \-> {
+  now = time.now();
+  month = months[time.month(now)];
+  return time.fmt("%D-" + month + "-%Y", now);
+};
+
+fhead = \-> return
+  "// Copyright " + date() + " ºDeme\n" +
+  "// GNU General Public License - V3 <http://www.gnu.org/licenses/>"
+;;
+
+processJs = \fjs -> {
+  fpath = path.cat([sourceDir, fjs]);
+  id = fjs[:-3];
+
+  processH(id);
+  processC(id, file.read(fpath));
+};
+
+processH = \id -> {
+  code = """
+    <<HEAD>>
+
+    /// Built-in <<id>>.
+
+    #ifndef BUILTIN_<<ID>>_H
+      #define BUILTIN_<<ID>>_H
+
+    char *<<id>>_bget (void);
+
+    #endif
+  """
+  ;
+
+  file.write(
+    path.cat([hDir, id + ".h"]),
+    str.replace(
+      str.replace(
+        str.replace(
+          code,
+          "<<id>>",
+          id
+        ),
+        "<<ID>>",
+        str.toUpper(id)
+      ),
+      "<<HEAD>>",
+      fhead()
+    )
+  );
+};
+
+processC = \id, jsCode -> {
+  tx = arr.join(
+    arr.map(
+      str.split(jsCode, "\n")
+      ,
+      \l -> return '  ' + js.ws(l + "\n");
+    ),
+    "\n"
+  );
+
+  code = """
+    <<HEAD>>
+
+    char *<<id>>_bget (void) {return
+    <<TX>>
+    ;}
+  """
+  ;
+
+  file.write(
+    path.cat([cDir, id + ".c"]),
+    str.replace(
+      str.replace(
+        str.replace(
+          code,
+          "<<id>>",
+          id
+        ),
+        "<<TX>>",
+        tx
+      ),
+      "<<HEAD>>",
+      fhead()
+    )
+  );
+};
+
+processFunctions = \Mods -> {
+  includes = \-> return arr.join(arr.map(
+    Mods, \m -> return '#include "builtin/' + m + '.h"';
+  ), "\n");;
+
+  imports = \-> return arr.join(arr.map(
+    Mods, \m -> return "    \"import * as " + m + " from '#_js/" + m + ".js';\"";
+  ), "\n");;
+
+  hAndCs = \-> return arr.join(arr.map(
+    Mods, \m -> return '  write_builtin("' + m + '", ' + m + '_bget);';
+  ), "\n");;
+
+  code = """
+    <<HEAD>>
+
+    #include "builtin/builtin.h"
+    #include "kut/str.h"
+    #include "kut/file.h"
+    #include "kut/path.h"
+    <<INCLUDES>>
+
+    char *builtin_module_head (char *to_root) {
+      return str_replace(
+    <<IMPORTS>>
+        ,
+        "#", to_root
+      );
+    }
+
+    void builtin_generate (char *path) {
+      file_mkdir(path);
+
+        //--
+        void write_builtin (char *id, char *(*fn)(void)) {
+          file_write(path_cat(path, str_f("%s.js", id), NULL), fn());
+        };
+    <<H&Cs>>
+    }
+  """
+  ;
+
+  file.write(
+    path.cat([cDir, "builtin.c"]),
+    str.replace(
+      str.replace(
+        str.replace(
+          str.replace(
+            code,
+            "<<H&Cs>>",
+            hAndCs()
+          ),
+          "<<IMPORTS>>",
+          imports()
+        ),
+        "<<INCLUDES>>",
+        includes()
+      ),
+      "<<HEAD>>",
+      fhead()
+    )
+  );
+};
+
+Mods = [];
+for (fjs = file.dir(sourceDir)) {
+  arr.push(Mods, fjs[:-3]);
+  processJs(fjs);
+}
+
+processFunctions(Mods);
+
+sys.println("Javascript built-in generated");

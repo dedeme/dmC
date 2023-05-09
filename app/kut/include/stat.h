@@ -32,12 +32,6 @@ Stat *stat_end (void);
 /// Returns TRUE if 'this' is an end statement.
 int stat_is_end (Stat *this);
 
-/// Returns an empty statement.
-Stat *stat_empty (void);
-
-/// Returns TRUE if 'this' is an empty statement.
-int stat_is_empty (Stat *this);
-
 /// Creates a statement of the indicated type.
 Stat *stat_assign (Exp *left, Exp *right);
 
@@ -179,9 +173,9 @@ int stat_is_return (Stat *this);
 
 /// Creates a statement of the indicated type.
 /// 'finally' is Opt<StatCode>
-Stat *stat_try (StatCode *try, char *catch_var, StatCode *catch, Opt *finally);
+Stat *stat_try (StatCode *try, int catch_var, StatCode *catch, Opt *finally);
 
-/// Read a Stat of the indicate type. Returns an Arr[<StatCode>, <char>, <StatCode>, <Opt<StatCode>>]
+/// Read a Stat of the indicate type. Returns an Arr[<StatCode>, <int>, <StatCode>, <Opt<StatCode>>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_try (Stat *this);
 
@@ -211,9 +205,9 @@ Arr *stat_get_if (Stat *this);
 int stat_is_if (Stat *this);
 
 /// Creates a statement of the indicated type.
-Stat *stat_for (char *var, Exp *collection, StatCode *stat);
+Stat *stat_for (int var, Exp *collection, StatCode *stat);
 
-/// Read a Stat of the indicate type. Returns an Arr[<char>, <Exp>, <StatCode>]
+/// Read a Stat of the indicate type. Returns an Arr[<int>, <Exp>, <StatCode>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_for (Stat *this);
 
@@ -221,9 +215,9 @@ Arr *stat_get_for (Stat *this);
 int stat_is_for (Stat *this);
 
 /// Creates a statement of the indicated type.
-Stat *stat_for_ix (char *var_e, char *var_ix,  Exp *collection, StatCode *stat);
+Stat *stat_for_ix (int var_e, int var_ix,  Exp *collection, StatCode *stat);
 
-/// Read a Stat of the indicate type. Returns an Arr[<char>, <char>, <Exp>, <StatCode>]
+/// Read a Stat of the indicate type. Returns an Arr[<int>, <int>, <Exp>, <StatCode>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_for_ix (Stat *this);
 
@@ -231,9 +225,9 @@ Arr *stat_get_for_ix (Stat *this);
 int stat_is_for_ix (Stat *this);
 
 /// Creates a statement of the indicated type.
-Stat *stat_for_r (char *var, Exp *start, Exp *end, StatCode *stat);
+Stat *stat_for_r (int var, Exp *start, Exp *end, StatCode *stat);
 
-/// Read a Stat of the indicate type. Returns an Arr[<char>, <Exp>, <Exp>, <StatCode>]
+/// Read a Stat of the indicate type. Returns an Arr[<int>, <Exp>, <Exp>, <StatCode>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_for_r (Stat *this);
 
@@ -241,9 +235,9 @@ Arr *stat_get_for_r (Stat *this);
 int stat_is_for_r (Stat *this);
 
 /// Creates a statement of the indicated type.
-Stat *stat_for_rs (char *var, Exp *start, Exp *end, Exp *step, StatCode *stat);
+Stat *stat_for_rs (int var, Exp *start, Exp *end, Exp *step, StatCode *stat);
 
-/// Read a Stat of the indicate type. Returns an Arr[<char>, <Exp>, <Exp>, <Exp>, <StatCode>]
+/// Read a Stat of the indicate type. Returns an Arr[<int>, <Exp>, <Exp>, <Exp>, <StatCode>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_for_rs (Stat *this);
 
@@ -251,10 +245,10 @@ Arr *stat_get_for_rs (Stat *this);
 int stat_is_for_rs (Stat *this);
 
 /// Creates a statement of the indicated type.
-/// 'entries' is Arr<Tp<Exp, StatCode>>
+/// 'entries' is Arr<Tp<Arr<Exp>, StatCode>>
 Stat *stat_switch (Exp *cond, Arr *entries);
 
-/// Read a Stat of the indicate type. Returns an Arr[<Exp>, Arr<Tp<Exp, StatCode>>]
+/// Read a Stat of the indicate type. Returns an Arr[<Exp>, Arr<Tp<Arr<Exp>, StatCode>>]
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Arr *stat_get_switch (Stat *this);
 
@@ -262,17 +256,24 @@ Arr *stat_get_switch (Stat *this);
 int stat_is_switch (Stat *this);
 
 /// Creates a statement of the indicated type.
-Stat *stat_import (int file_ix, char *id);
+Stat *stat_import (char *module_path, int id);
 
-/// Read a Stat of the indicate type. Returns an Arr[<int>, <char>].
+/// Read a Stat of the indicate type. Returns an Arr[<char>, <int>].
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 /// Example
 ///   Arr *imp = stat_get_import(st);
-///   int file_ix = *(int *)arr_get(imp, 0);
+///   char *mod_path = arr_get(imp, 0);
+///   int sym = *(int *)arr_get(imp, 1);
 Arr *stat_get_import (Stat *this);
 
 /// Returns TRUE if 'this' match the type.
 int stat_is_import (Stat *this);
+
+/// Creates a statement of the indicated type.
+Stat *stat_export (void);
+
+/// Returns TRUE if 'this' match the type.
+int stat_is_export (Stat *this);
 
 ///
 char *stat_type_to_str (Stat *this);

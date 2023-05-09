@@ -6,9 +6,7 @@
 #ifndef FILEIX_H
   #define FILEIX_H
 
-#include "kut/rs.h"
-
-/// Initialize code file paths arra.
+/// Initialize code file paths array.
 void fileix_init(void);
 
 /// Set the program working directory.
@@ -22,7 +20,7 @@ char *fileix_get_root (void);
 /// If path already has been added, it do nothing and also returns its index.
 ///    fix  : Index of file which imports 'ipath' or -1 if such file is the main
 ///           one.
-///    ipath: Import a relative file path without the extesion ".kut":
+///    ipath: Relative file path without the extesion ".kut":
 ///             * If 'fix' == -1, 'root/ipath' is used (used for 'main' module).
 ///             * Otherwise:
 ///               · If parent(fix)/ipath exists, such path is used.

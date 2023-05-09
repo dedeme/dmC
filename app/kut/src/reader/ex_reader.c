@@ -1,9 +1,10 @@
 // Copyright 14-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "reader/ex_reader.h"
 #include "DEFS.h"
+#include "reader/ex_reader.h"
 #include "function.h"
+#include "symix.h"
 #include "reader/pt_sq_pr_reader.h"
 #include "reader/st_reader.h"
 
@@ -20,9 +21,9 @@ static Arr *solve_level1 (Arr *exps) {
     if (token_is_binary1(tk)) {
       int sz1 = arr_size(new_exps) - 1;
       Exp *last = arr_get(new_exps, sz1);
-      if (*token_get_operator(tk) == '*')
+      if (*((char *)tk->value) == '*')
         arr_set(new_exps, sz1, exp_mul(last, arr_get(exps, i + 1)));
-      else if (*token_get_operator(tk) == '/')
+      else if (*((char *)tk->value) == '/')
         arr_set(new_exps, sz1, exp_div(last, arr_get(exps, i + 1)));
       else
         arr_set(new_exps, sz1, exp_mod(last, arr_get(exps, i + 1)));
@@ -47,7 +48,7 @@ static Arr *solve_level2 (Arr *exps) {
     if (token_is_binary2(tk)) {
       int sz1 = arr_size(new_exps) - 1;
       Exp *last = arr_get(new_exps, sz1);
-      if (*token_get_operator(tk) == '+')
+      if (*((char *)tk->value) == '+')
         arr_set(new_exps, sz1, exp_add(last, arr_get(exps, i + 1)));
       else
         arr_set(new_exps, sz1, exp_sub(last, arr_get(exps, i + 1)));
@@ -72,15 +73,15 @@ static Arr *solve_level3 (Arr *exps) {
     if (token_is_binary3(tk)) {
       int sz1 = arr_size(new_exps) - 1;
       Exp *last = arr_get(new_exps, sz1);
-      if (!strcmp(token_get_operator(tk), "=="))
+      if (!strcmp((char *)tk->value, "=="))
         arr_set(new_exps, sz1, exp_eq(last, arr_get(exps, i + 1)));
-      else if (!strcmp(token_get_operator(tk), "!="))
+      else if (!strcmp((char *)tk->value, "!="))
         arr_set(new_exps, sz1, exp_neq(last, arr_get(exps, i + 1)));
-      else if (!strcmp(token_get_operator(tk), ">"))
+      else if (!strcmp((char *)tk->value, ">"))
         arr_set(new_exps, sz1, exp_greater(last, arr_get(exps, i + 1)));
-      else if (!strcmp(token_get_operator(tk), ">="))
+      else if (!strcmp((char *)tk->value, ">="))
         arr_set(new_exps, sz1, exp_greater_eq(last, arr_get(exps, i + 1)));
-      else if (!strcmp(token_get_operator(tk), "<"))
+      else if (!strcmp((char *)tk->value, "<"))
         arr_set(new_exps, sz1, exp_less(last, arr_get(exps, i + 1)));
       else
         arr_set(new_exps, sz1, exp_less_eq(last, arr_get(exps, i + 1)));
@@ -105,7 +106,7 @@ static Arr *solve_level4 (Arr *exps) {
     if (token_is_binary4(tk)) {
       int sz1 = arr_size(new_exps) - 1;
       Exp *last = arr_get(new_exps, sz1);
-      if (*token_get_operator(tk) == '&')
+      if (*((char *)tk->value) == '&')
         arr_set(new_exps, sz1, exp_and(last, arr_get(exps, i + 1)));
       else
         arr_set(new_exps, sz1, exp_or(last, arr_get(exps, i + 1)));
@@ -134,30 +135,55 @@ static Exp *read_switch (Cdr *cdr) {
   if (!token_is_open_bracket(tk))
     EXC_KUT(cdr_fail_expect(cdr, "{", token_to_str(tk)));
 
-  // <Tp<Exp, Exp>>
+  // <Tp<Arr<Exp>, Exp>>
   Arr *cases = arr_new();
   for (;;) {
-    if (cdr_next_token_is_close_bracket(cdr)) {
-      cdr_read_token(cdr);
-      break;
-    }
+    if (cdr_next_token_is_close_bracket(cdr))
+      EXC_KUT(cdr_fail(cdr, "'default' case is missing"));
 
     Exp *c1 = ex_reader_read(cdr);
+
+    if (exp_is_sym(c1) && exp_get_sym(c1) == symix_DEFAULT) {
+      Token *tk = cdr_read_token(cdr);
+
+      if (!token_is_colon(tk))
+        EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
+
+      arr_push(cases, tp_new(arr_new_from(c1, NULL), ex_reader_read(cdr)));
+
+      tk = cdr_read_token(cdr);
+      if (!token_is_semicolon(tk))
+        EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));
+
+      tk = cdr_read_token(cdr);
+      if (!token_is_close_bracket(tk))
+        EXC_KUT(cdr_fail_expect(cdr, "}", token_to_str(tk)));
+
+      return exp_switch(cond, cases);
+    }
+
+    //Exp
+    Arr *cs = arr_new_from(c1, NULL);
+    while (cdr_next_token_is_comma(cdr)) {
+      cdr_read_token(cdr);
+      Exp *exp = ex_reader_read(cdr);
+      if (exp_is_sym(exp) && exp_get_sym(exp) == symix_DEFAULT)
+        EXC_KUT(cdr_fail(cdr, "Unexpected 'default'"));
+      arr_push(cs, exp);
+    }
 
     Token *tk = cdr_read_token(cdr);
 
     if (!token_is_colon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
 
-    arr_push(cases, tp_new(c1, ex_reader_read(cdr)));
+    arr_push(cases, tp_new(cs, ex_reader_read(cdr)));
 
     tk = cdr_read_token(cdr);
 
     if (!token_is_semicolon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));
   }
-
-  return exp_switch(cond, cases);
 }
 
 // exps is [Exp, Token, Exp, Token ..., Exp] -> at least one element is added.
@@ -266,7 +292,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
     for (;;) {
       Exp *exp = ex_reader_read(cdr);
       char *key;
-      if (exp_is_sym(exp)) key = exp_get_sym(exp);
+      if (exp_is_sym(exp)) key = symix_get(exp_get_sym(exp));
       else if (exp_is_string(exp)) key = exp_get_string(exp);
       else EXC_KUT(cdr_fail_expect(cdr, "symbol or string", exp_to_js(exp)));
 
@@ -302,20 +328,15 @@ Exp *ex_reader_read1 (Cdr *cdr) {
   }
 
   if (token_is_backslash(tk)) { // \ -------------------------------------------
-    // <char>
+    // <Token>
     Arr *pars = arr_new();
     if (cdr_next_token_is_arrow(cdr)) {
       cdr_read_token(cdr);
     } else {
       for(;;) {
         Token *tk = cdr_read_token(cdr);
-        if (token_is_symbol(tk)) {
-          char *s = token_get_symbol(tk);
-          EACH(pars, char, s2) {
-            if (!strcmp(s2, s))
-              EXC_KUT(cdr_fail(cdr, str_f("Duplicate parameter '%s'", s)));
-          }_EACH
-          arr_push(pars, s);
+        if (tk->type == TOKEN_SYMBOL) {
+          arr_push(pars, tk);
           tk = cdr_read_token(cdr);
           if (token_is_comma(tk)) continue;
           if (token_is_arrow(tk)) break;
@@ -324,30 +345,43 @@ Exp *ex_reader_read1 (Cdr *cdr) {
         EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
       }
     }
-
-    return exp_function(function_new(pars, st_reader_read(cdr)));
+    int n = arr_size(pars);
+    int *ints = ATOMIC(n * sizeof(int));
+    int *p = ints;
+    EACH(pars, Token, tk) {
+      int s = tk->b;
+      int *p2 = ints;
+      while (p2 < p) {
+        if (s == *p2++)
+          EXC_KUT(cdr_fail(
+            cdr, str_f("Duplicate parameter '%s'", symix_get(s))
+          ));
+      }
+      *p++ = s;
+    }_EACH
+    return exp_function(function_new(iarr_new(n, ints), st_reader_read(cdr)));
   }
 
   // Others --------------------------------------------------------------------
 
-  if (token_is_line_comment(tk) || token_is_comment(tk))
+  if (tk->type == TOKEN_LINE_COMMENT || tk->type == TOKEN_COMMENT)
     return ex_reader_read1(cdr);
 
-  if (token_is_bool(tk))
-    return exp_bool(token_get_bool(tk));
+  if (tk -> type == TOKEN_BOOL)
+    return exp_bool(tk->b);
 
-  if (token_is_int(tk))
-    return exp_int(token_get_int(tk));
+  if (tk -> type == TOKEN_INT)
+    return exp_int(tk->i);
 
-  if (token_is_float(tk))
-    return exp_float(token_get_float(tk));
+  if (tk -> type == TOKEN_FLOAT)
+    return exp_float(tk->d);
 
-  if (token_is_string(tk))
-    return exp_string(token_get_string(tk));
+  if (tk -> type == TOKEN_STRING)
+    return exp_string(tk->value);
 
-  if (token_is_symbol(tk)) {
-    char *sym = token_get_symbol(tk);
-    return !strcmp(sym, "switch")
+  if (tk->type == TOKEN_SYMBOL) {
+    int sym = tk->b;
+    return sym == symix_SWITCH
       ? read_switch(cdr)
       : exp_sym(sym)
     ;

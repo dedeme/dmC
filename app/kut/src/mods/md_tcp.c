@@ -1,6 +1,7 @@
 // Copyright 08-Apr-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "kut/thread.h"
 #include "mods/md_tcp.h"
 #include "kut/tcp.h"
@@ -9,7 +10,6 @@
 #include "kut/sys.h"
 #include "exp.h"
 #include "function.h"
-#include "DEFS.h"
 #include "obj.h"
 #include "runner/fail.h"
 

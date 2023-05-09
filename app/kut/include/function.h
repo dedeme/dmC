@@ -6,21 +6,23 @@
 #ifndef FUNCTION_H
   #define FUNCTION_H
 
+#include "iarr.h"
 #include "stat.h"
 #include "heap0.h"
 #include "heaps.h"
+#include "imports.h"
 #include "kut/arr.h"
 #include "kut/map.h"
 
 typedef struct function_Function Function;
 
 /// Constructor
-///   pars: Arr<char>. Parameters.
+///   pars: Symbols array.
 ///   stat: Statement.
-Function *function_new (Arr *pars, StatCode *stat);
+Function *function_new (Iarr *pars, StatCode *stat);
 
-/// Returns Map<int> with 'this' imports.
-Map *function_get_imports (Function *this);
+/// Returns 'this' imports.
+Imports *function_get_imports (Function *this);
 
 /// Returns the heap0.
 Heap0 *function_get_heap0 (Function *this);
@@ -28,8 +30,8 @@ Heap0 *function_get_heap0 (Function *this);
 /// Returns Arr<Heap> with 'this' heaps.
 Heaps *function_get_heaps (Function *this);
 
-/// Returns Arr<char> with parameters.
-Arr *function_get_pars (Function *this);
+/// Returns function parameters.
+Iarr *function_get_pars (Function *this);
 
 /// Returns the function statement.
 StatCode *function_get_stat (Function *this);
@@ -40,7 +42,7 @@ StatCode *function_get_stat (Function *this);
 ///   heap0: New heap0.
 ///   heaps: New heaps.
 Function *function_set_context (
-  Function *this, Map *imports, Heap0 *heap0, Heaps *heaps
+  Function *this, Imports *imports, Heap0 *heap0, Heaps *heaps
 );
 
 /// Run 'this' and returns an expression which can be empty, break, continue or

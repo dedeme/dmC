@@ -25,11 +25,11 @@ Module *obj_rget_module (Exp *this);
 int obj_is_module (Exp *this);
 
 /// Creates an expression of the indicated object.
-Exp *obj_bmodule (char *value);
+Exp *obj_bmodule (int value);
 
 /// Read an Exp of the indicate object.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *obj_rget_bmodule (Exp *this);
+int obj_rget_bmodule (Exp *this);
 
 /// Returns TRUE if 'this' match the object type.
 int obj_is_bmodule (Exp *this);

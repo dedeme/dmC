@@ -11,21 +11,29 @@
 #include "exp.h"
 
 ///
+typedef struct heap_HeapEntry HeapEntry;
+
+/// Returns the heap entry symbol.
+int heap_entry_symbol (HeapEntry *entry);
+
+/// Returns the expression associate to the heap symbol.
+Exp *heap_entry_exp (HeapEntry *entry);
+
+///
 typedef struct heap_Heap Heap;
 
 /// Constructor.
 Heap *heap_new (void);
 
-/// Returns this as a Map<Exp> whose keys are the defined symbols.
-/// Example:
-///   Exp *e = opt_get(map_get(heap_get(h), key));
-///   if (e) {
-///    ...
-///   }
-Map *heap_get (Heap *this);
+/// Returns this as an Arr<Heap0Entry>.
+Arr *heap_get_array (Heap *this);
 
 /// Adds a new symbol to 'this' and returs TRUE. If the symbol already exists,
 /// does nothing and returns FALSE.
-int heap_add (Heap *this, char *symbol, Exp *exp);
+int heap_add (Heap *this, int symbol, Exp *exp);
+
+/// Returns an Opt<HeapEntry> with the entry with symbol 'sym' or 'opt_none'
+/// if such symbol is not found.
+Opt *heap_get(Heap *this, int sym);
 
 #endif

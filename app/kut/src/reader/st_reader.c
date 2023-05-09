@@ -1,30 +1,45 @@
 // Copyright 14-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "reader/st_reader.h"
 #include "kut/path.h"
-#include "DEFS.h"
 #include "fileix.h"
+#include "symix.h"
 #include "reader/reader.h"
 #include "reader/ex_reader.h"
 #include "reader/pt_sq_pr_reader.h"
 
-static Stat *read_symbol(char *sym, Cdr *cdr) {
-  if (!strcmp(sym, "break")) {
+static StatCode *st_in_read(Cdr *cdr) {
+  int nline = cdr_get_next_nline(cdr);
+  StatCode *r = st_reader_read(cdr);
+  Stat *st = stat_code_stat(r);
+  if (stat_is_block_close(st))
+    EXC_KUT(cdr_fail_line(cdr, "Unexpected '}'", nline));
+  if (stat_is_import(st))
+    EXC_KUT(cdr_fail_line(cdr, "'import' out of main block", nline));
+  if (stat_is_end(st))
+    EXC_KUT(cdr_fail(cdr, "Unexpected end of text"));
+
+  return r;
+}
+
+static Stat *read_symbol(int sym, Cdr *cdr) {
+  if (sym == symix_BREAK) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_semicolon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));
     return stat_break();
   }
 
-  if (!strcmp(sym, "continue")) {
+  if (sym == symix_CONTINUE) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_semicolon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));
     return stat_continue();
   }
 
-  if (!strcmp(sym, "trace")) {
+  if (sym == symix_TRACE) {
     int is_complete = FALSE;
     if (cdr_next_token_is_colon(cdr)) {
       cdr_read_token(cdr);
@@ -37,7 +52,7 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     return stat_trace(is_complete, exp);
   }
 
-  if (!strcmp(sym, "return")) {
+  if (sym == symix_RETURN) {
     if (cdr_next_token_is_semicolon(cdr)) {
       cdr_read_token(cdr);
       return stat_return(exp_empty());
@@ -49,12 +64,12 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     return stat_return(exp);
   }
 
-  if (!strcmp(sym, "import")) {
+  if (sym == symix_IMPORT) {
     Token *tk = cdr_read_token(cdr);
-    if (!token_is_string(tk))
+    if (tk->type != TOKEN_STRING)
       EXC_KUT(cdr_fail_expect(cdr, "string", token_to_str(tk)));
 
-    char *mod = token_get_string(tk);
+    char *mod = tk->value;
     if (*mod == '/')
       EXC_KUT(cdr_fail(cdr, "Module path starts with '/'"));
     if (str_ends(mod, "/"))
@@ -64,30 +79,26 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     if (!*mod)
       EXC_KUT(cdr_fail(cdr, "Module path is empty"));
 
-    int fix = fileix_add(cdr_get_file(cdr), mod);
-    if (fix == -1)
-      EXC_KUT(cdr_fail(cdr, str_f("Module '%s' not found", mod)));
-
     tk = cdr_read_token(cdr);
-    char *id;
+    int id;
     if (token_is_colon(tk)) {
       tk = cdr_read_token(cdr);
-      if (!token_is_symbol(tk))
+      if (tk->type != TOKEN_SYMBOL)
         EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
-      id = token_get_symbol(tk);
+      id = tk->b;
       tk = cdr_read_token(cdr);
     } else {
-      id = path_base(mod);
+      id = symix_add(path_base(mod));
     }
 
     if (!token_is_semicolon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk)));
 
-    return stat_import(fix, id);
+    return stat_import(mod, id);
   }
 
-  if (!strcmp(sym, "try")) {
-    StatCode *st1 = st_reader_read(cdr);
+  if (sym == symix_TRY) {
+    StatCode *st1 = st_in_read(cdr);
     Token *tk = cdr_read_token(cdr);
     if (!token_is_catch(tk))
       EXC_KUT(cdr_fail_expect(cdr, "catch", token_to_str(tk)));
@@ -95,46 +106,46 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     if (!token_is_open_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
     Token *var = cdr_read_token(cdr);
-    if (!token_is_symbol(var))
+    if (var->type != TOKEN_SYMBOL)
       EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(var)));
     tk = cdr_read_token(cdr);
     if (!token_is_close_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
-    StatCode *st2 = st_reader_read(cdr);
+    StatCode *st2 = st_in_read(cdr);
     // <StatCode>
     Opt *st3 = opt_none();
     if (cdr_next_token_is_finally(cdr)) {
       cdr_read_token(cdr);
-      st3 = opt_some(st_reader_read(cdr));
+      st3 = opt_some(st_in_read(cdr));
     }
-    return stat_try(st1, token_get_symbol(var), st2, st3);
+    return stat_try(st1, var->b, st2, st3);
   }
 
-  if (!strcmp(sym, "catch")) {
+  if (sym == symix_CATCH) {
     EXC_KUT(cdr_fail(cdr, "'catch' without 'try'"));
   }
 
-  if (!strcmp(sym, "finally")) {
+  if (sym == symix_FINALLY) {
     EXC_KUT(cdr_fail(cdr, "'finally' without 'try'"));
   }
 
-  if (!strcmp(sym, "while")) {
+  if (sym == symix_WHILE) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_open_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
     if (cdr_next_token_is_close_parenthesis(cdr)) {
       cdr_read_token(cdr);
-      return stat_while(exp_empty(), st_reader_read(cdr));
+      return stat_while(exp_empty(), st_in_read(cdr));
     }
 
     Exp *cond = ex_reader_read(cdr);
     tk = cdr_read_token(cdr);
     if (!token_is_close_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
-    return stat_while(cond, st_reader_read(cdr));
+    return stat_while(cond, st_in_read(cdr));
   }
 
-  if (!strcmp(sym, "if")) {
+  if (sym == symix_IF) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_open_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
@@ -142,40 +153,40 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     tk = cdr_read_token(cdr);
     if (!token_is_close_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
-    StatCode *st1 = st_reader_read(cdr);
+    StatCode *st1 = st_in_read(cdr);
 
     // <StatCode>
     Opt *st2 = opt_none();
     if (cdr_next_token_is_else(cdr)) {
       cdr_read_token(cdr);
-      st2 = opt_some(st_reader_read(cdr));
+      st2 = opt_some(st_in_read(cdr));
     }
 
     return stat_if(cond, st1, st2);
   }
 
-  if (!strcmp(sym, "else")) {
+  if (sym == symix_ELSE) {
     EXC_KUT(cdr_fail(cdr, "'else' without 'if'"));
   }
 
-  if (!strcmp(sym, "for")) {
+  if (sym == symix_FOR) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_open_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
     Token *var1 = cdr_read_token(cdr);
-    if (!token_is_symbol(var1))
+    if (var1->type != TOKEN_SYMBOL)
       EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(var1)));
-    char *v1 = token_get_symbol(var1);
+    int v1 = var1->b;
 
-    char *v2 = "";
+    int v2 = -1;
     if (cdr_next_token_is_comma(cdr)){
       cdr_read_token(cdr);
       Token *var2 = cdr_read_token(cdr);
-      if (!token_is_symbol(var2))
+      if (var2->type != TOKEN_SYMBOL)
         EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(var2)));
-      v2 = token_get_symbol(var2);
-      if (!strcmp(v1, v2))
-        EXC_KUT(str_f("For variables are equals (%s)", v1));
+      v2 = var2->b;
+      if (v1 == v2)
+        EXC_KUT(str_f("For variables are equals (%s)", symix_get(v1)));
     }
 
     tk = cdr_read_token(cdr);
@@ -185,7 +196,7 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     Exp *exp1 = ex_reader_read(cdr);
     if (cdr_next_token_is_colon(cdr)){ // Range
       cdr_read_token(cdr);
-      if (*v2)
+      if (v2 != -1)
         EXC_KUT(cdr_fail(cdr, "Ranges are not allowed in 'for (i, e = ...)'"));
 
       Exp *exp2 = ex_reader_read(cdr);
@@ -199,8 +210,8 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
       if (!token_is_close_par(tk))
         EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
       return exp3
-        ? stat_for_rs(v1, exp1, exp2, exp3, st_reader_read(cdr))
-        : stat_for_r(v1, exp1, exp2, st_reader_read(cdr))
+        ? stat_for_rs(v1, exp1, exp2, exp3, st_in_read(cdr))
+        : stat_for_r(v1, exp1, exp2, st_in_read(cdr))
       ;
     }
 
@@ -210,13 +221,13 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     if (!token_is_close_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
 
-    return *v2
-      ? stat_for_ix(v1, v2, exp1, st_reader_read(cdr))
-      : stat_for(v1, exp1, st_reader_read(cdr))
+    return v2 != -1
+      ? stat_for_ix(v1, v2, exp1, st_in_read(cdr))
+      : stat_for(v1, exp1, st_in_read(cdr))
     ;
   }
 
-  if (!strcmp(sym, "switch")) {
+  if (sym == symix_SWITCH) {
     Token *tk = cdr_read_token(cdr);
     if (!token_is_open_par(tk))
       EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
@@ -228,15 +239,28 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
     tk = cdr_read_token(cdr);
     if (!token_is_open_bracket(tk))
       EXC_KUT(cdr_fail_expect(cdr, "{", token_to_str(tk)));
-    // <Tp<Exp, StatCode>>
+    // <Tp<Arr<Exp>, StatCode>>
     Arr *cases = arr_new();
     if (!cdr_next_token_is_close_bracket(cdr)) {
       for (;;) {
         Exp *e = ex_reader_read(cdr);
+        // Exp
+        Arr *conds = arr_new_from(e, NULL);
+        if (!exp_is_sym(e) || exp_get_sym(e) != symix_DEFAULT) {
+          while (cdr_next_token_is_comma(cdr)) {
+            cdr_read_token(cdr);
+            Exp *exp = ex_reader_read(cdr);
+            if (exp_is_sym(exp) && exp_get_sym(exp) == symix_DEFAULT)
+              EXC_KUT(cdr_fail(cdr, "Unexpected 'default'"));
+            arr_push(conds, exp);
+          }
+        }
+
         tk = cdr_read_token(cdr);
         if (!token_is_colon(tk))
           EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
-        arr_push(cases, tp_new(e, st_reader_read(cdr)));
+
+        arr_push(cases, tp_new(conds, st_in_read(cdr)));
         if (cdr_next_token_is_close_bracket(cdr)) break;
       }
     }
@@ -257,13 +281,12 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
   if (token_is_assign(tk)) {
     if (token_is_equals(tk)) {
       if (
-        !(exp_is_sym(exp) || exp_is_pt(exp) || exp_is_pr(exp) ||
-          exp_is_slice(exp) || exp_is_sq(exp))
+        !(exp_is_sym(exp) || exp_is_pt(exp) || exp_is_sq(exp))
       ) {
         EXC_KUT(cdr_fail(cdr, "Unexpected '='"));
       }
     } else if (
-      !(exp_is_pt(exp) || exp_is_pr(exp) || exp_is_slice(exp) || exp_is_sq(exp))
+      !(exp_is_pt(exp) || exp_is_sq(exp))
     ) {
       EXC_KUT(cdr_fail(cdr, str_f("Unexpected '%s'", token_to_str(tk))));
     }
@@ -275,12 +298,12 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
       EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk2)));
 
     return token_is_equals(tk) ? stat_assign(exp, exp2)
-      : !strcmp(token_get_operator(tk), "+=") ? stat_add_as(exp, exp2)
-      : !strcmp(token_get_operator(tk), "-=") ? stat_sub_as(exp, exp2)
-      : !strcmp(token_get_operator(tk), "*=") ? stat_mul_as(exp, exp2)
-      : !strcmp(token_get_operator(tk), "/=") ? stat_div_as(exp, exp2)
-      : !strcmp(token_get_operator(tk), "%=") ? stat_mod_as(exp, exp2)
-      : !strcmp(token_get_operator(tk), "&=") ? stat_and_as(exp, exp2)
+      : !strcmp(tk->value, "+=") ? stat_add_as(exp, exp2)
+      : !strcmp(tk->value, "-=") ? stat_sub_as(exp, exp2)
+      : !strcmp(tk->value, "*=") ? stat_mul_as(exp, exp2)
+      : !strcmp(tk->value, "/=") ? stat_div_as(exp, exp2)
+      : !strcmp(tk->value, "%=") ? stat_mod_as(exp, exp2)
+      : !strcmp(tk->value, "&=") ? stat_and_as(exp, exp2)
       : stat_or_as(exp, exp2)
     ;
   }
@@ -290,12 +313,10 @@ static Stat *read_symbol(char *sym, Cdr *cdr) {
 }
 
 static Stat *read(Cdr *cdr, Token *tk) {
-  if (token_is_symbol(tk))
-    return read_symbol(token_get_symbol(tk), cdr);
-  if (token_is_operator(tk)) {
-    char *op = token_get_operator(tk);
-    if (!strcmp(op, ";"))
-      return stat_empty();
+  if (tk->type == TOKEN_SYMBOL)
+    return read_symbol(tk->b, cdr);
+  if (tk->type == TOKEN_OPERATOR) {
+    char *op = tk->value;
     if (!strcmp(op, "{"))
       return stat_block(reader_read_block(cdr));
     if (!strcmp(op, "}"))
@@ -320,8 +341,16 @@ StatCode *st_reader_read(Cdr *cdr) {
   }
   Token *tk = opt_get(cdr_read_token_op(cdr));
   if (tk) {
-    if (token_is_comment(tk) || token_is_line_comment(tk))
-      return st_reader_read(cdr); // Skip comments
+    if (tk->type == TOKEN_LINE_COMMENT) {
+      if (str_starts(tk->value, "///")) {
+        int fix = cdr_get_file(cdr);
+        int nline = cdr_get_nline(cdr) - 1;
+        return stat_code_new(fix, nline, stat_export());
+      }
+      return st_reader_read(cdr); // Skip comment
+    }
+    if (tk->type == TOKEN_COMMENT)
+      return st_reader_read(cdr); // Skip comment
     int fix = cdr_get_file(cdr);
     int nline = cdr_get_nline(cdr);
     return stat_code_new(fix, nline, read(cdr, tk));

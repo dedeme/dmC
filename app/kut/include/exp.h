@@ -172,15 +172,15 @@ Function *exp_rget_function (Exp *this);
 int exp_is_function (Exp *this);
 
 /// Creates an expression of the indicated type.
-Exp *exp_sym (char *value);
+Exp *exp_sym (int value);
 
 /// Read an Exp of the indicate type.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-char *exp_get_sym (Exp *this);
+int exp_get_sym (Exp *this);
 
 /// Read an Exp of the indicate type in run time.
 /// Throws EXC_KUT if 'this' is not of such type.
-char *exp_rget_sym (Exp *this);
+int exp_rget_sym (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
 int exp_is_sym (Exp *this);
@@ -237,10 +237,10 @@ Tp *exp_get_pr(Exp *this);
 int exp_is_pr (Exp *this);
 
 /// Creates an expression of the indicated type.
-/// 'cases' is Arr<Tp<Exp, Exp>>.
+/// 'cases' is Arr<Tp<Arr<Exp>, Exp>>.
 Exp *exp_switch (Exp *cond, Arr *cases);
 
-/// Read an Exp of the indicate type. Returns a Tp<Exp, Arr<Tp<Exp, Exp>>>.
+/// Read an Exp of the indicate type. Returns a Tp<Exp, Arr<Tp<Arr<Exp>, Exp>>>.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Tp *exp_get_switch(Exp *this);
 
@@ -415,9 +415,6 @@ int exp_is_binary (Exp *this);
 
 /// Returns TRUE if 'this' is a string.
 int exp_is_string (Exp *this);
-
-/// Returns TRUE if 'this' is a EXP_PR or 'EXP_PT + function call'.
-int exp_is_function_callx (Exp *this);
 
 /// Returns a string representation of 'this' type.
 char *exp_type_to_str (Exp *this);

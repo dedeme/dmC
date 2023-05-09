@@ -1,27 +1,24 @@
 // Copyright 14-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "function.h"
 #include "DEFS.h"
+#include "function.h"
 #include "heap.h"
+#include "symix.h"
 #include "runner/runner.h"
 #include "runner/fail.h"
 
 struct function_Function {
-  // <int>
-  Map *imports;
+  Imports *imports;
   Heap0 *heap0;
-  // <Heap>
   Heaps *heaps;
-  // <char>
-  Arr *pars;
+  Iarr *pars;
   StatCode *stat;
 };
 
-// pars is Arr<char>
-Function *function_new (Arr *pars, StatCode *stat) {
+Function *function_new (Iarr *pars, StatCode *stat) {
   Function *this = MALLOC(Function);
-  this->imports = map_new();
+  this->imports = imports_new();
   this->heap0 = heap0_new();
   this->heaps = heaps_new(heap_new());
   this->pars = pars;
@@ -29,8 +26,7 @@ Function *function_new (Arr *pars, StatCode *stat) {
   return this;
 }
 
-// <int>
-Map *function_get_imports (Function *this) {
+Imports *function_get_imports (Function *this) {
   return this->imports;
 }
 
@@ -42,8 +38,7 @@ Heaps *function_get_heaps (Function *this) {
   return this->heaps;
 }
 
-// <char>
-Arr *function_get_pars (Function *this) {
+Iarr *function_get_pars (Function *this) {
   return this->pars;
 }
 
@@ -54,7 +49,7 @@ StatCode *function_get_stat (Function *this) {
 //  imports is Map<int>
 //  heaps is Arr<Heap>
 Function *function_set_context (
-  Function *old, Map *imports, Heap0 *heap0, Heaps *heaps
+  Function *old, Imports *imports, Heap0 *heap0, Heaps *heaps
 ) {
   Function *this = MALLOC(Function);
   this->imports = imports;
@@ -66,10 +61,10 @@ Function *function_set_context (
 }
 
 Exp *function_run (Function *this, Arr *pars) {
-  CHECK_PARS("<function>", arr_size(this->pars), pars);
+  CHECK_PARS("<function>", iarr_size(this->pars), pars);
 
   Heap *hp = heap_new();
-  EACH(this->pars, char, p) {
+  EACHI(this->pars, p) {
     heap_add(hp, p, arr_get(pars, _i));
   }_EACH
 
@@ -98,9 +93,14 @@ Exp *function_to_exp (Function *this, Arr *params) {
 }
 
 char *function_to_str (Function *this) {
+  // Arr<char>
+  Arr *ps = arr_new();
+  EACHI(this->pars, i) {
+    arr_push(ps, symix_get(i));
+  }_EACH
   return str_f(
     "(\\%s -> %s)",
-    arr_join(this->pars, ", "),
+    arr_join(ps, ", "),
     stat_to_str(stat_code_stat(this->stat))
   );
 }

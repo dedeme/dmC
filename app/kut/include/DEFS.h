@@ -3,11 +3,13 @@
 
 /// Definitions and constants.
 
-#include "kut/DEFS.h"
-#include "exp.h"
-
 #ifndef DEFS_H
   #define DEFS_H
+
+  #define GC_THREADS
+  #include "kut/DEFS.h"
+  #include "exp.h"
+  #include "iarr.h"
 
   #define TESTING
 
@@ -65,5 +67,21 @@
       "'%s' bad parameters number:\n  expected: %d\n    actual: %d", \
       fn_id, n, arr_size(array) \
     ))
+
+  /// Equals to EACH but for Iarr.
+  /// It must be closed with _EACH.
+  #define EACHI(a, i) { \
+    Iarr *__a = (Iarr *) a; \
+    int i; \
+    int __size = iarr_size(__a); \
+    int _i = -1; \
+    while (++_i < __size) { \
+      i = iarr_get(__a, _i);
+
+  #define FRUN(rs, fn, params) \
+      Exp *rs = NULL; \
+      if (exp_is_function(fn)) rs = function_run(exp_rget_function(fn), (ps)); \
+      if (obj_is_bfunction(fn)) rs = obj_rget_bfunction(fn)(ps); \
+      if (!rs) EXC_KUT(fail_type("function", (fn)));
 
 #endif

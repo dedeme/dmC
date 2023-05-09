@@ -25,7 +25,7 @@ sys.test(sys.toStr({"a": 1}), '{"a": 1}');
 sys.test(sys.toStr({"a": 1, "b": 2, "c": 3}), '{"a": 1, "b": 2, "c": 3}');
 sys.test({"a": 1, "b": 2, "c": 3}, {"a": 1, "b": 2, "c": 3});
 
-sys.test(sys.toStr(\->;), "(\\ -> ;)");
+sys.test(sys.toStr(\->{}), "(\\ -> {})");
 sys.test(sys.toStr(\-> sys.println("");), '(\\ -> sys.println("");)');
 sys.test(sys.toStr(\a, b -> {
     c = a + b;
@@ -73,6 +73,22 @@ sys.test(
     3 : "three";
     default: "none";
   }, "none"
+);
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : sys.throw("fail");
+    2, 15 : "two";
+    3 : "three";
+    default: sys.throw("fail");
+  }, "two"
+);
+sys.test(
+  switch([1, 2, 3][1]) {
+    1 : sys.throw("fail");
+    15, 2, 33 : "two";
+    3 : "three";
+    default: sys.throw("fail");
+  }, "two"
 );
 
 sys.test(!true, false);
@@ -177,10 +193,15 @@ sys.assert({"a": 1, "b": 2} != {"a": 1, "b": 1});
 
 sys.test(
   sys.eval("""
-    \-> { S=[0];  for (i = 0:4) S! += i; return S!; }()
+    \-> { S=[0];
+      for (i = 0:4)
+        S! += i;
+      return S!; }()
   """
   ), 6
 );
+
+// sys.test(3.0, 3);
 
 /*
 try
@@ -190,3 +211,4 @@ catch (e)
 
 sys.println("here");
 */
+

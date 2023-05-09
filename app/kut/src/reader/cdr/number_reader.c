@@ -1,10 +1,10 @@
 // Copyright 08-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "reader/cdr/number_reader.h"
 #include "kut/buf.h"
 #include "kut/js.h"
-#include "DEFS.h"
 
 static Token *read_exponent(Cdr *cdr, Buf *bf) {
   char ch = cdr_read_char(cdr);

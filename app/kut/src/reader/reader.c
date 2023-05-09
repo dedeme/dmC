@@ -1,16 +1,18 @@
 // Copyright 07-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "reader/reader.h"
 #include "DEFS.h"
+#include "reader/reader.h"
 #include "kut/opt.h"
 #include "modules.h"
+#include "fileix.h"
+#include "symix.h"
 #include "reader/st_reader.h"
 #include "reader/cdr/cdr.h"
 
 Module *reader_read_main_block (Cdr *cdr) {
-  // <int>
-  Map *imports = map_new();
+  Imports *imports = imports_new();
+  Exports *exports = exports_new();
   Heap0 *heap0 = heap0_new();
   // <StatCode>
   Arr *stats = arr_new();
@@ -24,24 +26,29 @@ Module *reader_read_main_block (Cdr *cdr) {
       EXC_KUT(cdr_fail(cdr, "Unexpected '}'"));
 
     if (stat_is_import(st)) { // Adds symbol to imports
-      // [<int>, <char>]
+      // [<int>, <int>]
       Arr *ps = stat_get_import(st);
-      char *id = arr_get(ps, 1);
+      int id = *((int *)arr_get(ps, 1));
 
-      if (map_has_key(imports, id))
+      if (imports_get_fix(imports, id) != -1)
         EXC_KUT(cdr_fail_line(cdr, str_f(
-          "Import '%d' already defined in imports", id
+          "Import '%s' already defined in imports", symix_get(id)
         ), stat_code_line(st_cd)));
 
-      if (map_has_key(heap0_get(heap0), id))
+      if (opt_get(heap0_get(heap0, id)))
         EXC_KUT(cdr_fail_line(cdr, str_f(
-          "Import '%d' already defined in code, line %d.",
-          id, heap0_entry_nline(opt_get(map_get(heap0_get(heap0), id)))
+          "Import '%s' already defined in code, line %d.",
+          symix_get(id), heap0_entry_nline(opt_get(heap0_get(heap0, id)))
         ), stat_code_line(st_cd)));
 
-      int *fix = arr_get(ps, 0);
-      map_put(imports, id, fix);
-      modules_add(*fix);
+      char *mod_path = arr_get(ps, 0);
+      int fix = fileix_add(cdr_get_file(cdr), mod_path);
+      if (fix == -1)
+        EXC_KUT(cdr_fail_line(
+          cdr, str_f("Module '%s' not found", mod_path), stat_code_line(st_cd)
+        ));
+      imports_add(imports, id, fix);
+      modules_add(fix);
       continue;
     }
 
@@ -50,25 +57,36 @@ Module *reader_read_main_block (Cdr *cdr) {
       Tp *ps = stat_get_assign(st);
       Exp *ex = tp_e1(ps);
       if (exp_is_sym(ex)) {
-        char *id = exp_get_sym(ex);
+        int id = exp_get_sym(ex);
 
-        if (map_has_key(imports, id))
+        if (imports_get_fix(imports, id) != -1)
           EXC_KUT(cdr_fail_line(cdr, str_f(
-            "Symbol '%s' already defined in imports", id
+            "Symbol '%s' already defined in imports", symix_get(id)
           ), stat_code_line(st_cd)));
 
         if (!heap0_add(heap0, id, stat_code_line(st_cd), tp_e2(ps)))
           EXC_KUT(cdr_fail_line(cdr, str_f(
             "Symbol '%s' already defined in code (line %d)",
-            id, heap0_entry_nline(opt_get(map_get(heap0_get(heap0), id)))
+            symix_get(id), heap0_entry_nline(opt_get(heap0_get(heap0, id)))
           ), stat_code_line(st_cd)));
+
+        if (
+          !arr_empty(stats) &&
+          stat_is_export(stat_code_stat(arr_peek(stats))) &&
+          stat_code_line(arr_peek(stats)) == stat_code_line(st_cd) - 1
+        )
+          exports_add(exports, id);
       }
     }
-
     arr_push(stats, st_cd);
   }
 
-  return module_new(imports, heap0, stats);
+    //--
+    int filter (StatCode *st_cd) {
+      return !stat_is_export(stat_code_stat(st_cd));
+    }
+  arr_filter_in(stats, (FPRED)filter);
+  return module_new(imports, exports, heap0, stats);
 }
 
 // <StatCode>
@@ -87,5 +105,10 @@ Arr *reader_read_block (Cdr *cdr) {
     arr_push(stats, st_cd);
   }
 
+    //--
+    int filter (StatCode *st_cd) {
+      return !stat_is_export(stat_code_stat(st_cd));
+    }
+  arr_filter_in(stats, (FPRED)filter);
   return stats;
 }

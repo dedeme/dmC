@@ -1,10 +1,10 @@
 // Copyright 24-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "mods/md_sys.h"
 #include "kut/buf.h"
 #include "exp.h"
-#include "DEFS.h"
 #include "runner/fail.h"
 
 // \s, s -> i

@@ -1,0 +1,15 @@
+
+import "sub2/s21";
+
+a = 0;
+///
+A = [a];
+{
+A! = 1800;
+}
+
+///
+hello21 = \n -> return s21.hello(n);;
+
+///
+other = \ -> {};

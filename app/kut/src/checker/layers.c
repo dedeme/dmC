@@ -1,10 +1,11 @@
 // Copyright 31-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "checker/layers.h"
 #include "DEFS.h"
+#include "checker/layers.h"
 #include "fileix.h"
 #include "bmodule.h"
+#include "symix.h"
 #include "checker/cksym.h"
 
 struct layers_Layers {
@@ -25,15 +26,15 @@ Layers *layers_add (Layers *this, Layer *layer) {
   return r;
 }
 
-void layers_add_symbol(Layers *this, int fix, int nline, char *symbol) {
+void layers_add_symbol(Layers *this, int fix, int nline, int symbol) {
   if (this->layers == &root) return;
   // <Cksym>
   Arr *syms = layer_get_syms(this->layer);
   EACH(syms, Cksym, sym) {
-    if (!strcmp(cksym_get_id(sym), symbol)) {
+    if (cksym_get_id(sym) == symbol) {
       printf(
         "%s:%d: Symbol '%s' already declared in line %d\n",
-        fileix_to_fail(fix), nline, symbol, cksym_get_nline(sym)
+        fileix_to_fail(fix), nline, symix_get(symbol), cksym_get_nline(sym)
       );
       return;
     }
@@ -41,26 +42,26 @@ void layers_add_symbol(Layers *this, int fix, int nline, char *symbol) {
   arr_push(syms, cksym_new(symbol, fix, nline));
 }
 
-int layers_err_if_not_found(Layers *this, Map *imports, Cksym *sym) {
-  char *id = cksym_get_id(sym);
+int layers_err_if_not_found(Layers *this, Imports *imports, Cksym *sym) {
+  int id = cksym_get_id(sym);
   while (this != &root) {
     EACH(layer_get_syms(this->layer), Cksym, sym2) {
-      if (!strcmp(cksym_get_id(sym2), id)) {
+      if (cksym_get_id(sym2) == id) {
         cksym_set_used(sym2);
         return -1;
       }
     }_EACH
     this = this->layers;
   }
-  // sym_fix is Kv<int>
-  EACH(imports, Kv, sym_fix) {
-    if (!strcmp(kv_key(sym_fix), id)) return *((int *)kv_value(sym_fix));
-  }_EACH
+
+  int fix = imports_get_fix(imports, id);
+  if (fix != -1) return fix;
+
   if (bmodule_exists(id)) return -1;
 
   printf(
     "%s:%d: Symbol not declared (%s)\n",
-    fileix_to_fail(cksym_get_fix(sym)), cksym_get_nline(sym), id
+    fileix_to_fail(cksym_get_fix(sym)), cksym_get_nline(sym), symix_get(id)
   );
   return -1;
 }

@@ -1,0 +1,7 @@
+
+import "sub/s1" : ss;
+
+sys.test(ss.hello21("world"), "hello world");
+sys.test(ss.A!, 1800);
+
+trace "End multi-files tests ok at line 7";

@@ -1,11 +1,10 @@
 // Copyright 07-Apr-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-#include "kut/thread.h"
+#include "DEFS.h"
 #include "mods/md_thread.h"
 #include "exp.h"
 #include "function.h"
-#include "DEFS.h"
 #include "obj.h"
 #include "runner/fail.h"
 #include "runner/runner.h"
@@ -76,14 +75,17 @@ static Exp *start (Arr *exps) {
 // \(\->()) -> ()
 static Exp *sync (Arr *exps) {
   CHECK_PARS ("thread.sync", 1, exps);
+  Exp *fn = arr_get(exps, 0);
     //--
-    Exp *fn (Bfunction bf) {
-        //--
-        void fn2(void) { bf(arr_new()); }
-      thread_sync(fn2);
-      return exp_empty();
+    void fn2(void) {
+      // Exp
+      Arr *ps = arr_new();
+      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      else EXC_KUT(fail_type("function", fn));
     }
-  return runner_fn(arr_get(exps, 0), fn);
+    thread_sync(fn2);
+    return exp_empty();
 }
 
 Bfunction md_thread_get (char *fname) {

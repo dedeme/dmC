@@ -1,17 +1,17 @@
 // Copyright 31-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
+#include "DEFS.h"
 #include "checker/cksym.h"
-#include "kut/DEFS.h"
 
 struct cksym_Cksym {
-  char *id;
+  int id;
   int fix;
   int nline;
   int used;
 };
 
-Cksym *cksym_new (char *id, int fix, int nline) {
+Cksym *cksym_new (int id, int fix, int nline) {
   Cksym *this = MALLOC(Cksym);
   this->id = id;
   this->fix = fix;
@@ -20,7 +20,7 @@ Cksym *cksym_new (char *id, int fix, int nline) {
   return this;
 }
 
-char *cksym_get_id (Cksym *this) {
+int cksym_get_id (Cksym *this) {
   return this->id;
 }
 
