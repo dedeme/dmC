@@ -36,7 +36,7 @@ export function fromIso (n) {
 export function fromStr (n) {
   sys.$params(arguments.length, 1);
   try {
-    return [JSON.parse(n)];
+    return [parseFloat(n)];
   } catch (e) {
     return [];
   }

@@ -8,14 +8,14 @@ import * as iter from './iter.js';
 export function all (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  return a.every(fn);
+  return a.every(e => fn(e));
 }
 
 // \a, (\*->b) -> b
 export function any (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  return a.some(fn);
+  return a.some(e => fn(e));
 }
 
 // \[a...] -> a
@@ -72,21 +72,21 @@ export function duplicates (a, fn) {
 export function each (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  a.forEach(fn);
+  a.forEach(e => fn(e));
 }
 
 // \a, (\*,n->()) -> ()
 export function eachIx (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 2);
-  a.forEach(fn);
+  a.forEach((e, i) => fn(e, i));
 }
 
 // \a, (\*->()) -> ()
 export function filter (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  return a.filter(fn);
+  return a.filter(e => fn(e));
 }
 
 // \a, (\*->()) -> ()
@@ -107,7 +107,7 @@ export function filterIn (a, fn) {
 export function find (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  return sys.$null(a.find(fn));
+  return sys.$null(a.find(e => fn(e)));
 }
 
 // \<iter> -> a
@@ -122,7 +122,7 @@ export function fromIter (it) {
 export function index (a, fn) {
   sys.$params(arguments.length, 2);
   sys.$fparams(fn, 1);
-  return a.findIndex(fn);
+  return a.findIndex(e => fn(e));
 }
 
 // \[s...], s -> s
@@ -184,7 +184,7 @@ export function push (a, e) {
 export function reduce (a, seed, fn) {
   sys.$params(arguments.length, 3);
   sys.$fparams(fn, 2);
-  return a.reduce(fn, seed);
+  return a.reduce((r, e, v1, v2) => fn(r,e), seed);
 }
 
 // \a, n -> *

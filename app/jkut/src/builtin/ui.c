@@ -1,4 +1,4 @@
-// Copyright 08-May-2023 ºDeme
+// Copyright 30-May-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *ui_bget (void) {return
@@ -169,7 +169,7 @@ char *ui_bget (void) {return
   "}\n"
   "\n"
   "// \\s -> <domo>\n"
-  "export function pass (s) {\n"
+  "export function pass (targetId) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  const r = q(\"input\").att(\"type\", \"password\");\n"
   "  r.e.onkeydown = function (e) {\n"

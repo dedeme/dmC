@@ -1,4 +1,4 @@
-// Copyright 08-May-2023 ºDeme
+// Copyright 30-May-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *math_bget (void) {return
@@ -40,7 +40,7 @@ char *math_bget (void) {return
   "export function fromStr (n) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  try {\n"
-  "    return [JSON.parse(n)];\n"
+  "    return [parseFloat(n)];\n"
   "  } catch (e) {\n"
   "    return [];\n"
   "  }\n"

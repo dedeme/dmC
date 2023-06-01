@@ -94,10 +94,14 @@ static Token *read_token (Cdr *this) {
         return NULL;
       case '/': {
         Token *tk = comment_reader_read(this, buf_str(blanks));
-        return tk->type == TOKEN_OPERATOR
-          ? read_operator(this, '/', buf_str(blanks)) // Operator '/'
-          : tk
-        ;
+        if (tk->type == TOKEN_OPERATOR)
+          return read_operator(this, '/', buf_str(blanks)); // Operator '/'
+        if (str_starts(tk->value, "///"))
+          return tk;
+        // Skip comment
+        Token *tk2 = read_token(this);
+        if (tk2) tk2->js = str_f("%s%s", tk->js, tk2->js);
+        return tk2;
       }
       case '\'':
       case '"':

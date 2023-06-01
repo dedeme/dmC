@@ -2,11 +2,14 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "dmCryp.h"
-#include "dmc/cryp.h"
-#include "dmc/Dec.h"
+#include "kut/cryp.h"
+#include "kut/dec.h"
+#include "kut/sys.h"
+#include "kut/str.h"
+#include <stdio.h>
 
 static void help () {
-  puts (
+  puts(
     "Use dmCryp <op> <params>\n"
     "  dmCryp k n     : Generate a key of 'n' B64 digits\n"
     "                   (e.g.) dmCryp k 12\n"
@@ -20,19 +23,18 @@ static void help () {
 }
 
 int main(int argc, char **args) {
-  sys_init("dmCryp");
+  sys_init();
 
   int r = 1;
 
   if (argc == 3) {
     if (str_eq(args[1], "k")) {
       if (dec_digits(args[2])) {
-        int n = atoi(args[2]);
+        int n = dec_stoi(args[2]);
         if (n > 0) {
-          char *k = cryp_genk_new(atoi(args[2]));
+          char *k = cryp_genk(n);
           printf(k);
-          free(k);
-          r = 1;
+          r = 0;
         } else {
           help();
         }
@@ -45,12 +47,10 @@ int main(int argc, char **args) {
   } else if (argc == 4) {
     if (str_eq(args[1], "k")) {
       if (dec_digits(args[2])) {
-        int n = atoi(args[2]);
+        int n = dec_stoi(args[2]);
         if (n > 0) {
-          char *k = str_new(args[3]);
-          cryp_key(&k, atoi(args[2]));
+          char *k = cryp_key(args[3], n);
           printf(k);
-          free(k);
           r = 0;
         } else {
           help();
@@ -59,16 +59,12 @@ int main(int argc, char **args) {
         help();
       }
     } else if (str_eq(args[1], "e")) {
-      char *msg = str_new(args[3]);
-      cryp_cryp(&msg, args[2]);
+      char *msg = cryp_encode(args[2], args[3]);
       printf(msg);
-      free(msg);
       r = 0;
     } else if (str_eq(args[1], "d")) {
-      char *msg = str_new(args[3]);
-      cryp_decryp(&msg, args[2]);
+      char *msg = cryp_decode(args[2], args[3]);
       printf(msg);
-      free(msg);
       r = 0;
     } else {
       help();
@@ -77,6 +73,5 @@ int main(int argc, char **args) {
     help();
   }
 
-  sys_end();
   return r;
 }

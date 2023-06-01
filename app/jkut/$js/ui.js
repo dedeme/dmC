@@ -165,7 +165,7 @@ export function mouseY (ev) {
 }
 
 // \s -> <domo>
-export function pass (s) {
+export function pass (targetId) {
   sys.$params(arguments.length, 1);
   const r = q("input").att("type", "password");
   r.e.onkeydown = function (e) {

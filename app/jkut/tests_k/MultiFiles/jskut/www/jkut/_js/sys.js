@@ -99,7 +99,9 @@ export function $checkExists (left, right) {
 }
 
 export function $checkNull (v) {
-  if (v == null) throw new Error('Null expression');
+  if (typeof(v) === "number" && !Number.isFinite(v))
+    throw new Error ('Bad Number ' + v);
+  if (v == null) throw new Error('Null expression ' + v);
   return v;
 }
 
@@ -134,6 +136,7 @@ export function test (actual, expected) {
 // \* -> s
 export function toStr (v) {
   $params(arguments.length, 1);
+  if (v == null) return "<null>";
   if (typeof(v) === 'object') return JSON.stringify(v);
   return v.toString();
 }

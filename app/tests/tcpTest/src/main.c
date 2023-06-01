@@ -22,7 +22,7 @@ static char *handler (char *rq) {
 }
 
 static void runServer(void) {
-  TcpServer *sv = tcp_server(2525);
+  TcpServer *sv = tcp_server(2525, 5);
 
   int end = FALSE;
   for(;;) {
@@ -34,12 +34,13 @@ static void runServer(void) {
       //--
       void fn (void *conn) {
         for (;;) {
-          Rs *rq_rs = tcp_read(conn);
-          char *rq = rs_get(rq_rs);
-          if (!rq) {
+          Rs *rq_rs = tcp_read(conn, 1000, 1);
+          Bytes *rqBs = rs_get(rq_rs);
+          if (!rqBs) {
             puts(rs_error(rq_rs));
             return;
           }
+          char *rq = bytes_to_str(rqBs);
 
           if (!str_eq(rq, "Hello")) {
             end = TRUE;
@@ -48,7 +49,7 @@ static void runServer(void) {
           }
 
           char *rp = handler(rq);
-          char *err = tcp_write(conn, rp);
+          char *err = tcp_write(conn, bytes_from_str(rp));
           if (*err) {
             puts(err);
             break;
@@ -71,18 +72,18 @@ static void runClient(void) {
   }
 
   REPEAT(2) {
-    tcp_write(conn, "Hello");
+    tcp_write(conn, bytes_from_str("Hello"));
 
-    Rs *rp_rs = tcp_read(conn);
-    char *rp = rs_get(rp_rs);
+    Rs *rp_rs = tcp_read(conn, 1000, 1);
+    Bytes *rp = rs_get(rp_rs);
     if (!rp) {
-      puts(rs_error(conn_rs));
+      puts(rs_error(rp_rs));
       return;
     }
-    puts(str_f("Recibido: %s", rp));
+    puts(str_f("Recibido: %s", bytes_to_str(rp)));
   }_REPEAT
 
-  tcp_write(conn, "End");
+  tcp_write(conn, bytes_from_str("End"));
   tcp_close_conn(conn);
 }
 

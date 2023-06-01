@@ -5,9 +5,8 @@
 #include "bmodule.h"
 
 static char *bmods[] = {
-  "arr", "b64", "bytes", "client", "cryp", "dic", "dom", "iter",
-  "js", "file", "math", "path", "regex", "storage", "str",
-  "sys", "tcp", "thread", "time", "timer", "ui",
+  "arr", "b64", "bytes", "client", "cryp", "dic", "domo", "iter",
+  "js", "math", "storage", "str", "sys", "time", "timer", "ui",
   NULL
 };
 

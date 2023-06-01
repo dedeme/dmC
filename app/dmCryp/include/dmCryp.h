@@ -4,6 +4,4 @@
 #ifndef DMCRYP_H
   #define DMCRYP_H
 
-#include "dmc/std.h"
-
 #endif

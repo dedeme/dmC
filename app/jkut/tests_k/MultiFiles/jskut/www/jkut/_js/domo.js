@@ -14,9 +14,9 @@ export function mk (e) {
     // \s, * -> <domo>
     att: (k, v) => { e.setAttribute(k, v); return d; },
     // \b -> <domo>
-    checked: (v) => { e.checked(v); return d; },
+    checked: (v) => { e.checked = v; return d; },
     // \b -> <domo>
-    disabled: (v) => { e.disabled(v); return d; },
+    disabled: (v) => { e.disabled = v; return d; },
     // \s -> *
     getAtt: (k) => e.getAttribute(k),
     // \-> s

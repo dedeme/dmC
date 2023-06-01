@@ -13,4 +13,4 @@ bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
 	gcc $(CFLAGS) $(FILES) -o bin/$(PRG) \
 	  -Iinclude -I$(LIB_INCLUDE) \
 		-L$(LIB_PATH) -l$(LIB) \
-		-lgc -lpthread
+		-lgc -lpthread -lm

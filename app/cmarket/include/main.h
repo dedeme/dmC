@@ -1,9 +1,12 @@
-// Copyright 23-Feb-2019 ºDeme
+// Copyright 31-May-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Program entry.
 
 #ifndef MAIN_H
   #define MAIN_H
 
-#include "dmc/std.h"
+///
+int main (int argc, char *argv[]);
 
 #endif

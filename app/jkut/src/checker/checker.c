@@ -217,12 +217,12 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
     Tp *v = stat_get_assign(st);
     Exp *left = tp_e1(v);
     Exp *right = tp_e2(v);
-    check_exp(layers, fix, line, is, right);
     if (exp_is_sym(left)) {
       layers_add_symbol(layers, fix, line, exp_get_sym(left));
     } else {
       check_exp(layers, fix, line, is, left);
     }
+    check_exp(layers, fix, line, is, right);
   } else if (stat_is_add_as(st)) {
     // <Exp, Exp>
     Tp *v = stat_get_add_as(st);
@@ -260,6 +260,8 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
     check_exp(layers, fix, line, is, tp_e2(v));
   } else if (stat_is_func(st)) {
     check_exp(layers, fix, line, is, stat_get_func(st));
+  } else if (stat_is_await(st)) {
+    check_exp(layers, fix, line, is, stat_get_await(st));
   } else if (stat_is_block(st)) {
     check_block(TRUE, layers, is, stat_get_block(st));
   } else if (stat_is_trace(st)) {

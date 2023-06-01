@@ -55,7 +55,7 @@ export function confirm (s) {
 }
 
 // \s -> <domo>
-export function field (s) {
+export function field (targetId) {
   sys.$params(arguments.length, 1);
   const r = q("input").att("type", "text");
   r.e.onkeydown = function (e) {
@@ -165,7 +165,7 @@ export function mouseY (ev) {
 }
 
 // \s -> <domo>
-export function pass (s) {
+export function pass (targetId) {
   sys.$params(arguments.length, 1);
   const r = q("input").att("type", "password");
   r.e.onkeydown = function (e) {
@@ -189,9 +189,30 @@ export function q (el) {
   sys.$params(arguments.length, 1);
   if (typeof(el) !== "string") return domo.mk(el);
   switch (el.charAt(0)) {
-    case "#": return domo.mk(document.getElementById(el.substring(1)));
-    case "@": return domo.mk(document.querySelector(el.substring(1)));
-    default: return domo.mk(document.createElement(el));
+    case "#":
+      return domo.mk(sys.$checkNull(document.getElementById(el.substring(1))));
+    case "@":
+      return domo.mk(sys.$checkNull(document.querySelector(el.substring(1))));
+    default:
+      return domo.mk(sys.$checkNull(document.createElement(el)));
+  }
+}
+
+// \* -> [<domo>] | []
+export function qOp (el) {
+  sys.$params(arguments.length, 1);
+  if (typeof(el) !== "string") return domo.mk(el);
+  let e = null;
+  switch (el.charAt(0)) {
+    case "#":
+      e = document.getElementById(el.substring(1));
+      return e == null ? [] : [domo.mk(e)];
+    case "@":
+      e = document.querySelector(el.substring(1));
+      return e == null ? [] : [domo.mk(e)];
+    default:
+      e = document.createElement(el);
+      return e == null ? [] : [domo.mk(e)];
   }
 }
 

@@ -57,7 +57,8 @@ export function fmt (template, t) {
     p = p2 + 1;
 
     if (p === t.length) throw new Error("Template ends at '%'");
-    switch (template.charAt(p)) {
+    const ch = template.charAt(p);
+    switch (ch) {
       case "%":
         r.push("%");
         break;

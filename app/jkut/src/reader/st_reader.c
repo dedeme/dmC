@@ -422,37 +422,40 @@ static Stat *read_symbol(Token *token, Cdr *cdr) {
     if (str_ends(tkjs, "&=")) tkjs = str_f("%s&=", str_left(tkjs, -1));
     else if (str_ends(tkjs, "|=")) tkjs = str_f("%s|=", str_left(tkjs, -1));
 
-    char *async = "";
-    char *exp2_js;
-    if (exp_is_function(exp2)) {
-      exp2_js = exp_get_js(exp2);
-      if (str_starts(exp2_js, "async ")) {
-        exp2_js = str_right(exp2_js, 6);
-        async = "async ";
+    char *exp2_js = exp_get_js(exp2);
+    char *js;
+    if (exp_is_sym(exp)) {
+      if (exp_is_function(exp2)) {
+        if (!token_is_equals(tk))
+          EXC_ILLEGAL_ARGUMENT("Bad operator", "=", token_to_str(tk));
+        int ix = str_index(exp2_js, "function") + 8;
+        js = str_f("%s%s %s%s%s",
+          exp_js_replace(exp, ""),
+          str_left(exp2_js, ix),
+          exp_get_sym(exp),
+          str_right(exp2_js, ix),
+          tk2->js
+        );
+      } else {
+        js = str_f("%s%ssys.$checkNull(%s)%s",
+          exp_js_insert(exp, "const "),
+          tk->js,
+          exp2_js,
+          tk2->js
+        );
       }
-      int ix = str_cindex(exp2_js, '(');
-      exp2_js = str_f("%s%s", str_left(exp2_js, ix), str_right(exp2_js, ix));
-      ix = str_cindex(exp2_js, '=');
-      exp2_js = str_f("%s%s", str_left(exp2_js, ix), str_right(exp2_js, ix + 2));
     } else {
-      exp2_js = exp_js_insert(exp2, "sys.$checkNull(");
-      exp2_js = str_f("%s)", exp2_js);
+      js = str_f("%s%ssys.$checkExists(%s,%s)%s",
+        exp_get_js(exp),
+        tk->js,
+        exp_to_str(exp),
+        exp_is_function(exp2)
+          ? exp2_js
+          : str_f("sys.$checkNull(%s)", exp2_js),
+        tk2->js
+      );
     }
 
-    char *js = str_f("%s%s%s%s",
-      exp_is_sym(exp)
-        ? exp_is_function(exp2)
-          ? exp_js_insert(exp, str_f("%sfunction ", async))
-          : exp_js_insert(exp, "const ")
-        : exp_get_js(exp)
-      ,
-      exp_is_function(exp2) ? str_left(tk->js, -1) : tkjs,
-      exp_is_sym(exp)
-        ? exp2_js
-        : str_f("sys.$checkExists(%s,%s)", str_trim(exp_get_js(exp)), exp2_js)
-      ,
-      tk2->js
-    );
     return token_is_equals(tk) ? stat_assign(exp, exp2, js)
       : !strcmp(tk->value, "+=") ? stat_add_as(exp, exp2, js)
       : !strcmp(tk->value, "-=") ? stat_sub_as(exp, exp2, js)

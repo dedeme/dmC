@@ -1,4 +1,4 @@
-// Copyright 08-May-2023 ºDeme
+// Copyright 30-May-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *time_bget (void) {return
@@ -61,7 +61,8 @@ char *time_bget (void) {return
   "    p = p2 + 1;\n"
   "\n"
   "    if (p === t.length) throw new Error(\"Template ends at '%'\");\n"
-  "    switch (template.charAt(p)) {\n"
+  "    const ch = template.charAt(p);\n"
+  "    switch (ch) {\n"
   "      case \"%\":\n"
   "        r.push(\"%\");\n"
   "        break;\n"

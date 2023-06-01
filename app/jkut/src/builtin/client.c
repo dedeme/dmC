@@ -1,4 +1,4 @@
-// Copyright 08-May-2023 ºDeme
+// Copyright 30-May-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *client_bget (void) {return
@@ -82,7 +82,7 @@ char *client_bget (void) {return
   "  let rp = \"<without response>\";\n"
   "  try {\n"
   "    rp = await sendServer(\n"
-  "      \":\" + cryp.encode(key, str.fmt(\"%v:%v:%v\", [user, p, exp]))\n"
+  "      \":\" + cryp.encode(sessionKey, str.fmt(\"%v:%v:%v\", [userName, p, exp]))\n"
   "    );\n"
   "    const data = js.r(cryp.decode(sessionKey, rp));\n"
   "    const sessionId = data[\"sessionId\"];\n"

@@ -330,7 +330,7 @@ static Exp *read_async (Cdr *cdr, char *blanks) {
   Exp *exp = ex_reader_read(cdr);
   if (!exp_is_function(exp))
     EXC_GENERIC(cdr_fail_expect(cdr, "function", exp_to_str(exp)));
-  char *js = str_f("async %s%s", blanks, exp_get_js(exp));
+  char *js = str_f("%sasync %s", blanks, exp_get_js(exp));
   exp_set_js(exp, js);
   return exp;
 }
@@ -542,10 +542,10 @@ Exp *ex_reader_read1 (Cdr *cdr) {
     // <char>
     Arr *pars = arr_new();
     Buf *js = buf_new();
-    buf_add(js, str_f("%s(", str_left(tk->js, -1)));
+    buf_add(js, str_f("%sfunction(", str_left(tk->js, -1)));
 
     if (cdr_next_token_is_arrow(cdr)) {
-      buf_add(js, str_f(")%s%s", str_left(cdr_read_token(cdr)->js, -2), "=>"));
+      buf_add(js, str_f(")%s", str_left(cdr_read_token(cdr)->js, -2)));
     } else {
       for(;;) {
         Token *tk2 = cdr_read_token(cdr);
@@ -565,7 +565,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
             continue;
           }
           if (token_is_arrow(tk3)) {
-            buf_add(js, str_f(")%s%s", str_left(tk3->js, -2), "=>"));
+            buf_add(js, str_f(")%s", str_left(tk3->js, -2)));
             break;
           }
           EXC_GENERIC(cdr_fail_expect(cdr, "'->' or ','", token_to_str(tk3)));
@@ -573,12 +573,17 @@ Exp *ex_reader_read1 (Cdr *cdr) {
         EXC_GENERIC(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
       }
     }
+    char *pars_ctrl = str_f("sys.$params(arguments.length, %d);", arr_size(pars));
     StatCode *st_cd = st_reader_read(cdr);
     Stat *st = stat_code_stat(st_cd);
     if (stat_is_block(st)) {
-      buf_add(js, stat_get_js(st));
+      char *stjs = stat_get_js(st);
+      int ix = str_cindex(stjs, '{') + 1;
+      buf_add(js, str_f("%s%s%s",
+        str_left(stjs, ix), pars_ctrl, str_right(stjs, ix)
+      ));
     } else {
-      buf_add(js, " {");
+      buf_add(js, str_f(" {%s", pars_ctrl));
       buf_add(js, stat_get_js(st));
       buf_add(js, "}");
     }

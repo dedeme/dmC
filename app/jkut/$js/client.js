@@ -78,7 +78,7 @@ export async function authentication (userName, pass, withExpiration) {
   let rp = "<without response>";
   try {
     rp = await sendServer(
-      ":" + cryp.encode(key, str.fmt("%v:%v:%v", [user, p, exp]))
+      ":" + cryp.encode(sessionKey, str.fmt("%v:%v:%v", [userName, p, exp]))
     );
     const data = js.r(cryp.decode(sessionKey, rp));
     const sessionId = data["sessionId"];
