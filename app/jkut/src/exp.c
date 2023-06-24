@@ -378,7 +378,7 @@ Exp *exp_switch (Exp *cond, Arr *cases, char *js) {
   return new(EXP_SWITCH, tp_new(cond, cases), js);
 }
 
-// <Exp, Arr<Tp<Exp, Exp>>>
+// <Exp, Arr<Tp<Arr<Exp>, Exp>>>
 Tp *exp_get_switch (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_switch, "switch", this);
   return this->value;
@@ -646,9 +646,14 @@ char *exp_to_str (Exp *this) {
     char *fn_map(Kv *kv) {
       return str_f("\"%s\": %s", kv_key(kv), exp_to_str(kv_value(kv)));
     }
-    // tp is Tp<Exp, Exp>
+    // tp is Tp<Arr<Exp>, Exp>
     char *fn_switch(Tp *tp) {
-      return str_f("%s: %s;", exp_to_str(tp_e1(tp)), exp_to_str(tp_e2(tp)));
+      // Exp
+      Arr *conds = tp_e1(tp);
+        //--
+        char *fn_map(Exp *exp) { return exp_to_str(exp); }
+      char *sconds = arr_join(arr_map(conds, (FMAP)fn_map), ", ");
+      return str_f("%s: %s;", sconds, exp_to_str(tp_e2(tp)));
     }
 
   switch (this->type) {
@@ -686,7 +691,7 @@ char *exp_to_str (Exp *this) {
     case EXP_SYM :
       return this->value;
     case EXP_RANGE: {
-      // <Exp, Exp, Exp>
+      // <Exp, Exp, Opt<Exp>>
       Tp3 *tp = exp_get_range(this);
       Exp *e3 = opt_get(tp3_e3(tp));
       return e3
@@ -708,7 +713,7 @@ char *exp_to_str (Exp *this) {
     }
     case EXP_SLICE: {
       // <Exp, Opt<Exp>, Opt<Exp>>
-      Tp3 *tp = exp_get_slice(this);
+      Tp3 *tp =this->value;
       Exp *e2 = opt_get(tp3_e2(tp));
       Exp *e3 = opt_get(tp3_e3(tp));
       return str_f(
@@ -728,7 +733,7 @@ char *exp_to_str (Exp *this) {
       );
     }
     case EXP_SWITCH: {
-      // <Exp, Arr<Tp<Exp, Exp>>>
+      // <Exp, Arr<Tp<Arr<Exp>, Exp>>>
       Tp *tp = exp_get_switch(this);
       return str_f(
         "switch(%s){%s}",
@@ -818,4 +823,3 @@ char *exp_to_str (Exp *this) {
   );
   return NULL;
 }
-

@@ -18,10 +18,20 @@ int db_lock (void);
 /// Intended to be used by 'server_stop'
 void db_unlock (void);
 
+/// Returns true if 'path' exists.
+///   path: File path relative to 'cts_data_path()'.
+int db_exists (char *path);
+
+/// Returns data base path of 'relative_path'.
+char *db_path (char *relative_path);
+
 /// Read a table.
+///   path: File path relative to 'cts_data_path()'.
 char *db_read (char *path);
 
 /// Write text in table
+///   path: File path relative to 'cts_data_path()'.
+///   text: Text to write.
 void db_write (char *path, char *text);
 
 #endif

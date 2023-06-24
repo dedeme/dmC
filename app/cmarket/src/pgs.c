@@ -2,22 +2,21 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "pgs.h"
-#include "kut/DEFS.h"
 #include "kut/cryp.h"
+#include "pgs/home/home.h"
+#include "pgs/settings/settings.h"
 
 static char *comKey = NULL;
 
 void pgs_process (char *ck, Map *rq) {
   comKey = ck;
   char *module = pgs_rs(rq, "module");
-  if (module) {
-    if (str_eq(module, "abc")) {
-    } else {
-      EXC_GENERIC(str_f(
-        "Value '%s' not found for 'module' in '%s'", module, js_wo(rq)
-      ));
-    }
-  }
+  if (str_eq(module, "Home")) home_process(rq);
+  else if (str_eq(module, "Settings")) settings_process(rq);
+  else
+    EXC_GENERIC(str_f(
+      "Value '%s' not found for 'module' in '%s'", module, js_wo(rq)
+    ));
 }
 
 int pgs_rb (Map *rq, char *key) {
@@ -47,4 +46,6 @@ void pgs_print (Map *rp) {
   printf(cryp_encode(comKey, js_wo(rp)));
 }
 
-void pgs_print_empty (void);
+void pgs_print_empty (void) {
+  printf(cryp_encode(comKey, js_wo(map_new())));
+}

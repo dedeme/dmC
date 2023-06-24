@@ -36,7 +36,8 @@ int main (int argc, char *argv[]) {
 
   signal (SIGFPE, shandler);
   sys_init();
-
+//#include "db/svCodesTb.h"
+//svCodesTb_purge();
   char *param = argv[1];
   TRY {
 

@@ -181,7 +181,7 @@ static Exp *tmp (Arr *exps) {
 
 // \ -> s
 static Exp *wd (Arr *exps) {
-  CHECK_PARS ("file.tmp", 0, exps);
+  CHECK_PARS ("file.wd", 0, exps);
   return exp_string(file_wd());
 }
 

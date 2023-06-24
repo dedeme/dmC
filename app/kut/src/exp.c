@@ -416,7 +416,7 @@ Exp *exp_switch (Exp *cond, Arr *cases) {
   return new(EXP_SWITCH, tp_new(cond, cases));
 }
 
-// <Exp, Arr<Tp<[Exp...], Exp>>>
+// <Exp, Arr<Tp<Arr<Exp>, Exp>>>
 Tp *exp_get_switch (Exp *this) {
   TEST_EXP_TYPE_ERROR(exp_is_switch, "switch", this);
   return this->value;
@@ -692,7 +692,7 @@ char *exp_to_str (Exp *this) {
     }
     // tp is Tp<Arr<Exp>, Exp>
     char *fn_switch(Tp *tp) {
-      /// Exp
+      // Exp
       Arr *conds = tp_e1(tp);
         //--
         char *fn_map(Exp *exp) { return exp_to_js(exp); }
@@ -769,7 +769,7 @@ char *exp_to_str (Exp *this) {
       );
     }
     case EXP_SWITCH: {
-      // <Exp, Arr<Tp<Exp, Exp>>>
+      // <Exp, Arr<Tp<Arr<Exp>, Exp>>>
       Tp *tp = exp_get_switch(this);
       return str_f(
         "switch(%s){%s}",
@@ -857,7 +857,7 @@ char *exp_to_str (Exp *this) {
   EXC_ILLEGAL_ARGUMENT("Bad expression type identifier",
     str_f("(0 to %d)", EXP_TERNARY), str_f("%d", this->type)
   );
-  return NULL;
+  return NULL; // Unreachable
 }
 
 char *exp_to_js (Exp *this) {
@@ -869,3 +869,4 @@ char *exp_to_js (Exp *this) {
       ? fmtf(dec_ftos(this->d, 9))
       : exp_to_str(this);
 }
+

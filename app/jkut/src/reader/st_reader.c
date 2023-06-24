@@ -439,7 +439,7 @@ static Stat *read_symbol(Token *token, Cdr *cdr) {
       } else {
         js = str_f("%s%ssys.$checkNull(%s)%s",
           exp_js_insert(exp, "const "),
-          tk->js,
+          tkjs,
           exp2_js,
           tk2->js
         );
@@ -447,7 +447,7 @@ static Stat *read_symbol(Token *token, Cdr *cdr) {
     } else {
       js = str_f("%s%ssys.$checkExists(%s,%s)%s",
         exp_get_js(exp),
-        tk->js,
+        tkjs,
         exp_to_str(exp),
         exp_is_function(exp2)
           ? exp2_js

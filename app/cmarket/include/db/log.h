@@ -22,13 +22,13 @@ void log_error (char *msg);
 void log_warning (char *msg);
 
 /// Reset log.
-void log_reset (char *msg);
+void log_reset (void);
 
 /// Return log content in JSON format.
 /// Log content is an array with each entry equals to:
 ///   isError: boolean. 'true' if the entri is an error.
 ///   date: char*. Date in format "%D/%M/%Y(%T)"
 ///   msg: char*. Entry message.
-char *readJs (void);
+char *log_readJs (void);
 
 #endif

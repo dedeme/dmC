@@ -7,8 +7,10 @@
   #define PGS_H
 
 #include <inttypes.h>
+#include "kut/DEFS.h"
 #include "kut/map.h"
 #include "kut/js.h"
+//#include "kut/str.h"
 
 /// Web client request process.
 ///   ck: Communication key.

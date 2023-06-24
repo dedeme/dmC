@@ -1,4 +1,4 @@
-// Copyright 30-May-2023 ºDeme
+// Copyright 24-Jun-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *time_bget (void) {return
@@ -113,7 +113,7 @@ char *time_bget (void) {return
   "export function fromClock (t1, s) {\n"
   "  sys.$params(arguments.length, 2);\n"
   "  const r = fromClockOp(t1, s);\n"
-  "  if (r.length === 0) throw new Error(\"Bad template '\" + s + \"'\");\n"
+  "  if (r.length === 0) throw new Error(\"Bad clock '\" + s + \"'\");\n"
   "  return r[0];\n"
   "}\n"
   "\n"
@@ -139,7 +139,7 @@ char *time_bget (void) {return
   "export function fromEn (s, sep) {\n"
   "  sys.$params(arguments.length, 2);\n"
   "  const r = fromEnOp(s, sep);\n"
-  "  if (r.length === 0) throw new Error(\"Bad template '\" + s + \"'\");\n"
+  "  if (r.length === 0) throw new Error(\"Bad date '\" + s + \"'\");\n"
   "  return r[0];\n"
   "}\n"
   "\n"
@@ -155,7 +155,7 @@ char *time_bget (void) {return
   "export function fromIso (s, sep) {\n"
   "  sys.$params(arguments.length, 2);\n"
   "  const r = fromIsoOp(s, sep);\n"
-  "  if (r.length === 0) throw new Error(\"Bad template '\" + s + \"'\");\n"
+  "  if (r.length === 0) throw new Error(\"Bad date '\" + s + \"'\");\n"
   "  return r[0];\n"
   "}\n"
   "\n"
@@ -171,7 +171,7 @@ char *time_bget (void) {return
   "export function fromStr (s) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  const r = fromStrOp(s);\n"
-  "  if (r.length === 0) throw new Error(\"Bad template '\" + s + \"'\");\n"
+  "  if (r.length === 0) throw new Error(\"Bad date '\" + s + \"'\");\n"
   "  return r[0];\n"
   "}\n"
   "\n"

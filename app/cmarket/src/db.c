@@ -8,17 +8,25 @@
 #include "kut/sys.h"
 #include "data/cts.h"
 #include "db/log.h"
+#include "db/calendarTb.h"
+#include "db/quotesDb.h"
+#include "db/cosTb.h"
+#include "db/svCodesTb.h"
 #include <stdio.h>
 
 void db_init (void) {
-  char *root = cts_data_path();
+  char *root = DATA_PATH;
   if (!file_exists(root)) file_mkdir(root);
 
   log_init();
+  calendarTb_init();
+  quotesDb_init();
+  cosTb_init();
+  svCodesTb_init();
 }
 
 int db_lock (void) {
-  char *p = path_cat(cts_data_path(), "lock", NULL);
+  char *p = path_cat(DATA_PATH, "lock", NULL);
   if (file_exists(p)) {
     Time time_out = time_now() + 10000;
     for (;;) {
@@ -32,12 +40,19 @@ int db_lock (void) {
 }
 
 void db_unlock (void) {
-  file_del(path_cat(cts_data_path(), "lock", NULL));
+  file_del(path_cat(DATA_PATH, "lock", NULL));
 }
 
-/// Read a table.
+int db_exists (char *path) {
+  return file_exists(path_cat(DATA_PATH, path, NULL));
+}
+
+char *db_path (char *relative_path) {
+  return path_cat(DATA_PATH, relative_path, NULL);
+}
+
 char *db_read (char *path) {
-  char *p = path_cat(cts_data_path(), "lock", NULL);
+  char *p = path_cat(DATA_PATH, "lock", NULL);
   if (file_exists(p)) {
     Time time_out = time_now() + 10000;
     for (;;) {
@@ -47,14 +62,13 @@ char *db_read (char *path) {
       sys_sleep(500);
     }
   }
-  return file_read(p);
+  return file_read(path_cat(DATA_PATH, path, NULL));
 }
 
-/// Write text in table
 void db_write (char *path, char *text) {
   if (!db_lock())
     EXC_ILLEGAL_STATE(str_f("Date base locked writing '%s'", path));
 
-  file_write(path, text);
+  file_write(path_cat(DATA_PATH, path, NULL), text);
   db_unlock();
 }

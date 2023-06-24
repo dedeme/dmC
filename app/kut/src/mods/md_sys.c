@@ -31,7 +31,7 @@ static Exp *fassert (Arr *exps) {
   return NULL; // Unreachable
 }
 
-// \s, [s...] -> [s, s]
+// \s, [s...] -> [s, b]
 static Exp *cmd (Arr *exps) {
   CHECK_PARS ("sys.cmd", 2, exps);
   char *c = exp_rget_string(arr_get(exps, 0));
@@ -40,10 +40,30 @@ static Exp *cmd (Arr *exps) {
   // <char>
   Arr *ps = arr_map(exp_rget_array(arr_get(exps, 1)), (FMAP)fn);
   arr_insert(ps, 0, c);
+  // <char>
   Rs *rs = sys_cmd(arr_join(ps, " "));
-  char *r1 = rs_get(rs);
-  if (r1) return exp_array(arr_new_from(exp_string(r1), exp_string(""), NULL));
-  return exp_array(arr_new_from(exp_string(""), exp_string(rs_error(rs)), NULL));
+  char *r = rs_get(rs);
+  if (r) return exp_array(arr_new_from(exp_string(r), exp_bool(1), NULL));
+  return  exp_array(arr_new_from(exp_string(rs_error(rs)), exp_bool(0), NULL));
+}
+
+// \s, [s...] -> [s, s]
+static Exp *cmd2 (Arr *exps) {
+  CHECK_PARS ("sys.cmd", 2, exps);
+  char *c = exp_rget_string(arr_get(exps, 0));
+    //--
+    char *fn (Exp *e) { return str_to_escape(exp_rget_string(e)); }
+  // <char>
+  Arr *ps = arr_map(exp_rget_array(arr_get(exps, 1)), (FMAP)fn);
+  arr_insert(ps, 0, c);
+  // <<char>, <char>
+  Tp *tp = sys_cmd2(arr_join(ps, " "));
+
+  return exp_array(arr_new_from(
+    exp_string(tp_e1(tp)),
+    exp_string(tp_e2(tp)),
+    NULL
+  ));
 }
 
 // \-> {s}
@@ -181,6 +201,7 @@ Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "args")) return args;
   if (!strcmp(fname, "assert")) return fassert;
   if (!strcmp(fname, "cmd")) return cmd;
+  if (!strcmp(fname, "cmd2")) return cmd2;
   if (!strcmp(fname, "environ")) return environ;
   if (!strcmp(fname, "eval")) return eval;
   if (!strcmp(fname, "exit")) return fexit;

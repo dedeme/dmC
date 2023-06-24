@@ -205,10 +205,10 @@ Tp *exp_get_pr(Exp *this);
 int exp_is_pr (Exp *this);
 
 /// Creates an expression of the indicated type.
-/// 'cases' is Arr<Tp<Exp, Exp>>.
+/// 'cases' is Arr<Tp<Arr<Exp>, Exp>>.
 Exp *exp_switch (Exp *cond, Arr *cases, char *js);
 
-/// Read an Exp of the indicate type. Returns a Tp<Exp, Arr<Tp<Exp, Exp>>>.
+/// Read an Exp of the indicate type. Returns a Tp<Exp, Arr<Tp<Arr<Exp>, Exp>>>.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 Tp *exp_get_switch(Exp *this);
 

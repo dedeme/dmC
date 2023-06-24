@@ -109,7 +109,7 @@ export function fmt (template, t) {
 export function fromClock (t1, s) {
   sys.$params(arguments.length, 2);
   const r = fromClockOp(t1, s);
-  if (r.length === 0) throw new Error("Bad template '" + s + "'");
+  if (r.length === 0) throw new Error("Bad clock '" + s + "'");
   return r[0];
 }
 
@@ -135,7 +135,7 @@ export function fromClockOp (t1, s) {
 export function fromEn (s, sep) {
   sys.$params(arguments.length, 2);
   const r = fromEnOp(s, sep);
-  if (r.length === 0) throw new Error("Bad template '" + s + "'");
+  if (r.length === 0) throw new Error("Bad date '" + s + "'");
   return r[0];
 }
 
@@ -151,7 +151,7 @@ export function fromEnOp (s, sep) {
 export function fromIso (s, sep) {
   sys.$params(arguments.length, 2);
   const r = fromIsoOp(s, sep);
-  if (r.length === 0) throw new Error("Bad template '" + s + "'");
+  if (r.length === 0) throw new Error("Bad date '" + s + "'");
   return r[0];
 }
 
@@ -167,7 +167,7 @@ export function fromIsoOp (s, sep) {
 export function fromStr (s) {
   sys.$params(arguments.length, 1);
   const r = fromStrOp(s);
-  if (r.length === 0) throw new Error("Bad template '" + s + "'");
+  if (r.length === 0) throw new Error("Bad date '" + s + "'");
   return r[0];
 }
 

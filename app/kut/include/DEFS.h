@@ -35,7 +35,7 @@
           ); \
       }
 
-    /// Utility to show statemtne type error messages.
+    /// Utility to show statement type error messages.
     #define TEST_STAT_TYPE_ERROR(fn_is, expected, stat) { \
         char *__expected = expected; \
         Stat *__stat = stat; \
@@ -78,6 +78,8 @@
     while (++_i < __size) { \
       i = iarr_get(__a, _i);
 
+  /// Execute the function or bfunction 'fn' with parameters 'params' and
+  /// returns its result in 'rs'.
   #define FRUN(rs, fn, params) \
       Exp *rs = NULL; \
       if (exp_is_function(fn)) rs = function_run(exp_rget_function(fn), (ps)); \

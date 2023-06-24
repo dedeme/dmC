@@ -10,7 +10,7 @@
 #include "data/cts.h"
 
 static char *path (void) {
-  return path_cat(cts_data_path(), "log.tb", NULL);
+  return path_cat(DATA_PATH, "log.tb", NULL);
 }
 
 static char *mkFieldJs (int isError, char *msg) {
@@ -49,7 +49,7 @@ void log_warning (char *msg) {
 }
 
 /// Reset log.
-void log_reset (char *msg) {
+void log_reset () {
   file_write(path(), "[]");
 }
 
@@ -58,7 +58,7 @@ void log_reset (char *msg) {
 ///   isError: boolean. 'true' if the entri is an error.
 ///   date: char*. Date in format "%D/%M/%Y(%T)"
 ///   msg: char*. Entry message.
-char *readJs (void) {
+char *log_readJs (void) {
   return file_read(path());
 }
 
