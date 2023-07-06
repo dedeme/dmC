@@ -7,6 +7,7 @@
 #include "kut/sys.h"
 #include "main.h"
 #include "exp.h"
+#include "exmodule.h"
 #include "reader/cdr/cdr.h"
 #include "reader/ex_reader.h"
 #include "runner/fail.h"
@@ -29,6 +30,12 @@ static Exp *fassert (Arr *exps) {
   if (exp_rget_bool(arr_get(exps, 0))) return exp_empty();
   EXC_KUT("Assert failed");
   return NULL; // Unreachable
+}
+
+// \s, * -> *
+static Exp *c (Arr *exps) {
+  CHECK_PARS ("sys.c", 2, exps);
+  return exmodule_run(exp_rget_string(arr_get(exps, 0)), arr_get(exps, 1));
 }
 
 // \s, [s...] -> [s, b]
@@ -200,6 +207,7 @@ static Exp *user (Arr *exps) {
 Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "args")) return args;
   if (!strcmp(fname, "assert")) return fassert;
+  if (!strcmp(fname, "c")) return c;
   if (!strcmp(fname, "cmd")) return cmd;
   if (!strcmp(fname, "cmd2")) return cmd2;
   if (!strcmp(fname, "environ")) return environ;

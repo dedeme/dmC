@@ -1,11 +1,11 @@
 // Copyright 06-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Built-in storage.
+/// Built-in domox.
 
-#ifndef BUILTIN_STORAGE_H
-  #define BUILTIN_STORAGE_H
+#ifndef BUILTIN_DOMOX_H
+  #define BUILTIN_DOMOX_H
 
-char *storage_bget (void);
+char *domox_bget (void);
 
 #endif
