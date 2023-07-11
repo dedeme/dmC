@@ -32,8 +32,6 @@ class Domo {
   // DOM element.
   // *
   get e() { return this.el; }
-//  // \* -> ()
-//  set e(value) { this.e = value; }
   // \s -> <domo>
   html (s) { this.el.innerHTML = s; return this; }
   // \-> b
@@ -61,7 +59,6 @@ class Domo {
   text (s) { this.el.textContent = s; return this; }
   // \* -> <domo>
   value (v) { this.el.value = v; return this; }
-
 }
 
 // \* -> <domo>

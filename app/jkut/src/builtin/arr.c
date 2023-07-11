@@ -1,4 +1,4 @@
-// Copyright 06-Jul-2023 ºDeme
+// Copyright 11-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *arr_bget (void) {return
@@ -22,18 +22,24 @@ char *arr_bget (void) {return
   "  return a.some(e => fn(e));\n"
   "}\n"
   "\n"
-  "// \\[a...] -> a\n"
-  "export function cat (a) {\n"
-  "  sys.$params(arguments.length, 1);\n"
-  "  let r = [];\n"
-  "  for (const e of a) r = r.concat(e);\n"
-  "  return r;\n"
+  "// \\a, a -> ()\n"
+  "export function cat (a1, a2) {\n"
+  "  sys.$params(arguments.length, 2);\n"
+  "  a1.push(...a2);\n"
   "}\n"
   "\n"
   "// \\a -> ()\n"
   "export function clear (a) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  a.length = 0;\n"
+  "}\n"
+  "\n"
+  "// \\[a...] -> a\n"
+  "export function concat (a) {\n"
+  "  sys.$params(arguments.length, 1);\n"
+  "  let r = [];\n"
+  "  for (const e of a) r = r.concat(e);\n"
+  "  return r;\n"
   "}\n"
   "\n"
   "// \\a -> a\n"

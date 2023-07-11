@@ -1,4 +1,4 @@
-// Copyright 06-Jul-2023 ºDeme
+// Copyright 11-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *domo_bget (void) {return
@@ -36,8 +36,6 @@ char *domo_bget (void) {return
   "  // DOM element.\n"
   "  // *\n"
   "  get e() { return this.el; }\n"
-  "//  // \\* -> ()\n"
-  "//  set e(value) { this.e = value; }\n"
   "  // \\s -> <domo>\n"
   "  html (s) { this.el.innerHTML = s; return this; }\n"
   "  // \\-> b\n"
@@ -65,7 +63,6 @@ char *domo_bget (void) {return
   "  text (s) { this.el.textContent = s; return this; }\n"
   "  // \\* -> <domo>\n"
   "  value (v) { this.el.value = v; return this; }\n"
-  "\n"
   "}\n"
   "\n"
   "// \\* -> <domo>\n"

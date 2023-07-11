@@ -62,7 +62,7 @@
 ///   Running the market strategy.
 ///   See "libmkt/strategy" in "KtWeb:CMarket".
 ///
-///   \{Closes:[<vec>...], Params:[f...]} -> <vec>
+///   \{Closes=[<vec>...], Params=[f...]} -> <vec>
 ///   calcXxx
 ///   sys.c("calcXxx", [Env]); // -> References vector
 ///   ------

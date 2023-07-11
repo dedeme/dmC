@@ -35,11 +35,9 @@ export function fromIso (n) {
 // \s -> [n]|[]
 export function fromStr (n) {
   sys.$params(arguments.length, 1);
-  try {
-    return [parseFloat(n)];
-  } catch (e) {
-    return [];
-  }
+  const v = parseFloat(n);
+  if (isNaN(v) || v === Infinity || v === -Infinity) return [];
+  return [v];
 }
 
 // \s -> b

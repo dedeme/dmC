@@ -1,4 +1,4 @@
-// Copyright 06-Jul-2023 ºDeme
+// Copyright 11-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *math_bget (void) {return
@@ -39,11 +39,9 @@ char *math_bget (void) {return
   "// \\s -> [n]|[]\n"
   "export function fromStr (n) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  try {\n"
-  "    return [parseFloat(n)];\n"
-  "  } catch (e) {\n"
-  "    return [];\n"
-  "  }\n"
+  "  const v = parseFloat(n);\n"
+  "  if (isNaN(v) || v === Infinity || v === -Infinity) return [];\n"
+  "  return [v];\n"
   "}\n"
   "\n"
   "// \\s -> b\n"

@@ -65,7 +65,6 @@ static Exp *raux (char *js) {
   else if (*js == '-' || (*js >= '0' && *js <= '9')) rt = exp_float(js_rd(js));
   else if (!strcmp(js, "true")) rt = exp_bool(TRUE);
   else if (!strcmp(js, "false")) rt = exp_bool(FALSE);
-  else if (!strcmp(js, "null")) rt = exp_array(arr_new());
   else EXC_ILLEGAL_ARGUMENT("Bad JSON", "JSON string", js);
   return rt;
 }
@@ -139,10 +138,11 @@ static char *waux (Exp *exp) {
   else if (exp_is_array(exp)) rt = arr_to_js(exp_rget_array(exp), (FTO)waux);
   else if (exp_is_map(exp)) rt = map_to_js(exp_rget_map(exp), (FTO)waux);
   else if (exp_is_float(exp)) rt = js_wf(exp_rget_float(exp), 9);
-  else if (exp_is_int(exp)) rt = js_wl(exp_rget_int(exp));
   else if (exp_is_bool(exp)) rt = js_wb(exp_rget_bool(exp));
   else EXC_ILLEGAL_ARGUMENT(
-      "Data not JSONizable", "JSONizable data", exp_to_js(exp)
+      "Data not JSONizable",
+      "JSONizable data",
+      str_f("%s(%s)", exp_to_js(exp), exp_type_to_str(exp))
     );
   return rt;
 }

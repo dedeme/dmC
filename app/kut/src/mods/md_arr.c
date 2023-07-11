@@ -38,6 +38,13 @@ static Exp *any (Arr *exps) {
   return exp_bool(arr_any(a, (FPRED)fn2));
 }
 
+// \a, a -> ()
+static Exp *cat (Arr *exps) {
+  CHECK_PARS ("arr.cat", 2, exps);
+  arr_cat(exp_rget_array(arr_get(exps, 0)), exp_rget_array(arr_get(exps, 1)));
+  return exp_empty();
+}
+
 // \a -> ()
 static Exp *clear (Arr *exps) {
   CHECK_PARS ("arr.clear", 1, exps);
@@ -389,6 +396,7 @@ static Exp *unshift (Arr *exps) {
 Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "all")) return all;
   if (!strcmp(fname, "any")) return any;
+  if (!strcmp(fname, "cat")) return cat;
   if (!strcmp(fname, "clear")) return clear;
   if (!strcmp(fname, "copy")) return copy;
   if (!strcmp(fname, "drop")) return drop;
