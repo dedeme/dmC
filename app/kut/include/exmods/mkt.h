@@ -66,7 +66,7 @@
 ///   calcXxx
 ///   sys.c("calcXxx", [Env]); // -> References vector
 ///   ------
-///   Calculate references for a market model.
+///   Calculate simulation results for a market model.
 ///   They are defined:
 ///     calcAppr
 ///     calcAppr2

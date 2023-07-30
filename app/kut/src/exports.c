@@ -28,7 +28,7 @@ void exports_add(Exports *this, int symbol) {
   }
 
   int buf = this->buf + this->buf;
-  this->data = GC_REALLOC(this->data, buf);
+  this->data = GC_REALLOC(this->data, buf * sizeof(int));
   (this->data)[ix] = symbol;
   this->len = ix + 1;
   this->buf = buf;

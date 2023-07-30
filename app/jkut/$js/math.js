@@ -89,18 +89,26 @@ export function round (n, dec) {
 
 function to (n, dec, thsep, decsep) {
   const ps = toFix(n, dec).split(".");
-  let r0 = [...ps[0]].reverse();
+  var ps0 = ps[0];
+  var sign = "";
+  if (ps0.charAt(0) == "-") {
+    ps0 = ps0.substring(1);
+    sign = "-";
+  }
+  const r0Length = ps0.length;
+  const r0 = [...ps0].reverse();
   let r1 = [];
   let i = 0;
   while (true) {
     r1.push(r0[i]);
     ++i;
-    if (i >= r0.length) break;
+    if (i >= r0Length) break;
     if (i % 3 == 0) r1.push(thsep);
   }
-  return ps.length == 1
+  return sign + (ps.length == 1
     ? r1.reverse().join("")
-    : r1.reverse().join("") + decsep + ps[1]
+    : r1.reverse().join("") + decsep + ps[1])
+  ;
 }
 
 // \n, n -> s

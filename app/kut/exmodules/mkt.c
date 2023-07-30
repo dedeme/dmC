@@ -8,14 +8,15 @@
 
 // GENERAL ---------------------------------------------------------------------
 
-#define initialCapital 100000
+#define initialCapital 250000
 #define min_to_bet 11000.0
-#define no_lost_multiplicator 1.05
 #define bet 10000
+//#define days_win 25 // 5 weeks
+//#define days_loss 90 // 18 weeks
+#define no_loss_multiplicator 1.02 // 'sell >= buy * no_loss_multiplicator' is ok.
 static double withdrawalLimit = initialCapital + bet + bet;
 #define order_buy 0
 #define order_sell 1
-#define order_trap 2
 
 typedef struct exmodule_Vec {
   int size;
@@ -215,6 +216,8 @@ static Exp *strategy_run(Exp *exp) {
   Exp **a = (Exp**)arr_begin(exp_rget_array(exp));
   // <Exp>
   Map *env = exp_rget_map(a[0]);
+  int days_win = exp_rget_int(opt_get(map_get(env, "daysWin")));
+  int days_loss = exp_rget_int(opt_get(map_get(env, "daysLoss")));
   double *cls = ((Vec *)exp_rget_object("<vec>", a[1]))->vs;
   Exp *rfs_ex = a[2];
   Vec *rfs_v = exp_rget_object("<vec>", rfs_ex);
@@ -233,38 +236,37 @@ static Exp *strategy_run(Exp *exp) {
     int *stockss = ATOMIC(sizeof(int) * cols);
     RANGE0(i, cols) { stockss[i] = 0; }_RANGE;
     int *traps = ATOMIC(sizeof(int) * cols);
-    RANGE0(i, cols) { traps[i] = FALSE; }_RANGE;
+    RANGE0(i, cols) { traps[i] = 0; }_RANGE;
     double *prf_cashs = ATOMIC(sizeof(double) * cols);
     RANGE0(i, cols) { prf_cashs[i] = 0; }_RANGE;
     double *prf_prices = ATOMIC(sizeof(double) * cols);
     int *prf_stocks = ATOMIC(sizeof(int) * cols);
     RANGE0(i, cols) { prf_stocks[i] = 0; }_RANGE;
     int *prf_traps = ATOMIC(sizeof(int) * cols);
-    RANGE0(i, cols) { prf_traps[i] = FALSE; }_RANGE;
+    RANGE0(i, cols) { prf_traps[i] = 0; }_RANGE;
 
     env2 = exp_array(arr_new_from(
       prow, // 0
       arr_begin(exp_rget_array(opt_get(map_get(env, "Refs")))), // 1
       arr_begin(exp_rget_array(opt_get(map_get(env, "Dates")))), // 2
       arr_begin(exp_rget_array(opt_get(map_get(env, "Opens")))), // 3
-      arr_begin(exp_rget_array(opt_get(map_get(env, "Maxs")))), // 4
-      exp_rget_array(opt_get(map_get(env, "Nks"))), // 5
-      to_dos, //6
-      to_sells, // 7
-      traps, // 8
-      arr_begin(exp_rget_array(opt_get(map_get(env, "CashIn")))), // 9
-      stockss, // 10
-      prices, // 11
-      exp_rget_array(opt_get(map_get(env, "Orders"))), // 12 orders
-      arr_begin(exp_rget_array(opt_get(map_get(env, "PrfCashs")))), // 13
-      prf_prices, // 14
-      arr_begin(exp_rget_array(opt_get(map_get(env, "PrfStocks")))), // 15
-      prf_traps, // 16
-      exp_rget_array(opt_get(map_get(env, "Buys"))), // 17
-      exp_rget_array(opt_get(map_get(env, "Sales"))), // 18
-      arr_begin(exp_rget_array(opt_get(map_get(env, "Withdrawals")))), // 19
-      arr_begin(exp_rget_array(opt_get(map_get(env, "Hassets")))), // 20
-      arr_begin(exp_rget_array(opt_get(map_get(env, "Hwithdrawals")))), // 21
+      exp_rget_array(opt_get(map_get(env, "Nks"))), // 4
+      to_dos, //5
+      to_sells, // 6
+      traps, // 7
+      arr_begin(exp_rget_array(opt_get(map_get(env, "CashIn")))), // 8
+      stockss, // 9
+      prices, // 10
+      exp_rget_array(opt_get(map_get(env, "Orders"))), // 11
+      arr_begin(exp_rget_array(opt_get(map_get(env, "PrfCashs")))), // 12
+      prf_prices, // 13
+      arr_begin(exp_rget_array(opt_get(map_get(env, "PrfStocks")))), // 14
+      prf_traps, // 15
+      exp_rget_array(opt_get(map_get(env, "Buys"))), // 16
+      exp_rget_array(opt_get(map_get(env, "Sales"))), // 17
+      arr_begin(exp_rget_array(opt_get(map_get(env, "Withdrawals")))), // 18
+      arr_begin(exp_rget_array(opt_get(map_get(env, "Hassets")))), // 19
+      arr_begin(exp_rget_array(opt_get(map_get(env, "Hwithdrawals")))), // 20
       NULL
     ));
     map_add(env, "env", env2);
@@ -284,7 +286,23 @@ static Exp *strategy_run(Exp *exp) {
     return exp_map(value);
   }
 
-  double broker_fees(double amount) {
+  double broker_buy_fees(double amount) {
+    return (amount > 50000      // broker
+        ? amount * 0.001
+        : 9.75
+      ) +
+      amount * 0.00003 +       // market
+      0.11 +                   // Execution fee
+      amount * 0.002           // tobin
+    ;
+  }
+
+  double broker_buy (int stocks, double price) {
+    double amount = stocks * price;
+    return amount + broker_buy_fees(amount);
+  }
+
+  double broker_sell_fees(double amount) {
     return (amount > 50000      // broker
         ? amount * 0.001
         : 9.75
@@ -294,17 +312,9 @@ static Exp *strategy_run(Exp *exp) {
     ;
   }
 
-  double broker_buy (int stocks, double price) {
-    double amount = stocks * price;
-    return amount
-      + broker_fees(amount)
-      + amount * 0.002  // tobin
-    ;
-  }
-
   double broker_sell (int stocks, double price) {
     double amount = stocks * price;
-    return amount - broker_fees(amount);
+    return amount - broker_sell_fees(amount);
   }
 
   // PROCESS -----
@@ -321,60 +331,64 @@ static Exp *strategy_run(Exp *exp) {
   char *date = exp_rget_string(date_ex[row]);
   Exp **os_ex = envs[3];
   double *os = ((Vec *)exp_rget_object("<vec>", os_ex[row]))->vs;
-  Exp **ms_ex = envs[4];
-  double *ms = ((Vec *)exp_rget_object("<vec>", ms_ex[row]))->vs;
 
   double assets = 0;
-  char *nks = envs[5];
-  int *to_dos = envs[6];
-  int *to_sells = envs[7];
-  int *traps = envs[8];
+  char *nks = envs[4];
+  int *to_dos = envs[5];
+  int *to_sells = envs[6];
+  int *traps = envs[7];
   // f
-  Exp **cash_in = envs[9];
-  int *stockss = envs[10];
-  double *prices = envs[11];
+  Exp **cash_in = envs[8];
+  int *stockss = envs[9];
+  double *prices = envs[10];
   // <Exp><order>
-  Arr *orders = envs[12];
+  Arr *orders = envs[11];
   // f
-  Exp **prf_cashs = envs[13];
-  double *prf_prices = envs[14];
+  Exp **prf_cashs = envs[12];
+  double *prf_prices = envs[13];
   // i
-  Exp **prf_stocks = envs[15];
-  int *prf_traps = envs[16];
-  // <Exp> s
-  Arr *buys = envs[17];
-  // <Exp> s
-  Arr *sales = envs[18];
+  Exp **prf_stocks = envs[14];
+  int *prf_traps = envs[15];
+  // <Exp> [s...]
+  Arr *abuys = envs[16];
+  // <Exp> [s...]
+  Arr *asales = envs[17];
   // f
-  Exp **withdrawals = envs[19];
+  Exp **withdrawals = envs[18];
   // f
-  Exp **hassets = envs[20];
+  Exp **hassets = envs[19];
   // f
-  Exp **hwithdrawals = envs[21];
+  Exp **hwithdrawals = envs[20];
 
   EACH(nks, Exp, enk) {
     char *nk = exp_rget_string(enk);
     double op = os[_i];
     double cl = cls[_i];
-    double mx = ms[_i];
     double rf = rfs[_i];
+    // <Exp> s
+    Arr *buys = exp_rget_array(arr_get(abuys, _i));
+    // <Exp> s
+    Arr *sales = exp_rget_array(arr_get(asales, _i));
 
-
+    --traps[_i];
+    --prf_traps[_i];
     if (to_dos[_i]) {
       if (to_sells[_i]) { // there is buy order.
-        double cash = exp_rget_float(cash_in[0]);
-        if (cash > min_to_bet && !traps[_i]) {
-          int stocks = (int)(bet / op);
-          stockss[_i] = stocks;
-          prices[_i] = op;
-          cash -= broker_buy(stocks, op);
-          cash_in[0] = exp_float(cash);
-          arr_push(orders, mkOrder(date, nk, order_buy, stocks, op));
+        if (traps[_i] < 1) {
+          double cash = exp_rget_float(cash_in[0]);
+          if (cash > min_to_bet) {
+            int stocks = (int)(bet / op);
+            stockss[_i] = stocks;
+            prices[_i] = op;
+            cash -= broker_buy(stocks, op);
+            cash_in[0] = exp_float(cash);
+            arr_push(orders, mkOrder(date, nk, order_buy, stocks, op));
+          }
         }
 
-        if (!prf_traps[_i]) {
+        if (prf_traps[_i] < 1) {
           double prf_cash = exp_rget_float(prf_cashs[_i]);
-          int stocks = (int)((prf_cash - broker_fees(prf_cash)) / op);
+          int stocks = (int)((prf_cash - broker_buy_fees(prf_cash)) / op);
           double cost = broker_buy(stocks, op);
           while (cost > prf_cash) {
             --stocks;
@@ -387,56 +401,33 @@ static Exp *strategy_run(Exp *exp) {
         }
       } else {
         int stocks = stockss[_i];
-        if (stocks > 0 && !traps[_i]) {
-          if (op > prices[_i] * no_lost_multiplicator) {
-            stockss[_i] = 0;
-            double cash = exp_rget_float(cash_in[0]);
-            cash += broker_sell(stocks, op);
-            cash_in[0] = exp_float(cash);
-            arr_push(orders, mkOrder(date, nk, order_sell, stocks, op));
-          } else {
-            traps[_i] = TRUE;
-            arr_push(orders, mkOrder(date, nk, order_trap, stocks, op));
-          }
+        if (stocks > 0) {
+          stockss[_i] = 0;
+          double cash = exp_rget_float(cash_in[0]);
+          cash += broker_sell(stocks, op);
+          cash_in[0] = exp_float(cash);
+          arr_push(orders, mkOrder(date, nk, order_sell, stocks, op));
+
+          if (op < prices[_i] * no_loss_multiplicator)
+            traps[_i] = days_loss;
+          else
+            traps[_i] = days_win;
         }
 
         stocks = exp_rget_int(prf_stocks[_i]);
-        if (stocks > 0 && !prf_traps[_i]) {
-          if (op > prf_prices[_i] * no_lost_multiplicator) {
-            prf_stocks[_i] = exp_int(0);
-            double cash = exp_rget_float(prf_cashs[_i]);
-            prf_cashs[_i] = exp_float(cash + broker_sell(stocks, op));
-            arr_push(sales, exp_string(date));
-          } else {
-            prf_traps[_i] = TRUE;
-          }
+        if (stocks > 0) {
+          prf_stocks[_i] = exp_int(0);
+          double cash = exp_rget_float(prf_cashs[_i]);
+          prf_cashs[_i] = exp_float(cash + broker_sell(stocks, op));
+          arr_push(sales, exp_string(date));
+
+          if (op < prf_prices[_i] * no_loss_multiplicator)
+            prf_traps[_i] = days_loss;
+          else
+            traps[_i] = days_win;
         }
       }
       to_dos[_i] = FALSE;
-    }
-
-    if (traps[_i]) {
-      double price = prices[_i] * no_lost_multiplicator;
-      if (mx > price) {
-        int stocks = stockss[_i];
-        stockss[_i] = 0;
-        double cash = exp_get_float(cash_in[0]);
-        cash_in[0] = exp_float(cash + broker_sell(stocks, price));
-        arr_push(orders, mkOrder(date, nk, order_sell, stocks, price));
-        traps[_i] = FALSE;
-      }
-    }
-
-    if (prf_traps[_i]) {
-      double price = prf_prices[_i] * no_lost_multiplicator;
-      if (mx > price) {
-        int stocks = exp_rget_int(prf_stocks[_i]);
-        prf_stocks[_i] = exp_int(0);
-        double cash = exp_get_float(prf_cashs[_i]);
-        prf_cashs[_i] = exp_float(cash + broker_sell(stocks, price));
-        arr_push(sales, exp_string(date));
-        prf_traps[_i] = FALSE;
-      }
     }
 
     int stocks = stockss[_i];
@@ -564,7 +555,7 @@ static Exp *calc_appr(Exp *exp) {
         refs[i] = rf - (rf - c) * incr;
       }
     } else {
-      if (c < rf) {
+      if (c <= rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + start);
       } else {
@@ -663,7 +654,7 @@ static Exp *calc_appr2(Exp *exp) {
         else refs[i] = r2;
       }
     } else {
-      if (c < rf) {
+      if (c <= rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + start);
       } else {
@@ -763,7 +754,7 @@ static Exp *calc_ea(Exp *exp) {
       double new_avg = avg + 2 * (c - avg) / (days + 1);
       avgs[i] = new_avg;
 
-      if (new_avg > c) {
+      if (c <= new_avg) {
         is_solds[i] = TRUE;
         refs[i] = new_avg * (1 + strip);
       } else {
@@ -785,7 +776,7 @@ static Exp *calc_ea(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c < rf) {
+        if (c <= rf) {
           is_solds[i] = TRUE;
           refs[i] = new_avg * (1 + strip);
         } else {
@@ -885,7 +876,7 @@ static Exp *calc_ea2(Exp *exp) {
       double new_avg = avg + (c - avg) / days;
       avgs[i] = new_avg;
 
-      if (new_avg > c) {
+      if (c <= new_avg) {
         is_solds[i] = TRUE;
         refs[i] = new_avg * (1 + strip);
       } else {
@@ -907,7 +898,7 @@ static Exp *calc_ea2(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c < rf) {
+        if (c <= rf) {
           is_solds[i] = TRUE;
           refs[i] = new_avg * (1 + strip);
         } else {
@@ -1011,7 +1002,7 @@ static Exp *calc_ma(Exp *exp) {
       sums[i] += c - old_closes[i];
       double avg = sums[i] / days;
 
-      if (avg > c) {
+      if (c <= avg) {
         is_solds[i] = TRUE;
         refs[i] = avg * (1 + strip);
       } else {
@@ -1032,7 +1023,7 @@ static Exp *calc_ma(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c < rf) {
+        if (c <= rf) {
           is_solds[i] = TRUE;
           refs[i] = avg * (1 + strip);
         } else {
@@ -1130,7 +1121,7 @@ static Exp *calc_mm(Exp *exp) {
     } else if (row == days) {
       double old_c = old_closes[i];
 
-      if (old_c > c) {
+      if (c <= old_c) {
         is_solds[i] = TRUE;
         refs[i] = old_c * (1 + strip);
       } else {
@@ -1150,7 +1141,7 @@ static Exp *calc_mm(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c < rf) {
+        if (c <= rf) {
           is_solds[i] = TRUE;
           refs[i] = old_c * (1 + strip);
         } else {
@@ -1253,7 +1244,7 @@ static Exp *calc_qfix(Exp *exp) {
     double ref = refs[i];
     double q = closes[i];
 
-    if (q0 < ref) {
+    if (q0 <= ref) {
       if (q < q0) {
         refs[i] = up_gap2(q, ref);
       } else if (q > ref) {
@@ -1262,7 +1253,7 @@ static Exp *calc_qfix(Exp *exp) {
     } else {
       if (q > q0) {
         refs[i] = down_gap2(q, ref);
-      } else if (q < ref) {
+      } else if (q <= ref) {
         refs[i] = up_gap(q);
       }
     }
@@ -1350,7 +1341,7 @@ static Exp *calc_qmob(Exp *exp) {
         refs[i] = new_rf;
       }
     } else {
-      if (c < rf) {
+      if (c <= rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + gap);
       } else {

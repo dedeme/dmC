@@ -1,4 +1,4 @@
-// Copyright 11-Jul-2023 ºDeme
+// Copyright 30-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *math_bget (void) {return
@@ -93,18 +93,26 @@ char *math_bget (void) {return
   "\n"
   "function to (n, dec, thsep, decsep) {\n"
   "  const ps = toFix(n, dec).split(\".\");\n"
-  "  let r0 = [...ps[0]].reverse();\n"
+  "  var ps0 = ps[0];\n"
+  "  var sign = \"\";\n"
+  "  if (ps0.charAt(0) == \"-\") {\n"
+  "    ps0 = ps0.substring(1);\n"
+  "    sign = \"-\";\n"
+  "  }\n"
+  "  const r0Length = ps0.length;\n"
+  "  const r0 = [...ps0].reverse();\n"
   "  let r1 = [];\n"
   "  let i = 0;\n"
   "  while (true) {\n"
   "    r1.push(r0[i]);\n"
   "    ++i;\n"
-  "    if (i >= r0.length) break;\n"
+  "    if (i >= r0Length) break;\n"
   "    if (i % 3 == 0) r1.push(thsep);\n"
   "  }\n"
-  "  return ps.length == 1\n"
+  "  return sign + (ps.length == 1\n"
   "    ? r1.reverse().join(\"\")\n"
-  "    : r1.reverse().join(\"\") + decsep + ps[1]\n"
+  "    : r1.reverse().join(\"\") + decsep + ps[1])\n"
+  "  ;\n"
   "}\n"
   "\n"
   "// \\n, n -> s\n"

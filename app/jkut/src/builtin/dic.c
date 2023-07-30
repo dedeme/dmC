@@ -1,4 +1,4 @@
-// Copyright 11-Jul-2023 ºDeme
+// Copyright 30-Jul-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *dic_bget (void) {return
