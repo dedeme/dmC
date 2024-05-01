@@ -22,9 +22,9 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
     EACH(exp_rget_array(exp), Exp, e) {
       check_exp(layers, fix, nline, is, e);
     }_EACH
-  } else if (exp_is_map(exp)) {
+  } else if (exp_is_dic(exp)) {
     // v is Tp<char, Exp>
-    EACH(map_to_array(exp_rget_map(exp)), Tp, v) {
+    EACH(map_to_array(exp_rget_dic(exp)), Tp, v) {
       check_exp(layers, fix, nline, is, tp_e2(v));
     }_EACH
   } else if (exp_is_function(exp)) {
@@ -74,6 +74,14 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
             printf(
               "%s:%d: Symbol '%s.%s' not found\n",
               fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2)
+            );
+        } else {
+          char ch = *symix_get(sym1);
+          if (ch >= 'a' && ch <= 'z')
+            printf(
+              "%s:%d: (%s.%s) Lower case symbol '%s' is not a module\n",
+              fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2),
+              symix_get(sym1)
             );
         }
       }
@@ -204,6 +212,17 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
       check_exp(layers, fix, line, is, left);
     }
     check_exp(layers, fix, line, is, right);
+  } else if (stat_is_arr_multi(st) || stat_is_dic_multi(st)) {
+    Tp3 *v = stat_is_arr_multi(st)
+      ? stat_get_arr_multi(st)
+      : stat_get_dic_multi(st)
+    ;
+
+    EACH(tp3_e2(v), Exp, sym) {
+      if (!exp_is_empty(sym))
+        layers_add_symbol(layers, fix, line, exp_rget_sym(sym));
+    }_EACH
+    check_exp(layers, fix, line, is, tp3_e3(v));
   } else if (stat_is_add_as(st)) {
     // <Exp, Exp>
     Tp *v = stat_get_add_as(st);
@@ -324,15 +343,18 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
       is, for_st
     );
   } else if (stat_is_switch(st)) {
-    // [<Exp>, Arr<Tp<Exp, StatCode>>]
+    // [<Exp>, Arr<Tp<Arr<Exp>, StatCode>>]
     Arr *v = stat_get_switch(st);
     check_exp(layers, fix, line, is, arr_get(v, 0));
-    // exp_st is Tp<Exp, StatCode>
+    // exp_st is Tp<Arr<Exp>, StatCode>
     EACH(arr_get(v, 1), Tp, exp_st) {
       StatCode *st_cd = tp_e2(exp_st);
-      Exp *exp = tp_e1(exp_st);
-      if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
-        check_exp(layers, fix, stat_code_line(st_cd), is, tp_e1(exp_st));
+      // <Exp>
+      Arr *exps = tp_e1(exp_st);
+      EACH(exps, Exp, exp) {
+        if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
+          check_exp(layers, fix, stat_code_line(st_cd), is, exp);
+      }_EACH
       check_st(layers, is, st_cd);
     }_EACH
   }

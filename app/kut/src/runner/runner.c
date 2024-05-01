@@ -71,8 +71,9 @@ static void assign (Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
     int sym = exp_get_sym(left);
     int ok = TRUE;
     if (heaps_is_initial(hs)) {
-      if (!heaps_is_duplicate(hs, sym))
+      if (!heaps_is_duplicate(hs, sym)) {
         heaps_add_symbol(hs, sym, solver_solve(is, h0, hs, tp_e2(v)));
+      }
     } else {
       ok = heaps_add_symbol(hs, sym, solver_solve(is, h0, hs, tp_e2(v)));
     }
@@ -94,9 +95,9 @@ static void assign (Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
       );
       return;
     }
-    if (exp_is_map(ct)) {
+    if (exp_is_dic(ct)) {
       // <Exp>
-      Map *m = exp_rget_map(ct);
+      Map *m = exp_rget_dic(ct);
       char *key = exp_rget_string(solver_solve(is, h0, hs, tp_e2(v2)));
       if (!map_has_key(m, key))
         EXC_KUT(str_f("Key '%s' does not exist in dictionary", key));
@@ -107,9 +108,9 @@ static void assign (Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
     // <Exp, Exp>
     Tp *v2 = exp_get_pt(left);
     Exp *ct = solver_solve(is, h0, hs, tp_e1(v2));
-    if (exp_is_map(ct)) {
+    if (exp_is_dic(ct)) {
       // <Exp>
-      Map *m = exp_rget_map(ct);
+      Map *m = exp_rget_dic(ct);
       char *key = symix_get(exp_rget_sym(tp_e2(v2)));
       if (!map_has_key(m, key))
         EXC_KUT(str_f("Key '%s' does not exist in dictionary", key));
@@ -119,6 +120,55 @@ static void assign (Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
   }
 
   EXC_KUT(fail_type("symbol, array or dictionary", left));
+}
+
+static void assign_multi (
+  int is_arr, Imports *is, Heap0 *h0, Heaps *hs, Stat *st
+) {
+  Tp3 *v = is_arr ? stat_get_arr_multi(st) : stat_get_dic_multi(st);
+
+  Exp *new_sym = tp3_e1(v);
+  // <Exp>
+  Arr *syms = tp3_e2(v);
+  Exp *exp = tp3_e3(v);
+
+  if (is_arr && exp_is_array(exp) && arr_size(exp_get_array(exp)) == 0) {
+    // <Exp>
+    Arr *exp_ints = arr_new();
+    for (int i = 0; i < arr_size(syms); ++i)
+      arr_push(exp_ints, exp_int(i));
+    exp = exp_array(exp_ints);
+  } else if (!is_arr && exp_is_dic(exp) && map_size(exp_get_dic(exp)) == 0) {
+    // <Exp>
+    Map *exp_strs = map_new();
+    EACH(syms, Exp, sym) {
+      if (exp_is_empty(sym)) continue;
+      char *s = symix_get(exp_get_sym(sym));
+      map_put(exp_strs, s, exp_string(s));
+    }_EACH
+    exp = exp_dic(exp_strs);
+  }
+
+  assign(is, h0, hs, stat_assign(new_sym, exp));
+  exp = solver_solve(is, h0, hs, new_sym);
+  if (is_arr) {
+    if (!exp_is_array(exp))
+      EXC_KUT(fail_type("array", exp));
+  } else {
+    if (!exp_is_dic(exp))
+      EXC_KUT(fail_type("dictionary", exp));
+  }
+
+  EACH(tp3_e2(v), Exp, sym) {
+    if (exp_is_empty(sym)) continue;
+    int id = exp_get_sym(sym);
+    Exp *right = is_arr
+      ? exp_int(_i)
+      : exp_string(symix_get(id))
+    ;
+    Exp *exp = exp_sq(new_sym, right);
+    assign(is, h0, hs, stat_assign(sym, exp));
+  }_EACH
 }
 
 // v is Tp<Exp, Exp>
@@ -140,9 +190,9 @@ static void assign_xxx (
       )));
       return;
     }
-    if (exp_is_map(ct)) {
+    if (exp_is_dic(ct)) {
       // <Exp>
-      Map *m = exp_rget_map(ct);
+      Map *m = exp_rget_dic(ct);
       char *key = exp_rget_string(solver_solve(is, h0, hs, tp_e2(v2)));
       if (!map_has_key(m, key))
         EXC_KUT(str_f("Key '%s' does not exist in dictionary", key));
@@ -156,9 +206,9 @@ static void assign_xxx (
     // <Exp, Exp>
     Tp *v2 = exp_get_pt(left);
     Exp *ct = solver_solve(is, h0, hs, tp_e1(v2));
-    if (exp_is_map(ct)) {
+    if (exp_is_dic(ct)) {
       // <Exp>
-      Map *m = exp_rget_map(ct);
+      Map *m = exp_rget_dic(ct);
       char *key = symix_get(exp_rget_sym(tp_e2(v2)));
       if (!map_has_key(m, key))
         EXC_KUT(str_f("Key '%s' does not exist in dictionary", key));
@@ -226,7 +276,7 @@ static Exp *fwhile (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
   } else {
     for (;;) {
       Exp *sv_cond = solver_solve(is, h0, hs, cond);
-      if (exp_rget_as_bool(sv_cond)) {
+      if (exp_rget_bool(sv_cond)) {
         Exp *r2 = runner_run_stat(stk, is, h0, hs, st_cd);
         if (exp_is_empty(r2)) continue;
         if (exp_is_continue(r2)) continue;
@@ -248,7 +298,7 @@ static Exp *fif (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
   StatCode *st1 = arr_get(ps, 1);
   Exp *sv_cond = solver_solve(is, h0, hs, cond);
 
-  if (exp_rget_as_bool(sv_cond)) return runner_run_stat(stk, is, h0, hs, st1);
+  if (exp_rget_bool(sv_cond)) return runner_run_stat(stk, is, h0, hs, st1);
 
   StatCode *st2 = opt_get(arr_get(ps, 2));
 
@@ -260,7 +310,7 @@ static Exp *fif (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
 static Exp *for_c (
   Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st, int with_ix
 ) {
-  // [<int>, <int>, <Exp>, <StatCode>] or [int>, <Exp>, <StatCode>]
+  // [<int>, <int>, <Exp>, <StatCode>] or [<int>, <Exp>, <StatCode>]
   Arr *v = with_ix ? stat_get_for_ix(st) : stat_get_for(st);
   int *v1 = arr_get(v, 0);
   int *v2 = NULL;
@@ -277,8 +327,12 @@ static Exp *for_c (
     Arr *a = exp_get_array(ct);
     EACH(a, Exp, ex) {
       Heap *h = heap_new();
-      heap_add(h, *v1, ex);
-      if (with_ix) heap_add(h, *v2, exp_int(_i));
+      if (with_ix) {
+        heap_add(h, *v1, exp_int(_i));
+        heap_add(h, *v2, ex);
+      } else {
+        heap_add(h, *v1, ex);
+      }
       Exp *r = runner_run_stat(stk, is, h0, heaps_add(hs, h), st_cd);
       if (exp_is_empty(r) || exp_is_continue(r)) continue;
       if (exp_is_break(r)) break;
@@ -286,13 +340,17 @@ static Exp *for_c (
     }_EACH
     return exp_empty();
   }
-  if (exp_is_map(ct)) {
+  if (exp_is_dic(ct)) {
     // <Exp>
-    Map *m = exp_rget_map(ct);
+    Map *m = exp_rget_dic(ct);
     EACH(m, Kv, kv) {
       Heap *h = heap_new();
-      heap_add(h, *v1, kv_value(kv));
-      if (with_ix) heap_add(h, *v2, exp_string(kv_key(kv)));
+      if (with_ix) {
+        heap_add(h, *v1, exp_string(kv_key(kv)));
+        heap_add(h, *v2, kv_value(kv));
+      } else {
+        heap_add(h, *v1, kv_value(kv));
+      }
       Exp *r = runner_run_stat(stk, is, h0, heaps_add(hs, h), st_cd);
       if (exp_is_empty(r) || exp_is_continue(r)) continue;
       if (exp_is_break(r)) break;
@@ -304,8 +362,12 @@ static Exp *for_c (
     char *s = exp_get_string(ct);
     for (int64_t i = 0; i < strlen(s); ++i) {
       Heap *h = heap_new();
-      heap_add(h, *v1, exp_string(str_new_c(s[i])));
-      if (with_ix) heap_add(h, *v2, exp_int(i));
+      if (with_ix) {
+        heap_add(h, *v1, exp_int(i));
+        heap_add(h, *v2, exp_string(str_new_c(s[i])));
+      } else {
+        heap_add(h, *v1, exp_string(str_new_c(s[i])));
+      }
       Exp *r = runner_run_stat(stk, is, h0, heaps_add(hs, h), st_cd);
       if (exp_is_empty(r) || exp_is_continue(r)) continue;
       if (exp_is_break(r)) break;
@@ -319,8 +381,13 @@ static Exp *for_c (
     while (it_has_next(it)) {
       Heap *h = heap_new();
       Exp *nx = it_next(it);
-      heap_add(h, *v1, nx);
-      if (with_ix) heap_add(h, *v2, exp_int(i++));
+      if (with_ix) {
+        heap_add(h, *v1, exp_int(i));
+        heap_add(h, *v2, nx);
+      } else {
+        heap_add(h, *v1, nx);
+      }
+      ++i;
       Exp *r = runner_run_stat(stk, is, h0, heaps_add(hs, h), st_cd);
       if (exp_is_empty(r) || exp_is_continue(r)) continue;
       if (exp_is_break(r)) break;
@@ -329,11 +396,11 @@ static Exp *for_c (
     return exp_empty();
   }
 
-  EXC_KUT(fail_type("string, array, map or <iter>", ct));
+  EXC_KUT(fail_type("string, array, map, <iter> or <vec>", ct));
   return NULL; // Ureachable.
 }
 
-static Exp *for_r (
+static Exp *for_range (
   Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st, int with_step
 ) {
   // [<int>, <Exp>, <Exp>, <Exp>, <StatCode>] or
@@ -396,7 +463,7 @@ static Exp *fswitch (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
       Exp *yes = solver_solve_isolate(exp_eq(
         exp1, solver_solve(is, h0, hs, cond)
       ));
-      if (exp_rget_as_bool(yes)) {
+      if (exp_rget_bool(yes)) {
         ok = TRUE;
         break;
       }
@@ -438,6 +505,8 @@ Exp *runner_run_stat(
     else if (stat_is_func(st)) func_call(is, h0, hs, st);
     else if (stat_is_block(st))
       exp = runner_run(FALSE, stk, is, h0, hs, stat_get_block(st));
+    else if (stat_is_arr_multi(st)) assign_multi(TRUE, is, h0, hs, st);
+    else if (stat_is_dic_multi(st)) assign_multi(FALSE, is, h0, hs, st);
     else if (stat_is_assign(st)) assign(is, h0, hs, st);
     else if (stat_is_add_as(st))
       assign_xxx(is, h0, hs, stat_get_add_as(st), exp_add);
@@ -460,9 +529,9 @@ Exp *runner_run_stat(
     else if (stat_is_for_ix(st))
       exp = for_c(stk, is, h0, hs, st, TRUE);
     else if (stat_is_for_r(st))
-      exp = for_r(stk, is, h0, hs, st, FALSE);
+      exp = for_range(stk, is, h0, hs, st, FALSE);
     else if (stat_is_for_rs(st)) exp =
-      for_r(stk, is, h0, hs, st, TRUE);
+      for_range(stk, is, h0, hs, st, TRUE);
     else if (stat_is_switch(st)) exp = fswitch(stk, is, h0, hs, st);
     else EXC_KUT(str_f("Not valid statement: '%s'", stat_to_str(st)));
   } CATCH (e) {

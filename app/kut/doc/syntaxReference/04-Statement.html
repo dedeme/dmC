@@ -107,15 +107,19 @@ with <code>/</code> nor be an empty string.</p>
 <h3>for</h3>
 <p>Scheme1: <code>for ( TkSymbol1 <span class='kmd-fm'>, TkSymbol2</span>? = Exp ) Stat</code> <br> <br>
 Scheme2: <code>for ( TkSymbol = Exp1 : Exp2 <span class='kmd-fm'>: Exp3</span>? ) Stat</code></p>
-<p>In the Scheme1 <code>Exp</code> is an array or iterator, <code>TkSymbol1</code> is bound to
-each element and <code>TkSymbol2</code> to its index.</p>
+<p>In the Scheme1 <code>Exp</code> is an array, iterator or dictionary.</p>
+
+<ul>
+<li>if <i>TkSymbol2</i> is omited, <i>TkSymbol1</i> is replaced by each value of <i>Exp</i>.	</li>
+<li>Oterwise <i>TkSymbol1</i> is replaced by the iterarion index or the dictionary key and <i>TkSymbol2</i> is replaced by each value of <i>Exp</i>.</li>
+</ul>
 <p>In the Scheme2 <code>Exp1</code>, <code>Exp2</code> and <code>Exp3</code> solve to an integer whose value
 is bound to <code>TkSymbol</code>.</p>
 <p>Examples:<br>
 <code>for (e = ["a", "v"]) sys.println(e);</code><br>
-<code>for (e, i = ["a", "v"]) sys.println(e + "->" + math.toStr(i));</code><br>
-<code>for (i = [0 : 12]) { sys.println(math.toStr(i)); }</code><br>
-<code>for (i = [0 : 12 : 2]) sys.println(math.toStr(i));</code></p>
+<code>for (i, e = ["a", "v"]) sys.println(e + "->" + math.itos(i));</code><br>
+<code>for (i = [0 : 12]) { sys.println(math.itos(i)); }</code><br>
+<code>for (i = [0 : 12 : 2]) sys.println(math.itos(i));</code></p>
 <h3>switch</h3>
 <p>Scheme: <code>switch ( Exp ) { <span class='kmd-fm'>Exp:Stat;</span>* <span class='kmd-fm'>default:Stat;</span>? }</code></p>
 <p>Example: <code>switch (v) { 3 : return 3 * 2; default: return 25; }</code></p>

@@ -1,4 +1,4 @@
-// Copyright 30-Jul-2023 ºDeme
+// Copyright 25-Apr-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *iter_bget (void) {return
@@ -117,6 +117,23 @@ char *iter_bget (void) {return
   "  sys.$fparams(fn, 2);\n"
   "  let ix = 0;\n"
   "  while (hasNext(it)) fn(next(it), ix++);\n"
+  "}\n"
+  "\n"
+  "// \\<iter>, (async \\n,*->()), (\\->()) -> ()\n"
+  "export function eachSync (it, f1, f2) {\n"
+  "  sys.$params(arguments.length, 3);\n"
+  "  sys.$fparams(f1, 2);\n"
+  "  sys.$fparams(f2, 0);\n"
+  "  let ix = 0;\n"
+  "  async function fn () {\n"
+  "    if (hasNext(it)) {\n"
+  "      await f1(ix++, next(it));\n"
+  "      fn();\n"
+  "    } else {\n"
+  "      f2();\n"
+  "    }\n"
+  "  }\n"
+  "  fn();\n"
   "}\n"
   "\n"
   "// \\-> <iter>\n"

@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 
+///
 enum token_Token_t {
   TOKEN_BOOL, TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING,
   TOKEN_LINE_COMMENT, TOKEN_COMMENT, TOKEN_SYMBOL, TOKEN_OPERATOR
@@ -106,6 +107,10 @@ int token_is_exclamation (Token *this);
 /// Returns TRUE if 'this' is an operator of the indicated type.
 /// ("\")
 int token_is_backslash (Token *this);
+
+/// Returns TRUE if 'this' is an operator of the indicated type.
+/// ("#")
+int token_is_hash (Token *this);
 
 /// Returns TRUE if 'this' is an operator of the indicated type.
 /// ("->")

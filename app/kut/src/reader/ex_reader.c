@@ -118,13 +118,13 @@ static Arr *solve_level4 (Arr *exps) {
   return new_exps;
 }
 
-static Exp *read_switch (Cdr *cdr) {
+static Exp *read_switch (Types *tps, Cdr *cdr) {
   Token *tk = cdr_read_token(cdr);
 
   if (!token_is_open_par(tk))
     EXC_KUT(cdr_fail_expect(cdr, "(", token_to_str(tk)));
 
-  Exp *cond = ex_reader_read(cdr);
+  Exp *cond = ex_reader_read(tps, cdr);
   tk = cdr_read_token(cdr);
 
   if (!token_is_close_par(tk))
@@ -141,7 +141,7 @@ static Exp *read_switch (Cdr *cdr) {
     if (cdr_next_token_is_close_bracket(cdr))
       EXC_KUT(cdr_fail(cdr, "'default' case is missing"));
 
-    Exp *c1 = ex_reader_read(cdr);
+    Exp *c1 = ex_reader_read(tps, cdr);
 
     if (exp_is_sym(c1) && exp_get_sym(c1) == symix_DEFAULT) {
       Token *tk = cdr_read_token(cdr);
@@ -149,7 +149,7 @@ static Exp *read_switch (Cdr *cdr) {
       if (!token_is_colon(tk))
         EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
 
-      arr_push(cases, tp_new(arr_new_from(c1, NULL), ex_reader_read(cdr)));
+      arr_push(cases, tp_new(arr_new_from(c1, NULL), ex_reader_read(tps, cdr)));
 
       tk = cdr_read_token(cdr);
       if (!token_is_semicolon(tk))
@@ -166,7 +166,7 @@ static Exp *read_switch (Cdr *cdr) {
     Arr *cs = arr_new_from(c1, NULL);
     while (cdr_next_token_is_comma(cdr)) {
       cdr_read_token(cdr);
-      Exp *exp = ex_reader_read(cdr);
+      Exp *exp = ex_reader_read(tps, cdr);
       if (exp_is_sym(exp) && exp_get_sym(exp) == symix_DEFAULT)
         EXC_KUT(cdr_fail(cdr, "Unexpected 'default'"));
       arr_push(cs, exp);
@@ -177,7 +177,7 @@ static Exp *read_switch (Cdr *cdr) {
     if (!token_is_colon(tk))
       EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
 
-    arr_push(cases, tp_new(cs, ex_reader_read(cdr)));
+    arr_push(cases, tp_new(cs, ex_reader_read(tps, cdr)));
 
     tk = cdr_read_token(cdr);
 
@@ -187,20 +187,20 @@ static Exp *read_switch (Cdr *cdr) {
 }
 
 // exps is [Exp, Token, Exp, Token ..., Exp] -> at least one element is added.
-static void add_expressions (Arr *exps, Cdr *cdr) {
-  Exp *exp = ex_reader_read1(cdr);
-  exp = pt_sq_pr_reader_read(exp, cdr);
+static void add_expressions (Types *tps, Arr *exps, Cdr *cdr) {
+  Exp *exp = ex_reader_read1(tps, cdr);
+  exp = pt_sq_pr_reader_read(tps, exp, cdr);
   arr_push(exps, exp);
   if (cdr_next_token_is_binary(cdr)) {
     arr_push(exps, cdr_read_token(cdr));
-    add_expressions(exps, cdr);
+    add_expressions(tps, exps, cdr);
   }
 }
 
-Exp *ex_reader_read (Cdr *cdr) {
+Exp *ex_reader_read (Types *tps, Cdr *cdr) {
   // <Exp>
   Arr *exs = arr_new();
-  add_expressions(exs, cdr);
+  add_expressions(tps, exs, cdr);
 
   exs = solve_level1(exs); // * / %
   exs = solve_level2(exs); // + -
@@ -211,10 +211,10 @@ Exp *ex_reader_read (Cdr *cdr) {
 
   if (cdr_next_token_is_ternary(cdr)) {
     cdr_read_token(cdr);
-    Exp *exp2 = ex_reader_read(cdr);
+    Exp *exp2 = ex_reader_read(tps, cdr);
     Token *tk = cdr_read_token(cdr);
     if (token_is_colon(tk)) {
-      exp = exp_ternary(exp, exp2, ex_reader_read(cdr));
+      exp = exp_ternary(exp, exp2, ex_reader_read(tps, cdr));
     } else {
       EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
     }
@@ -222,10 +222,10 @@ Exp *ex_reader_read (Cdr *cdr) {
   return exp;
 }
 
-Exp *ex_reader_read1 (Cdr *cdr) {
+Exp *ex_reader_read1 (Types *tps, Cdr *cdr) {
   Token *tk = cdr_read_token(cdr);
   if (token_is_open_par(tk)) { // ( --------------------------------------------
-    Exp *exp = ex_reader_read(cdr);
+    Exp *exp = ex_reader_read(tps, cdr);
     tk = cdr_read_token(cdr);
     if (token_is_close_par(tk))
       return exp;
@@ -233,8 +233,8 @@ Exp *ex_reader_read1 (Cdr *cdr) {
   }
 
   if (token_is_unary(tk)) { // - ! ---------------------------------------------
-    Exp *exp = ex_reader_read1(cdr);
-    exp = pt_sq_pr_reader_read(exp, cdr);
+    Exp *exp = ex_reader_read1(tps, cdr);
+    exp = pt_sq_pr_reader_read(tps, exp, cdr);
     return token_is_exclamation(tk)
       ? exp_not(exp)
       : exp_minus(exp)
@@ -247,16 +247,16 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       return exp_array(arr_new());
     }
 
-    Exp *exp = ex_reader_read(cdr);
+    Exp *exp = ex_reader_read(tps, cdr);
 
 
     if (cdr_next_token_is_colon(cdr)) { // Range
       Token *tk = cdr_read_token(cdr);
-      Exp *exp2 = ex_reader_read(cdr);
+      Exp *exp2 = ex_reader_read(tps, cdr);
       Exp *exp3 = exp_empty();
       if (cdr_next_token_is_colon(cdr)) {
         cdr_read_token(cdr);
-        exp3 = ex_reader_read(cdr);
+        exp3 = ex_reader_read(tps, cdr);
       }
       tk = cdr_read_token(cdr);
       if (token_is_close_square(tk))
@@ -273,7 +273,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       Token *tk = cdr_read_token(cdr);
 
       if (token_is_close_square(tk)) break;
-      else if (token_is_comma(tk)) arr_push(exps, ex_reader_read(cdr));
+      else if (token_is_comma(tk)) arr_push(exps, ex_reader_read(tps, cdr));
       else EXC_KUT(cdr_fail_expect(cdr, "']' or ','", token_to_str(tk)));
     }
 
@@ -283,14 +283,14 @@ Exp *ex_reader_read1 (Cdr *cdr) {
   if (token_is_open_bracket(tk)) { // { ----------------------------------------
     if (cdr_next_token_is_close_bracket(cdr)) {
       cdr_read_token(cdr);
-      return exp_map(map_new());
+      return exp_dic(map_new());
     }
 
     // <Exp>
     Map *mp = map_new();
 
     for (;;) {
-      Exp *exp = ex_reader_read(cdr);
+      Exp *exp = ex_reader_read(tps, cdr);
       char *key;
       if (exp_is_sym(exp)) key = symix_get(exp_get_sym(exp));
       else if (exp_is_string(exp)) key = exp_get_string(exp);
@@ -314,7 +314,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       }
 
       if (token_is_colon(tk)) {
-        map_put(mp, key, ex_reader_read(cdr));
+        map_put(mp, key, ex_reader_read(tps, cdr));
         tk = cdr_read_token(cdr);
         if (token_is_comma(tk)) continue;
         if (token_is_close_bracket(tk)) break;
@@ -324,10 +324,11 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       EXC_KUT(cdr_fail_expect(cdr, ":", token_to_str(tk)));
     }
 
-    return exp_map(mp);
+    return exp_dic(mp);
   }
 
   if (token_is_backslash(tk)) { // \ -------------------------------------------
+    tps = types_new_block(tps);
     // <Token>
     Arr *pars = arr_new();
     if (cdr_next_token_is_arrow(cdr)) {
@@ -335,7 +336,17 @@ Exp *ex_reader_read1 (Cdr *cdr) {
     } else {
       for(;;) {
         Token *tk = cdr_read_token(cdr);
+        int module = -1;
+        if (token_is_colon(tk)) {
+          tk = cdr_read_token(cdr);
+          if (tk->type != TOKEN_SYMBOL)
+            EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+          module = tk->b;
+          tk = cdr_read_token(cdr);
+        }
         if (tk->type == TOKEN_SYMBOL) {
+          if (module != -1)
+            types_add(tps, tk->b, module);
           arr_push(pars, tk);
           tk = cdr_read_token(cdr);
           if (token_is_comma(tk)) continue;
@@ -359,13 +370,15 @@ Exp *ex_reader_read1 (Cdr *cdr) {
       }
       *p++ = s;
     }_EACH
-    return exp_function(function_new(iarr_new(n, ints), st_reader_read(cdr)));
+    return exp_function(function_new(
+      iarr_new(n, ints), st_reader_read(tps, cdr)
+    ));
   }
 
   // Others --------------------------------------------------------------------
 
   if (tk->type == TOKEN_LINE_COMMENT || tk->type == TOKEN_COMMENT)
-    return ex_reader_read1(cdr);
+    return ex_reader_read1(tps, cdr);
 
   if (tk -> type == TOKEN_BOOL)
     return exp_bool(tk->b);
@@ -382,7 +395,7 @@ Exp *ex_reader_read1 (Cdr *cdr) {
   if (tk->type == TOKEN_SYMBOL) {
     int sym = tk->b;
     return sym == symix_SWITCH
-      ? read_switch(cdr)
+      ? read_switch(tps, cdr)
       : exp_sym(sym)
     ;
   }

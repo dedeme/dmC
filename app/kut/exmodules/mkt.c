@@ -9,12 +9,10 @@
 // GENERAL ---------------------------------------------------------------------
 
 #define initialCapital 250000
-#define min_to_bet 11000.0
-#define bet 10000
-//#define days_win 25 // 5 weeks
-//#define days_loss 90 // 18 weeks
+#define min_to_bet 13000.0
+#define bet 12000
 #define no_loss_multiplicator 1.02 // 'sell >= buy * no_loss_multiplicator' is ok.
-static double withdrawalLimit = initialCapital + bet + bet;
+static double withdrawal_limit = initialCapital + bet + bet;
 #define order_buy 0
 #define order_sell 1
 
@@ -211,11 +209,65 @@ static Exp *qs_vol(Exp *exp) {
 
 // STRATEGY --------------------------------------------------------------------
 
+static double broker_buy_fees(double amount) {
+  return (amount > 50000      // broker
+      ? amount * 0.001
+      : 9.75
+    ) +
+    amount * 0.00003 +       // market
+    0.11 +                   // Execution fee
+    amount * 0.004           // tobin + penalty
+  ;
+}
+
+static double broker_buy (int64_t stocks, double price) {
+  double amount = stocks * price;
+  return amount + broker_buy_fees(amount);
+}
+
+static double broker_sell_fees(double amount) {
+  return (amount > 50000      // broker
+      ? amount * 0.001
+      : 9.75
+    ) +
+    amount * 0.00003 +       // market
+    0.11 +                   // Execution fee
+    amount * 0.002           // penalty
+  ;
+}
+
+static double broker_sell (int64_t stocks, double price) {
+  double amount = stocks * price;
+  return amount - broker_sell_fees(amount);
+}
+
+// \f -> f
+static Exp *broker_buy_fees_f(Exp *exp) {
+  return exp_float(broker_buy_fees(exp_rget_float(exp)));
+}
+
+// \i, f -> f
+static Exp *broker_buy_f(Exp *exp) {
+  Exp **a = (Exp**)arr_begin(exp_rget_array(exp));
+  return exp_float(broker_buy(exp_rget_int(a[0]), exp_rget_float(a[1])));
+}
+
+// \f -> f
+static Exp *broker_sell_fees_f(Exp *exp) {
+  return exp_float(broker_sell_fees(exp_rget_float(exp)));
+}
+
+// \i, f -> f
+static Exp *broker_sell_f(Exp *exp) {
+  Exp **a = (Exp**)arr_begin(exp_rget_array(exp));
+  return exp_float(broker_sell(exp_rget_int(a[0]), exp_rget_float(a[1])));
+}
+
 // \[d, <vec>, <vec>] -> ()
 static Exp *strategy_run(Exp *exp) {
   Exp **a = (Exp**)arr_begin(exp_rget_array(exp));
   // <Exp>
-  Map *env = exp_rget_map(a[0]);
+  Map *env = exp_rget_dic(a[0]);
   int days_win = exp_rget_int(opt_get(map_get(env, "daysWin")));
   int days_loss = exp_rget_int(opt_get(map_get(env, "daysLoss")));
   double *cls = ((Vec *)exp_rget_object("<vec>", a[1]))->vs;
@@ -283,38 +335,7 @@ static Exp *strategy_run(Exp *exp) {
     map_add(value, "type", exp_int(type));
     map_add(value, "stocks", exp_int(stocks));
     map_add(value, "price", exp_float(price));
-    return exp_map(value);
-  }
-
-  double broker_buy_fees(double amount) {
-    return (amount > 50000      // broker
-        ? amount * 0.001
-        : 9.75
-      ) +
-      amount * 0.00003 +       // market
-      0.11 +                   // Execution fee
-      amount * 0.002           // tobin
-    ;
-  }
-
-  double broker_buy (int stocks, double price) {
-    double amount = stocks * price;
-    return amount + broker_buy_fees(amount);
-  }
-
-  double broker_sell_fees(double amount) {
-    return (amount > 50000      // broker
-        ? amount * 0.001
-        : 9.75
-      ) +
-      amount * 0.00003 +       // market
-      0.11                     // Execution fee
-    ;
-  }
-
-  double broker_sell (int stocks, double price) {
-    double amount = stocks * price;
-    return amount - broker_sell_fees(amount);
+    return exp_dic(value);
   }
 
   // PROCESS -----
@@ -449,7 +470,7 @@ static Exp *strategy_run(Exp *exp) {
   double cash = exp_rget_float(cash_in[0]);
   double w = exp_rget_float(withdrawals[0]);
   double total = cash + assets;
-  if (total > withdrawalLimit) {
+  if (total > withdrawal_limit) {
     double dif = total - initialCapital - bet;
     double secur_amount = min_to_bet - bet;
     double withdraw = -1;
@@ -477,7 +498,7 @@ static Exp *strategy_run(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_appr(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     double start = exp_rget_float(
@@ -555,7 +576,7 @@ static Exp *calc_appr(Exp *exp) {
         refs[i] = rf - (rf - c) * incr;
       }
     } else {
-      if (c <= rf) {
+      if (c < rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + start);
       } else {
@@ -570,10 +591,10 @@ static Exp *calc_appr(Exp *exp) {
   return exp_object("<vec>", refs_v);
 }
 
-// \{Closes:[<vec>...], Params:[f...]} -> <vec>
+// \{Closes:[<vec>.], Params:[f.]} -> <vec>
 static Exp *calc_appr2(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     double start = exp_rget_float(
@@ -654,7 +675,7 @@ static Exp *calc_appr2(Exp *exp) {
         else refs[i] = r2;
       }
     } else {
-      if (c <= rf) {
+      if (c < rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + start);
       } else {
@@ -672,10 +693,119 @@ static Exp *calc_appr2(Exp *exp) {
   return exp_object("<vec>", refs_v);
 }
 
+// \{Closes:[<vec>.], Params:[f.]} -> <vec>
+static Exp *calc_appr3(Exp *exp) {
+  // <Exp>
+  Map *env = exp_rget_dic(exp);
+  Exp *env2 = opt_get(map_get(env, "env"));
+  if (!env2) {
+    double start = exp_rget_float(
+      arr_get(exp_rget_array(opt_get(map_get(env, "Params"))), 0)
+    );
+    double incr = exp_rget_float(
+      arr_get(exp_rget_array(opt_get(map_get(env, "Params"))), 1)
+    );
+
+    // <vec>
+    Exp **all_closes =
+      (Exp **)arr_begin(exp_rget_array(opt_get(map_get(env, "Closes"))));
+    Vec *closes_v = exp_rget_object("<vec>", all_closes[0]);
+    double *closes = closes_v->vs;
+    int cos = closes_v->size;
+
+    int *is_solds = ATOMIC(sizeof(int) * cos);
+    double *refs = ATOMIC(sizeof(double) * cos);
+    RANGE0(i, cos) {
+      is_solds[i] = FALSE;
+      refs[i] = closes[i] * (1 - start);
+    }_RANGE
+
+    double *pstart = ATOMIC(sizeof(double));
+    *pstart = start;
+    double *pincr = ATOMIC(sizeof(double));
+    *pincr = incr;
+    int *row = ATOMIC(sizeof(int));
+    *row = 1;
+
+    env2 = exp_array(arr_new_from(
+      pstart, // 0
+      pincr, // 1
+      row, // 2
+      is_solds, // 3
+      refs, // 4
+      all_closes, // 5
+      NULL
+    ));
+    map_add(env, "env", env2);
+
+    Vec *refs_v = MALLOC(Vec);
+    refs_v->size = cos;
+    refs_v->vs = refs;
+    return exp_object("<vec>", refs_v);
+  }
+  void **envs = arr_begin(exp_rget_array(env2));
+
+  // FUNCTIONS -----
+
+  // PROCESS -----
+
+  double start = *((double *)envs[0]);
+  double incr = *((double *)envs[1]);
+  int *prow = envs[2];
+  int row = *prow;
+  *prow = row + 1;
+  int *is_solds = envs[3];
+  double *refs = envs[4];
+  Exp **all_closes = envs[5];
+  Vec *closes_v = exp_rget_object("<vec>", all_closes[row]);
+  int cos = closes_v->size;
+  double *closes = closes_v->vs;
+  int row1 = row - 1;
+  Vec *pcloses_v = exp_rget_object("<vec>", all_closes[row1]);
+  double *pcloses = pcloses_v->vs;
+
+  RANGE0(i, cos) {
+    double c = closes[i];
+    double rf = refs[i];
+    int is_sold = is_solds[i];
+
+    if (is_sold) {
+      if (c > rf) {
+        is_solds[i] = FALSE;
+        refs[i] = c * (1 - start);
+      } else {
+        double pc = pcloses[i];
+
+        double r1 = rf - (rf - c) * incr;
+        double r2 = c * rf / pc;
+        if (r1 < r2) refs[i] = r1;
+        else refs[i] = r2;
+      }
+    } else {
+      if (c < rf) {
+        is_solds[i] = TRUE;
+        refs[i] = c * (1 + start);
+      } else {
+        double pc = pcloses[i];
+
+        double r1 = rf + (c - rf) * incr;
+        double r2 = c * rf / pc;
+        if (r1 > r2) refs[i] = r1;
+        else refs[i] = r2;
+      }
+    }
+  }_RANGE
+
+  Vec *refs_v = MALLOC(Vec);
+  refs_v->size = cos;
+  refs_v->vs = refs;
+  return exp_object("<vec>", refs_v);
+}
+
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_ea(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     int days = (int)(exp_rget_float(
@@ -776,7 +906,7 @@ static Exp *calc_ea(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c <= rf) {
+        if (c < rf) {
           is_solds[i] = TRUE;
           refs[i] = new_avg * (1 + strip);
         } else {
@@ -797,7 +927,7 @@ static Exp *calc_ea(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_ea2(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     int days = (int)(exp_rget_float(
@@ -898,7 +1028,7 @@ static Exp *calc_ea2(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c <= rf) {
+        if (c < rf) {
           is_solds[i] = TRUE;
           refs[i] = new_avg * (1 + strip);
         } else {
@@ -919,7 +1049,7 @@ static Exp *calc_ea2(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_ma(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     int days = (int)(exp_rget_float(
@@ -1023,7 +1153,7 @@ static Exp *calc_ma(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c <= rf) {
+        if (c < rf) {
           is_solds[i] = TRUE;
           refs[i] = avg * (1 + strip);
         } else {
@@ -1044,7 +1174,7 @@ static Exp *calc_ma(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_mm(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     int days = (int)(exp_rget_float(
@@ -1141,7 +1271,7 @@ static Exp *calc_mm(Exp *exp) {
           else refs[i] = rf;
         }
       } else {
-        if (c <= rf) {
+        if (c < rf) {
           is_solds[i] = TRUE;
           refs[i] = old_c * (1 + strip);
         } else {
@@ -1162,7 +1292,7 @@ static Exp *calc_mm(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_qfix(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     double *jmp = ATOMIC(sizeof(double));
@@ -1177,9 +1307,9 @@ static Exp *calc_qfix(Exp *exp) {
     double *closes = closes_v->vs;
     int cos = closes_v->size;
     double *refs = ATOMIC(sizeof(double) * cos);
+    double jmp2 = *jmp;
+    double lg_jmp = log(jmp2);
     RANGE0(i, cos) {
-      double jmp2 = *jmp;
-      double lg_jmp = log(jmp2);
       refs[i] = pow(jmp2, round(log(closes[i])/lg_jmp) - 1) / jmp2;
     }_RANGE
 
@@ -1268,7 +1398,7 @@ static Exp *calc_qfix(Exp *exp) {
 // \{Closes:[<vec>...], Params:[f...]} -> <vec>
 static Exp *calc_qmob(Exp *exp) {
   // <Exp>
-  Map *env = exp_rget_map(exp);
+  Map *env = exp_rget_dic(exp);
   Exp *env2 = opt_get(map_get(env, "env"));
   if (!env2) {
     double gap = exp_rget_float(
@@ -1341,7 +1471,7 @@ static Exp *calc_qmob(Exp *exp) {
         refs[i] = new_rf;
       }
     } else {
-      if (c <= rf) {
+      if (c < rf) {
         is_solds[i] = TRUE;
         refs[i] = c * (1 + gap);
       } else {
@@ -1359,8 +1489,23 @@ static Exp *calc_qmob(Exp *exp) {
 }
 
 Exp *exmodule_run (char *fn, Exp *data) {
+  // CONSTANTS
+
+  if (!strcmp(fn, "bet")) return exp_float(bet);
+  if (!strcmp(fn, "initialCapital")) return exp_float(initialCapital);
+  if (!strcmp(fn, "minToBet")) return exp_float(min_to_bet);
+  if (!strcmp(fn, "noLossMultiplicator")) return exp_float(no_loss_multiplicator);
+  if (!strcmp(fn, "withdrawalLimit")) return exp_float(withdrawal_limit);
+
+  // FUNCTIONS
+
+  if (!strcmp(fn, "brokerBuy")) return broker_buy_f(data);
+  if (!strcmp(fn, "brokerBuyFees")) return broker_buy_fees_f(data);
+  if (!strcmp(fn, "brokerSell")) return broker_sell_f(data);
+  if (!strcmp(fn, "brokerSellFees")) return broker_sell_fees_f(data);
   if (!strcmp(fn, "calcAppr")) return calc_appr(data);
   if (!strcmp(fn, "calcAppr2")) return calc_appr2(data);
+  if (!strcmp(fn, "calcAppr3")) return calc_appr3(data);
   if (!strcmp(fn, "calcEa")) return calc_ea(data);
   if (!strcmp(fn, "calcEa2")) return calc_ea2(data);
   if (!strcmp(fn, "calcMa")) return calc_ma(data);

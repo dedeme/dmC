@@ -59,7 +59,6 @@ static Opt *range_next_down (solver_range2_O *o) {
 
 // ----------------------------------------------------------------------------
 
-// stk is Arr<StatCode>, is is Map<int>
 Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
   if (exp_is_bool(exp)) {
     return exp;
@@ -81,13 +80,13 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       Exp *solve (Exp *e) { return solver_solve(is, h0, hs, e); }
     return exp_array(arr_map(exp_get_array(exp), (FMAP)solve));
   }
-  if (exp_is_map(exp)) {
+  if (exp_is_dic(exp)) {
       //--
       // <Exp>
       Kv *solve (Kv *kv) {
         return kv_new(kv_key(kv), solver_solve(is, h0, hs, kv_value(kv)));
       }
-    return exp_map((Map *)arr_map(map_to_array(exp_get_map(exp)), (FMAP)solve));
+    return exp_dic((Map *)arr_map(map_to_array(exp_get_dic(exp)), (FMAP)solve));
   }
   if (exp_is_function(exp)) {
     return exp_function(function_set_context(
@@ -110,7 +109,16 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     // IN HEAP0
 
     if (e) {
-      r = solver_solve(is, h0, hs, heap0_entry_exp(e));
+      Heap0 *new_h0 = h0;
+      Exp *exp = heap0_entry_exp(e);
+
+      if (heaps_is_initial(hs)) {
+        if (exp_is_cyclic(exp))
+          EXC_KUT(str_f("Cyclic symbol %s", symix_get(sym)));
+        new_h0 = heap0_new_cyclic(h0, e);
+      }
+
+      r = solver_solve(is, new_h0, hs, exp);
       heap_add(tp_e2(ex_hp), sym, r);
       return r;
     }
@@ -206,9 +214,9 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
         exp_rget_sym(tp_e2(v))
       ));
     }
-    if (exp_is_map(ex0)) {
+    if (exp_is_dic(ex0)) {
       char *key = symix_get(exp_rget_sym(tp_e2(v)));
-      return md_dic_fget(exp_get_map(ex0), key);
+      return md_dic_fget(exp_get_dic(ex0), key);
     }
     EXC_KUT(fail_type("module or dictionary", ex0));
   }
@@ -221,8 +229,8 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       return md_str_at(exp_get_string(ct), exp_rget_int(ix_key));
     if (exp_is_array(ct))
       return arr_get(exp_get_array(ct), exp_rget_int(ix_key));
-    if (exp_is_map(ct))
-      return md_dic_fget(exp_get_map(ct), exp_rget_string(ix_key));
+    if (exp_is_dic(ct))
+      return md_dic_fget(exp_get_dic(ct), exp_rget_string(ix_key));
     EXC_KUT(fail_type("string, array or dictionary", ct));
   }
   if (exp_is_slice(exp)) {
@@ -292,7 +300,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
           return solver_solve(is, h0, hs, tp_e2(e));
 
         Exp *cond2 = solver_solve(is, h0, hs, exp);
-        if (exp_rget_as_bool(solver_solve_isolate(exp_eq(cond, cond2)))) {
+        if (exp_rget_bool(solver_solve_isolate(exp_eq(cond, cond2)))) {
           ok = TRUE;
           break;
         }
@@ -332,7 +340,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       arr_cat(a, exp_rget_array(e2));
       return exp_array(a);
     }
-    EXC_KUT(fail_type("int, float, string or array", e1));
+    EXC_KUT(fail_type("int, float, string, array or vec", e1));
   }
   if (exp_is_sub(exp)) {
     // <Exp, Exp>
@@ -343,7 +351,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     if (exp_is_float(e1)) return exp_float(
       exp_get_float(e1) - exp_rget_float(e2)
     );
-    EXC_KUT(fail_type("int or float", e1));
+    EXC_KUT(fail_type("int, float or vec", e1));
   }
   if (exp_is_mul(exp)) {
     // <Exp, Exp>
@@ -354,7 +362,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     if (exp_is_float(e1)) return exp_float(
       exp_get_float(e1) * exp_rget_float(e2)
     );
-    EXC_KUT(fail_type("int or float", e1));
+    EXC_KUT(fail_type("int, float or vec", e1));
   }
   if (exp_is_div(exp)) {
     // <Exp, Exp>
@@ -373,35 +381,37 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
         EXC_KUT("Floating division by 0");
       return exp_float(exp_get_float(e1) / dv);
     }
-    EXC_KUT(fail_type("int or float", e1));
+    EXC_KUT(fail_type("int, float or vec", e1));
   }
   if (exp_is_mod(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_mod(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
-    int64_t dv = exp_rget_int(e2);
-    if (!dv)
-      EXC_KUT("Integer division by 0");
-
-    return exp_int(exp_rget_int(e1) % dv);
+    if (exp_is_int(e1)) {
+      int64_t dv = exp_rget_int(e2);
+      if (!dv)
+        EXC_KUT("Integer division by 0");
+      return exp_int(exp_rget_int(e1) % dv);
+    }
+    EXC_KUT(fail_type("int or vec", e1));
   }
   if (exp_is_and(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_and(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
-    int b1 = exp_rget_as_bool(e1);
+    int b1 = exp_rget_bool(e1);
     if (b1)
-      return exp_bool(exp_rget_as_bool(solver_solve(is, h0, hs, tp_e2(v))));
+      return exp_bool(exp_rget_bool(solver_solve(is, h0, hs, tp_e2(v))));
     return exp_bool(FALSE);
   }
   if (exp_is_or(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_or(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
-    int b1 = exp_rget_as_bool(e1);
+    int b1 = exp_rget_bool(e1);
     if (b1) return exp_bool(TRUE);
-    return exp_bool(exp_rget_as_bool(solver_solve(is, h0, hs, tp_e2(v))));
+    return exp_bool(exp_rget_bool(solver_solve(is, h0, hs, tp_e2(v))));
   }
 
     //--
@@ -450,12 +460,12 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
         }
         else return exp_bool(FALSE);
       }
-      if (exp_is_map(e1)) {
-        if (exp_is_map(e2)) {
+      if (exp_is_dic(e1)) {
+        if (exp_is_dic(e2)) {
           // <Exp>
-          Map *m1 = exp_get_map(e1);
+          Map *m1 = exp_get_dic(e1);
           // <Exp>
-          Map *m2 = exp_get_map(e2);
+          Map *m2 = exp_get_dic(e2);
 
           if (map_size(m1) != map_size(m2)) return exp_bool(FALSE);
           EACH(map_to_array(m1), Kv, kv) {
@@ -472,7 +482,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
         else return exp_bool(FALSE);
       }
 
-      EXC_KUT(fail_type("bool, int, float, string or array", e1));
+      EXC_KUT(fail_type("bool, int, float, string, array, dic or vec", e1));
       return NULL; // Unreachable
     }
     // v is Tp<Exp, Exp>
@@ -525,7 +535,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     // <Exp, Exp, Exp>
     Tp3 *v = exp_get_ternary(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp3_e1(v));
-    if (exp_rget_as_bool(e1)) return solver_solve(is, h0, hs, tp3_e2(v));
+    if (exp_rget_bool(e1)) return solver_solve(is, h0, hs, tp3_e2(v));
     else return solver_solve(is, h0, hs, tp3_e3(v));
   }
 

@@ -15,7 +15,6 @@ let isDmCgi = true;
 let appName = "";
 let user = "";
 let sessionKey = "0";
-let connectionKey = "";
 let levelV = "";
 let fExpired = () => {};
 
@@ -31,41 +30,16 @@ function sendServer (jsRq) {
     request.onload = () => {
       if (request.status >= 200 && request.status < 300)
         resolve(request.responseText.trim());
-      else reject(new Error(request.statusText));
+      else reject(Error(request.statusText));
     };
-    request.onerror = () => reject(new Error("Network error: " + request.statusText));
-    request.onabort = () => reject(new Error("Network error: " + request.statusText));
+    request.onerror = () => reject(Error("Network error: " + request.statusText));
+    request.onabort = () => reject(Error("Network error: " + request.statusText));
     request.setRequestHeader(
       "Content-Type",
       "text/plain"
     );
     request.send(appName + ":" + jsRq);
   });
-}
-
-// \b, {*...} -> <promise>{*...}
-async function sendCommon (isSecure, rq) {
-  let rp = "<without response>";
-  try {
-    rp = await sendServer(isSecure
-      ? sessionId() + ":" + connectionKey + ":" + cryp.encode(sessionKey, js.w(rq))
-      : sessionId() + ":" + cryp.encode(sessionKey, js.w(rq))
-    );
-    return js.r(cryp.decode(sessionKey, rp));
-  } catch (e) {
-    try {
-      const data = js.r(cryp.decode("nosession", rp));
-      if (dic.hasKey(data, "expired")) {
-        fExpired();
-        return {};
-      }
-      throw(e);
-    } catch (e2) {
-      throw new Error(str.fmt(
-        "RAW SERVER RESPONSE:\n%v\nCLIENT ERROR:\n%v", [rp, e2.message]
-      ));
-    }
-  }
 }
 
 // \s, s, b -> <promise>b
@@ -88,10 +62,9 @@ export async function authentication (userName, pass, withExpiration) {
     user = userName;
     sessionKey = data["key"];
     levelV = data["level"];
-    connectionKey = ["conKey"];
     return true;
   } catch (e) {
-    throw new Error(str.fmt(
+    throw Error(str.fmt(
       "RAW SERVER RESPONSE:\n%v\nCLIENT ERROR:\n%v", [rp, e.message]
     ));
   }
@@ -110,10 +83,9 @@ export async function connect () {
 
     user = data["user"];
     levelV = data["level"];
-    connectionKey = data["conKey"];
     return true;
   } catch (e) {
-    throw new Error(str.fmt(
+    throw Error(str.fmt(
       "RAW SERVER RESPONSE:\n%v\nCLIENT ERROR:\n%v", [rp, e.message]
     ));
   }
@@ -155,7 +127,7 @@ export async function longRun (rq) {
     ++count;
 
     if (dic.hasKey(rp, "longRunEnd") && rp["longRunEnd"]) timer.stop(tm);
-    else if (count >= 60) throw new Error("Long run time over");
+    else if (count >= 60) throw Error("Long run time over");
     return rp;
   });
 }
@@ -170,13 +142,31 @@ export function sessionId () {
 // \{*...} -> <promise>{*...}
 export async function send (rq) {
   sys.$params(arguments.length, 1);
-  return await sendCommon(false, rq);
-}
-
-// \{*...} -> <promise>{*...}
-export async function ssend (rq) {
-  sys.$params(arguments.length, 1);
-  return await sendCommon(true, rq);
+  let rp = "<without response>";
+  try {
+    rp = await sendServer(
+      sessionId() + ":" + cryp.encode(sessionKey, js.w(rq))
+    );
+    const data = js.r(cryp.decode(sessionKey, rp));
+    if (dic.hasKey(data, "dbKey") && data["dbKey"] === "") {
+      fExpired(false);
+      return {};
+    }
+    return data;
+  } catch (e) {
+    try {
+      const data = js.r(cryp.decode("nosession", rp));
+      if (dic.hasKey(data, "expired")) {
+        fExpired(true);
+        return {};
+      }
+      throw(e);
+    } catch (e2) {
+      throw Error(str.fmt(
+        "RAW SERVER RESPONSE:\n%v\nCLIENT ERROR:\n%v", [rp, e2.message]
+      ));
+    }
+  }
 }
 
 // \-> s

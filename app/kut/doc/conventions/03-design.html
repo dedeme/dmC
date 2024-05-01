@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Design</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Conventions and Programing Schemes.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-snippets.html'>Anterior (Snippets)</a> · <a href="index.html">Índice</a> · <a href='04-flow.html'>Posterior (Program Flow)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Constants'>Constants</a><br>
+<a href='#Enumerations'>Enumerations</a><br>
+<a href='#Global functions.'>Global functions.</a><br>
+<a href='#Objets and not side effects functions among them.'>Objets and not side effects functions among them.</a><br>
+<a href='#Data base'>Data base</a><br>
+<a href='#Browser interface'>Browser interface</a>
+</p>
+<hr>
+<a name="Constants"></a>
+<h3>Constants</h3>
+<p>Every constat shuld be in <code>data/cts.kut</code>.</p>
+<a name="Enumerations"></a>
+<h3>Enumerations</h3>
+<p>Use the form <code>a, b,...=;</code> for enumrations of intesive use and  <code>a, b,...:;"</code>
+for normal use.</p>
+<a name="Global functions."></a>
+<h3>Global functions.</h3>
+<p>They should be in a file in root named <code>fns.kut</code>.</p>
+<a name="Objets and not side effects functions among them."></a>
+<h3>Objets and not side effects functions among them.</h3>
+<p>They should be in a directory in root named <code>data</code> and its subdirectories.</p>
+<a name="Data base"></a>
+<h3>Data base</h3>
+<ol>
+<dt>Initialization</dt>
+<dd>
+<p>They should be in a file in root named <code>db.kut</code>.</p>
+</dd>
+<dt>Tables and similars, including functions with side effects.</dt>
+<dd>
+<p>They should be in a directory in root named <code>db</code> and its subdirectories.</p>
+<p>Files should be named with suffix '.tb' if they do the management of a table or
+  '.db' if they do it of several tables.</p>
+</dd>
+</ol>
+<a name="Browser interface"></a>
+<h3>Browser interface</h3>
+<p>They should be in a directory in root named <code>pgs</code> and its subdirectories.</p>
+<p>Files should be named with suffix '.pg' for complete pages, or '.wg' for
+widgets.</p>
+<p>The main hub of request processing should be in a file in root named <code>pgs.kut</code>.</p>
+<hr>
+<p style="text-indent: 0px"><a href='02-snippets.html'>Anterior (Snippets)</a> · <a href="index.html">Índice</a> · <a href='04-flow.html'>Posterior (Program Flow)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

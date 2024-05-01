@@ -27,6 +27,11 @@ typedef struct heap0_Heap0 Heap0;
 /// Constructor.
 Heap0 *heap0_new (void);
 
+/// Returns a new Heap0 duplicate of 'this' and with the symbol of 'entry'
+/// marked as cyclic.
+/// Used to prevent cyclic references.
+Heap0 *heap0_new_cyclic (Heap0 *this, Heap0Entry *entry);
+
 /// Returns this as an Arr<Heap0Entry>.
 Arr *heap0_get_array (Heap0 *this);
 

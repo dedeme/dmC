@@ -197,6 +197,29 @@ static Exp *findex (Arr *exps) {
   return exp_int(arr_index(a, (FPRED)fn2));
 }
 
+// \a, i, * -> ()
+static Exp *insert (Arr *exps) {
+  CHECK_PARS ("arr.insert", 3, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Exp *e = arr_get(exps, 2);
+  arr_insert(a, ix, e);
+  return exp_empty();
+}
+
+// \a, i, a -> ()
+static Exp *insert_arr (Arr *exps) {
+  CHECK_PARS ("arr.inserArr", 3, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  // <Exp>
+  Arr *a2 = exp_rget_array(arr_get(exps, 2));
+  arr_insert_arr(a, ix, a2);
+  return exp_empty();
+}
+
 // \[s...], s -> s
 static Exp *join (Arr *exps) {
   CHECK_PARS ("arr.join", 2, exps);
@@ -297,6 +320,19 @@ static Exp *fremove (Arr *exps) {
   return e;
 }
 
+// \a, i, i -> a
+static Exp *remove_range (Arr *exps) {
+  CHECK_PARS ("arr.remove_range", 3, exps);
+  // <Exp>
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  int64_t begin = exp_rget_int(arr_get(exps, 1));
+  int64_t end = exp_rget_int(arr_get(exps, 2));
+  // <Exp>
+  Arr *r = arr_take(arr_drop(a, begin), end - begin);
+  arr_remove_range(a, begin, end);
+  return exp_array(r);
+}
+
 // \a -> a
 static Exp *reverse (Arr *exps) {
   CHECK_PARS ("arr.reverse", 1, exps);
@@ -393,6 +429,71 @@ static Exp *unshift (Arr *exps) {
   return exp_empty();
 }
 
+// \[[*.].] -> [[*.].]
+static Exp *unzip (Arr *exps) {
+  CHECK_PARS ("arr.unzip", 1, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+
+  int nels = arr_size(a);
+  if (nels == 0) return exp_array(a);
+
+  // <Arr>
+  Arr *r = arr_new();
+  int nas = arr_size(exp_rget_array(arr_get(a, 0)));
+  RANGE0(ias, nas) {
+    arr_push(r, arr_new());
+  }_RANGE
+
+  RANGE0(iels, nels) {
+    // <Exp>
+    Arr *els = exp_rget_array(arr_get(a, iels));
+    RANGE0(ias, nas) {
+      Arr *col = arr_get(r, ias);
+      arr_push(col, arr_get(els, ias));
+    }_RANGE
+  }_RANGE
+
+  // <Exp>
+  Arr *exp_r = arr_new();
+  RANGE0(ias, nas) {
+    arr_push(exp_r, exp_array(arr_get(r, ias)));
+  }_RANGE
+
+  return exp_array(exp_r);
+}
+
+// \[[*.].] -> [[*.].]
+static Exp *zip (Arr *exps) {
+  CHECK_PARS ("arr.zip", 1, exps);
+  Arr *a = exp_rget_array(arr_get(exps, 0));
+  int nas = arr_size(a);
+  if (nas < 2) return exp_array(a);
+
+  // Exp
+  Arr *as = arr_new();
+  RANGE0(i, nas) {
+    arr_push(as, exp_rget_array(arr_get(a, i)));
+  }_RANGE
+  int nels = arr_size(arr_get(as, 0));
+  RANGE(ias, 1, nas) {
+    int sz = arr_size(arr_get(as, ias));
+    if (sz < nels) nels = sz;
+  }_RANGE
+  if (nels == 0) return exp_array(arr_new());
+
+  // Exp
+  Arr *r = arr_new();
+  RANGE0(iels, nels) {
+    // Exp
+    Arr *row = arr_new();
+    RANGE0(ias, nas) {
+      arr_push(row, arr_get(arr_get(as, ias), iels));
+    }_RANGE
+    arr_push(r, exp_array(row));
+  }_RANGE
+  return exp_array(r);
+}
+
 Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "all")) return all;
   if (!strcmp(fname, "any")) return any;
@@ -409,6 +510,8 @@ Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "find")) return find;
   if (!strcmp(fname, "fromIter")) return from_iter;
   if (!strcmp(fname, "index")) return findex;
+  if (!strcmp(fname, "insert")) return insert;
+  if (!strcmp(fname, "insertArr")) return insert_arr;
   if (!strcmp(fname, "join")) return join;
   if (!strcmp(fname, "map")) return map;
   if (!strcmp(fname, "new")) return new;
@@ -417,6 +520,7 @@ Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "push")) return push;
   if (!strcmp(fname, "reduce")) return reduce;
   if (!strcmp(fname, "remove")) return fremove;
+  if (!strcmp(fname, "removeRange")) return remove_range;
   if (!strcmp(fname, "reverse")) return reverse;
   if (!strcmp(fname, "reverseIn")) return reverse_in;
   if (!strcmp(fname, "shift")) return shift;
@@ -427,6 +531,8 @@ Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "takeWhile")) return take_while;
   if (!strcmp(fname, "toIter")) return to_iter;
   if (!strcmp(fname, "unshift")) return unshift;
+  if (!strcmp(fname, "unzip")) return unzip;
+  if (!strcmp(fname, "zip")) return zip;
   EXC_KUT(fail_bfunction("arr", fname));
   return NULL; // Unreachable
 }

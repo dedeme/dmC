@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Snippets</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Conventions and Programing Schemes.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='01-naming.html'>Anterior (Naming)</a> · <a href="index.html">Índice</a> · <a href='03-design.html'>Posterior (Design)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Testing variable'>Testing variable</a><br>
+<a href='#Results'>Results</a>
+</p>
+<hr>
+<a name="Testing variable"></a>
+<h3>Testing variable</h3>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+a0 = fn();
+a = a0 == "x" : a0 : "z";
+...
+</div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<a name="Results"></a>
+<h3>Results</h3>
+<h4>Result wiht ok.</h4>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+// b
+ok = fn();
+if (!ok) sys.throw("msg");
+...
+</div>
+<script>aceConf("aceEditor-1", "kut");</script>
+<h4>Result with error.</h4>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+// s
+error = fn();
+if (error != "") sys.throw(error);
+...
+</div>
+<script>aceConf("aceEditor-2", "kut");</script>
+<h4>Option results</h4>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+aOp = fn();
+if (!aOp) sys.throw("msg");
+a = aOp!;
+...
+</div>
+<script>aceConf("aceEditor-3", "kut");</script>
+<p>&nbsp;</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+aOp = fn();
+a = !aOp ? "default" : aOp!;
+...
+</div>
+<script>aceConf("aceEditor-4", "kut");</script>
+<p>&nbsp;</p>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+aOp = fn();
+if (!!aOp) fn(aOp!)
+...
+</div>
+<script>aceConf("aceEditor-5", "kut");</script>
+<h4>Result with value.</h4>
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">...
+// [*|s, b]
+v, ok = fn();
+if (!ok) sys.throw(v);
+...
+</div>
+<script>aceConf("aceEditor-6", "kut");</script>
+<hr>
+<p style="text-indent: 0px"><a href='01-naming.html'>Anterior (Naming)</a> · <a href="index.html">Índice</a> · <a href='03-design.html'>Posterior (Design)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

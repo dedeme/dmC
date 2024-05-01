@@ -103,34 +103,9 @@ static Exp *eq_day (Arr *exps) {
   ));
 }
 
-// \i, s -> i
+// \i, s -> [i]|[]
 static Exp *from_clock (Arr *exps) {
   CHECK_PARS ("time.fromClock", 2, exps);
-  int64_t tm = exp_get_int(arr_get(exps, 0));
-  char *tms = exp_rget_string(arr_get(exps, 1));
-  // <char>
-  Arr *ps = str_csplit(tms, ':');
-  if (arr_size(ps) == 3) {
-    int h = to_time_number(arr_get(ps, 0), 24);
-    if (h != 1) {
-      int m = to_time_number(arr_get(ps, 1), 60);
-      if (m != -1) {
-        int s = to_time_number(arr_get(ps, 2), 60);
-        if (s != -1)
-          return exp_int(time_new_time(
-            time_day(tm), time_month(tm), time_year(tm),
-            h, m, s
-          ));
-      }
-    }
-  }
-  EXC_ILLEGAL_ARGUMENT("Bad time", "Time in format HH:MM:SS", tms);
-  return NULL; // Unreachable
-}
-
-// \i, s -> [i]|[]
-static Exp *from_clock_op (Arr *exps) {
-  CHECK_PARS ("time.fromClockOp", 2, exps);
   int64_t tm = exp_get_int(arr_get(exps, 0));
   char *tms = exp_rget_string(arr_get(exps, 1));
   // <char>
@@ -154,18 +129,9 @@ static Exp *from_clock_op (Arr *exps) {
   return exp_array(arr_new());
 }
 
-// \s, s -> i
+// \s, s -> [i]|[]
 static Exp *from_en (Arr *exps) {
   CHECK_PARS ("time.fromEn", 2, exps);
-  return exp_int(time_from_us_sep(
-    exp_rget_string(arr_get(exps, 0)),
-    *exp_rget_string(arr_get(exps, 1))
-  ));
-}
-
-// \s, s -> [i]|[]
-static Exp *from_en_op (Arr *exps) {
-  CHECK_PARS ("time.fromEnOp", 2, exps);
   return from_iso_en_op(
     FALSE,
     exp_rget_string(arr_get(exps, 0)),
@@ -173,18 +139,9 @@ static Exp *from_en_op (Arr *exps) {
   );
 }
 
-// \s, s -> i
+// \s, s -> [i]|[]
 static Exp *from_iso (Arr *exps) {
   CHECK_PARS ("time.fromIso", 2, exps);
-  return exp_int(time_from_iso_sep(
-    exp_rget_string(arr_get(exps, 0)),
-    *exp_rget_string(arr_get(exps, 1))
-  ));
-}
-
-// \s, s -> [i]|[]
-static Exp *from_iso_op (Arr *exps) {
-  CHECK_PARS ("time.fromIsoOp", 2, exps);
   return from_iso_en_op(
     TRUE,
     exp_rget_string(arr_get(exps, 0)),
@@ -192,23 +149,17 @@ static Exp *from_iso_op (Arr *exps) {
   );
 }
 
-// \s -> i
+// \s -> [i]|[]
 static Exp *from_str (Arr *exps) {
   CHECK_PARS ("time.fromStr", 1, exps);
-  return exp_int(time_from_str(exp_rget_string(arr_get(exps, 0))));
-}
-
-// \s -> [i]|[]
-static Exp *from_str_op (Arr *exps) {
-  CHECK_PARS ("time.fromStrOp", 1, exps);
   return from_str_op_aux(exp_rget_string(arr_get(exps, 0)));
 }
 
 // \s, i -> s
 static Exp *fmt (Arr *exps) {
   CHECK_PARS ("time.fmt", 2, exps);
-  char *s = exp_rget_string(arr_get(exps, 0));
-  int64_t tm = exp_rget_int(arr_get(exps, 1));
+  int64_t tm = exp_rget_int(arr_get(exps, 0));
+  char *s = exp_rget_string(arr_get(exps, 1));
 
   int len = strlen(s);
   int p = 0;
@@ -375,14 +326,10 @@ Bfunction md_time_get (char *fname) {
   if (!strcmp(fname, "dfDays")) return df_days;
   if (!strcmp(fname, "eqDay")) return eq_day;
   if (!strcmp(fname, "fromClock")) return from_clock;
-  if (!strcmp(fname, "fromClockOp")) return from_clock_op;
   if (!strcmp(fname, "fromEn")) return from_en;
-  if (!strcmp(fname, "fromEnOp")) return from_en_op;
   if (!strcmp(fname, "fromIso")) return from_iso;
-  if (!strcmp(fname, "fromIsoOp")) return from_iso_op;
   if (!strcmp(fname, "fromStr")) return from_str;
-  if (!strcmp(fname, "fromStrOp")) return from_str_op;
-  if (!strcmp(fname, "fmt")) return fmt;
+  if (!strcmp(fname, "format")) return fmt;
   if (!strcmp(fname, "hour")) return hour;
   if (!strcmp(fname, "millisecond")) return millisecond;
   if (!strcmp(fname, "minute")) return minute;

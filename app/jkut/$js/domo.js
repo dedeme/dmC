@@ -10,7 +10,7 @@ class Domo {
   // \<domo> -> <domo>
   add (o) { this.el.appendChild(o.e); return this; }
   // \[<domo>] -> <domo>
-  adds (a) { a.forEach(o => this.el.appendChild(o.e)); return this; }
+  adds (a) { for (const o of a) this.el.appendChild(o.e); return this; }
   // \s, * -> <domo>
   att (k, v) { this.el.setAttribute(k, v); return this; }
   // \b -> <domo>

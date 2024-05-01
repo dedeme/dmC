@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Comienzo</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='01-requisitos.html'>Anterior (Requisitos)</a> · <a href="index.html">Índice</a> · <a href='03-lector1.html'>Posterior (Lector de bajo nivel)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Línea de comando.'>Línea de comando.</a><br>
+<a href='#Inicialización.'>Inicialización.</a><br>
+<a href='#Comprobación - ejecución.'>Comprobación - ejecución.</a>
+</p>
+<hr>
+<p>(Archivos <i>main.h</i> y <i>main.c</i>)</p>
+<a name="Línea de comando."></a>
+<h3>Línea de comando.</h3>
+<p>Kut puede ser llamado de las siguientes formas:</p>
+<h4><code>kut -v</code></h4>
+<p>Muestra la versión del programa.</p>
+<p>Ejemplo:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">  kut -v</div>
+<script>aceConf("aceEditor-0", "bash");</script>
+<h4><code>kut -c &lt;archivo></code></h4>
+<p>Comprueba la sintaxis de <i>archivo</i>.</p>
+<p>Ejemplo:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">  kut -c myprogr</div>
+<script>aceConf("aceEditor-1", "bash");</script>
+<h4><code>kut &lt;archivo> [argumentos]</code></h4>
+<p>Ejecuta un <i>archivo</i> '.kut' con argumentos opcionales.</p>
+<p><i>archivo</i> va sin extensión.</p>
+<p>Ejemplos:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">  kut myprogr
+  kut myprogr arg1 arg2</div>
+<script>aceConf("aceEditor-2", "bash");</script>
+<a name="Inicialización."></a>
+<h3>Inicialización.</h3>
+<h4>Señal SIGFPE</h4>
+<p>Se redirecciona la señal de error matemático para generar un mensaje antes
+de finalizar el programa.</p>
+<h4>Recolector de basura.</h4>
+<p>Se inicializa el recolector de basura.</p>
+<h4>Sistema.</h4>
+<ul>
+<li>
+<p>Establece el lenguaje a 'C'.</p>
+</li>
+<li>
+<p>Prepara el generador de números aleatorios.</p>
+</li>
+<li>
+<p>Prepara el sistema de <i>threads</i>.</p>
+</li>
+</ul>
+<h4>Índice de archivos con código.</h4>
+<p>Se inicializa el objeto <a href="80-objetos.html#fileix">fileix</a> y se establece el valor
+del path relativo del archivo <i>.kut</i> que está siendo procesado.</p>
+<h4>Índice de símbolos.</h4>
+<p>Se inicializa el objeto <a href="80-objetos.html#symix">symix</a> añadiendo las palabras
+reservadas y los nombres de las librerías básicas (_built-in_).</p>
+<h4>Índice de modulos.</h4>
+<p>Se inicializa la <a href="80-objetos.html#módulos">lista de módulos</a> creando una lista
+vacía.</p>
+<a name="Comprobación - ejecución."></a>
+<h3>Comprobación - ejecución.</h3>
+<p>Esta acción se ejecuta dentro de bloque <code>TRY</code>, que, en caso de excepción,
+imprime el mensaje de la misma.</p>
+<p>Primeramente se lee y registra el módulo correspondiente al archivo principal
+y después, dependiendo de la opción <code>-c</code> de la línea de comando, se pasa a la
+comprobación o a la ejecución.</p>
+<h4>Lectura.</h4>
+<p>Se hace creando un nuevo lector lector de bajo nivel
+(<a href="03-lector1.html#Clase <code>Cdr</code>">Cdr</a>) e iniciando un proceso
+<a href="04-lector2.html#Lector de bloque principal">lectura de bloque principal</a>.</p>
+<h4>Comprobación.</h4>
+<ol>
+<li>
+<p>Se leen todos los módulos del programa y se registran.</p>
+</li>
+<li>
+<p> Se comprueba cada módulo con <a href="06-comprobador.html">el comprobador</a> (*checker*).</p>
+</li>
+</ol>
+<h4>Ejecución.</h4>
+<p>Se ejecuta el código del módulo pricipal con el <a href="05-ejecutor.html">el ejecutor</a> (*runner*).
+La lectura y ejecución de los demás módulos se va realizando conforme el
+programa se ejecuta.</p>
+<p>La expresión devuelta por esta función es descartada salvo que sea un <i>break</i> o
+un <i>continue</i>, en cuyo caso se lanza un excepción.</p>
+<hr>
+<p style="text-indent: 0px"><a href='01-requisitos.html'>Anterior (Requisitos)</a> · <a href="index.html">Índice</a> · <a href='03-lector1.html'>Posterior (Lector de bajo nivel)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

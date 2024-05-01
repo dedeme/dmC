@@ -33,6 +33,12 @@ Exp *exp_empty_return (void);
 /// Returns TRUE if 'this' is an empty-return expression.
 int exp_is_empty_return (Exp *this);
 
+/// Returns a 'cyclic symbol' expression used to prevent cyclic references.
+Exp *exp_cyclic (void);
+
+/// Returns TRUE if 'this' is a cyclic expression.
+int exp_is_cyclic (Exp *this);
+
 /// Creates an expression of the indicated type.
 Exp *exp_break (Stack *value);
 
@@ -70,9 +76,6 @@ int exp_is_bool (Exp *this);
 /// Read an Exp of type bool, string or array as boolean.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
 int exp_rget_as_bool (Exp *this);
-
-/// Returns TRUE if 'this' is of type bool, string or array.
-int exp_is_as_bool (Exp *this);
 
 /// Creates an expression of the indicated type.
 Exp *exp_int (int64_t value);
@@ -117,6 +120,8 @@ char *exp_rget_string (Exp *this);
 int exp_is_string (Exp *this);
 
 /// Creates an expression of the indicated type.
+/// Types "<empty expression>", "<empty return>" and "<cyclic symbol>" are
+/// reserved.
 Exp *exp_object (char *type, void *value);
 
 /// Read an Exp of the indicate type. Returns a Tp<char, void>
@@ -144,18 +149,18 @@ Arr *exp_rget_array (Exp *this);
 int exp_is_array (Exp *this);
 
 /// Creates an expression of the indicated type. 'value' is type Map<Exp>.
-Exp *exp_map (Map *value);
+Exp *exp_dic (Map *value);
 
 /// Read an Exp of the indicate type. Returns an array of type Map<Exp>.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-Map *exp_get_map (Exp *this);
+Map *exp_get_dic (Exp *this);
 
 /// Read an Exp of the indicate type. Returns an array of type Map<Exp>.
 /// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
-Map *exp_rget_map (Exp *this);
+Map *exp_rget_dic (Exp *this);
 
 /// Returns TRUE if 'this' match the type.
-int exp_is_map (Exp *this);
+int exp_is_dic (Exp *this);
 
 /// Creates an expression of the indicated type.
 Exp *exp_function (Function *value);

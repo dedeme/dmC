@@ -1,0 +1,77 @@
+
+import "sub/s5";
+
+:s5 Pair = s5.new("a", 3);
+Pair2 = s5.new("b", 7);
+
+sys.test([Pair[s5.pr1], Pair[s5.pr2]], ["a", 3]);
+sys.test(s5.add(Pair, Pair2), ["ab", 10]);
+
+sys.test([Pair.pr1, Pair.pr2], ["a", 3]);
+sys.test(Pair.add(Pair2), ["ab", 10]);
+
+fn = \:s5 A -> {
+  return [A.pr1, A.pr2];
+};
+
+A = [Pair, Pair2];
+rV = [""];
+for (:s5 p = A) rV! += p.pr1;
+sys.test(rV!, "ab");
+
+rV! = "";
+for (i, :s5 p = A) rV! += p.pr1;
+sys.test(rV!, "ab");
+
+Dc = {"one": Pair, "two": Pair2};
+smV = [0];
+for (k, :s5 v = Dc) smV! += v.pr2;
+sys.test(smV!, 10);
+
+sys.test(fn(Pair2), ["b", 7]);
+
+sys.test(s5.one, 1);
+sys.test(s5.two, 2);
+
+sys.test(s5.sone, "1");
+sys.test(s5.stwo, "2");
+
+sys.test(s5.one2, 0);
+sys.test(s5.two2, 1);
+
+sys.test(s5.sone2, "sone2");
+sys.test(s5.stwo2, "stwo2");
+
+
+{
+  fact2, b2 = [\n -> {if (n <= 0) return 1; else return n * fact2(n-1);}, 4];
+  sys.test(fact2(4) + b2, 28);
+  fact2b, b2b : {
+    fact2b: \n -> {if (n <= 0) return 1; else return n * fact2b(n-1);},
+    b2b: 5
+  };
+  sys.test(fact2b(4) + b2b, 29);
+}
+fact, b = [\n -> {if (n <= 0) return 1; else return n * fact(n-1);}, 4];
+sys.test(fact(4) + b, 28);
+factb, bb : {
+  factb: \n -> {if (n <= 0) return 1; else return n * factb(n-1);},
+  bb: 5
+};
+sys.test(factb(4) + bb, 29);
+
+, dica : {"dicb": 1, dica: 2, dicc: 3};
+sys.test(dica, 2);
+
+,,,,, dica2 : {"dicb": 1, dica2: 2, dicc: 3};
+sys.test(dica2, 2);
+
+dicb, dicc : {"dicb": 1, dica: 2, dicc: 3};
+sys.test(dicb + dicc, 4);
+
+, arra = [1, 2, 3];
+sys.test(arra, 2);
+
+arrb,,arrc = [1, 2, 3];
+sys.test(arrb + arrc, 4);
+

@@ -223,6 +223,18 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
       check_exp(layers, fix, line, is, left);
     }
     check_exp(layers, fix, line, is, right);
+  } else if (stat_is_arr_multi(st) || stat_is_dic_multi(st)) {
+    Tp *v = stat_is_arr_multi(st)
+      ? stat_get_arr_multi(st)
+      : stat_get_dic_multi(st)
+    ;
+
+    check_exp(layers, fix, line, is, tp_e2(v));
+    EACH(tp_e1(v), Exp, sym) {
+      char *sym_s = exp_get_sym(sym);
+      if (*sym_s)
+        layers_add_symbol(layers, fix, line, sym_s);
+    }_EACH
   } else if (stat_is_add_as(st)) {
     // <Exp, Exp>
     Tp *v = stat_get_add_as(st);
@@ -292,8 +304,7 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
   } else if (stat_is_if(st)) {
     // [<Exp>, <StatCode>, Opt<StatCode>]
     Arr *v = stat_get_if(st);
-    Exp *cond = arr_get(v, 0);
-    if (cond) check_exp(layers, fix, line, is, cond);
+    check_exp(layers, fix, line, is, arr_get(v, 0));
     check_st(layers, is, arr_get(v, 1));
     StatCode *else_st = opt_get(arr_get(v, 2));
     if (else_st) check_st(layers, is, else_st);
@@ -350,12 +361,15 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
     // [<Exp>, Arr<Tp<Exp, StatCode>>]
     Arr *v = stat_get_switch(st);
     check_exp(layers, fix, line, is, arr_get(v, 0));
-    // exp_st is Tp<Exp, StatCode>
+    // exp_st is <Tp<Arr<Exp>, StatCode>>
     EACH(arr_get(v, 1), Tp, exp_st) {
       StatCode *st_cd = tp_e2(exp_st);
-      Exp *exp = tp_e1(exp_st);
-      if (!exp_is_sym(exp) || strcmp(exp_get_sym(exp), "default"))
-        check_exp(layers, fix, stat_code_line(st_cd), is, tp_e1(exp_st));
+      // <Exp>
+      Arr *exps = tp_e1(exp_st);
+      EACH(exps, Exp, exp) {
+        if (!exp_is_sym(exp) || strcmp(exp_get_sym(exp), "default"))
+          check_exp(layers, fix, stat_code_line(st_cd), is, exp);
+      }_EACH
       check_st(layers, is, st_cd);
     }_EACH
   }

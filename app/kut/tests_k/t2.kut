@@ -102,4 +102,10 @@ fnX = \ -> {
 fnX();
 */
 
+{
+  fact2 = \n -> {if (n <= 0) return 1; else return n * fact2(n-1);};
+  sys.test(fact2(4), 24);
+}
 
+fact = \n -> if (n <= 0) return 1; else return n * fact(n-1);;
+sys.test(fact(4), 24);

@@ -93,17 +93,21 @@ Examples:\\
 Scheme1: ##for ( TkSymbol1 ||, TkSymbol2||? = Exp ) Stat## \\ \\
 Scheme2: ##for ( TkSymbol = Exp1 : Exp2 ||: Exp3||? ) Stat##
 
-In the Scheme1 ##Exp## is an array or iterator, ##TkSymbol1## is bound to
-each element and ##TkSymbol2## to its index.
+In the Scheme1 ##Exp## is an array, iterator or dictionary.
+
+<{l
+if //TkSymbol2// is omited, //TkSymbol1// is replaced by each value of //Exp//.	
+Oterwise //TkSymbol1// is replaced by the iterarion index or the dictionary key and //TkSymbol2// is replaced by each value of //Exp//.
+}>
 
 In the Scheme2 ##Exp1##, ##Exp2## and ##Exp3## solve to an integer whose value
 is bound to ##TkSymbol##.
 
 Examples:\\
 ##for (e = ["a", "v"]) sys.println(e);##\\
-##for (e, i = ["a", "v"]) sys.println(e + "->" + math.toStr(i));##\\
-##for (i = [0 : 12]) { sys.println(math.toStr(i)); }##\\
-##for (i = [0 : 12 : 2]) sys.println(math.toStr(i));##
+##for (i, e = ["a", "v"]) sys.println(e + "->" + math.itos(i));##\\
+##for (i = [0 : 12]) { sys.println(math.itos(i)); }##\\
+##for (i = [0 : 12 : 2]) sys.println(math.itos(i));##
 
 *** switch
 

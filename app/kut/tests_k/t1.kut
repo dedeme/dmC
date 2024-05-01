@@ -93,8 +93,6 @@ sys.test(
 
 sys.test(!true, false);
 sys.test(!false, true);
-sys.test(!"abc", false);
-sys.test(!"", true);
 sys.test(![1, 2], false);
 sys.test(![], true);
 
@@ -123,16 +121,10 @@ sys.test(15 % 7, 1);
 
 sys.test(true & false, false);
 sys.test(true | sys.throw("error"), true);
-sys.test("abc" & "", false);
-sys.test("abc" | "", true);
-sys.test([] & sys.throw("err"), false);
-sys.test([] | [1, 2], true);
 sys.test(3 == 0 & 3 == "a", false);
 sys.test(3 != 0 | 3 == "a", true);
 
 sys.test("ab"[0] == "a" ? 1 : 2, 1);
-sys.test("" ? 1 : 2, 2);
-sys.test([0] ? 1 : 2, 1);
 
 sys.test(4 - 2 - 2, 0);
 sys.test(4 - (2 - 2), 4);

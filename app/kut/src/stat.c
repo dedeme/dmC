@@ -5,13 +5,15 @@
 #include "stat.h"
 #include "fileix.h"
 #include "symix.h"
+#include "kut/buf.h"
 
 #undef TRY
 
 
 enum stat_Stat_t {
   END,
-  ASSIGN, ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS,
+  INDEXED, ASSIGN, ARR_MULTI, DIC_MULTI,
+  ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS,
   FUNCTION, BLOCK,
   BLOCK_CLOSE, BREAK, CONTINUE,
   TRACE, RETURN,
@@ -68,6 +70,24 @@ int stat_is_end (Stat *this) {
   return this == &end_stat;
 }
 
+Stat *stat_indexed (Arr *syms) {
+  if (arr_size(syms) < 2)
+    EXC_ILLEGAL_ARGUMENT(
+      "Bad elements number of 'syms'", "2", str_f("%d", arr_size(syms))
+    );
+
+  return new(INDEXED, syms);
+}
+
+Arr *stat_get_indexed (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_indexed, "index", this);
+  return this->value;
+}
+
+int stat_is_indexed (Stat *this) {
+  return this->type == INDEXED;
+}
+
 Stat *stat_assign (Exp *left, Exp *right) {
   return new(ASSIGN, tp_new(left, right));
 }
@@ -81,6 +101,33 @@ Tp *stat_get_assign (Stat *this) {
 int stat_is_assign (Stat *this) {
   return this->type == ASSIGN;
 }
+
+Stat *stat_arr_multi (Exp *new_sym, Arr *syms, Exp *exp) {
+  return new(ARR_MULTI, tp3_new(new_sym, syms, exp));
+}
+
+Tp3 *stat_get_arr_multi (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_arr_multi, "arr_multi", this);
+  return this->value;
+}
+
+int stat_is_arr_multi (Stat *this) {
+  return this->type == ARR_MULTI;
+}
+
+Stat *stat_dic_multi (Exp *new_sym, Arr *syms, Exp *exp) {
+  return new(DIC_MULTI, tp3_new(new_sym, syms, exp));
+}
+
+Tp3 *stat_get_dic_multi (Stat *this) {
+  TEST_STAT_TYPE_ERROR(stat_is_dic_multi, "dic_multi", this);
+  return this->value;
+}
+
+int stat_is_dic_multi (Stat *this) {
+  return this->type == DIC_MULTI;
+}
+
 
 Stat *stat_add_as (Exp *left, Exp *right) {
   return new(ADDAS, tp_new(left, right));
@@ -416,7 +463,10 @@ int stat_is_export (Stat *this) {
 char *stat_type_to_str (Stat *this)  {
   switch (this->type) {
     case END: return "eof";
+    case INDEXED: return "indexed";
     case ASSIGN: return "assign";
+    case ARR_MULTI: return "arr_multi";
+    case DIC_MULTI: return "dic_multi";
     case ADDAS: return "add_as";
     case SUBAS: return "sub_as";
     case MULAS: return "mul_as";
@@ -462,10 +512,48 @@ char *stat_to_str (Stat *this) {
 
   switch (this->type) {
     case END: return "<eof>";
+    case INDEXED: {
+      Exp **syms = (Exp**)arr_begin(this->value);
+      Buf *bf = buf_new();
+      buf_add(bf, exp_to_js(syms[0]));
+      buf_add(bf, " : ");
+      int i;
+      for (i = 1; i < arr_size((Arr *)this->value) - 1; ++i) {
+        buf_add(bf, exp_to_js(syms[i]));
+        buf_add(bf, ", ");
+      }
+      buf_add(bf, exp_to_js(syms[i]));
+      buf_cadd(bf, ';');
+      return buf_str(bf);
+    }
     case ASSIGN: {
       Tp *v = stat_get_assign(this);
       return str_f("%s = %s;",
         exp_to_js(tp_e1(v)), exp_to_js(tp_e2(v))
+      );
+    }
+    case ARR_MULTI: {
+      Tp3 *v = stat_get_arr_multi(this);
+      Arr *syms = tp3_e2(v);
+      Buf *bf = buf_new();
+      for (int i = 0; i < arr_size(syms); ++i) {
+        if (i > 0) buf_add(bf, ", ");
+        buf_add(bf, symix_get(exp_get_sym(arr_get(syms, i))));
+      }
+      return str_f("%s = %s;",
+        buf_str(bf), exp_to_js(tp3_e3(v))
+      );
+    }
+    case DIC_MULTI: {
+      Tp3 *v = stat_get_dic_multi(this);
+      Arr *syms = tp3_e2(v);
+      Buf *bf = buf_new();
+      for (int i = 0; i < arr_size(syms); ++i) {
+        if (i > 0) buf_add(bf, ", ");
+        buf_add(bf, symix_get(exp_get_sym(arr_get(syms, i))));
+      }
+      return str_f("%s = %s;",
+        buf_str(bf), exp_to_js(tp3_e3(v))
       );
     }
     case ADDAS: {

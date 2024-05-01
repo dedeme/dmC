@@ -1,0 +1,18 @@
+=
+book = Kut. Referencia del programa.
+title = Requisitos
+=
+
+Kut depende de
+
+- lm
+> Librería matemática.
+
+- pthread
+> Librería de manejo de threads.
+
+- gc
+> Recolector de basura 'Boehm'.
+
+- libkut
+> Utilidades para implementar las librerías de Kut.

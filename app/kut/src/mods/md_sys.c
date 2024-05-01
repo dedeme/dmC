@@ -3,6 +3,7 @@
 
 #include "DEFS.h"
 #include "mods/md_sys.h"
+#include <unistd.h>
 #include "kut/rs.h"
 #include "kut/sys.h"
 #include "main.h"
@@ -10,6 +11,7 @@
 #include "exmodule.h"
 #include "reader/cdr/cdr.h"
 #include "reader/ex_reader.h"
+#include "reader/types.h"
 #include "runner/fail.h"
 #include "runner/solver.h"
 
@@ -84,14 +86,14 @@ static Exp *environ (Arr *exps) {
   EACH(map_to_array(env), Kv, e) {
     arr_push(env2, kv_new(kv_key(e), exp_string(kv_value(e))));
   }_EACH
-  return exp_map(map_from_array(env2));
+  return exp_dic(map_from_array(env2));
 }
 
 // \s -> * | ()
 static Exp *eval (Arr *exps) {
   CHECK_PARS ("sys.eval", 1, exps);
   Cdr *cdr = cdr_new(-1, exp_rget_string(arr_get(exps, 0)));
-  Exp *exp = ex_reader_read(cdr);
+  Exp *exp = ex_reader_read(types_new(), cdr);
   return solver_solve_isolate(exp);
 }
 
@@ -107,12 +109,6 @@ static Exp *home (Arr *exps) {
   return exp_string(sys_user_home());
 }
 
-// \* -> *
-static Exp *id (Arr *exps) {
-  CHECK_PARS ("sys.id", 1, exps);
-  return arr_get(exps, 0);
-}
-
 // \-> s
 static Exp *get_locale (Arr *exps) {
   CHECK_PARS ("sys.getLocale", 0, exps);
@@ -123,6 +119,12 @@ static Exp *get_locale (Arr *exps) {
 static Exp *main_path (Arr *exps) {
   CHECK_PARS ("sys.mainPath", 0, exps);
   return exp_string(str_f("%s.kut", arr_get(main_args(), 1)));
+}
+
+// \ -> i
+static Exp *pid (Arr *exps) {
+  CHECK_PARS ("sys.pid", 0, exps);
+  return exp_int(getpid());
 }
 
 // \* -> ()
@@ -215,8 +217,8 @@ Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "exit")) return fexit;
   if (!strcmp(fname, "getLocale")) return get_locale;
   if (!strcmp(fname, "home")) return home;
-  if (!strcmp(fname, "id")) return id;
   if (!strcmp(fname, "mainPath")) return main_path;
+  if (!strcmp(fname, "pid")) return pid;
   if (!strcmp(fname, "print")) return print;
   if (!strcmp(fname, "printError")) return print_error;
   if (!strcmp(fname, "println")) return println;

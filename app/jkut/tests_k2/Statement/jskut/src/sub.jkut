@@ -1,0 +1,61 @@
+///
+mk :
+  ixx1, fnixx2, fnixx3;
+
+/// \<sub> -> i
+fn = \s -> return s[fnixx2]();;
+
+/// \<sub>, i, i -> i
+fn2 = \s, n1, n2 -> return s[fnixx3](n1, n2);;
+
+///
+one, two = [1, 2];
+sys.test(one, 1);
+sys.test(two, 2);
+
+///
+sone, stwo : {sone: "1", stwo: "2", sfive: "5"};
+sys.test(sone, "1");
+sys.test(stwo, "2");
+
+///
+one2, two2 = ;
+sys.test(one2, 0);
+sys.test(two2, 1);
+
+///
+sone2, stwo2 : ;
+sys.test(sone2, "sone2");
+sys.test(stwo2, "stwo2");
+
+{
+  xsone2, xstwo2 : ;
+  sys.test(xsone2, "xsone2");
+  sys.test(xstwo2, "xstwo2");
+
+  one3,,,four = [1, 2, 3, 4];
+  sys.test(one3, 1);
+  sys.test(four, 4);
+
+  sone3,,,sfour : {sone3: "1", sfour: "4"};
+  sys.test(sone3, "1");
+  sys.test(sfour, "4");
+
+  ,two3,,,five = [1, 2, 3, 4, 5, 6];
+  sys.test(two3, 2);
+  sys.test(five, 5);
+
+  ,stwo3,,,sfive : {stwo3: "2", sfour: "4", sfive: "5"};
+  sys.test(stwo3, "2");
+  sys.test(sfive, "5");
+
+}
+
+one3,,,four = [1, 2, 3, 4];
+sys.test(one3, 1);
+sys.test(four, 4);
+
+,two3,,,five = [1, 2, 3, 4, 5];
+sys.test(two3, 2);
+sys.test(five, 5);
+

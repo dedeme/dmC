@@ -107,6 +107,10 @@ int token_is_exclamation (Token *this);
 int token_is_backslash (Token *this);
 
 /// Returns TRUE if 'this' is an operator of the indicated type.
+/// ("#")
+int token_is_hash (Token *this);
+
+/// Returns TRUE if 'this' is an operator of the indicated type.
 /// ("->")
 int token_is_arrow (Token *this);
 

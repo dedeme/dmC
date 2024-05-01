@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Lector de bajo nivel</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-lector2.html'>Posterior (Lector de alto nivel)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Clase <code>Cdr</code>'>Clase <code>Cdr</code></a><br>
+<a href='#Sistema de lectura.'>Sistema de lectura.</a><br>
+<a href='#Proceso de lectura.'>Proceso de lectura.</a>
+</p>
+<hr>
+<p>(Archivos en <i>reader/cdr</i>: <i>cdr.h</i>, <i>cdr.c</i>,
+  <i>comment_reader.h</i>, <i>comment_reader.c</i>,
+  <i>number_reader.h</i>, <i>number_reader.c</i>,
+  <i>string_reader.h</i> y <i>string_reader.c</i>
+)</p>
+<a name="Clase <code>Cdr</code>"></a>
+<h3>Clase <code>Cdr</code></h3>
+<p>Clase creada a partir de un índice de archivo con código fuente y su
+correspondiente código. Su objeto es traducir código a tokens.</p>
+<p>Lleva un seguimiento del número de línea, lo que permite emitir mensajes
+de error con indicación del mismo.</p>
+<p>Mantiene un buffer con el último caracter leido y no retornado, que permite
+informar sobre el tipo del siguiente token a retornar (*cdr_next_token_is_colon*,
+<code>cdr_next_token_is_binary</code>, etc.)</p>
+<a name="Sistema de lectura."></a>
+<h3>Sistema de lectura.</h3>
+<p>Lee caracter a caracter, formando y retornando tokens.</p>
+<p>Cuando alcanza el final del código retorna una <code>option none</code>.</p>
+<p>Es posible revertir la lectura del último caracter leido.</p>
+<a name="Proceso de lectura."></a>
+<h3>Proceso de lectura.</h3>
+<p>Después de leer el caracter <code>ch</code> procede de la siguiente forma:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">  switch (ch) {
+    case 0:
+      return NULL;
+    case '/': {
+      Token *tk = comment_reader_read(this);
+      return tk->type == TOKEN_OPERATOR
+        ? read_operator(this, '/') // Operator '/'
+        : str_starts(tk->value, "///")
+          ? tk
+          : read_token(this) // Skip comment
+      ;
+    }
+    case '\'':
+    case '"':
+      return string_reader_read(this, ch);
+    default:
+      if (ch <= ' ')
+        return read_token(this); // Skip blank
+      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+        return read_symbol(this, ch);
+      if ((ch >= '0' && ch <= '9'))
+        return number_reader_read(this, ch);
+      if (str_cindex(opChs, ch) == -1)
+        EXC_KUT(cdr_fail_line(
+          this, str_f("Unexpected character %d('%c')", ch, ch), this->next_nline
+        ));
+
+      return read_operator(this, ch);
+  }
+</div>
+<script>aceConf("aceEditor-0", "c_cpp");</script>
+<p><code>NULL</code> es retornado como <code>option none</code>.</p>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-lector2.html'>Posterior (Lector de alto nivel)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

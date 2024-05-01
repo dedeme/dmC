@@ -29,7 +29,7 @@ static Exp *all (Arr *exps) {
     // Exp
     Arr *ps = arr_new_from(e, NULL);
     FRUN(rs, fn, ps);
-    if (!exp_rget_as_bool(rs)) return exp_bool(FALSE);
+    if (!exp_rget_bool(rs)) return exp_bool(FALSE);
   }
   return exp_bool(TRUE);
 }
@@ -44,7 +44,7 @@ static Exp *any (Arr *exps) {
     // Exp
     Arr *ps = arr_new_from(e, NULL);
     FRUN(rs, fn, ps);
-    if (exp_rget_as_bool(rs)) return exp_bool(TRUE);
+    if (exp_rget_bool(rs)) return exp_bool(TRUE);
   }
   return exp_bool(FALSE);
 }
@@ -246,7 +246,7 @@ static Exp *map (Arr *exps) {
   //--
   // <Exp>, o is Tp<Function, Function>
   Opt *fn_new (Tp *o) {
-    if (exp_rget_as_bool(function_run(tp_e1(o), arr_new()))) {
+    if (exp_rget_bool(function_run(tp_e1(o), arr_new()))) {
       return opt_some(function_run(tp_e2(o), arr_new()));
     }
     return opt_none();

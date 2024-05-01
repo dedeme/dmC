@@ -1,4 +1,4 @@
-// Copyright 30-Jul-2023 ºDeme
+// Copyright 25-Apr-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *domo_bget (void) {return
@@ -14,7 +14,7 @@ char *domo_bget (void) {return
   "  // \\<domo> -> <domo>\n"
   "  add (o) { this.el.appendChild(o.e); return this; }\n"
   "  // \\[<domo>] -> <domo>\n"
-  "  adds (a) { a.forEach(o => this.el.appendChild(o.e)); return this; }\n"
+  "  adds (a) { for (const o of a) this.el.appendChild(o.e); return this; }\n"
   "  // \\s, * -> <domo>\n"
   "  att (k, v) { this.el.setAttribute(k, v); return this; }\n"
   "  // \\b -> <domo>\n"

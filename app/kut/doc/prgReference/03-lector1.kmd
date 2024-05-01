@@ -1,0 +1,70 @@
+=
+title = Lector de bajo nivel
+=
+
+(Archivos en _reader/cdr_: _cdr.h_, _cdr.c_,
+  _comment_reader.h_, _comment_reader.c_,
+  _number_reader.h_, _number_reader.c_,
+  _string_reader.h_ y _string_reader.c_
+)
+
+## Clase <code>Cdr</code>
+
+Clase creada a partir de un índice de archivo con código fuente y su
+correspondiente código. Su objeto es traducir código a tokens.
+
+Lleva un seguimiento del número de línea, lo que permite emitir mensajes
+de error con indicación del mismo.
+
+Mantiene un buffer con el último caracter leido y no retornado, que permite
+informar sobre el tipo del siguiente token a retornar (*cdr_next_token_is_colon*,
+*cdr_next_token_is_binary*, etc.)
+
+## Sistema de lectura.
+
+Lee caracter a caracter, formando y retornando tokens.
+
+Cuando alcanza el final del código retorna una *option none*.
+
+Es posible revertir la lectura del último caracter leido.
+
+## Proceso de lectura.
+
+Después de leer el caracter *ch* procede de la siguiente forma:
+
+``c_cpp
+  switch (ch) {
+    case 0:
+      return NULL;
+    case '/': {
+      Token *tk = comment_reader_read(this);
+      return tk->type == TOKEN_OPERATOR
+        ? read_operator(this, '/') // Operator '/'
+        : str_starts(tk->value, "///")
+          ? tk
+          : read_token(this) // Skip comment
+      ;
+    }
+    case '\'':
+    case '"':
+      return string_reader_read(this, ch);
+    default:
+      if (ch <= ' ')
+        return read_token(this); // Skip blank
+      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+        return read_symbol(this, ch);
+      if ((ch >= '0' && ch <= '9'))
+        return number_reader_read(this, ch);
+      if (str_cindex(opChs, ch) == -1)
+        EXC_KUT(cdr_fail_line(
+          this, str_f("Unexpected character %d('%c')", ch, ch), this->next_nline
+        ));
+
+      return read_operator(this, ch);
+  }
+``
+
+*NULL* es retornado como *option none*.
+
+
+

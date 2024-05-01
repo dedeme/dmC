@@ -719,8 +719,8 @@ char *exp_to_str (Exp *this) {
       return str_f(
         "%s[%s:%s]",
         exp_to_str(tp3_e1(tp)),
-        e2 ? exp_to_str(tp3_e2(tp)): "",
-        e3 ? exp_to_str(tp3_e3(tp)): ""
+        e2 ? exp_to_str(e2): "",
+        e3 ? exp_to_str(e3): ""
       );
     }
     case EXP_PR: {

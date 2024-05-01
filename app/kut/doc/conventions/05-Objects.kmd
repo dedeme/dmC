@@ -1,0 +1,93 @@
+=
+title = Objects
+=
+
+## Indexed
+
+Intended to use in several objects or for reduce the memory used by the program.
+
+Each public indexed should be in its own file.
+
+# Indexed with only functions.
+
+Functional access will be enabled.
+
+``kut
+
+// \(\s->s), (\s->()) -> <myobj>
+mk : fnA, fnB;
+
+a = \o -> return o[fnA];
+b = \o -> return o[fnB];
+
+...
+
+:myobj
+obX = mk(f1, f2);
+
+sys.println(obX.a("text"));
+obX.b();
+
+// Beter that:
+//
+// sys.println(obX.fnA#("text"));
+// obX.fnB#();
+``
+
+# Indexed with mixed functional - value fields.
+
+Direct access will be used.
+
+``kut
+
+// \s, (\s->()) -> <myobj>
+mk : a, fn;
+
+...
+
+:myobj
+obX = mk("de", f);
+
+sys.println(obX.a);
+obX.fn#();
+``
+
+## Dictionary
+
+Intended for local or immediate use (returns multiple values in functions).
+
+It is also used in server-client communications.
+
+Use locally:
+
+
+``kut
+
+...
+
+a = {name: nm, age: a}
+
+...
+
+sys.println("Name is " + a.name + " and age is " + sys.toStr(a.age));
+
+...
+``
+
+Use as return
+
+``kut
+
+fn = \name, age -> return {name, age};
+
+...
+
+a = fn("Peter", 35);
+
+...
+
+sys.println("Name is " + a.name + " and age is " + sys.toStr(a.age));
+
+``
+
+

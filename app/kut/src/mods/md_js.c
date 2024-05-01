@@ -50,7 +50,7 @@ static Exp *ro (Arr *exps) {
   CHECK_PARS ("js.ro", 1, exps);
     //--
     Kv *fn (Kv *kv) { return kv_new(kv_key(kv), exp_string(kv_value(kv))); }
-  return exp_map((Map *)arr_map(
+  return exp_dic((Map *)arr_map(
     (Arr *)js_ro(exp_rget_string(arr_get(exps, 0))), (FMAP)fn
   ));
 }
@@ -61,7 +61,7 @@ static Exp *raux (char *js) {
   Exp *rt;
   if (*js == '"') rt = exp_string(js_rs(js));
   else if (*js == '[') rt = exp_array(arr_from_js(js, (FFROM)raux));
-  else if (*js == '{') rt = exp_map(map_from_js(js, (FFROM)raux));
+  else if (*js == '{') rt = exp_dic(map_from_js(js, (FFROM)raux));
   else if (*js == '-' || (*js >= '0' && *js <= '9')) rt = exp_float(js_rd(js));
   else if (!strcmp(js, "true")) rt = exp_bool(TRUE);
   else if (!strcmp(js, "false")) rt = exp_bool(FALSE);
@@ -128,7 +128,7 @@ static Exp *wo (Arr *exps) {
     //--
     Kv *fn (Kv *kv) { return kv_new(kv_key(kv), exp_rget_string(kv_value(kv))); }
   return exp_string(js_wo(
-    (Map *)arr_map((Arr *)exp_rget_map(arr_get(exps, 0)), (FMAP)fn)
+    (Map *)arr_map((Arr *)exp_rget_dic(arr_get(exps, 0)), (FMAP)fn)
   ));
 }
 
@@ -136,7 +136,8 @@ static char *waux (Exp *exp) {
   char *rt;
   if (exp_is_string(exp)) rt = js_ws(exp_rget_string(exp));
   else if (exp_is_array(exp)) rt = arr_to_js(exp_rget_array(exp), (FTO)waux);
-  else if (exp_is_map(exp)) rt = map_to_js(exp_rget_map(exp), (FTO)waux);
+  else if (exp_is_dic(exp)) rt = map_to_js(exp_rget_dic(exp), (FTO)waux);
+  else if (exp_is_int(exp)) rt = js_wl(exp_rget_int(exp));
   else if (exp_is_float(exp)) rt = js_wf(exp_rget_float(exp), 9);
   else if (exp_is_bool(exp)) rt = js_wb(exp_rget_bool(exp));
   else EXC_ILLEGAL_ARGUMENT(

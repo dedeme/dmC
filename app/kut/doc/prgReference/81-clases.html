@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Clases</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='80-objetos.html'>Anterior (Objetos)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Token'>Token</a><br>
+<a href='#Exp'>Exp</a><br>
+<a href='#Stat'>Stat</a><br>
+<a href='#StatCode'>StatCode</a><br>
+<a href='#Módulo'>Módulo</a>
+</p>
+<hr>
+<a name="Token"></a>
+<h3>Token</h3>
+<p>(Archivos <code>reader/token.(h/c)</code>)</p>
+<p>Clase inmutable de <i>tokens</i> de Kut.</p>
+<p>Tiene dos campos:</p>
+<ol>
+<dt><code>type</code></dt>
+<dd>
+<p>Uno de TOKEN_BOOL, TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING,
+  TOKEN_LINE_COMMENT, TOKEN_COMMENT, TOKEN_SYMBOL o TOKEN_OPERATOR. <br>  Accesible sólo con las functiones <code>token_is_xxx</code>.</p>
+</dd>
+<dt><code>value</code></dt>
+<dd>
+<p>Accesible sólo con las functiones <code>token_get_xxx</code>.</p>
+</dd>
+</ol>
+<p>Hay un constructor <code>token_xxx</code> para cada tipo.</p>
+<p>Se puede pasar a cadena el tipo ( <code>token_type_to_str</code> ) y el valor ( <code>token_to_str</code> )</p>
+<p>Hay functiones auxiliares para simplificar la programación de tipo <code>token_is_xxx</code>.</p>
+<a name="Exp"></a>
+<h3>Exp</h3>
+<p>(Archivos <code>exp.(h/c)</code>)</p>
+<p>Clase inmutable de <i>expresiones</i> de Kut.</p>
+<p>Tiene dos campos:</p>
+<ol>
+<dt><code>type</code></dt>
+<dd>
+<p>Uno de <br>  EXP_BREAK, EXP_CONTINUE, <br>  EXP_BOOL, EXP_INT, EXP_FLOAT, EXP_STRING, EXP_OBJECT, <br>  EXP_ARR, EXP_MAP, EXP_FUNC, EXP_SYM, <br>  EXP_RANGE, <br>  EXP_PT, EXP_SQ, EXP_SLICE, EXP_PR,
+    <i>(Point, Square braket - subindex, Square bracket - slice, Parentheses)</i> <br>  EXP_SWITCH, <br>  EXP_NOT, EXP_MINUS, <br>  EXP_ADD, EXP_SUB, EXP_MUL, EXP_DIV, EXP_MOD, <br>  EXP_AND, EXP_OR, <br>  EXP_GREATER, EXP_GREATER_EQ, EXP_LESS, EXP_LESS_EQ, <br>  EXP_EQ, EXP_NEQ <br>  o EXP_TERNARY. <br>  Accesible sólo con las funciones <code>exp_is_xxx</code>.</p>
+</dd>
+<dt><code>value</code></dt>
+<dd>
+<p>Accesible sólo con las funciones <code>exp_get_xxx</code> o <code>exp_rget_xxx</code>. La primera
+  utilizada en el proceso de lectura y la segunda en el de ejecución.</p>
+</dd>
+</ol>
+<p>Hay un constructor <code>exp_xxx</code> para cada tipo.</p>
+<h4>Expresiones predefinidas</h4>
+<ol>
+<dt><code>exp_empty</code></dt>
+<dd>
+<p>Expresion retornada por un bloque finalizado sin encontrar el símbolo <code>return</code>.
+  Comprobada con <code>exp_is_empty</code>.</p>
+</dd>
+<dt><code>exp_empty_return</code></dt>
+<dd>
+<p>Valor del símbolo <code>return</code> cuando se devuelve una expresión vacía (*return;*).
+  Comprobada con <code>exp_is_empty_return</code>.</p>
+</dd>
+</ol>
+<h4>Expresión <code>exp_object</code></h4>
+<p>Utilizada para objetos 'C'.</p>
+<p>El campo <code>type</code> indica el tipo del objeto. Por convención se utiliza el nombre
+entre signos '&lt;' - '>' (p.e. "&lt;file>").</p>
+<p>El campo <code>valor</code> contiene el puntero al objeto.</p>
+<p>Para comprobar si una expresión es un objeto en general se utiliza
+<code>exp_is_some_object</code> y para comprobar si es un objeto concreto <code>exp_is_object</code>.</p>
+<h4>Utilidades</h4>
+<ol>
+<dt><code>exp_is_binary</code></dt>
+<dd>
+<p>Permite comprobar si una expresión es de typo binario (+, &amp;, ==, etc).</p>
+</dd>
+<dt><code>exp_type_to_str</code></dt>
+<dd>
+<p>Retorna el tipo de una expresión.</p>
+</dd>
+<dt><code>exp_to_str</code></dt>
+<dd>
+<p>Retorna el la representación de una expresión.</p>
+</dd>
+<dt><code>exp_to_js</code></dt>
+<dd>
+<p>Retorna la misma representación que <code>exp_to_str</code> con las siguientes
+  diferencias:</p>
+<ul>
+<li>
+<p>Las expresiones de tipo 'str' se devuelven entre comillas.</p>
+</li>
+<li>
+<p>Las expresiones de tipo 'float' se devuelve siempre con el punto decimal.</p>
+</li>
+</ul>
+</dd>
+</ol>
+<a name="Stat"></a>
+<h3>Stat</h3>
+<p>(Archivos <code>stat.(h/c)</code>)</p>
+<p>Clase inmutable de <i>instrucciones</i> de Kut.</p>
+<p>Tiene dos campos:</p>
+<ol>
+<dt><code>type</code></dt>
+<dd>
+<p>Uno de
+  END, EMPTY, <br>  ASSIGN, ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS, <br>  FUNCTION, BLOCK, <br>  BLOCK_CLOSE, BREAK, CONTINUE, <br>  TRACE, ASSERT, RETURN, <br>  TRY, WHILE, IF, ELSE, FOR, FOR_IX, FOR_R, FOR_RS, SWITCH <br>  o IMPORT <br>  Accesible sólo con las functiones <code>stat_is_xxx</code>.</p>
+</dd>
+<dt><code>value</code></dt>
+<dd>
+<p>Accesible sólo con las functiones <code>stat_get_xxx</code>.</p>
+</dd>
+</ol>
+<p>Hay un constructor <code>stat_xxx</code> para cada tipo.</p>
+<p>Se puede pasar a cadena el tipo ( <code>stat_type_to_str</code> ) y el valor ( <code>stat_to_str</code> )</p>
+<a name="StatCode"></a>
+<h3>StatCode</h3>
+<p>(Archivos <code>stat.(h/c)</code>)</p>
+<p>Envoltorio de una <i>instrucción</i> que añade valores para identificar el archivo y
+línea en la que se encuentra.</p>
+<a name="Módulo"></a>
+<h3>Módulo</h3>
+<hr>
+<p style="text-indent: 0px"><a href='80-objetos.html'>Anterior (Objetos)</a> · <a href="index.html">Índice</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

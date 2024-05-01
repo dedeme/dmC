@@ -20,6 +20,7 @@ enum symix_Reserved {
   symix_DIC, symix_ITER, symix_JS, symix_FILE,
   symix_MATH, symix_PATH, symix_REGEX, symix_STR,
   symix_SYS, symix_TCP, symix_THREAD, symix_TIME,
+  symix_VEC,
 
   symix_ENUM_END
 };
@@ -34,5 +35,8 @@ int symix_add(char *sym);
 /// Returns the symnbol with index 'ix'.
 /// If such index does no exist, it throw an exception.
 char *symix_get (int ix);
+
+/// Returns a new internal symbol.
+int symix_generate (void);
 
 #endif

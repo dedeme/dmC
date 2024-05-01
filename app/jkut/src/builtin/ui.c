@@ -1,4 +1,4 @@
-// Copyright 30-Jul-2023 ºDeme
+// Copyright 25-Apr-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *ui_bget (void) {return
@@ -144,7 +144,7 @@ char *ui_bget (void) {return
   "  return img(name).att(\"style\", \"opacity:0.4\");\n"
   "}\n"
   "\n"
-  "// \\(\\->() | \\<event>->()) -> ()\n"
+  "// \\(\\<event>->()) -> <domo>\n"
   "export function link (fn) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  return q(\"span\").att(\"style\", \"cursor:pointer\").on(\"click\", fn);\n"
@@ -220,7 +220,7 @@ char *ui_bget (void) {return
   "  }\n"
   "}\n"
   "\n"
-  "/// \\s -> <iter>[domo...]\n"
+  "/// \\s -> <iter>[<domo>.]\n"
   "export function qq (s) {\n"
   "  sys.$params(arguments.length, 1);\n"
   "  function toIt (lst) {\n"
@@ -287,21 +287,12 @@ char *ui_bget (void) {return
   "  ;\n"
   "}\n"
   "\n"
-  "// \\-> <dic>[s...]\n"
+  "// \\-> [s...]\n"
   "export function url () {\n"
   "  sys.$params(arguments.length, 0);\n"
   "  const search = location.search;\n"
-  "  if (search === \"\") return {};\n"
-  "\n"
-  "  let i = 0;\n"
-  "  return arr.reduce(search.substring(1).split(\"&\"), {}, (r, e) => {\n"
-  "    const ix = e.indexOf(\"=\");\n"
-  "    if (ix === -1) r[\"\" + i] = decodeURI(e);\n"
-  "    else r[decodeURI(e.substring(0, ix))] = decodeURI(e.substring(ix + 1));\n"
-  "    ++i;\n"
-  "    return r;\n"
-  "  });\n"
+  "  if (search === \"\") return [];\n"
+  "  return arr.map(search.substring(1).split(\"&\"), decodeURI);\n"
   "}\n"
-  "\n"
   "\n"
 ;}

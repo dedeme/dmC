@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Objetos</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='06-comprobador.html'>Anterior (Comprobador)</a> · <a href="index.html">Índice</a> · <a href='81-clases.html'>Posterior (Clases)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#fileix'>fileix</a><br>
+<a href='#symix'>symix</a><br>
+<a href='#módulos'>módulos</a>
+</p>
+<hr>
+<a name="fileix"></a>
+<h3>fileix</h3>
+<p>(Archivos <code>fileix.h</code> y <code>fileix.c</code>)</p>
+<p>Mantiene las lista de rutas de los archivos de código Kut que han sido
+procesados o estan siéndolo.</p>
+<p>Este objeto permite:</p>
+<ul>
+<li>
+<p>Recuperar la ruta original desde el indice de la lista. Cada archivo se
+  puede recuperar:</p>
+<ul>
+<li>
+<p>Sin la extensión y con un límite de 50 caracteres. (Usado para imprimir
+    archivos importados)</p>
+</li>
+<li>
+<p>Con la extensión <i>.kut</i> y el path en forma canónica. (Usado para imprimir
+    errores y trazar mensajes)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Leer el correspondiente archivo desde su índice.</p>
+</li>
+</ul>
+
+<pre class=frame><i>NOTA: Se pueden registrar distintas rutas que apuntan al mismo archivo.
+</i></pre><a name="symix"></a>
+<h3>symix</h3>
+<p>(Archivos <code>symix.h</code> y <code>symix.c</code>)</p>
+<p>Vincula índices con símbolos.</p>
+<p>En la inicialización se establece los índices de las palabras reservadas y los
+módulos del sistema.</p>
+<p>Posteriormente los nuevos símbolos son añadidos con <code>add</code> y recuperados con
+<code>get</code>.</p>
+<a name="módulos"></a>
+<h3>módulos</h3>
+<p>(Archivos <code>modules.h</code> y <code>modules.c</code>)</p>
+<p>Array que mantiene una indexación de <a href="81-clases.html#Módulo">módulos</a>.</p>
+<p>El índice de cada módulo en el array es el mismo que el del archivo que lo
+contiene en <code>fileix</code>.</p>
+<p>Dada una entrada en el array pueden resultar tres casos:</p>
+<ol>
+<dt><code>option_none</code></dt>
+<dd>
+<p>No hay módulo que corresponda al índice.</p>
+</dd>
+<dt><code>option_some(option_none)</code></dt>
+<dd>
+<p>Hay un módulo asociado al índice, pero aún no está definido. (Se encuentra en
+  proceso de lectura)</p>
+</dd>
+<dt><code>option_some(option_some(módulo))</code></dt>
+<dd>
+<p>Hay un módulo asociado al índice que está definido. (El módulo ha sido leído
+  completamente)</p>
+</dd>
+</ol>
+<hr>
+<p style="text-indent: 0px"><a href='06-comprobador.html'>Anterior (Comprobador)</a> · <a href="index.html">Índice</a> · <a href='81-clases.html'>Posterior (Clases)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

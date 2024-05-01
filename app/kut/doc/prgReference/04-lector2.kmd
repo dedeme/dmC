@@ -1,0 +1,35 @@
+=
+title = Lector de alto nivel
+=
+
+## Lector de bloque principal
+
+Lee un módulo completo. Para ello [#Lectura de instrucción](lee instrucción por instrucción),
+realizando las siguientes acciones:
+
+- Se ha alcanzado el fin de archivo.
+> Final de lectura.
+
+- Se ha leído un fin de bloque (<code>}</code>).
+> Se emite un error.
+
+- Se ha leído un <code>import</code>.
+> Se controla que el identificador no ha sido usado ya ni para otro *import* ni
+  para una variable. Si el identificador es correcto se actualizan las listas
+  de archivos ([80-objetos.html#fileix](fileix)), de
+  [80-objetos.html#módulos](módulos) y de *imports*.
+
+  _NOTA: En este punto el archivo importado NO es leído todavía._
+
+- Se ha leído una asignación.
+> Se controla que el identificador no ha sido usado ya ni para un *import* ni
+  para otra variable. Si la línea inmediata anterior comienza con *///*, se
+  añade la lista de *exports*.
+
+Al final de lectura se elimina las instrucciones de comentario tipo *export*
+(líneas que comienzan con *///*, utilizadas para marcar la siguiente línea
+como variable exportable).
+
+## Lector de instrucciones.
+
+

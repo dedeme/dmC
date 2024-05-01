@@ -11,9 +11,9 @@
 #include "runner/stack.h"
 
 enum exp_Exp_t {
-  EXP_BREAK, EXP_CONTINUE,
+  EXP_BREAK, EXP_CONTINUE, // Made at run time.
   EXP_BOOL, EXP_INT, EXP_FLOAT, EXP_STRING, EXP_OBJECT,
-  EXP_ARR, EXP_MAP, EXP_FUNC, EXP_SYM,
+  EXP_ARR, EXP_DIC, EXP_FUNC, EXP_SYM,
   EXP_RANGE,
   EXP_PT, EXP_SQ, EXP_SLICE, EXP_PR, // Point, Square braket - subindex, Sqare braket - slice, Parentheses
   EXP_SWITCH,
@@ -37,6 +37,7 @@ struct exp_Exp {
 };
 
 static Exp empty_exp = { .type = EXP_OBJECT, .value = "<empty expression>" };
+static Exp cyclic_exp = { .type = EXP_OBJECT, .value = "<cyclic symbol>" };
 static Exp empty_return_exp = { .type = EXP_OBJECT, .value = "<empty return>" };
 
 static char *type_to_str (Exp_t type) {
@@ -49,7 +50,7 @@ static char *type_to_str (Exp_t type) {
     case EXP_STRING: return "str";
     case EXP_OBJECT: return "object";
     case EXP_ARR: return "arr";
-    case EXP_MAP: return "dic";
+    case EXP_DIC: return "dic";
     case EXP_FUNC: return "function";
     case EXP_SYM: return "symbol";
     case EXP_RANGE: return "range";
@@ -117,6 +118,14 @@ int exp_is_empty (Exp *this) {
   return this == &empty_exp;
 }
 
+Exp *exp_cyclic (void) {
+  return &cyclic_exp;
+}
+
+int exp_is_cyclic (Exp *this) {
+  return this == &cyclic_exp;
+}
+
 Exp *exp_empty_return (void) {
   return &empty_return_exp;
 }
@@ -172,14 +181,9 @@ int exp_is_bool(Exp *this) {
 
 int exp_rget_as_bool (Exp *this) {
   if (this->type == EXP_BOOL) return this->b ? TRUE : FALSE;
-  if (this->type == EXP_STRING) return *((char *)this->value) ? TRUE : FALSE;
   if (this->type == EXP_ARR) return arr_size(this->value) ? TRUE : FALSE;
   EXC_KUT(fail_type("bool, string or array", this));
   return 0; // Unreachable
-}
-
-int exp_is_as_bool (Exp *this) {
-  return this->type == (EXP_BOOL | EXP_STRING | EXP_ARR);
 }
 
 Exp *exp_int (int64_t value) {
@@ -284,25 +288,25 @@ int exp_is_array (Exp *this) {
   return this->type == EXP_ARR;
 }
 
-Exp *exp_map (Map *value) {
-  return new(EXP_MAP, value);
+Exp *exp_dic (Map *value) {
+  return new(EXP_DIC, value);
 }
 
 // <Exp>
-Map *exp_get_map (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_map, "map", this);
+Map *exp_get_dic (Exp *this) {
+  TEST_EXP_TYPE_ERROR(exp_is_dic, "dictionary", this);
   return this->value;
 }
 
 // <Exp>
-Map *exp_rget_map (Exp *this) {
-  if (this->type == EXP_MAP) return this->value;
-  EXC_KUT(fail_type("map", this));
+Map *exp_rget_dic (Exp *this) {
+  if (this->type == EXP_DIC) return this->value;
+  EXC_KUT(fail_type("dictionary", this));
   return NULL; // Unreachable.
 }
 
-int exp_is_map (Exp *this) {
-  return this->type == EXP_MAP;
+int exp_is_dic (Exp *this) {
+  return this->type == EXP_DIC;
 }
 
 Exp *exp_function (Function *value) {
@@ -648,10 +652,7 @@ int exp_is_ternary (Exp *this) {
   return this->type == EXP_TERNARY;
 }
 
-
-
 // UTILITIES
-
 
 int exp_is_binary (Exp *this) {
   switch (this->type) {
@@ -675,8 +676,8 @@ int exp_is_binary (Exp *this) {
 }
 
 char *exp_type_to_str (Exp *this) {
-  if (exp_is_empty(this)) return this->value;
-  if (exp_is_empty_return(this)) return this->value;
+  if (exp_is_empty(this) || exp_is_cyclic(this) || exp_is_empty_return(this))
+    return this->value;
 
   if (this->type == EXP_OBJECT)
     return str_f("%s%s", type_to_str(this->type), (char *)tp_e1(this->value));
@@ -700,8 +701,8 @@ char *exp_to_str (Exp *this) {
       return str_f("%s: %s;", sconds, exp_to_js(tp_e2(tp)));
     }
 
-  if (exp_is_empty(this)) return this->value;
-  if (exp_is_empty_return(this)) return this->value;
+  if (exp_is_empty(this) || exp_is_cyclic(this) || exp_is_empty_return(this))
+    return this->value;
 
   switch (this->type) {
     case EXP_BREAK:
@@ -720,7 +721,7 @@ char *exp_to_str (Exp *this) {
       return str_f("%s:%ld", exp_type_to_str(this), (long)tp_e2(this->value));
     case EXP_ARR:
       return str_f("[%s]", arr_join(arr_map(this->value, (FMAP)exp_to_js), ", "));
-    case EXP_MAP:
+    case EXP_DIC:
       return str_f(
         "{%s}",
         arr_join(arr_map(map_to_array(this->value), (FMAP)fn_map), ", ")

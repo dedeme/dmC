@@ -35,6 +35,19 @@ Heap0 *heap0_new(void) {
   return (Heap0 *)arr_new();
 }
 
+Heap0 *heap0_new_cyclic (Heap0 *this, Heap0Entry *entry) {
+  int sym = entry->symbol;
+  // <Heap0Entry>
+  Arr *r = arr_new_bf(arr_size((Arr *)this));
+  EACH((Arr *)this, Heap0Entry, e) {
+    arr_push(r, e->symbol == sym
+      ? new_entry(sym, e->nline, exp_cyclic())
+      : e
+    );
+  }_EACH
+  return (Heap0 *) r;
+}
+
 /// Returns an Arr<Heap0Entry>.
 Arr *heap0_get_array(Heap0 *this) {
   return (Arr *) this;

@@ -4,6 +4,8 @@
 #include "DEFS.h"
 #include "bmodule.h"
 
+  // NOTE: arr, dic and str are used in st_reader/read_symbol
+  //       and all bmods in reader/read_main_block;
 static char *bmods[] = {
   "arr", "b64", "bytes", "client", "cryp", "dic", "domo", "iter",
   "js", "math", "storage", "str", "sys", "time", "timer", "ui",
@@ -11,11 +13,12 @@ static char *bmods[] = {
 };
 
 static char *md_arr[] = {
-  "all", "any", "cat", "clear", "copy", "drop", "dropWhile", "duplicates",
-  "each", "eachIx", "filter", "filterIn", "find", "fromIter", "index",
-  "join", "map", "mk", "peek", "pop", "reduce", "remove", "push",
-  "reverse", "reverseIn", "shift", "shuffle", "size", "sort",
-  "take", "takeWhile", "toIter", "unshift",
+  "all", "any", "cat", "concat", "clear", "copy", "drop", "dropWhile",
+  "duplicates", "each", "eachIx", "eachSync", "filter", "filterIn", "find",
+  "fromIter", "index", "insert", "insertArr", "join", "map", "mk", "peek",
+  "pop", "reduce", "remove", "removeRange", "push", "reverse", "reverseIn",
+  "shift", "shuffle", "size", "sort", "take", "takeWhile", "toIter",
+  "unshift",
   NULL
 };
 
@@ -31,8 +34,8 @@ static char *md_bytes[] = {
 };
 
 static char *md_client[] = {
-  "authentication", "connect", "crypPass", "init", "level", "longRun",
-  "sessionId", "send", "ssend", "userName",
+  "authentication", "connect", "crypPass", "init", "level",
+  "longRun", "sessionId", "send", "userName",
   NULL
 };
 
@@ -54,8 +57,8 @@ static char *md_domo[] = {
 
 static char *md_iter[] = {
   "all", "any", "cat", "count", "drop", "dropWhile", "empty", "each", "eachIx",
-  "filter", "find", "index", "map", "hasNext", "mk", "next", "reduce",
-  "take", "takeWhile", "toStr", "unary",
+  "eachSync", "filter", "find", "index", "map", "hasNext", "mk", "next",
+  "reduce", "take", "takeWhile", "toStr", "unary",
   NULL
 };
 
@@ -84,15 +87,15 @@ static char *md_str[] = {
 };
 
 static char *md_sys[] = {
-  "asBool", "assert", "println", "test", "toStr", "type",
+  "asBool", "assert", "test", "toStr", "type",
   NULL
 };
 
 static char *md_time[] = {
-  "addDays", "day", "dfDays", "eqDay", "fmt", "fromClock", "fromClockOp",
-  "fromEn", "fromEnOp", "fromIso", "fromIsoOp", "fromStr", "fromStrOp",
-  "hour", "millisecond", "minute", "month", "mk", "mkDate", "now",
-  "second", "toEn", "toIso", "toStr", "weekday", "year", "yearDay",
+  "addDays", "day", "dfDays", "eqDay", "format", "fromClock", "fromClockOp",
+  "fromDate", "fromEn", "fromEnOp", "fromIso", "fromIsoOp", "fromStr",
+  "fromStrOp", "hour", "millisecond", "minute", "month", "mk", "mkDate", "now",
+  "second", "toDate", "toEn", "toIso", "toStr", "weekday", "year", "yearDay",
   NULL
 };
 

@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Objects</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Conventions and Programing Schemes.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='04-flow.html'>Anterior (Program Flow)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Indexed'>Indexed</a><br>
+<a href='#Dictionary'>Dictionary</a>
+</p>
+<hr>
+<a name="Indexed"></a>
+<h3>Indexed</h3>
+<p>Intended to use in several objects or for reduce the memory used by the program.</p>
+<p>Each public indexed should be in its own file.</p>
+<h4>Indexed with only functions.</h4>
+<p>Functional access will be enabled.</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+// \(\s->s), (\s->()) -> <myobj>
+mk : fnA, fnB;
+
+a = \o -> return o[fnA];
+b = \o -> return o[fnB];
+
+...
+
+:myobj
+obX = mk(f1, f2);
+
+sys.println(obX.a("text"));
+obX.b();
+
+// Beter that:
+//
+// sys.println(obX.fnA#("text"));
+// obX.fnB#();
+</div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<h4>Indexed with mixed functional - value fields.</h4>
+<p>Direct access will be used.</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+// \s, (\s->()) -> <myobj>
+mk : a, fn;
+
+...
+
+:myobj
+obX = mk("de", f);
+
+sys.println(obX.a);
+obX.fn#();
+</div>
+<script>aceConf("aceEditor-1", "kut");</script>
+<a name="Dictionary"></a>
+<h3>Dictionary</h3>
+<p>Intended for local or immediate use (returns multiple values in functions).</p>
+<p>It is also used in server-client communications.</p>
+<p>Use locally:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+...
+
+a = {name: nm, age: a}
+
+...
+
+sys.println("Name is " + a.name + " and age is " + sys.toStr(a.age));
+
+...
+</div>
+<script>aceConf("aceEditor-2", "kut");</script>
+<p>Use as return</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+fn = \name, age -> return {name, age};
+
+...
+
+a = fn("Peter", 35);
+
+...
+
+sys.println("Name is " + a.name + " and age is " + sys.toStr(a.age));
+
+</div>
+<script>aceConf("aceEditor-3", "kut");</script>
+<hr>
+<p style="text-indent: 0px"><a href='04-flow.html'>Anterior (Program Flow)</a> · <a href="index.html">Índice</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

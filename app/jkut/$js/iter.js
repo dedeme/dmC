@@ -115,6 +115,23 @@ export function eachIx (it, fn) {
   while (hasNext(it)) fn(next(it), ix++);
 }
 
+// \<iter>, (async \n,*->()), (\->()) -> ()
+export function eachSync (it, f1, f2) {
+  sys.$params(arguments.length, 3);
+  sys.$fparams(f1, 2);
+  sys.$fparams(f2, 0);
+  let ix = 0;
+  async function fn () {
+    if (hasNext(it)) {
+      await f1(ix++, next(it));
+      fn();
+    } else {
+      f2();
+    }
+  }
+  fn();
+}
+
 // \-> <iter>
 export function empty (it, fn) {
   sys.$params(arguments.length, 0);

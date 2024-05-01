@@ -1,0 +1,43 @@
+=
+title = Design
+=
+
+## Constants
+
+Every constat shuld be in *data/cts.kut*.
+
+## Enumerations
+
+Use the form *a, b,...=;* for enumrations of intesive use and  *a, b,...:;"*
+for normal use.
+
+## Global functions.
+
+They should be in a file in root named *fns.kut*.
+
+## Objets and not side effects functions among them.
+
+They should be in a directory in root named *data* and its subdirectories.
+
+## Data base
+
+- Initialization
+> They should be in a file in root named *db.kut*.
+
+- Tables and similars, including functions with side effects.
+> They should be in a directory in root named *db* and its subdirectories.
+
+  Files should be named with suffix '.tb' if they do the management of a table or
+  '.db' if they do it of several tables.
+
+
+## Browser interface
+
+They should be in a directory in root named *pgs* and its subdirectories.
+
+Files should be named with suffix '.pg' for complete pages, or '.wg' for
+widgets.
+
+The main hub of request processing should be in a file in root named *pgs.kut*.
+
+

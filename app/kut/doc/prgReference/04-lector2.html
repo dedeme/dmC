@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Lector de alto nivel</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='03-lector1.html'>Anterior (Lector de bajo nivel)</a> · <a href="index.html">Índice</a> · <a href='05-ejecutor.html'>Posterior (Ejecutor)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Lector de bloque principal'>Lector de bloque principal</a><br>
+<a href='#Lector de instrucciones.'>Lector de instrucciones.</a>
+</p>
+<hr>
+<a name="Lector de bloque principal"></a>
+<h3>Lector de bloque principal</h3>
+<p>Lee un módulo completo. Para ello <a href="#Lectura de instrucción">lee instrucción por instrucción</a>,
+realizando las siguientes acciones:</p>
+<ol>
+<dt>Se ha alcanzado el fin de archivo.</dt>
+<dd>
+<p>Final de lectura.</p>
+</dd>
+<dt>Se ha leído un fin de bloque (<code>}</code>).</dt>
+<dd>
+<p>Se emite un error.</p>
+</dd>
+<dt>Se ha leído un <code>import</code>.</dt>
+<dd>
+<p>Se controla que el identificador no ha sido usado ya ni para otro <code>import</code> ni
+  para una variable. Si el identificador es correcto se actualizan las listas
+  de archivos (<a href="80-objetos.html#fileix">fileix</a>), de
+  <a href="80-objetos.html#módulos">módulos</a> y de <code>imports</code>.</p>
+<p><i>NOTA: En este punto el archivo importado NO es leído todavía.</i></p>
+</dd>
+<dt>Se ha leído una asignación.</dt>
+<dd>
+<p>Se controla que el identificador no ha sido usado ya ni para un <code>import</code> ni
+  para otra variable. Si la línea inmediata anterior comienza con <code>///</code>, se
+  añade la lista de <code>exports</code>.</p>
+</dd>
+</ol>
+<p>Al final de lectura se elimina las instrucciones de comentario tipo <code>export</code>
+(líneas que comienzan con <code>///</code>, utilizadas para marcar la siguiente línea
+como variable exportable).</p>
+<a name="Lector de instrucciones."></a>
+<h3>Lector de instrucciones.</h3>
+<hr>
+<p style="text-indent: 0px"><a href='03-lector1.html'>Anterior (Lector de bajo nivel)</a> · <a href="index.html">Índice</a> · <a href='05-ejecutor.html'>Posterior (Ejecutor)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

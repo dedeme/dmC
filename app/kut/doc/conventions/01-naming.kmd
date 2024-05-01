@@ -1,0 +1,20 @@
+=
+book = Kut. Conventions and Programing Schemes.
+title = Naming
+=
+
+## First symbols character.
+
+- Upercase
+> Lists type \[*.] and dictionaries type {*.}.
+
+- Lowercase
+> The rest.
+
+## Sufixes.
+
+- V
+> For variables type \[*]. (Mutable variables)
+
+- Op
+> For variables type (\[*] | \[]) (Option)

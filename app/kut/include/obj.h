@@ -104,5 +104,4 @@ TcpConn *obj_rget_tcp_conn (Exp *this);
 /// Returns TRUE if 'this' match the object type.
 int obj_is_tcp_conn (Exp *this);
 
-
 #endif

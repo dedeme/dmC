@@ -7,6 +7,7 @@
   #define READER_H
 
 #include "reader/cdr/cdr.h"
+#include "reader/types.h"
 #include "module.h"
 
 /// Read the 'main' block of a module.
@@ -16,6 +17,6 @@ Module *reader_read_main_block (Cdr *cdr);
 
 /// Read a code block. Returns Arr<StatCode>.
 /// Throw EXC_KUT if the reading fails.
-Arr *reader_read_block (Cdr *cdr);
+Arr *reader_read_block (Types *tps, Cdr *cdr);
 
 #endif

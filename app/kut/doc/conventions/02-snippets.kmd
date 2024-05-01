@@ -1,0 +1,73 @@
+=
+title = Snippets
+=
+
+## Testing variable
+
+``kut
+...
+a0 = fn();
+a = a0 == "x" : a0 : "z";
+...
+``
+
+## Results
+
+# Result wiht ok.
+
+``kut
+...
+// b
+ok = fn();
+if (!ok) sys.throw("msg");
+...
+``
+
+# Result with error.
+
+``kut
+...
+// s
+error = fn();
+if (error != "") sys.throw(error);
+...
+``
+
+# Option results
+
+``kut
+...
+aOp = fn();
+if (!aOp) sys.throw("msg");
+a = aOp!;
+...
+``
+
+·
+
+``kut
+...
+aOp = fn();
+a = !aOp ? "default" : aOp!;
+...
+``
+
+·
+
+``kut
+...
+aOp = fn();
+if (!!aOp) fn(aOp!)
+...
+``
+
+# Result with value.
+
+``kut
+...
+// [*|s, b]
+v, ok = fn();
+if (!ok) sys.throw(v);
+...
+``
+

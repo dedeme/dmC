@@ -187,6 +187,10 @@ int token_is_backslash (Token *this) {
   return this->type == TOKEN_OPERATOR && !strcmp(this->value, "\\");
 }
 
+int token_is_hash (Token *this) {
+  return this->type == TOKEN_OPERATOR && !strcmp(this->value, "#");
+}
+
 int token_is_arrow (Token *this) {
   return this->type == TOKEN_OPERATOR && !strcmp(this->value, "->");
 }

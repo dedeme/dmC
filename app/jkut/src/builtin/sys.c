@@ -1,4 +1,4 @@
-// Copyright 30-Jul-2023 ºDeme
+// Copyright 25-Apr-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *sys_bget (void) {return
@@ -15,7 +15,7 @@ char *sys_bget (void) {return
   "    end = end < begin ? begin : end > len ? len : end;\n"
   "    return o.substring(begin, end);\n"
   "  }\n"
-  "  if (typeof(o) === 'object' && Array.isArray(o)) {\n"
+  "  if (Array.isArray(o)) {\n"
   "    if (begin === null) begin = 0;\n"
   "    if (end === null) end = o.length;\n"
   "    return o.slice(begin, end);\n"
@@ -63,8 +63,14 @@ char *sys_bget (void) {return
   "\n"
   "export function $forObject (o) {\n"
   "  if (Object.prototype.toString.call(o) === '[object Object]')\n"
-  "    return Object.keys(o);\n"
+  "    return Object.values(o);\n"
   "  return o;\n"
+  "}\n"
+  "\n"
+  "export function $forObject2 (o) {\n"
+  "  if (Object.prototype.toString.call(o) === '[object Object]')\n"
+  "    return Object.entries(o);\n"
+  "  return o.entries();\n"
   "}\n"
   "\n"
   "export function $forCmp (v) {\n"
@@ -115,9 +121,8 @@ char *sys_bget (void) {return
   "export function asBool (e) {\n"
   "  $params(arguments.length, 1);\n"
   "  if (typeof(e) === 'boolean') return e;\n"
-  "  if (typeof(e) === 'string') return e != '';\n"
-  "  if (typeof(e) === 'object' && Array.isArray(e)) return e.length != 0;\n"
-  "  throw new Error('\\nExpected: boolean, string or Array.\\n   Found: ' + e);\n"
+  "  if (Array.isArray(e)) return e.length != 0;\n"
+  "  throw new Error('\\nExpected: boolean or Array.\\n   Found: ' + e);\n"
   "}\n"
   "\n"
   "// \\* -> ()\n"

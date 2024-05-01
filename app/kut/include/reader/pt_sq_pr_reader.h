@@ -8,10 +8,14 @@
 
 #include "reader/cdr/cdr.h"
 #include "exp.h"
+#include "reader/types.h"
 
 /// Reads anexed expressions 'point', 'square - slice' and 'parenthesis',
 /// if they exist. Otherwise returns 'left'
+///   tps : List symbols-modules of typed symbols.
+///   left: Current expression.
+///   cdr : Code reader.
 /// Throws EXC_KUT
-Exp *pt_sq_pr_reader_read (Exp *left, Cdr *cdr);
+Exp *pt_sq_pr_reader_read (Types *tps, Exp *left, Cdr *cdr);
 
 #endif

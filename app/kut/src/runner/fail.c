@@ -15,7 +15,12 @@ char *fail_add_stack (char *msg, Stack *stack) {
 
 char *fail_type (char *expected, Exp *exp) {
   char *sexp = exp_to_js(exp);
-  if (strlen(sexp) > 160) sexp = str_f("%s...", str_left(sexp, 157));
+  // char
+  Arr *runes = str_runes(sexp);
+  int size = arr_size(runes);
+  if (size > 160)
+    sexp = str_f("...%s", arr_join(arr_drop(runes, size - 157), ""));
+
   return str_f(
     "Type error:\n    Expected: %s\n    Found   : %s (%s)",
     expected,

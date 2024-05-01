@@ -40,6 +40,18 @@ static Exp *to_int_op_aux (char *s, int base) {
   return exp_array(arr_new_from(exp_int(r), NULL));
 }
 
+// \ -> f
+static Exp *e (Arr *exps) {
+  CHECK_PARS ("math.e", 0, exps);
+  return exp_float(M_E);
+}
+
+// \ -> f
+static Exp *pi (Arr *exps) {
+  CHECK_PARS ("math.pi", 0, exps);
+  return exp_float(M_PI);
+}
+
 // \f -> f
 static Exp *f_abs (Arr *exps) {
   CHECK_PARS ("math.abs", 1, exps);
@@ -337,6 +349,13 @@ static Exp *f_trunc (Arr *exps) {
 }
 
 Bfunction md_math_get (char *fname) {
+  // CONSTANTS
+
+  if (!strcmp(fname, "e")) return e;
+  if (!strcmp(fname, "pi")) return pi;
+
+  // FUNCTIONS
+
   if (!strcmp(fname, "abs")) return f_abs;
   if (!strcmp(fname, "acos")) return f_acos;
   if (!strcmp(fname, "acosh")) return f_acosh;

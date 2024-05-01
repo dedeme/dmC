@@ -49,7 +49,9 @@ int fileix_add(int fix, char *ipath) {
 char *fileix_to_str (int ix) {
   if (ix < 0) return "Built-in";
   char *s = str_left(arr_get(paths, ix), - 4);
-  if (strlen(s) > 50) s = str_f("...%s", str_right(s, -47));
+  Arr *runes = str_runes(s);
+  if (arr_size(runes) > 50)
+    s = str_f("...%s", arr_join(arr_drop(runes, arr_size(runes) - 47), ""));
   return s;
 }
 
@@ -58,8 +60,6 @@ char *fileix_to_fail (int ix) {
   return arr_get(paths, ix);
 }
 
-/// Read the file with index 'ix'
-/// <char>
 char *fileix_read (int ix) {
   return file_read(arr_get(paths, ix));
 }

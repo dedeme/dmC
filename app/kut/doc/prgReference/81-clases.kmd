@@ -1,0 +1,133 @@
+=
+title = Clases
+=
+
+## Token
+
+(Archivos *reader/token.(h/c)*)
+
+Clase inmutable de _tokens_ de Kut.
+
+Tiene dos campos:
+
+- <code>type</code>
+> Uno de TOKEN_BOOL, TOKEN_INT, TOKEN_FLOAT, TOKEN_STRING,
+  TOKEN_LINE_COMMENT, TOKEN_COMMENT, TOKEN_SYMBOL o TOKEN_OPERATOR. \
+  Accesible sólo con las functiones *token_is_xxx*.
+
+- <code>value</code>
+> Accesible sólo con las functiones *token_get_xxx*.
+
+Hay un constructor *token_xxx* para cada tipo.
+
+Se puede pasar a cadena el tipo ( *token_type_to_str* ) y el valor ( *token_to_str* )
+
+Hay functiones auxiliares para simplificar la programación de tipo *token_is_xxx*.
+
+## Exp
+
+(Archivos *exp.(h/c)*)
+
+Clase inmutable de _expresiones_ de Kut.
+
+Tiene dos campos:
+
+- <code>type</code>
+> Uno de \
+  EXP_BREAK, EXP_CONTINUE, \
+  EXP_BOOL, EXP_INT, EXP_FLOAT, EXP_STRING, EXP_OBJECT, \
+  EXP_ARR, EXP_MAP, EXP_FUNC, EXP_SYM, \
+  EXP_RANGE, \
+  EXP_PT, EXP_SQ, EXP_SLICE, EXP_PR,
+    _(Point, Square braket - subindex, Square bracket - slice, Parentheses)_ \
+  EXP_SWITCH, \
+  EXP_NOT, EXP_MINUS, \
+  EXP_ADD, EXP_SUB, EXP_MUL, EXP_DIV, EXP_MOD, \
+  EXP_AND, EXP_OR, \
+  EXP_GREATER, EXP_GREATER_EQ, EXP_LESS, EXP_LESS_EQ, \
+  EXP_EQ, EXP_NEQ \
+  o EXP_TERNARY. \
+  Accesible sólo con las funciones *exp_is_xxx*.
+
+- <code>value</code>
+> Accesible sólo con las funciones *exp_get_xxx* o *exp_rget_xxx*. La primera
+  utilizada en el proceso de lectura y la segunda en el de ejecución.
+
+Hay un constructor *exp_xxx* para cada tipo.
+
+# Expresiones predefinidas
+
+- <code>exp_empty</code>
+> Expresion retornada por un bloque finalizado sin encontrar el símbolo *return*.
+  Comprobada con *exp_is_empty*.
+
+- <code>exp_empty_return</code>
+> Valor del símbolo *return* cuando se devuelve una expresión vacía (*return;*).
+  Comprobada con *exp_is_empty_return*.
+
+# Expresión <code>exp_object</code>
+
+Utilizada para objetos 'C'.
+
+El campo *type* indica el tipo del objeto. Por convención se utiliza el nombre
+entre signos '<' - '>' (p.e. "<file>").
+
+El campo *valor* contiene el puntero al objeto.
+
+Para comprobar si una expresión es un objeto en general se utiliza
+*exp_is_some_object* y para comprobar si es un objeto concreto *exp_is_object*.
+
+# Utilidades
+
+- <code>exp_is_binary</code>
+> Permite comprobar si una expresión es de typo binario (+, &, ==, etc).
+
+- <code>exp_type_to_str</code>
+> Retorna el tipo de una expresión.
+
+- <code>exp_to_str</code>
+> Retorna el la representación de una expresión.
+
+- <code>exp_to_js</code>
+> Retorna la misma representación que *exp_to_str* con las siguientes
+  diferencias:
+
+  * Las expresiones de tipo 'str' se devuelven entre comillas.
+
+  * Las expresiones de tipo 'float' se devuelve siempre con el punto decimal.
+
+## Stat
+
+(Archivos *stat.(h/c)*)
+
+Clase inmutable de _instrucciones_ de Kut.
+
+Tiene dos campos:
+
+- <code>type</code>
+> Uno de
+  END, EMPTY, \
+  ASSIGN, ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS, ORAS, \
+  FUNCTION, BLOCK, \
+  BLOCK_CLOSE, BREAK, CONTINUE, \
+  TRACE, ASSERT, RETURN, \
+  TRY, WHILE, IF, ELSE, FOR, FOR_IX, FOR_R, FOR_RS, SWITCH \
+  o IMPORT \
+  Accesible sólo con las functiones *stat_is_xxx*.
+
+- <code>value</code>
+> Accesible sólo con las functiones *stat_get_xxx*.
+
+Hay un constructor *stat_xxx* para cada tipo.
+
+Se puede pasar a cadena el tipo ( *stat_type_to_str* ) y el valor ( *stat_to_str* )
+
+## StatCode
+
+(Archivos *stat.(h/c)*)
+
+Envoltorio de una _instrucción_ que añade valores para identificar el archivo y
+línea en la que se encuentra.
+
+## Módulo
+

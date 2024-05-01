@@ -73,6 +73,9 @@ int cdr_next_token_is_exclamation (Cdr *this);
 /// Returns 'true' if the next token is the operator '!'.
 int cdr_next_token_is_backslash (Cdr *this);
 
+/// Returns 'true' if the next token is the operator '#'.
+int cdr_next_token_is_hash (Cdr *this);
+
 /// Returns 'true' if the next token is the operator '->'.
 int cdr_next_token_is_arrow (Cdr *this);
 

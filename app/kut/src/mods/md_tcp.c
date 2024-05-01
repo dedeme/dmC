@@ -76,6 +76,7 @@ static Exp *f_read (Arr *exps) {
 // \i -> <tcpServer>
 static Exp *server (Arr *exps) {
   CHECK_PARS ("tcp.server", 2, exps);
+  signal(SIGPIPE, SIG_IGN);
   return obj_tcp_server(tcp_server(
     exp_rget_int(arr_get(exps, 0)),
     exp_rget_int(arr_get(exps, 1))

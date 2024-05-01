@@ -8,6 +8,8 @@
 static Arr *syms;
 
 void symix_init(void) {
+  // NOTE: arr, dic and str are used in st_reader/read_symbol
+  //       and all builtin modules in reader/read_main_block;
   syms = arr_new_from(
     // Reserverd words
     "break", "catch", "continue", "default",
@@ -76,4 +78,10 @@ int symix_add(char *sym) {
 
 char *symix_get (int ix) {
   return arr_get(syms, ix);
+}
+
+static int id = 0;
+int symix_generate (void) {
+  arr_push(syms, str_f("gen-%d-", id++));
+  return arr_size(syms) - 1;
 }

@@ -1,0 +1,62 @@
+=
+title = Objetos
+=
+
+## fileix
+
+(Archivos *fileix.h* y *fileix.c*)
+
+Mantiene las lista de rutas de los archivos de código Kut que han sido
+procesados o estan siéndolo.
+
+Este objeto permite:
+
+* Recuperar la ruta original desde el indice de la lista. Cada archivo se
+  puede recuperar:
+
+  * Sin la extensión y con un límite de 50 caracteres. (Usado para imprimir
+    archivos importados)
+
+  * Con la extensión _.kut_ y el path en forma canónica. (Usado para imprimir
+    errores y trazar mensajes)
+
+* Leer el correspondiente archivo desde su índice.
+
+``
+<pre class=frame><i>NOTA: Se pueden registrar distintas rutas que apuntan al mismo archivo.
+</i></pre>``
+
+## symix
+
+(Archivos *symix.h* y *symix.c*)
+
+Vincula índices con símbolos.
+
+En la inicialización se establece los índices de las palabras reservadas y los
+módulos del sistema.
+
+Posteriormente los nuevos símbolos son añadidos con *add* y recuperados con
+*get*.
+
+## módulos
+
+(Archivos *modules.h* y *modules.c*)
+
+Array que mantiene una indexación de [81-clases.html#Módulo](módulos).
+
+El índice de cada módulo en el array es el mismo que el del archivo que lo
+contiene en *fileix*.
+
+Dada una entrada en el array pueden resultar tres casos:
+
+- <code>option_none</code>
+> No hay módulo que corresponda al índice.
+
+- <code>option_some(option_none)</code>
+> Hay un módulo asociado al índice, pero aún no está definido. (Se encuentra en
+  proceso de lectura)
+
+- <code>option_some(option_some(módulo))</code>
+> Hay un módulo asociado al índice que está definido. (El módulo ha sido leído
+  completamente)
+

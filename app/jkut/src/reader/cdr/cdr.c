@@ -9,7 +9,7 @@
 #include "fileix.h"
 #include "DEFS.h"
 
-static char *opChs = ";=,.()+-*/!<>[]{}%&|?:\\";
+static char *opChs = ";=,.()+-*/!<>[]{}%&|?:\\#";
 
 struct cdr_Cdr {
   char *code;
@@ -228,6 +228,11 @@ int cdr_next_token_is_exclamation (Cdr *this) {
 int cdr_next_token_is_backslash (Cdr *this) {
   Token *tk = this->next_tk;
   return tk && token_is_backslash(tk);
+}
+
+int cdr_next_token_is_hash (Cdr *this) {
+  Token *tk = this->next_tk;
+  return tk && token_is_hash(tk);
 }
 
 int cdr_next_token_is_arrow (Cdr *this) {

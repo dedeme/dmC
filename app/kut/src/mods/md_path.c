@@ -27,9 +27,11 @@ static Exp *canonical (Arr *exps) {
 static Exp *cat (Arr *exps) {
   CHECK_PARS ("path.cat", 1, exps);
 
-  return exp_string(path_clean(arr_cjoin(
-    arr_map(exp_rget_array(arr_get(exps, 0)), (FMAP)exp_rget_string)
-  , '/')));
+  //<char>
+  Arr *a = arr_map(exp_rget_array(arr_get(exps, 0)), (FMAP)exp_rget_string);
+  if (arr_size(a) == 0) arr_push(a, "./");
+  else if (!*(char *)*arr_begin(a)) *arr_begin(a) = "."; // First entry == ""
+  return exp_string(path_clean(arr_cjoin(a, '/')));
 }
 
 // \s -> s

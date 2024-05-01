@@ -8,8 +8,9 @@
 
 #include "reader/cdr/cdr.h"
 #include "stat.h"
+#include "reader/types.h"
 
 /// Read a statement.
-StatCode *st_reader_read(Cdr *cdr);
+StatCode *st_reader_read(Types *tps, Cdr *cdr);
 
 #endif

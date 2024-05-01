@@ -33,6 +33,18 @@ Stat *stat_end (void);
 int stat_is_end (Stat *this);
 
 /// Creates a statement of the indicated type.
+/// Trows EXC_ILLEGAL_AGUMENT if arr_size(syms) < 2.
+///   syms: Arr<Exp> with expressions of type EXP_SYM.
+Stat *stat_indexed (Arr *syms);
+
+/// Read a Stat of the indicate type. Returns Arr<Exp> (Exp of type EXP_SYM).
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Arr *stat_get_indexed (Stat *this);
+
+/// Returns TRUE if 'this' match the type.
+int stat_is_indexed (Stat *this);
+
+/// Creates a statement of the indicated type.
 Stat *stat_assign (Exp *left, Exp *right);
 
 /// Read a Stat of the indicate type. Returns Tp<Exp, Exp>.
@@ -41,6 +53,32 @@ Tp *stat_get_assign (Stat *this);
 
 /// Returns TRUE if 'this' match the type.
 int stat_is_assign (Stat *this);
+
+/// Creates a statement of the indicated type.
+///   new_sym: internal symbol to assign 'exp'. Necessary for the runner.
+///   syms   : Arr<Exp> with expressions of type EXP_SYM or EXP_EMPTY.
+///   exp    : Expresion with should resolve in EXP_ARR.
+Stat *stat_arr_multi (Exp *new_sym, Arr *syms, Exp *exp);
+
+/// Read a Stat of the indicate type. Returns Tp3<Exp, Arr, Exp>.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Tp3 *stat_get_arr_multi (Stat *this);
+
+/// Returns TRUE if 'this' match the type.
+int stat_is_arr_multi (Stat *this);
+
+/// Creates a statement of the indicated type.
+///   new_sym: internal symbol to assign 'exp'. Necessary for the runner.
+///   syms   : Arr<Exp> with expressions of type EXP_SYM or EXP_EMPTY.
+///   exp    : Expresion with should resolve in EXP_DIC.
+Stat *stat_dic_multi (Exp *new_sym, Arr *syms, Exp *exp);
+
+/// Read a Stat of the indicate type. Returns Tp3<Exp, Arr, Exp>.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Tp3 *stat_get_dic_multi (Stat *this);
+
+/// Returns TRUE if 'this' match the type.
+int stat_is_dic_multi (Stat *this);
 
 /// Creates a statement of the indicated type.
 Stat *stat_add_as (Exp *left, Exp *right);
