@@ -7,7 +7,7 @@ H_FILES = $(wildcard include/*.h) $(wildcard include/*/*.h) $(wildcard include/*
 LIB_PATH = lib/lib$(LIB)
 LIB_INCLUDE = lib/lib$(LIB)/include
 
-CFLAGS = -Wall -rdynamic
+CFLAGS = -Wall -rdynamic -z execstack
 FILES = $(C_FILES) $(H_FILES)
 bin/$(PRG): $(FILES) $(LIB_PATH)/lib$(LIB).a
 	gcc $(CFLAGS) $(FILES) -o bin/$(PRG) \

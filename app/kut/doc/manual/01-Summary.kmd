@@ -1,0 +1,174 @@
+=
+book = Kut. Manual.
+title = Summary
+=
+
+## Hello World!
+
+To start we show how to write and execute the famous program "Hello World!".
+
+In a file called "hello.kut" we write in plain text the following text:
+
+``kut
+sys.println("Hello World!");``
+
+Then, from the same directory in a console, we write:
+
+*kut hello*
+
+and we can see:
+
+*Hello World!*
+
+## Program
+
+A Kut program is a set of files with extension '.kut' and which contains Kut
+code.
+
+The program starts with the file called by the command 'kut'.
+
+The rest of files are called through statements 'import'.
+
+Example:
+
+Write a file "helloText.kut":
+
+``kut
+///
+tx = "Hello World!";``
+
+And another "helloMain.kut":
+
+``kut
+import "helloText";
+
+sys.println(helloText.tx);``
+
+After writing in console
+
+*kut helloText*
+
+we can see too:
+
+*Hello World*
+
+## Module
+
+Each file with extension '.kut' and Kut code is a module.
+
+It is writen in plain text and contains:
+
+  - Comments.
+
+  - Statements.
+
+  - Blocks.
+
+  - Control sequences.
+
+## Comments
+
+They give information about the code.
+
+Comments are lines which start with '//'.
+
+Example:
+
+``kut
+// Normal comment.
+/// Documentation command.``
+
+## Statement
+
+Made by expressions, they are commands to execute by Kut.
+
+Statements are executed sequentially, from top to bottom, unless this way
+is changed by a control sequence.
+
+Example ("hello2.kut"):
+
+``kut
+tx = "Hello World!";
+sys.println(tx);``
+
+Which shows:
+
+*Hello World*
+
+## Block
+
+It is a group of statement enclosed by '{' and '}'.
+
+Each block has its own referencial frame.
+
+Example ("helloBlock.kut")
+
+``kut
+tx = "World!";
+{
+  tx = "Hello ";
+  sys.print(tx);
+}
+sys.println(tx);``
+
+Which shows:
+
+*Hello World*
+
+## Control sequence
+
+Control sequences change the sequencial order of statements.
+
+Example: ("helloIf1.kut")
+
+``kut
+v = true;
+if (v) sys.println("Hello World!");
+else sys.println("Hello People!");``
+
+shows:
+
+*Hello World*
+
+Example: ("helloIf2.kut")
+
+``kut
+v = false;
+if (v) sys.println("Hello World!");
+else sys.println("Hello People!");``
+
+shows:
+
+*Hello People*
+
+
+## Expression
+
+Expressions are literals and symbols mixed by operators.
+
+Every expression has a value.
+
+Literal examples:
+
+  - true
+
+  - 23.12
+
+  - "stop"
+
+Symbol examples:
+
+  - x
+
+  - aVeryLongSymbol
+
+  - p12
+
+Operator examples:
+
+  - 3 - (12 + 6)
+
+  - x > 2 | x < -5
+
+  - str.left("abd", 2)
+

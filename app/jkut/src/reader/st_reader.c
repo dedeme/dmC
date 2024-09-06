@@ -58,9 +58,24 @@ static Stat *read_multi(Types *tps, char *sym, Cdr *cdr, char *js) {
       if (tk->type != TOKEN_SYMBOL)
         EXC_GENERIC(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
       types_add(tps, tk->value, tk_mod->value);
+    } else if (token_is_equals(tk)) {
+      buf_add(abf, "]");
+      buf_add(abf, tk->js);
+      Exp *exp = ex_reader_read(tps, cdr);
+      Token *tk2 = cdr_read_token(cdr);
+      if (!token_is_semicolon(tk2))
+        EXC_GENERIC(cdr_fail_expect(cdr, ";", token_to_str(tk2)));
+      buf_add(abf, exp_get_js(exp));
+      buf_add(abf, tk2->js);
+      char *js = exp_js_insert(
+        exp_bool(FALSE, buf_str(abf)), // fake Exp.
+        "const ["
+      );
+      return stat_arr_multi(syms, exp, js);
 
     } else if (tk->type != TOKEN_SYMBOL)
       EXC_GENERIC(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+
     arr_push(syms, exp_sym(tk->value, tk->value));
     buf_add(abf, tk->js);
     buf_add(dbf, tk->js);
@@ -716,8 +731,15 @@ static Stat *read_symbol(Types *tps, Token *token, Cdr *cdr) {
           str_right(exp2_js, ix),
           tk2->js
         );
-      } else {
+      } else if (exp_can_be_null(exp2)) {
         js = str_f("%s%ssys.$checkNull(%s)%s",
+          exp_js_insert(exp, "const "),
+          tkjs,
+          exp2_js,
+          tk2->js
+        );
+      } else {
+        js = str_f("%s%s%s%s",
           exp_js_insert(exp, "const "),
           tkjs,
           exp2_js,
@@ -729,9 +751,9 @@ static Stat *read_symbol(Types *tps, Token *token, Cdr *cdr) {
         exp_get_js(exp),
         tkjs,
         exp_to_str(exp),
-        exp_is_function(exp2)
-          ? exp2_js
-          : str_f("sys.$checkNull(%s)", exp2_js),
+        exp_can_be_null(exp2)
+          ? str_f("sys.$checkNull(%s)", exp2_js)
+          : exp2_js,
         tk2->js
       );
     }

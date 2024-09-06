@@ -1,0 +1,86 @@
+// Copyright 04-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// System functions.
+
+/// Throws an exception if 'test' is 'false'. Otherwise do nothing.
+/// \b -> ()
+assert = \test -> {};
+
+/// Executes command 'c' with parameters 'pars' and returns an array with
+/// two strings:
+///   - First : Reponse ok.
+///   - Second: Error or "".
+///             If kut fail to execute 'c', it returns the message "NOEXEC: <c>".
+/// \s, [s.] -> [s, s]
+cmd = \c, pars -> {};
+
+/// Returns a dictionary with environment pairs 'key-value'.
+/// \-> {s.}
+environ = \-> {};
+
+/// Finalizes immediately the program with 'code'.
+///   code: Code of error. Usually [0-125]. 0 as 'without error' result.
+/// \i -> ()
+exit = \code -> {};
+
+/// Returns the current locale.
+/// \-> s
+getLocale = \-> {};
+
+/// Returns the home directory.
+/// \-> s
+home = \-> {};
+
+/// Returns the process identifier.
+/// \-> i
+pid = \-> {};
+
+/// Shows a string representation of 'value' for console.
+/// \* -> ()
+print = \value -> {};
+
+/// Shows a string representation of 'value' "stderr".
+/// \* -> ()
+printError = \text -> {};
+
+/// Shows a string representation of 'value' followed by a carriage return
+/// for console.
+/// \* -> ()
+println = \text -> {};
+
+/// Reads a line on Console.
+/// The '\n' byte is not read.
+/// Inputs using [Control] casts unpredicted results.
+/// \-> s
+readLine = \-> {};
+
+/// Sets the current locale (e.g. sys.setLocale("es_ES.utf8");)
+/// \s -> ()
+setLocale = \lc -> {};
+
+/// Stop the current thread 'millis' milliseconds.
+/// \i -> ()
+sleep = \millis -> {};
+
+/// Throws an expcetion if 'actual' != 'expected', showing the value of
+/// 'actual'.
+/// \*, * -> ()
+test = \actual, expected -> {};
+
+/// Throws an exception with the message 'msg'.
+/// \s -> ()
+throw = \msg -> {};
+
+/// Returns the default conversion to string of 'o'
+/// \* -> s
+toStr = \o -> {};
+
+/// Marks symbol as used to avoid error "no used" messages.
+/// \*-> ()
+used = \-> {};
+
+/// Returns the user name.
+/// \-> s
+user = \-> {};
+

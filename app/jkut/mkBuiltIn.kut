@@ -13,7 +13,7 @@ months = [
 date = \-> {
   now = time.now();
   month = months[time.month(now)];
-  return time.format(now, "%D-" + month + "-%Y");
+  return time.fmt(now, "%D-" + month + "-%Y");
 };
 
 fhead = \-> return

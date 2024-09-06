@@ -1,4 +1,4 @@
-// Copyright 25-Apr-2024 ºDeme
+// Copyright 04-Sep-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *math_bget (void) {return
@@ -16,7 +16,7 @@ char *math_bget (void) {return
   "// \\s -> [n]|[]\n"
   "export function fromEn (n) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  return fromStr(n.replace(\",\", \"\"));\n"
+  "  return fromStr(n.replaceAll(\",\", \"\"));\n"
   "}\n"
   "\n"
   "// \\s -> [n]|[]\n"
@@ -33,7 +33,7 @@ char *math_bget (void) {return
   "// \\s -> [n]|[]\n"
   "export function fromIso (n) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  return fromStr(n.replace(\".\", \"\").replace(\",\", \".\"));\n"
+  "  return fromStr(n.replaceAll(\".\", \"\").replace(\",\", \".\"));\n"
   "}\n"
   "\n"
   "// \\s -> [n]|[]\n"
@@ -129,7 +129,7 @@ char *math_bget (void) {return
   "    return s;\n"
   "  }\n"
   "\n"
-  "  if (n === -0) n = 0;\n"
+  "  if (Object.is(n, -0)) n = 0;\n"
   "  const r1 = \"\" + round(n, dec);\n"
   "  const ps = r1.split(\".\");\n"
   "  if (ps.length == 1)\n"
@@ -166,7 +166,7 @@ char *math_bget (void) {return
   "// \\n -> s\n"
   "export function toStr(n) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  if (n === -0) n = 0;\n"
+  "  if (Object.is(n, -0)) n = 0;\n"
   "  return \"\" + n;\n"
   "}\n"
   "\n"

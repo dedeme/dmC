@@ -42,7 +42,7 @@ Opt *modules_get(int ix);
 /// Returns Opt<Module> with the module 'ix' or raise an EXC_IO if module does
 /// not exist.
 /// The module returned can be defined (opt_some(module)), or
-/// undefiend (opt_none).
+/// undefined (opt_none).
 ///   ix: Index of mudule (and module file)
 Opt *modules_get_ok(int ix);
 

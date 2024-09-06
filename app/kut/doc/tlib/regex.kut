@@ -1,0 +1,32 @@
+// Copyright 07-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Regular expressions.
+
+/// Returns an array splitting 's' in [no-match,match,no-match,...,no-match] with
+/// 'rg'.
+///   s : String for searching.
+///   rg: Regular expression.
+/// Examples:
+///   sys.test(regex.matches("paranormal", "a."), ["p", "ar", "", "an", "orm", "al", ""]);
+///   sys.test(regex.matches("paranormal", "xx"), []);
+/// You can extract only the matches with:
+///   // \[s.] -> [s.]
+///   getMatches = \:arr A -> {
+///     R = [];
+///     for (i = 1:A.size()-1:2) R.push(A[i]);
+///     return R;
+///   };
+/// \s, s -> [s.]
+matches = \s, rg -> {};
+
+/// Returns the result of replace "rg" by "repl" in "s".
+///   s   : Original string.
+///   rg  : Regular expression.
+///   repl: Replacement.
+/// Examples:
+///   sys.test(regex.replace("-ab-axxb-", "a(x*)b", "T"), "-T-T-");
+///   sys.test(regex.replace("-ab-axxb-", "a(x*)b", ""), "---");
+/// \s, s, s -> s
+replace = \s, rg, repl -> {};
+

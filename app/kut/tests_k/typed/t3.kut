@@ -1,0 +1,98 @@
+
+
+fn1 = \(|i) -> {
+  rV = [0];
+  while () {
+    rV! += 1;
+    if (rV! >= 3) return rV!;
+  }
+  return 125;
+};
+sys.test(fn1(), 3);
+
+fn2 = \(|i) -> {
+  rV = [0];
+  while () {
+    rV! += 1;
+    if (rV! >= 3) break;
+  }
+  return rV!;
+};
+sys.test(fn2(), 3);
+
+fn3 = \(|i) -> {
+  rV = [0];
+  while (rV! < 3) rV! += 1;
+  return rV!;
+};
+sys.test(fn3(), 3);
+
+fn4 = \(|i) -> {
+  sumV = [0];
+  cV = [0];
+  while (cV! < 6) {
+    if (cV! == 4) {
+      cV! += 1;
+      continue;
+    }
+    sumV! += cV!;
+    cV! += 1;
+  }
+  return sumV!;
+};
+sys.test(fn4(), 11);
+
+fn5 = \(|i) -> {
+  A = [1, 2, 3];
+  sumV = [0];
+  for (n = A) sumV! += n;
+  return sumV!;
+};
+sys.test(fn5(), 6);
+
+fn5b = \(|I) -> {
+  A = [1, 2, 3];
+  sumIxV = [0];
+  sumV = [0];
+  for (i, n = A) {
+    sumIxV! += i;
+    sumV! += n;
+  }
+  return [sumIxV!, sumV!];
+};
+sys.test(fn5b(), [3, 6]);
+
+fn6 = \(|s) -> {
+  D = {"a": "1", "b": "2", "c": "3"};
+  sumV = [""];
+  for (n = D) sumV! += n;
+  return sumV!;
+};
+sys.test(fn6(), "123");
+
+fn6b = \(|S) -> {
+  D = {"a": "1", "b": "2", "c": "3"};
+  sumKV = [""];
+  sumV = [""];
+  for (k, v = D) {
+    sumKV! += k;
+    sumV! += v;
+  }
+  return [sumKV!,sumV!];
+};
+sys.test(fn6b(), ["abc", "123"]);
+
+fn7 = \(|i) -> {
+  sumV = [0];
+  for (i = 0:4) sumV! += i;
+  return sumV!;
+};
+sys.test(fn7(), 6);
+
+fn7b = \(|i) -> {
+  sumV = [0];
+  for (i = 4:0:-2) {sumV! += i;}
+  return sumV!;
+};
+sys.test(fn7b(), 6);
+

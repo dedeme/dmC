@@ -9,6 +9,10 @@
 /// Number of expected quotes in 'NICK'.tb files.
 #define cts_historic_quotes 610
 
+/// First real reference date index (from before to after) = 610 - 350.
+/// After this index it remains the last 350 dates.
+#define cts_real_reference_date_ix 260
+
 /// Simulation initial capital.
 #define cts_initial_capital 250000.0
 

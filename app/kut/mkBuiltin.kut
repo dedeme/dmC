@@ -1,0 +1,56 @@
+// Copyright 22-Aug-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+// [s], s -> ()
+readDir = \PreviousV, dir -> {
+  Fs = file.dir(dir);
+  arr.sort(Fs, \f1, f2 -> return f1 < f2;);
+  for (f = Fs) {
+    fpath = file.cat([dir, f]);
+    if (fpath.isRegular()) {
+      PreviousV! += '"// ' + f + ' ----------\\n"\n';
+      for (l = str.split(fpath.read(), "\n"))
+        PreviousV! += '  "' + str.replace(
+            str.replace(l, "\\", "\\\\"),
+            '"', '\\"'
+          ) + '\\n"\n';
+    }
+  }
+};
+
+target = "include/typed/builtIn.h";
+
+template = """
+  // Copyright 22-Aug-2024 ºDeme
+  // GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+  /// Built-in base.
+
+  #ifndef TYPED_BUILT_IN_H
+    #define TYPED_BUILT_IN_H
+
+  *** Header.
+  char *builtIn_head =
+    <<HEADER>>;
+
+  *** Body.
+  char *builtIn_body =
+    <<BODY>>;
+
+  #endif
+  """;
+
+headV = [""];
+readDir(headV, "tlib/head");
+
+bodyV = [""];
+readDir(bodyV, "tlib/body");
+
+code = str.replace(
+  str.replace(
+    str.replace(template, "***", "///"),
+    "<<HEADER>>", headV!),
+  "<<BODY>>", bodyV!
+);
+
+file.write(target, code);

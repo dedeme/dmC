@@ -1,7 +1,7 @@
 // Copyright 04-Mar-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-/// Immutable classses of Kut statments.
+/// Kut statments.
 
 #ifndef STAT_H
   #define STAT_H
@@ -151,6 +151,7 @@ Tp *stat_get_or_as (Stat *this);
 int stat_is_or_as (Stat *this);
 
 /// Creates a statement of the indicated type.
+/// 'value' is 'exp_pr'.
 Stat *stat_func (Exp *value);
 
 /// Read a Stat of the indicate type.

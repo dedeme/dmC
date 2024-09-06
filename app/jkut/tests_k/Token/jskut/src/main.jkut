@@ -45,20 +45,20 @@ sys.test(\a, b -> return a;(16, 12), 16);
 
 sys.test(\ -> {
   sys.test("", "");
-  sys.assert("r");
   sys.assert(["a"]);
   return 16;
 }(), 16);
 sys.test(\a -> {
   sys.test("" ? true : false, false);
-  sys.test([] ? true : false, false);
+  sys.test(!![] ? true : false, false);
   return (a);
 }(16), 16);
 sys.test(\a, b -> {
   return a;
 }(16, 12), 16);
 
-\ -> return 16;();
+/*
+\ -> return 16;()];
 \a -> return (a);(16);
 \a, b -> return a;(16, 12);
 
@@ -78,5 +78,7 @@ sys.test(\a, b -> {
   return a;
 }(16, 12);
 
-trace "End token tests ok at line 81";
+*/
+
+trace "End token tests ok at line 83";
 

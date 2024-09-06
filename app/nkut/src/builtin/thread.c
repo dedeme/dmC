@@ -1,0 +1,33 @@
+// Copyright 06-Sep-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+char *thread_bget (void) {return
+  "// Copyright 22-Jun-2024 ºDeme\n"
+  "// GNU General Public License - V3 <http://www.gnu.org/licenses/>\n"
+  "\n"
+  "import * as timer from './timer.js';\n"
+  "import * as sys from './sys.js';\n"
+  "\n"
+  "// \\[n], n -> b\n"
+  "export function sleep (startV, delay) {\n"
+  "  sys.$params(arguments.length, 2);\n"
+  "  let now = new Date().getTime();\n"
+  "  if (now - startV[0] > delay) {\n"
+  "    startV[0] = now;\n"
+  "    return false;\n"
+  "  }\n"
+  "  return true;\n"
+  "}\n"
+  "\n"
+  "// \\\\[b], <timer> -> () -> [b]\n"
+  "export function run (fn) {\n"
+  "  sys.$params(arguments.length, 1);\n"
+  "  sys.$fparams(fn, 2);\n"
+  "  const endV = [false];\n"
+  "  const tm = [true, 1];\n"
+  "  timer.run(tm, () => fn(endV, tm));\n"
+  "  return endV;\n"
+  "}\n"
+  "\n"
+  "\n"
+;}

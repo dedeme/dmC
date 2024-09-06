@@ -1,0 +1,170 @@
+// Copyright 04-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Array functions.
+///
+/// Beside the functions described below, array also allows:
+///
+/// Empty constructor:
+///   - For integers: [!0]
+///   - For floats: [!0.0]
+///   - For strings: []
+///
+/// Subindex-get (v = A[ix])
+///   - Returns the element in position 'ix'.
+///   - If 'ix >= arr.len(A)' or 'ix < 0' an exception is thrown.
+///
+/// Subindex-set (A[ix] = v)
+///   - Sets the element in position 'ix'.
+///   - If 'ix >= arr.len(A)' or 'ix < 0' an exception is thrown.
+///
+/// Subarrays at left (A[:ix]), at right (A[ix:]) and between limits (A[i:j]).
+///   These subarrays are shallow copies of the original.
+///     - If subindices are '< 0', they are converted en 'len(A) + i'.
+///     - If the final value is '< 0' or '>= len(A)', it is adjusted to limits.
+///     - In case of 'A[i:j]', if 'j < i', returns an empty array.
+///     - The expresion 'A[:]' returns a shallow copy of 'A' (althoug 'arr.copy'
+///       is more efficient).
+///
+/// Boolean value (used with 'if', 'while', '? :', '!', '&' and '|'):
+///   - An empty array is valued as 'false'.
+///
+/// Addition
+///   - The symbol '+' can be used to concatenate arrays in a new array.
+///
+/// 'for' blocks.
+///   Next constructions are allowed:
+///     for (e = I)... Returns in 'e' in order each element of 'A'.
+///     for (i, e = I) ... Returns in 'e' and 'i' in order each element of 'A'
+///                        and its index.
+///
+/// SORT ALGORITHM EXAMPLE:
+///
+/// less = \(ii|b) n1, n2 -> return n1 < n2;;
+///
+/// sort = \(I|I) :arr A -> {
+///   sz = A.size();
+///   if (sz == 0) return [!0];
+///   if (sz == 1) return [A[0]];
+///   ix = A.size() / 2;
+///   :arr Left = sort(A.take(ix));
+///   :arr Right = sort(A.drop(ix));
+///   R = [!0];
+///   while () {
+///     if (!Left) { R.cat(Right); break; }
+///     if (!Right) { R.cat(Left); break; }
+///     if (less(Left!, Right!)) R.push(Left.shift());
+///     else R.push(Right.shift());
+///   }
+///   return R;
+/// };
+///
+/// sortIn = \(I|) :arr A -> {
+///   Tmp = sort(A);
+///   A.clear();
+///   A.cat(Tmp);
+/// };
+
+/// Adds in place elements of 'A2' to 'A1'. 'A2' can be the same 'A1'.
+/// \[*.], [*.] -> ()
+cat = \A1, A2 -> {};
+
+/// Removes every element of 'A'
+/// \[*.] -> ()
+clear = \A -> {};
+
+/// Returns 'true' if 'A' contains the element 'e'.
+/// \[*.], * -> b
+contains = \A, e -> {};
+
+/// Returns a shallow copy of 'A'
+/// \[*.] -> [*.]
+copy = \A -> {};
+
+/// Returns the remains elements of 'A' after make an 'arr.take' operation
+/// \[*.], i -> [*.]
+drop = \A, n -> {};
+
+/// Returns amd removes elements duplicates of 'A'.
+/// Returns only one copy.
+/// Parameters:
+///   A: Array to clean.
+/// \[*.] -> [*.]
+duplicates = \A -> {};
+
+/// Returns the index of the first element equals to 'e' or -1 if such element
+/// does not exist.
+/// \[*.], * -> i
+index = \A, e -> {};
+
+/// Inserts the element 'e' at position 'ix'.
+/// Throws exception if 'ix' is out of range.
+/// \[*.], i, * -> ()
+insert = \A, ix, e -> {};
+
+/// Inserts the array 'A2' at position 'ix' in 'A'.
+/// Throws exception if 'ix' is out of range.
+/// \[*.], i, [*.] -> ()
+insertArr = \A, ix, A2 -> {};
+
+/// Returns a string with elements of A (which are strings) joined with 'sep'.
+/// \[s.], s -> s
+join = \A, sep -> {};
+
+/// Returns a new array with 'n' elements equals to 'e'.
+/// If 'n' < 0, it is set to '0'.
+/// \i, (b | i | f | s ) -> [*.]
+new = \n, e -> {};
+
+/// Returns the last element of 'A'.
+/// \[*.] -> *
+peek = \A -> {};
+
+/// Removes and returns the last element of 'A'.
+/// \[*.] -> *
+pop = \A -> {};
+
+/// Append2 an element at the end of 'A'.
+/// \[*.], * -> ()
+push = \A, element -> {};
+
+/// Removes and returns the element at index 'ix'.
+/// Throws exception if 'ix' is out of range.
+/// \[*.], i -> *
+remove = \A, ix -> {};
+
+/// Removes and returns array with elements at between 'begin' (inclusive) and
+/// 'end' (exclusive).
+/// Throws exception if 'begin' or 'end' are out of range.
+/// \[*.], i, i -> *
+removeRange = \A, begin, end -> {};
+
+/// Returns elements of 'A' reversed.
+/// \[*.] -> [*.]
+reverse = \A -> {};
+
+/// Reverses elements of 'A' in place.
+/// \[*.] -> ()
+reverseIn = \A -> {};
+
+/// Removes and returns the first element of 'A'.
+/// \[*.] -> *
+shift = \A -> {};
+
+/// Reorders randomly elements of 'A' in place.
+/// \[*.] -> ()
+shuffle = \A  -> {};
+
+/// Returns the elements number of 'A'.
+/// \[*.] -> i
+size = \A -> {};
+
+/// Returns a shallow copy of 'A' with its 'n' first elements.
+///   -If 'n <= 0' returns an empty array.
+///   -if 'n >= len(A)' returns the complete array.
+/// \[*.], i -> [*.]
+take = \A, n -> {};
+
+/// Preppend an element at the beginning of 'A'.
+/// \[*.], * -> ()
+unshift = \A, element -> {};

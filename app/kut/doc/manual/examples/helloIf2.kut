@@ -1,0 +1,3 @@
+v = false;
+if (v) sys.println("Hello World!");
+else sys.println("Hello People!");

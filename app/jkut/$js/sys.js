@@ -124,8 +124,14 @@ export function asBool (e) {
 // \* -> ()
 export function assert (v) {
   $params(arguments.length, 1);
-  if (!asBool(v))
+  if (typeof(v) !== 'boolean' || !v)
     throw new Error('Assert failed');
+}
+
+// \* -> ()
+export function printError (v) {
+  $params(arguments.length, 1);
+  console.error(v);
 }
 
 // \*, * -> ()
@@ -141,7 +147,7 @@ export function test (actual, expected) {
 // \* -> s
 export function toStr (v) {
   $params(arguments.length, 1);
-  if (v == null) return "<null>";
+  if (v == null) return '<null>';
   if (typeof(v) === 'object') return JSON.stringify(v);
   return v.toString();
 }

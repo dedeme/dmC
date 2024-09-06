@@ -1,0 +1,61 @@
+// Copyright 04-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Dictionary functions.
+///
+/// Dictionary is a map from a string to any value. It is not sorted.
+///
+/// Beside the functions described below, 'dic' also allows:
+///
+/// D["k"]: Gets-Sets the value of key 'k'.
+///           - If D does not have such key, an exception is thrown (in
+///             both functions 'set' and 'get').
+/// D.k   : Equals to D[k], using the symbol 'k' as string.
+///
+/// 'for' blocks.
+///   Next construction are allowed:
+///     for (v = D)... Returns every value of D (including duplicates).
+///     for (k, v = D)... Returns every value of D ('v') and its key ('k').
+
+/// Returns a shallow copy of 'd'.
+/// \{*.} -> {*.}
+copy = \D -> {};
+
+/// Creates a dic from one array with pairs [key, value], removing pairs
+/// with duplicate key.
+/// \[[s,*].] -> {*.}
+fromArr = \A -> {};
+
+/// Returns an array with the value for key 'k' or an empty array if it does
+/// not exist.
+/// \{*.}, s -> ([*] | [])
+get = \D, k -> {};
+
+/// Returns 'true' if 'D' has the key 'k'.
+/// \{*.}, s -> b
+hasKey = \D, k -> {};
+
+/// Returns an unsorted array with the keys of 'D'.
+/// \{*.} -> [s.]
+keys = \D -> {};
+
+/// Adds a new value 'v' with key 'k' if such key does not exists. Otherwise
+/// change the value of 'k' with 'v'.
+/// \{*.}, s, * -> ()
+put = \D, k, v -> {};
+
+/// Removes key 'k' from 'D' if it exists. Oterwise this function does nothing.
+/// \{*.}, s -> ()
+remove = \D, k -> {};
+
+/// Returns the entries number of 'D'.
+/// \{*.} -> i
+size = \D -> {};
+
+/// Returns an unsorted array with the pairs [key, value] of 'D'
+/// \{*.} -> [[s,*].]
+toArr = \D -> {};
+
+/// Returns  an unsorted array with values of 'D'.
+/// \{*.} -> [*.]
+values = \D -> {};

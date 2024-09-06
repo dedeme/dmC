@@ -1,4 +1,4 @@
 import "t4";
 
-///
+/// \s -> s
 hello = \n -> return "hello " + n;;

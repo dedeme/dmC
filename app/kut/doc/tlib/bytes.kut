@@ -1,0 +1,55 @@
+// Copyright 01-Sep-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Array of byte functions.
+/// The type <bytes> is a compact representation of an array of byte.
+
+/// Adds bs2 to bs1 in place and returns bs1 modified.
+/// \<bytes>, <bytes> -> <bytes>
+add = \bs1, bs2 -> {};
+
+/// Returns the rest of bytes after 'bytes.take(bs)'.
+/// If n <= 0 returns returns a copy of bs.
+/// If n >= bytes.size(bs) returns an empty <bytes>.
+/// \<bytes>, i -> <bytes>
+drop = \bs, n -> {};
+
+/// Creates a <bytes> from an array of 'int's.
+/// \[i.] -> <bytes>
+fromArr = \A -> {};
+
+/// Creates a <bytes> from a normal string.
+/// \s -> <bytes>
+fromStr = \s -> {};
+
+/// Returns the value of 'bs' in position 'ix'.
+/// \<bytes>, i -> i
+get = \bs, ix -> {};
+
+/// Creates a <bytes> of length 'len', intialized with 0's.
+/// If 'len' < 0, it is set to 0.
+/// \i -> <bytes>
+new = \len -> {};
+
+/// Set the value of 'bs' in position 'ix' to 'b'.
+/// \<bytes>, i, i -> ()
+set = \bs, ix, v -> {};
+
+/// Returns the number of elements of 'bs'
+/// \<bytes> -> i
+size = \bs -> {};
+
+/// Returns the first 'n' elements of 'bs' in a new <bytes>.
+/// If n <= 0 returns an empty <bytes>.
+/// If n >= bytes.size(bs) returns a copy of bs.
+/// \<bytes>, i -> <bytes>
+take = \bs, n -> {};
+
+/// Returns 'bs' as an array of 'int's.
+/// \<bytes> -> [i.]
+toArr = \bs -> {};
+
+/// Returns 'bs' as a normal string ('bs' must not contain zeroes).
+/// \<bytes> -> s
+toStr = \bs -> {};
+

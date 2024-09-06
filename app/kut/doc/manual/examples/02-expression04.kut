@@ -1,0 +1,26 @@
+f1a = 0.;
+f1b = -0.0;
+f1c = 0.0e0;
+f1d = 0.0e-0;
+sys.println(f1d);
+sys.assert(f1a == f1b);
+sys.assert(f1a == f1c);
+sys.assert(f1a == f1d);
+
+f2a = 100.02;
+f2b = -100.02;
+f2c = 10_002.e-2;
+f2d = 1.0002e+2;
+f2e = 0.10002E3;
+sys.println(f2c);
+sys.assert(f2a == -f2b);
+sys.assert(f2a == f2c);
+sys.assert(f2a == f2d);
+sys.assert(f2a == f2e);
+
+// Wrong floats
+// .12 -> starts with '.'.
+// +1.2 -> starts with '-'.
+// 123 -> this number is integer.
+// 100e3 -> '.' is mising before 'e'.
+// 100.E -> There must be one digit at least after 'e|E'.

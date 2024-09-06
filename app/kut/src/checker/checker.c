@@ -6,6 +6,9 @@
 #include "stat.h"
 #include "fileix.h"
 #include "function.h"
+#include "typed/tfunction.h"
+#include "typed/treader.h"
+#include "typed/genc.h"
 #include "modules.h"
 #include "bmodule.h"
 #include "symix.h"
@@ -19,12 +22,12 @@ static void check_st(Layers *layers, Imports* is, StatCode *st_cd);
 // 'is' is Map<int>
 static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp) {
   if (exp_is_array(exp)) {
-    EACH(exp_rget_array(exp), Exp, e) {
+    EACH(exp_get_array(exp), Exp, e) {
       check_exp(layers, fix, nline, is, e);
     }_EACH
   } else if (exp_is_dic(exp)) {
     // v is Tp<char, Exp>
-    EACH(map_to_array(exp_rget_dic(exp)), Tp, v) {
+    EACH(map_to_array(exp_get_dic(exp)), Tp, v) {
       check_exp(layers, fix, nline, is, tp_e2(v));
     }_EACH
   } else if (exp_is_function(exp)) {
@@ -38,9 +41,12 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
     layers = layers_add(layers, layer_new(FALSE, syms));
 
     check_st(layers, is, st_cd);
+  } else if (exp_is_tfunction(exp)) {
+    Tfunction *fn = exp_get_tfunction(exp);
+    genc_write(fn);
   } else if (exp_is_sym(exp)) {
     layers_err_if_not_found(
-      layers, is, cksym_new(exp_rget_sym(exp), fix, nline)
+      layers, is, cksym_new(exp_get_sym(exp), fix, nline)
     );
   } else if (exp_is_range(exp)) {
     // <Exp, Exp, Exp>
@@ -52,9 +58,9 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
     // <Exp, Exp>
     Tp *v = exp_get_pt(exp);
     Exp *exp1 = tp_e1(v);
-    int sym2 = exp_rget_sym(tp_e2(v));
+    int sym2 = exp_get_sym(tp_e2(v));
     if (exp_is_sym(exp1)) {
-      int sym1 = exp_rget_sym(exp1);
+      int sym1 = exp_get_sym(exp1);
       if (bmodule_exists(sym1)) {
         TRY {
           bmodule_get_function(sym1, sym2);
@@ -114,7 +120,7 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
     // 'e' is Tp<Exp, Exp>
     EACH(tp_e2(v), Tp, e) {
       Exp *exp = tp_e1(e);
-      if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
+      if (!exp_is_sym(exp) || exp_get_sym(exp) != symix_DEFAULT)
         check_exp(layers, fix, nline, is, tp_e1(e));
       check_exp(layers, fix, nline, is, tp_e2(e));
     }_EACH
@@ -207,7 +213,7 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
     Exp *left = tp_e1(v);
     Exp *right = tp_e2(v);
     if (exp_is_sym(left)) {
-      layers_add_symbol(layers, fix, line, exp_rget_sym(left));
+      layers_add_symbol(layers, fix, line, exp_get_sym(left));
     } else {
       check_exp(layers, fix, line, is, left);
     }
@@ -220,7 +226,7 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
 
     EACH(tp3_e2(v), Exp, sym) {
       if (!exp_is_empty(sym))
-        layers_add_symbol(layers, fix, line, exp_rget_sym(sym));
+        layers_add_symbol(layers, fix, line, exp_get_sym(sym));
     }_EACH
     check_exp(layers, fix, line, is, tp3_e3(v));
   } else if (stat_is_add_as(st)) {
@@ -352,7 +358,7 @@ static void check_st(Layers *layers, Imports *is, StatCode *st_cd) {
       // <Exp>
       Arr *exps = tp_e1(exp_st);
       EACH(exps, Exp, exp) {
-        if (!exp_is_sym(exp) || exp_rget_sym(exp) != symix_DEFAULT)
+        if (!exp_is_sym(exp) || exp_get_sym(exp) != symix_DEFAULT)
           check_exp(layers, fix, stat_code_line(st_cd), is, exp);
       }_EACH
       check_st(layers, is, st_cd);

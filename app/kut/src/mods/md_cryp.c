@@ -10,15 +10,15 @@
 // \i -> s
 static Exp *genk (Arr *exps) {
   CHECK_PARS ("cryp.genk", 1, exps);
-  return exp_string(cryp_genk(exp_rget_int(arr_get(exps, 0))));
+  return exp_string(cryp_genk(exp_get_int(arr_get(exps, 0))));
 }
 
 // \s, i -> s
 static Exp *key (Arr *exps) {
   CHECK_PARS ("cryp.key", 2, exps);
   return exp_string(cryp_key(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1))
   ));
 }
 
@@ -26,8 +26,8 @@ static Exp *key (Arr *exps) {
 static Exp *encode (Arr *exps) {
   CHECK_PARS ("cryp.encode", 2, exps);
   return exp_string(cryp_encode(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 1))
   ));
 }
 
@@ -35,8 +35,8 @@ static Exp *encode (Arr *exps) {
 static Exp *decode (Arr *exps) {
   CHECK_PARS ("cryp.dcode", 2, exps);
   return exp_string(cryp_decode(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 1))
   ));
 }
 

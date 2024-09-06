@@ -1,0 +1,109 @@
+// Copyright 16-Aug-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+fn1 = \(D|s) M -> return M.a;;
+fn2 = \(Ds|s) M, tx ->  {
+  return M.a + "4" + tx;
+};
+fn3 = \(Dss|s) M, tx1, tx2 -> {
+  v1 = tx1 + tx2;
+  return M.a + v1;
+};
+/*
+fnX = \(|) -> {
+  sys.println("here");
+  continue;
+};
+*/
+
+fn = \(|) -> {
+  n1 = 23;
+  sys.test(n1 + 2, 25);
+  A1 = [1];
+  A2 = [0.0];
+
+  :: M = {"a": "12", "b": "12.0", "c": "true"};
+
+  A1! = 12;
+  A2! = 12.0;
+  cLeter = "c";
+  M[cLeter] = "ok";
+  sys.test(M[cLeter], "ok");
+  M.c = "ok2";
+  sys.test(M[cLeter], "ok2");
+  sys.test(M.c, "ok2");
+  {
+    { sys.test(n1, 23); }
+    n1 = -2;
+    sys.test(n1, -2);
+    {
+      sys.test(n1, -2);
+      n1 = 11;
+      sys.test(n1, 11);
+    }
+
+    A1! += 2;
+    sys.test(A1!, 14);
+    A1! -= -2;
+    sys.test(A1!, 16);
+    A1! *= 3;
+    sys.test(A1!, 48);
+    A1! /= 2;
+    sys.test(A1!, 24);
+    A1! %= 5;
+    sys.test(A1!, 4);
+
+    A2! += 2.0;
+    sys.test(A2!, 14.0);
+    A2! -= -2.0;
+    sys.test(A2!, 16.0);
+    A2! *= 3.0;
+    sys.test(A2!, 48.0);
+    A2! /= 2.0;
+    sys.test(A2!, 24.0);
+
+    M["a"] = "";
+    M["a"] += "4";
+    M.c += "!";
+
+    {
+      sys.test(fn1(M), "4");
+    }
+    sys.test(fn2(M, "10"), "4410");
+    sys.test(fn3(M, "15", "-5"), "415-5");
+
+  }
+
+  sys.test(n1, 23);
+  sys.test(A1!, 4);
+  sys.test(A2!, 24.0);
+  sys.test(M.a, "4");
+  sys.test(M.b, "12.0");
+  sys.test(M.c, "ok2!");
+
+  sys.test(fn1(M), "4");
+  sys.test(fn2(M, "10"), "4410");
+  sys.test(fn3(M, "15", "-5"), "415-5");
+
+};
+fn();
+
+
+//t = time.now();
+fibo = \(i|i) n -> {
+  if (n <= 0) return 0;
+  else if (n == 1) return 1;
+  else return fibo(n-2) + fibo(n-1);
+};
+sys.test(fibo(10), 55);
+//sys.println(time.now() - t);
+
+t2 = time.now();
+fibo2 = \ n -> {
+  if (n <= 0) return 0;
+  else if (n == 1) return 1;
+  else return fibo2(n-2) + fibo2(n-1);
+};
+sys.test(fibo2(10), 55);
+//sys.println(time.now() - t2);
+

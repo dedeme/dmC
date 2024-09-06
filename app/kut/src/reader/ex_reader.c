@@ -4,6 +4,7 @@
 #include "DEFS.h"
 #include "reader/ex_reader.h"
 #include "function.h"
+#include "typed/tfunction.h"
 #include "symix.h"
 #include "reader/pt_sq_pr_reader.h"
 #include "reader/st_reader.h"
@@ -331,29 +332,85 @@ Exp *ex_reader_read1 (Types *tps, Cdr *cdr) {
     tps = types_new_block(tps);
     // <Token>
     Arr *pars = arr_new();
+    Iarr *atypes = NULL;
+    Ttype rt_tp = ttype_ERROR;
+    int isTyped = FALSE;
     if (cdr_next_token_is_arrow(cdr)) {
       cdr_read_token(cdr);
     } else {
-      for(;;) {
+      if (cdr_next_token_is_open_parenthesis(cdr)) {
+        isTyped = TRUE;
+        cdr_read_token(cdr);
+
         Token *tk = cdr_read_token(cdr);
-        int module = -1;
-        if (token_is_colon(tk)) {
-          tk = cdr_read_token(cdr);
-          if (tk->type != TOKEN_SYMBOL)
-            EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
-          module = tk->b;
-          tk = cdr_read_token(cdr);
-        }
         if (tk->type == TOKEN_SYMBOL) {
-          if (module != -1)
-            types_add(tps, tk->b, module);
-          arr_push(pars, tk);
+          char *stypes = symix_get(tk->b);
+          int len = strlen(stypes);
+          int *itypes = ATOMIC(sizeof(int) * len);
+          char *ps = stypes;
+          int *pi = itypes;
+          while (*ps) {
+            Ttype tp = ttype_from_sym(*ps++);
+            if (tp == ttype_ERROR || tp == ttype_NO_RETURN)
+              EXC_KUT(cdr_fail_expect(cdr, "type", stypes));
+            *pi++ = tp;
+          }
+          atypes = iarr_new(len, itypes);
           tk = cdr_read_token(cdr);
-          if (token_is_comma(tk)) continue;
-          if (token_is_arrow(tk)) break;
-          EXC_KUT(cdr_fail_expect(cdr, "'->' or ','", token_to_str(tk)));
+        } else {
+          atypes = iarr_new(0, ATOMIC(sizeof(int) * 0));
         }
-        EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+
+        if (tk->type != TOKEN_OPERATOR || strcmp(tk->value, "|"))
+          EXC_KUT(cdr_fail_expect(cdr, "|", token_to_str(tk)));
+
+        tk = cdr_read_token(cdr);
+        if (token_is_close_par(tk)) {
+          rt_tp = ttype_NO_RETURN;
+        } else {
+          if (tk->type != TOKEN_SYMBOL)
+            EXC_KUT(cdr_fail_expect(
+              cdr, "typed return type", token_to_str(tk)
+            ));
+
+          char *rtype = symix_get(tk->b);
+          if (strlen(rtype) != 1)
+            EXC_KUT(cdr_fail_expect(cdr, "typed return type", rtype));
+          rt_tp = ttype_from_sym(*rtype);
+          if (rt_tp == ttype_ERROR)
+            EXC_KUT(cdr_fail_expect(cdr, "typed return type", rtype));
+
+          tk = cdr_read_token(cdr);
+
+          if (!token_is_close_par(tk)) {
+            EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
+          }
+        }
+      }
+      if (isTyped && cdr_next_token_is_arrow(cdr)) {
+        cdr_read_token(cdr);
+      } else {
+        for(;;) {
+          Token *tk = cdr_read_token(cdr);
+          int module = -1;
+          if (token_is_colon(tk)) {
+            tk = cdr_read_token(cdr);
+            if (tk->type != TOKEN_SYMBOL)
+              EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+            module = tk->b;
+            tk = cdr_read_token(cdr);
+          }
+          if (tk->type == TOKEN_SYMBOL) {
+            if (module != -1)
+              types_add(tps, tk->b, module);
+            arr_push(pars, tk);
+            tk = cdr_read_token(cdr);
+            if (token_is_comma(tk)) continue;
+            if (token_is_arrow(tk)) break;
+            EXC_KUT(cdr_fail_expect(cdr, "'->' or ','", token_to_str(tk)));
+          }
+          EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+        }
       }
     }
     int n = arr_size(pars);
@@ -370,6 +427,15 @@ Exp *ex_reader_read1 (Types *tps, Cdr *cdr) {
       }
       *p++ = s;
     }_EACH
+
+    if (isTyped) {
+      if (n != iarr_size(atypes))
+        EXC_KUT(cdr_fail(cdr, "Number of types and parameters does not match"));
+      return exp_tfunction(tfunction_new(
+        atypes, rt_tp, iarr_new(n, ints), st_reader_read(tps, cdr)
+      ));
+    }
+
     return exp_function(function_new(
       iarr_new(n, ints), st_reader_read(tps, cdr)
     ));

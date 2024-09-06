@@ -1,0 +1,37 @@
+static int str_cindex (char *str, char ch);
+static int str_cindex_from (char *str, char ch, int start);
+static char *str_creplace (char *s, char old, char new);
+static Arrs *str_csplit (char *s, char sep);
+static int str_ends (char *str, char  *substr);
+static char *str_f (char *format, ...);
+static char *str_fmt (char *format, Arrs *values);
+static char *str_from_escape (char *str);
+static char *str_from_iso (char *s);
+static char *str_from_unicode (unsigned *u);
+static char *str_from_utf16 (Arri *codepoints);
+static char *str_get (char *str, int64_t ix);
+static int str_index (char *str, char *substr);
+static int str_index_from (char *str, char *substr, int64_t start);
+static int str_last_cindex (char *str, char ch);
+static int str_last_index (char *str, char *substr);
+static char *str_ltrim (char *s);
+static char *str_left (char *str, int64_t end);
+static char *str_new (char *s);
+static char *str_new_c (char ch);
+static char *str_replace (char *s, char *old, char *new);
+static char *str_right (char *str, int64_t begin);
+static char *str_rtrim (char *s);
+static Arrs *str_split (char *s, char *sep);
+static Arrs *str_split_trim (char *s, char *sep);
+static int str_starts (char *str, char  *substr);
+static char *str_sub (char *str, int64_t begin, int64_t end);
+static char *str_to_escape (char *str);
+static char *str_to_lower (char *s);
+static Arrs *str_to_runes (char *s);
+static unsigned *str_to_unicode (char *s);
+static char *str_to_upper (char *s);
+static Arri *str_to_utf16 (char *s);
+static char *str_trim (char *s);
+static char *str_vf (char *format, va_list args);
+
+

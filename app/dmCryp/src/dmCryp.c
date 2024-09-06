@@ -3,7 +3,7 @@
 
 #include "dmCryp.h"
 #include "kut/cryp.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "kut/sys.h"
 #include "kut/str.h"
 #include <stdio.h>
@@ -29,8 +29,8 @@ int main(int argc, char **args) {
 
   if (argc == 3) {
     if (str_eq(args[1], "k")) {
-      if (dec_digits(args[2])) {
-        int n = dec_stoi(args[2]);
+      if (math_digits(args[2])) {
+        int n = math_stoi(args[2]);
         if (n > 0) {
           char *k = cryp_genk(n);
           printf(k);
@@ -46,8 +46,8 @@ int main(int argc, char **args) {
     }
   } else if (argc == 4) {
     if (str_eq(args[1], "k")) {
-      if (dec_digits(args[2])) {
-        int n = dec_stoi(args[2]);
+      if (math_digits(args[2])) {
+        int n = math_stoi(args[2]);
         if (n > 0) {
           char *k = cryp_key(args[3], n);
           printf(k);

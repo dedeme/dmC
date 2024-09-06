@@ -13,9 +13,11 @@
 #include "reader/reader.h"
 #include "reader/cdr/cdr.h"
 #include "checker/checker.h"
+#include "checker/tpchecker.h"
 #include "runner/runner.h"
 #include "runner/fail.h"
 #include "runner/stack.h"
+#include "typed/genc.h"
 
 // <char>
 static Arr *args;
@@ -40,6 +42,9 @@ static void shandler (int sig) {
 }
 
 int main(int argc, char *argv[]) {
+  GC_INIT();
+  sys_init();
+
   if (argc < 2) {
     puts(help);
     return 0;
@@ -55,19 +60,18 @@ int main(int argc, char *argv[]) {
   int check = FALSE;
   char *p = argv[1];
   if (str_eq(p, "-v")) {
-    puts("Kut version v2023.04");
+    puts("Kut version v2024.08");
     return 0;
   } else if (argc == 3 && str_eq(p, "-c")) {
     check = TRUE;
     p = argv[2];
   }
 
-  GC_INIT();
-  sys_init();
   symix_init();
   fileix_init();
   modules_init();
   fileix_set_root(path_parent(p));
+  genc_init(p);
 
   TRY {
     int fix = fileix_add(-1, path_base(p));
@@ -98,13 +102,21 @@ int main(int argc, char *argv[]) {
         }_EACH
       }
 
-      //CHEKS MODULES
+      // CHEKS MODULES
       // oomd is Opt<Opt<Module>>
       EACH(modules_get_array(), Opt, oomd) {
         Module *md = opt_get(opt_get(oomd));
         checker_run(_i, md);
       }_EACH
+
+      // CHECH TYPES
+      tpchecker_run(fix);
+
+      // GENERATE C CODE
+      genc_compile();
     } else {
+      genc_load_so();
+
       Exp *rs = runner_run(
         TRUE,
         stack_new(),

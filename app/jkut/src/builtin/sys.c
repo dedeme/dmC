@@ -1,4 +1,4 @@
-// Copyright 25-Apr-2024 ºDeme
+// Copyright 04-Sep-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *sys_bget (void) {return
@@ -128,8 +128,14 @@ char *sys_bget (void) {return
   "// \\* -> ()\n"
   "export function assert (v) {\n"
   "  $params(arguments.length, 1);\n"
-  "  if (!asBool(v))\n"
+  "  if (typeof(v) !== 'boolean' || !v)\n"
   "    throw new Error('Assert failed');\n"
+  "}\n"
+  "\n"
+  "// \\* -> ()\n"
+  "export function printError (v) {\n"
+  "  $params(arguments.length, 1);\n"
+  "  console.error(v);\n"
   "}\n"
   "\n"
   "// \\*, * -> ()\n"
@@ -145,7 +151,7 @@ char *sys_bget (void) {return
   "// \\* -> s\n"
   "export function toStr (v) {\n"
   "  $params(arguments.length, 1);\n"
-  "  if (v == null) return \"<null>\";\n"
+  "  if (v == null) return '<null>';\n"
   "  if (typeof(v) === 'object') return JSON.stringify(v);\n"
   "  return v.toString();\n"
   "}\n"

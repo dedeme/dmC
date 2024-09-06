@@ -10,8 +10,8 @@
 // \<bytes>, <bytes> -> <bytes>
 static Exp *add (Arr *exps) {
   CHECK_PARS ("bytes.add", 2, exps);
-  Bytes *bs1 = obj_rget_bytes(arr_get(exps, 0));
-  Bytes *bs2 = obj_rget_bytes(arr_get(exps, 1));
+  Bytes *bs1 = obj_get_bytes(arr_get(exps, 0));
+  Bytes *bs2 = obj_get_bytes(arr_get(exps, 1));
   bytes_add(bs1, bs2);
   return obj_bytes(bs1);
 }
@@ -19,8 +19,8 @@ static Exp *add (Arr *exps) {
 // \<bytes>, i -> <bytes>
 static Exp *drop (Arr *exps) {
   CHECK_PARS ("bytes.drop", 2, exps);
-  Bytes *bs = obj_rget_bytes(arr_get(exps, 0));
-  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Bytes *bs = obj_get_bytes(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
   int64_t sz = bytes_len(bs);
   Bytes *bs2 = sz > ix
     ? ix <= 0
@@ -35,12 +35,12 @@ static Exp *drop (Arr *exps) {
 static Exp *from_arr (Arr *exps) {
   CHECK_PARS ("bytes.fromArr", 1, exps);
   // <Exp>
-  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Arr *a = exp_get_array(arr_get(exps, 0));
   int sz = arr_size(a);
   Bytes *bs = bytes_new_bf(sz);
   unsigned char *p = bytes_bs(bs);
   EACH(a, Exp, e) {
-    *p++ = (unsigned char)exp_rget_int(e);
+    *p++ = (unsigned char)exp_get_int(e);
   }_EACH
   return obj_bytes(bs);
 }
@@ -48,14 +48,14 @@ static Exp *from_arr (Arr *exps) {
 // \s -> <bytes>
 static Exp *from_str (Arr *exps) {
   CHECK_PARS ("bytes.fromStr", 1, exps);
-  return obj_bytes(bytes_from_str(exp_rget_string(arr_get(exps, 0))));
+  return obj_bytes(bytes_from_str(exp_get_string(arr_get(exps, 0))));
 }
 
 // \<bytes>, i -> i
 static Exp *get (Arr *exps) {
   CHECK_PARS ("bytes.get", 2, exps);
-  Bytes *bs = obj_rget_bytes(arr_get(exps, 0));
-  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Bytes *bs = obj_get_bytes(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
   EXC_RANGE(ix, 0, bytes_len(bs) - 1);
   return exp_int(*(bytes_bs(bs) + ix));
 }
@@ -63,7 +63,7 @@ static Exp *get (Arr *exps) {
 // \i -> <bytes>
 static Exp *new (Arr *exps) {
   CHECK_PARS ("bytes.new", 1, exps);
-  int64_t bf = exp_rget_int(arr_get(exps, 0));
+  int64_t bf = exp_get_int(arr_get(exps, 0));
   if (bf < 0) bf = 0;
   Bytes *bs = bytes_new_bf(bf);
   unsigned char *p = bytes_bs(bs);
@@ -77,8 +77,8 @@ static Exp *new (Arr *exps) {
 // \<bytes>, i -> <bytes>
 static Exp *take (Arr *exps) {
   CHECK_PARS ("bytes.take", 2, exps);
-  Bytes *bs = obj_rget_bytes(arr_get(exps, 0));
-  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Bytes *bs = obj_get_bytes(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
   int64_t sz = bytes_len(bs);
   Bytes *bs2 = ix <= 0
     ? bytes_new()
@@ -92,10 +92,10 @@ static Exp *take (Arr *exps) {
 // \<bytes>, i, i -> ()
 static Exp *set (Arr *exps) {
   CHECK_PARS ("bytes.set", 3, exps);
-  Bytes *bs = obj_rget_bytes(arr_get(exps, 0));
-  int64_t ix = exp_rget_int(arr_get(exps, 1));
+  Bytes *bs = obj_get_bytes(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
   EXC_RANGE(ix, 0, bytes_len(bs) - 1);
-  unsigned char v = exp_rget_int(arr_get(exps, 2));
+  unsigned char v = exp_get_int(arr_get(exps, 2));
   *(bytes_bs(bs) + ix) = v;
   return exp_empty();
 }
@@ -103,13 +103,13 @@ static Exp *set (Arr *exps) {
 // \<bytes> -> i
 static Exp *size (Arr *exps) {
   CHECK_PARS ("bytes.size", 1, exps);
-  return exp_int(bytes_len(obj_rget_bytes(arr_get(exps, 0))));
+  return exp_int(bytes_len(obj_get_bytes(arr_get(exps, 0))));
 }
 
 // \<byte> -> [i...]
 static Exp *to_arr (Arr *exps) {
   CHECK_PARS ("bytes.toArr", 1, exps);
-  Bytes *bs = obj_rget_bytes(arr_get(exps, 0));
+  Bytes *bs = obj_get_bytes(arr_get(exps, 0));
   int sz = bytes_len(bs);
   // <Exp>
   Arr *a = arr_new();
@@ -124,7 +124,7 @@ static Exp *to_arr (Arr *exps) {
 // \<byte> -> s
 static Exp *to_str (Arr *exps) {
   CHECK_PARS ("bytes.toStr", 1, exps);
-  return exp_string(bytes_to_str(obj_rget_bytes(arr_get(exps, 0))));
+  return exp_string(bytes_to_str(obj_get_bytes(arr_get(exps, 0))));
 }
 
 Bfunction md_bytes_get (char *fname) {

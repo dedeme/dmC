@@ -3,7 +3,7 @@
 
 #include "DEFS.h"
 #include "reader/token.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "kut/js.h"
 #include "symix.h"
 
@@ -227,8 +227,8 @@ char *token_type_to_str (Token *this) {
 char *token_to_str (Token *this) {
   switch (this->type) {
     case TOKEN_BOOL: return str_f("Bool: %s", this->b ? "true" : "false");
-    case TOKEN_INT: return str_f("Int: %s", dec_itos(this->i));
-    case TOKEN_FLOAT: return str_f("Float: %s", dec_ftos(this->d, 9));
+    case TOKEN_INT: return str_f("Int: %s", math_itos(this->i));
+    case TOKEN_FLOAT: return str_f("Float: %s", math_ftos(this->d, 9));
     case TOKEN_STRING: return str_f("String: %s", js_ws(this->value));
     case TOKEN_LINE_COMMENT: return str_f("Line_comment: %s", this->value);
     case TOKEN_COMMENT: return str_f("Comment: %s", this->value);

@@ -1,0 +1,30 @@
+static char *_time_fmt (int64_t tm, char *template);
+static int64_t time_add_days (int64_t this, int64_t days);
+static int64_t time_day (int64_t this);
+static int time_day_light_correction (int day, int month, int year);
+static int64_t time_df_day (int64_t this, int64_t other);
+static int time_eq_day (int64_t this, int64_t other);
+static char *time_fmt (int64_t this, char *template);
+static Arri *time_from_clock (int64_t this, char *tms);
+static Arri *time_from_en (char *date, char *sep);
+static Arri *time_from_iso (char *date, char *sep);
+static Arri *time_from_iso_en_aux (int is_iso, char *date, char sep);
+static Arri *time_from_str(char *date);
+static int64_t time_from_time (time_t tm);
+static int64_t time_hour (int64_t this);
+static int64_t time_millisecond (int64_t this);
+static int64_t time_minute (int64_t this);
+static int64_t time_month (int64_t this);
+static int64_t time_new (int day, int month, int year);
+static int64_t time_new_time (
+  int day, int month, int year, int hour, int minute, int second
+);
+static int64_t time_now(void);
+static int64_t time_second (int64_t this);
+static char *time_to_en (int64_t this);
+static char *time_to_iso (int64_t this);
+static char *time_to_str (int64_t this);
+static time_t time_to_time (int64_t this);
+static int64_t time_weekday (int64_t this);
+static int64_t time_year (int64_t this);
+static int64_t time_year_day (int64_t this);

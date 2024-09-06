@@ -1,0 +1,5 @@
+import "s22";
+import "main";
+
+///
+hello = \n -> return "hello " + n;;

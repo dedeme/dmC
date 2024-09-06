@@ -17,9 +17,9 @@ f0 = \-> return f1();;
 tm = time.now();
 
 Sum = [0];
-for (i = 0 : 500_000) {{{{
+for (i = 0 : 5_000) {{{{
   Sum! += f0() + (i / (i + 1));
 }}}}
 
-sys.println(str.fmt("%v", [time.now() - tm]));
-sys.println(Sum!);
+sys.assert(time.now() - tm < 300);
+sys.test(Sum!, 50000);

@@ -94,11 +94,11 @@ informar sobre el tipo del siguiente token a retornar (*cdr_next_token_is_colon*
     case '"':
       return string_reader_read(this, ch);
     default:
-      if (ch <= ' ')
+      if (ch &lt;= ' ')
         return read_token(this); // Skip blank
-      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+      if ((ch >= 'a' &amp;&amp; ch &lt;= 'z') || (ch >= 'A' &amp;&amp; ch &lt;= 'Z'))
         return read_symbol(this, ch);
-      if ((ch >= '0' && ch <= '9'))
+      if ((ch >= '0' &amp;&amp; ch &lt;= '9'))
         return number_reader_read(this, ch);
       if (str_cindex(opChs, ch) == -1)
         EXC_KUT(cdr_fail_line(

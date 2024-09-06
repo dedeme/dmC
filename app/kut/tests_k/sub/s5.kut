@@ -1,26 +1,26 @@
 
-///
+/// \i, i -> <obj>
 new : pr1, pr2;
 
-///
+/// \<obj>, <obj> -> i
 add = \ P1,  P2 -> return [P1[pr1] + P2[pr1], P1[pr2] + P2[pr2]];;
 
-///
+/// [i,i]
 one, two = [1, 2];
 sys.test(one, 1);
 sys.test(two, 2);
 
-///
+/// {i, i, i}
 sone, stwo : {sone: "1", stwo: "2", sfive: "5"};
 sys.test(sone, "1");
 sys.test(stwo, "2");
 
-///
+/// [i, i]
 one2, two2 = ;
 sys.test(one2, 0);
 sys.test(two2, 1);
 
-///
+/// {i, i}
 sone2, stwo2 : ;
 sys.test(sone2, "sone2");
 sys.test(stwo2, "stwo2");

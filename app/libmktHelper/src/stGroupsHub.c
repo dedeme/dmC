@@ -88,6 +88,7 @@ char *stGroupsHub_run(Map *rq) {
       Arr *refs = modelsHub_calc_references(mdId, closes, pars);
 
       double *rs = openSimple2_calc(opens, closes, refs);
+
       arr_push(sales, js_wf(rs[0], 1));
       arr_push(assets, js_wf(rs[1], 3));
       arr_push(accs, js_wf(rs[2], 3));

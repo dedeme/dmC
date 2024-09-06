@@ -39,11 +39,17 @@ static Stat *read_multi(Types *tps, int sym, Cdr *cdr) {
     if (token_is_colon(tk)) {
       Token *tk_mod = cdr_read_token(cdr);
       if (tk_mod->type != TOKEN_SYMBOL)
-        EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk_mod)));
+        EXC_KUT(cdr_fail_expect(cdr, "symbol after ':'", token_to_str(tk_mod)));
       tk = cdr_read_token(cdr);
       if (tk->type != TOKEN_SYMBOL)
         EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
       types_add(tps, tk->b, tk_mod->b);
+    } else if (token_is_equals(tk)) {
+      Exp *exp = ex_reader_read(tps, cdr);
+      Token *tk2 = cdr_read_token(cdr);
+      if (!token_is_semicolon(tk2))
+        EXC_KUT(cdr_fail_expect(cdr, ";", token_to_str(tk2)));
+      return stat_arr_multi(exp_sym(symix_generate()), syms, exp);
     } else if (tk->type != TOKEN_SYMBOL)
       EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
 
@@ -140,7 +146,7 @@ static Stat *read_symbol(Types *tps, int sym, Cdr *cdr) {
     if (token_is_colon(tk)) {
       tk = cdr_read_token(cdr);
       if (tk->type != TOKEN_SYMBOL)
-        EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+        EXC_KUT(cdr_fail_expect(cdr, "symbol after ':'", token_to_str(tk)));
       id = tk->b;
       tk = cdr_read_token(cdr);
     } else {
@@ -383,7 +389,7 @@ static Stat *read_symbol(Types *tps, int sym, Cdr *cdr) {
   }
   if (token_is_colon(tk)) {
     if (!exp_is_sym(exp))
-      EXC_KUT(cdr_fail_expect(cdr, "symbol", exp_to_js(exp)));
+      EXC_KUT(cdr_fail_expect(cdr, "symbol before ':'", exp_to_js(exp)));
     // <Exp>
     Arr *syms = arr_new();
     arr_push(syms, exp);
@@ -401,7 +407,7 @@ static Stat *read_symbol(Types *tps, int sym, Cdr *cdr) {
   }
   if (token_is_comma(tk)) {
     if (!exp_is_sym(exp))
-      EXC_KUT(cdr_fail_expect(cdr, "symbol", exp_to_js(exp)));
+      EXC_KUT(cdr_fail_expect(cdr, "symbol before ','", exp_to_js(exp)));
     return read_multi(tps, exp_get_sym(exp), cdr);
   }
   if (token_is_assign(tk)) {
@@ -489,7 +495,7 @@ StatCode *st_reader_read(Types *tps, Cdr *cdr) {
         EXC_KUT(cdr_fail_expect(cdr, "symbol or ':'", token_to_str(tk_mod)));
       tk = cdr_read_token(cdr);
       if (tk->type != TOKEN_SYMBOL)
-        EXC_KUT(cdr_fail_expect(cdr, "symbol", token_to_str(tk)));
+        EXC_KUT(cdr_fail_expect(cdr, "symbol after ':'", token_to_str(tk)));
       types_add(tps, tk->b, token_is_colon(tk_mod) ? -1 : tk_mod->b);
 
       int nline = cdr_get_nline(cdr);

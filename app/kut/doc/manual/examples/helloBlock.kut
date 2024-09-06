@@ -1,0 +1,6 @@
+tx = "World!";
+{
+  tx = "Hello ";
+  sys.print(tx);
+}
+sys.println(tx);

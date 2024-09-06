@@ -22,14 +22,14 @@ typedef struct {
 // \<iter>, \*->b -> b
 static Exp *all (Arr *exps) {
   CHECK_PARS ("iter.all", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
   while (it_has_next(it)) {
     Exp *e = it_next(it);
     // Exp
     Arr *ps = arr_new_from(e, NULL);
     FRUN(rs, fn, ps);
-    if (!exp_rget_bool(rs)) return exp_bool(FALSE);
+    if (!exp_get_bool(rs)) return exp_bool(FALSE);
   }
   return exp_bool(TRUE);
 }
@@ -37,14 +37,14 @@ static Exp *all (Arr *exps) {
 // \<iter>, \*->b -> b
 static Exp *any (Arr *exps) {
   CHECK_PARS ("iter.any", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
   while (it_has_next(it)) {
     Exp *e = it_next(it);
     // Exp
     Arr *ps = arr_new_from(e, NULL);
     FRUN(rs, fn, ps);
-    if (exp_rget_bool(rs)) return exp_bool(TRUE);
+    if (exp_get_bool(rs)) return exp_bool(TRUE);
   }
   return exp_bool(FALSE);
 }
@@ -53,9 +53,9 @@ static Exp *any (Arr *exps) {
 static Exp *cat (Arr *exps) {
   CHECK_PARS ("iter.cat", 2, exps);
   // <Exp>
-  It *it1 = obj_rget_iter(arr_get(exps, 0));
+  It *it1 = obj_get_iter(arr_get(exps, 0));
   // <Exp>
-  It *it2 = obj_rget_iter(arr_get(exps, 1));
+  It *it2 = obj_get_iter(arr_get(exps, 1));
   return obj_iter(it_cat(it1, it2));
 }
 
@@ -63,7 +63,7 @@ static Exp *cat (Arr *exps) {
 static Exp *count (Arr *exps) {
   CHECK_PARS ("iter.count", 1, exps);
   // <Exp>
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   return exp_int(it_count(it));
 }
 
@@ -71,20 +71,20 @@ static Exp *count (Arr *exps) {
 static Exp *drop (Arr *exps) {
   CHECK_PARS ("iter.drop", 2, exps);
   // <Exp>
-  It *it = obj_rget_iter(arr_get(exps, 0));
-  return obj_iter(it_drop(it, exp_rget_int(arr_get(exps, 1))));
+  It *it = obj_get_iter(arr_get(exps, 0));
+  return obj_iter(it_drop(it, exp_get_int(arr_get(exps, 1))));
 }
 
 //  (\<iter>, \*->b) -> <iter>
 static Exp *drop_while (Arr *exps) {
   CHECK_PARS ("iter.dropWhile", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *exp2 = arr_get(exps, 1);
   if (exp_is_function(exp2)) {
       //--
       int fn (Exp *e) {
-        return exp_rget_bool(function_run(
-          exp_rget_function(exp2), arr_new_from(e, NULL)
+        return exp_get_bool(function_run(
+          exp_get_function(exp2), arr_new_from(e, NULL)
         ));
       }
     return obj_iter(it_dropf(it, (FPRED)fn));
@@ -92,8 +92,8 @@ static Exp *drop_while (Arr *exps) {
   if (obj_is_bfunction(exp2)) {
       //--
       int fn (Exp *e) {
-        return exp_rget_bool(
-          obj_rget_bfunction(exp2)(arr_new_from(e, NULL))
+        return exp_get_bool(
+          obj_get_bfunction(exp2)(arr_new_from(e, NULL))
         );
       }
     return obj_iter(it_dropf(it, (FPRED)fn));
@@ -105,13 +105,13 @@ static Exp *drop_while (Arr *exps) {
 // (\<iter>, \*->()) -> ()
 static Exp *each (Arr *exps) {
   CHECK_PARS ("iter.each", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
     //--
     void fn2 (Exp *e) {
       Arr *ps = arr_new_from(e,  NULL);
-      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
-      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      if (exp_is_function(fn)) function_run(exp_get_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_get_bfunction(fn)(ps);
       else EXC_KUT(fail_type("function", fn));
     }
   it_each(it, (FPROC)fn2);
@@ -121,13 +121,13 @@ static Exp *each (Arr *exps) {
 // (\<iter>, \*,i->()) -> ()
 static Exp *each_ix (Arr *exps) {
   CHECK_PARS ("iter.eachIx", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
     //--
     void fn2 (Exp *e, int ix) {
       Arr *ps = arr_new_from(e, exp_int(ix),  NULL);
-      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
-      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      if (exp_is_function(fn)) function_run(exp_get_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_get_bfunction(fn)(ps);
       else EXC_KUT(fail_type("function", fn));
     }
   it_each_ix(it, (void (*)(void *, int ix))fn2);
@@ -146,8 +146,8 @@ static Exp *empty (Arr *exps) {
       if (!it_has_next(o->it)) return opt_none();
       void *next = it_next(o->it);
       int ok = o->is_bfunction
-        ? exp_rget_bool(o->bfn(arr_new_from(next, NULL)))
-        : exp_rget_bool(function_run(o->fn, arr_new_from(next, NULL)))
+        ? exp_get_bool(o->bfn(arr_new_from(next, NULL)))
+        : exp_get_bool(function_run(o->fn, arr_new_from(next, NULL)))
       ;
       if (ok) return opt_some(next);
     }
@@ -155,18 +155,18 @@ static Exp *empty (Arr *exps) {
 // (\<iter>, \*->b) -> <iter>
 static Exp *filter (Arr *exps) {
   CHECK_PARS ("iter.filter", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *exp2 = arr_get(exps, 1);
   it_aux_O *o = MALLOC(it_aux_O);
   o->it = it;
   if (exp_is_function(exp2)) {
     o->is_bfunction = FALSE;
-    o->fn = exp_rget_function(exp2);
+    o->fn = exp_get_function(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))filter_next));
   }
   if (obj_is_bfunction(exp2)) {
     o->is_bfunction = TRUE;
-    o->bfn = obj_rget_bfunction(exp2);
+    o->bfn = obj_get_bfunction(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))filter_next));
   }
   EXC_KUT(fail_type("function", exp2));
@@ -176,7 +176,7 @@ static Exp *filter (Arr *exps) {
 // (\<iter>, \*->b) -> ([*] | [])
 static Exp *find (Arr *exps) {
   CHECK_PARS ("iter.find", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
     //--
     int fn2 (Exp *e) {
@@ -192,7 +192,7 @@ static Exp *find (Arr *exps) {
 // (\<iter>, \*->b) -> i
 static Exp *findex (Arr *exps) {
   CHECK_PARS ("iter.index", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *fn = arr_get(exps, 1);
     //--
     int fn2 (Exp *e) {
@@ -207,7 +207,7 @@ static Exp *findex (Arr *exps) {
 static Exp *has_next (Arr *exps) {
   CHECK_PARS ("iter.hasNext", 1, exps);
   // <Exp>
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   return exp_bool(it_has_next(it));
 }
 
@@ -225,18 +225,18 @@ static Exp *has_next (Arr *exps) {
 // (\<iter>, \*->*) -> <iter>
 static Exp *map (Arr *exps) {
   CHECK_PARS ("iter.map", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *exp2 = arr_get(exps, 1);
   it_aux_O *o = MALLOC(it_aux_O);
   o->it = it;
   if (exp_is_function(exp2)) {
     o->is_bfunction = FALSE;
-    o->fn = exp_rget_function(exp2);
+    o->fn = exp_get_function(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))map_next));
   }
   if (obj_is_bfunction(exp2)) {
     o->is_bfunction = TRUE;
-    o->bfn = obj_rget_bfunction(exp2);
+    o->bfn = obj_get_bfunction(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))map_next));
   }
   EXC_KUT(fail_type("function", exp2));
@@ -246,7 +246,7 @@ static Exp *map (Arr *exps) {
   //--
   // <Exp>, o is Tp<Function, Function>
   Opt *fn_new (Tp *o) {
-    if (exp_rget_bool(function_run(tp_e1(o), arr_new()))) {
+    if (exp_get_bool(function_run(tp_e1(o), arr_new()))) {
       return opt_some(function_run(tp_e2(o), arr_new()));
     }
     return opt_none();
@@ -254,21 +254,21 @@ static Exp *map (Arr *exps) {
 // (\\->b, \->*) -> <iter>
 static Exp *new (Arr *exps) {
   CHECK_PARS ("iter.new", 2, exps);
-  Function *fn_has = exp_rget_function(arr_get(exps, 0));
-  Function *fn_next = exp_rget_function(arr_get(exps, 1));
+  Function *fn_has = exp_get_function(arr_get(exps, 0));
+  Function *fn_next = exp_get_function(arr_get(exps, 1));
   return obj_iter(it_new(tp_new(fn_has, fn_next), (Opt *(*)(void *))fn_new));
 }
 
 // \<iter> -> *
 static Exp *next (Arr *exps) {
   CHECK_PARS ("iter.next", 1, exps);
-  return it_next(obj_rget_iter(arr_get(exps, 0)));
+  return it_next(obj_get_iter(arr_get(exps, 0)));
 }
 
 // (\<iter>, (*1), \(*1), (*2) -> (*1)) -> (*1)
 static Exp *reduce (Arr *exps) {
   CHECK_PARS ("iter.reduce", 3, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *seed = arr_get(exps, 1);
   Exp *fn = arr_get(exps, 2);
   while (it_has_next(it)) {
@@ -284,8 +284,8 @@ static Exp *reduce (Arr *exps) {
 static Exp *take (Arr *exps) {
   CHECK_PARS ("iter.take", 2, exps);
   // <Exp>
-  It *it = obj_rget_iter(arr_get(exps, 0));
-  return obj_iter(it_take(it, exp_rget_int(arr_get(exps, 1))));
+  It *it = obj_get_iter(arr_get(exps, 0));
+  return obj_iter(it_take(it, exp_get_int(arr_get(exps, 1))));
 }
 
   //--
@@ -293,26 +293,26 @@ static Exp *take (Arr *exps) {
     if (!it_has_next(o->it)) return opt_none();
     void *next = it_next(o->it);
     int ok = o->is_bfunction
-      ? exp_rget_bool(o->bfn(arr_new_from(next, NULL)))
-      : exp_rget_bool(function_run(o->fn, arr_new_from(next, NULL)))
+      ? exp_get_bool(o->bfn(arr_new_from(next, NULL)))
+      : exp_get_bool(function_run(o->fn, arr_new_from(next, NULL)))
     ;
     return ok ? opt_some(next) : opt_none();
   }
 // (\<iter>, \*->b) -> <iter>
 static Exp *take_while (Arr *exps) {
   CHECK_PARS ("iter.takeWhile", 2, exps);
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   Exp *exp2 = arr_get(exps, 1);
   it_aux_O *o = MALLOC(it_aux_O);
   o->it = it;
   if (exp_is_function(exp2)) {
     o->is_bfunction = FALSE;
-    o->fn = exp_rget_function(exp2);
+    o->fn = exp_get_function(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))take_next));
   }
   if (obj_is_bfunction(exp2)) {
     o->is_bfunction = TRUE;
-    o->bfn = obj_rget_bfunction(exp2);
+    o->bfn = obj_get_bfunction(exp2);
     return obj_iter(it_new(o, (Opt *(*)(void *))take_next));
   }
   EXC_KUT(fail_type("function", exp2));
@@ -323,7 +323,7 @@ static Exp *take_while (Arr *exps) {
 static Exp *to_str (Arr *exps) {
   CHECK_PARS ("iter.toStr", 1, exps);
   // <Exp>
-  It *it = obj_rget_iter(arr_get(exps, 0));
+  It *it = obj_get_iter(arr_get(exps, 0));
   return exp_string(str_f(
     "<iter>%s",
     exp_to_str(exp_array(arr_from_it(it)))

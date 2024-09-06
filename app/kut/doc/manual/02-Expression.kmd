@@ -1,0 +1,371 @@
+=
+title = Expression
+=
+
+## Value
+
+Values are the basic elements of Kut.
+
+Each value has a type and each type has a name to be used in the documentation
+annotations.
+
+# Basic types
+
+``
+<table border=1>
+<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td>name</td></tr>
+<tr><td>Boolean</td><td><code>true</code></td><td><code>b</code></td></tr>
+<tr><td>Integer</td><td><code>125</code></td><td><code>i</code></td></tr>
+<tr><td>Float</td><td><code>30.15</code></td><td><code>f</code></td></tr>
+<tr><td>String</td><td><code>"Clasic"</code></td><td><code>s</code></td></tr>
+<tr><td>Array</td><td><code>[1, true, 23, "abc"]</code></td>
+  <td>
+  Empty array: <code>[]</code><br>
+  Array of one element of type T: <code>[T]</code><br>
+  Array of two elements of type T, U: <code>[T, U]</code><br>
+  Array of 'n' elements of types T<sub>0</sub> ... T<sub>n</sub>:
+    <code>[T<sub>0</sub>, T<sub>1</sub>,  ..., T<sub>n</sub>]</code><br>
+  Array of 0, 1 or more elements of type T: <code>[T.]</code>
+  </td></tr>
+<tr><td>Dictionary</td><td><code>{"one": 1, "two": 2}</code></td><td>
+  Empty dictionary: <code>{}</code><br>
+  Dictionary of one value of type T: <code>{T}</code><br>
+  Dictionary of two values of type T, U: <code>{T, U}</code><br>
+  Dictionary of 'n' values of types T<sub>0</sub> ... T<sub>n</sub>:
+    <code>{T<sub>0</sub>, T<sub>1</sub>,  ..., T<sub>n</sub>}</code><br>
+  Dictionary of 0, 1 or more values of type T: <code>{T.}</code>
+  </td></tr>
+<tr><td>Function</td><td><code>\a -> {sys.println("a");}</code></td>
+  <td>
+  Function with 'n' parameters of types T<sub>0</sub> ... T<sub>n</sub><br>
+    which returns nothing:<br>
+    <code>&nbsp;&nbsp;\T<sub>0</sub>, T<sub>1</sub>, ..., T<sub>n</sub> -> ()
+      </code><br>
+  Function with 'n' parameters of types T<sub>0</sub> ... T<sub>n</sub><br>
+    which return a value of type U:<br>
+    <code>&nbsp;&nbsp;\T<sub>0</sub>, T<sub>1</sub>, ..., T<sub>n</sub> -> U
+      </code><br>
+  <br>
+  NOTE: For functions without parameters:<br>
+    <code>&nbsp;&nbsp;\ -> ()</code><br>
+    <code>&nbsp;&nbsp;\ -> U</code><br>
+  </td></tr>
+</table>
+``
+
+# Library types
+
+``
+<table border=1>
+<tr><td><b>Type</b></td><td><b>Library</b></td><td>name</td></tr>
+<tr><td>Bytes</td><td><code>bytes, b64, file, tcp</code></td><td><code>&lt;bytes></code></td></tr>
+<tr><td>File</td><td><code>file</code></td><td><code>&lt;file></code></td></tr>
+<tr><td>Iterator</td><td><code>iter</code></td><td><code>&lt;iter></code></td></tr>
+<tr><td>Tcp Server</td><td><code>tcp</code></td><td><code>&lt;tcpServer></code></td></tr>
+<tr><td>Tcp Connection</td><td><code>tcp</code></td><td><code>&lt;tcpConn></code></td></tr>
+<tr><td>Thread</td><td><code>thread</code></td><td><code>&lt;thread></code></td></tr>
+</table>
+``
+
+# User types
+
+They are arrays and dictionaries, usually constructed with a function and with
+a name of convenience. Its type name is formed with a name between '<' and '>'.
+
+Example of a 'person' type.
+
+``kut
+// \s, i -> <person>
+new = \name, age -> return [name, age];;
+// <person>
+person1 = new("Peter", 35);``
+
+## Types
+
+# Boolean
+
+Only allows thow values: _true_ and _false_.
+
+Boolean values have two literals:
+
+  - *true*
+
+  - *false*
+
+Example:
+
+``kut
+v = true;
+sys.println(v); // Shows: true
+
+v2 = false;
+sys.println(v == v2); // Shows: false``
+
+# Integer
+
+Integer values stand for Natural numbers.
+
+Their literals are sequences of one or more digits, optionally preceded by the
+sign '-'.
+
+*\[-]d+*
+
+Using the sign '+' is an error. (Wrong: *+115*).
+
+However '_' can be used to improve the reading. (Ok: *1_215*).
+
+Example:
+
+``kut
+i1 = 0;
+i2 = -0;
+i3 = 11892;
+i4 = -11_892;
+sys.println(i1 == i2); // Shows: true
+sys.println(i3 == -i4); // Shows: true
+sys.println(i2); // Shows: 0
+sys.println(i4); // Shows: -11892
+
+// Wrong integers
+// +115
+// --23
+// 2.1 -> this number is float.
+sys.println(i3 != 11892.0); // Shows: Type error.``
+
+# Float
+
+They are numbers with decimal point or scientific notation.
+
+Float literals follow the scheme:
+
+*\[-]d+.\[d *]\[(e|E)\[(+|-)]d+]*
+
+Starting with the sign '+' or with '.' is an error. (Wrong: *+1.0*, *.123*).
+
+'_' can be used to improve the reading. (Ok: *1_215.0*).
+
+The number can end at '.', (Ok: *234.*, *234.e2*)
+
+Example:
+
+``kut
+f1a = 0.;
+f1b = -0.0;
+f1c = 0.0e0;
+f1d = 0.0e-0;
+sys.println(f1d); // Shows: 0
+sys.assert(f1a == f1b);
+sys.assert(f1a == f1c);
+sys.assert(f1a == f1d);
+
+f2a = 100.02;
+f2b = -100.02;
+f2c = 10_002.e-2;
+f2d = 1.0002e+2;
+f2e = 0.10002E3;
+sys.println(f2c); // Shows: 100.02
+sys.assert(f2a == -f2b);
+sys.assert(f2a == f2c);
+sys.assert(f2a == f2d);
+sys.assert(f2a == f2e);
+
+// Wrong floats
+// .12 -> starts with '.'.
+// +1.2 -> starts with '-'.
+// 123 -> this number is integer.
+// 100e3 -> '.' is mising before 'e'.
+// 100.E -> There must be one digit at least after 'e|E'.``
+
+# String
+
+They are sequences of bytes which represent UTF-8 characters.
+
+Its literals are writen between single or double quotes ( *"abc"* or *'abc'* ).
+
+It is allowed empty strings ( *""* or *''* );
+
+It is allowed escape symbols '\\', '\n', '\t', '\b', '\f', '\r' and '\'' or
+'\"' depending on enclosing quotes ('' -> *\'* allowed. "" -> *\"* allowed).
+
+Also it is posible to use unicode sequences with 4 hexadecimal values
+(e.g. *\u23aC*)
+
+``<u>Triple quoted strings</u>``
+
+Triple quoted strings generate verbatim strings. They use the following rules:
+
+* Escape and unicode characters are no allowed.
+
+* If the first line is equals to """, it is skipped.
+
+* The left margin is adjusted to the most left character.
+
+``<u>String length</u>``
+
+The string length is measured in bytes:
+
+* "a" has 1 byte.
+
+* "€" has 3 bytes.
+
+If we call UTF-8 symbols as "runes", then:
+
+* "a" has 1 rune.
+
+* "€" has 1 rune.
+
+To measure bytes Kut use the *str.len* function.
+
+To measure runes you have to pass the 'string' to an array of 'runes' and then
+measure it. (e.g. *arr.size(str.toRunes("€"))* which return *1*).
+
+``<u>String slice</u>``
+
+Slicing string is made in bytes and using indexation "base 0". To slicing in
+runes you have to pass 'string' to 'runes' too:
+
+* *"xabcd"\[1:4]* gives *"abc"*
+
+* *"x€abcd"\[1:4]* gives *"€"*. Note that '€' count by 3.
+
+* *str.fromRunes(str.toRunes("xabcd")\[1:4])* gives *"abc"*
+
+* *str.fromRunes(str.toRunes("x€abcd")\[1:4])* gives *"€ab"*
+
+``<u>Element access</u>``
+
+String elements can be accessed with indexation "base 0":
+
+* *"xabcd"\[4]* gives *"d"*
+
+* *"a€abcd"\[5]* gives *"b"*. Note that '€' count by 3.
+
+* *str.fromRunes(\[str.toRunes("xabcd")\[4]])* gives *"d"*
+
+* *str.fromRunes(\[str.toRunes("a€abcd")\[3]])* gives *"b"*
+
+
+Note that *str.fromRunes(\[str.toRunes("a€abcd")\[1]])* gives *"€"*, but
+*"a€abcd"\[1]* returns a not valid UTF-8 character.
+
+``<u>String modification</u>``
+
+Strings can not be modified.
+
+``<u>String library</u>``
+
+To manipulate strings you can use the buit-in 'str' library.
+
+For example, the function *str.trim("  ab  ")* returns *"ab"*.
+
+``<u>String examples</u>``
+
+``kut
+s1a = "";
+s1b = '';
+sys.assert(s1a == s1b);
+// Bytes
+sys.assert(str.len(s1a) == 0);
+// Runes
+sys.println(str.toRunes(s1a)); // Shows: []
+sys.assert(arr.size(str.toRunes(s1a)) == 0);
+
+s2a = "ab€c\"'\u00f7n\nLine 2";
+s2b = 'ab€c"\'\u00f7n\nLine 2';
+sys.assert(s2a == s2b);
+// Bytes
+sys.println(s2a); // Shows: ab€c"'÷n
+                  //        Line 2
+sys.assert(str.len(s2a) == 18);
+// Runes
+sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+sys.assert(arr.size(str.toRunes(s2a)) == 15);
+
+s3a = "xabcd";
+// Bytes
+sys.assert(s3a[1:4] == "abc");
+sys.assert(s3a[4] == "d");
+// Runes
+sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
+sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
+
+s3b = "x€abcd";
+// Bytes
+sys.assert(s3b[1:4] == "€");
+sys.assert(s3b[5] == "b");
+sys.test(bytes.toArr(bytes.fromStr(s3b[1])), [226]);
+// Runes
+sys.assert(str.fromRunes(str.toRunes(s3b)[1:4]) == "€ab");
+sys.assert(str.fromRunes(str.toRunes(s3b)[3:4]) == "b");
+sys.assert(str.fromRunes([str.toRunes(s3b)[3]]) == "b");
+sys.assert(str.fromRunes([str.toRunes(s3b)[1]]) == "€");
+
+s4a = """
+  a\b1"2"3
+  b""";
+s4b = "a\\b1\"2\"3\nb";
+sys.println(s4a); // Shows: a\b1"2"3
+                  //        b
+sys.assert(s4a == s4b);
+
+s5a = """a
+  b""";
+s5b = """
+a
+  b""";
+s5c = "a\n  b";
+sys.println(s5a); // Shows: a
+                  //          b
+
+sys.assert(s5a == s5b);
+sys.assert(s5a == s5c);
+
+s6a = """
+  a
+b""";
+s6b = "  a\nb";
+sys.println(s6a); // Shows:   a
+                  //        b
+sys.assert(s6a == s6b);
+
+s7a = """
+  a
+  b
+""";
+sys.println(s7a); // Shows: a
+                  //        b
+s7b = "a\nb\n";
+sys.assert(s7a == s7b);``
+
+# Arrays
+
+They are collections of values. These values has not to have equals type.
+It is posible empty arrays.
+
+*\[_e1_, _e2_, ...]* (blanks ar not significant)
+
+Examples:
+
+* *\[]* (Empty array)
+
+* *\["a"]*
+
+* *\[1, "a", \[1, true], -1.0]*
+
+# Dictionaries
+
+Ther are collections of pairs key-value, where key must be a string and
+value can have any type. Values in a same dictionary has not to have equals
+type. It is posible empty dictionaries.
+
+*{k1: v1, k2: v2, ...}* (blanks are not significant)
+
+Examples:
+
+* *{}* (Empty dictionary)
+
+* *{"age": 32}*
+
+* *{"type": "rectangle", "dims": \[32.0, 11.24], "complete": true}*
+
+

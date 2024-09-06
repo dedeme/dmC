@@ -1,0 +1,119 @@
+// Copyright 06-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// File and filesystem management.
+
+/// Opens 'fpath' for appending.
+/// \s -> <file>
+aopen = \fpath -> {};
+
+/// Changes working directory.
+/// \s -> ()
+cd = \dir -> {};
+
+/// Closes 'f' and frees resources.
+/// \<file> -> ()
+close = \f -> {};
+
+/// Copies a file.
+///   source: Can be a regular file or a directory.
+///   target: - If source is a directory, target must be a directory.
+///           - If source is a regular file, target can be a directory or a
+///             regular file.
+/// NOTE: Target will be overwritte if already exists.
+/// \s, s -> ()
+copy = \source, target -> {};
+
+/// Deletes 'fpath'. If 'fpath' is a directory, 'del' deletes it and all its
+/// subdirectories, although they are not empty.
+/// If 'fpath' does not exists, 'del' do nothing.
+/// \s -> ()
+del = \fpath -> {};
+
+/// Returns base names of files and directories of 'dir'.
+/// \s -> [s.]
+dir = \dir -> {};
+
+/// Returns 'true' if 'fpath' is a file, link or directory.
+/// \s -> b
+exists = \fpath -> {};
+
+/// Returns 'true' if 'fpath' is a directory.
+/// NOTE: If 'fpath' is a link to directory, it returns 'true'.
+/// \s -> b
+isDirectory = \fpath -> {};
+
+/// Returns 'true' if 'fpath' is a link.
+/// \s -> b
+isLink = \fpath -> {};
+
+/// Returns 'true' if 'fpath' is a regular file.
+/// NOTE: If 'fpath' is a link to regular file, it returns 'true'.
+/// \s -> b
+isRegular = \fpath -> {};
+
+/// Creates the directory 'fpath' and its parents directory if is necessary.
+/// \s -> ()
+mkdir = \fpath -> {};
+
+/// Creates a symbol link from 'link' to 'fpath'.
+/// 'fpath' should be relative to 'link' or absolute.
+/// \s, s -> ()
+mklink = \fpath, link -> {};
+
+/// Reads the complete file 'fpath'.
+/// \s -> s
+read = \fpath -> {};
+
+/// Reads 'buf' bytes of 'f'.
+/// When 'f' is at end, returns a bytes with no element.
+/// \<file>, i -> <bytes>
+readBin = \f, buf -> {};
+
+/// Returns an array with the next line of 'f'.
+/// If there is no more elements, it returns an empty array.
+/// Lines are read without carriage return.
+/// \<file> -> ([s] | [])
+readLine = \f -> {};
+
+/// Changes (moves) 'oldPath' by 'newPath'
+/// \s, s -> ()
+rename = \oldPath, newPath -> {};
+
+/// Open 'fpath' for reading.
+/// \s -> <file>
+ropen = \fpath -> {};
+
+/// Returns the size of file 'fpath'.
+/// \s -> i
+size = \fpath -> {};
+
+/// Returns the time in milliseconds of the last modification of file 'fpath'.
+/// \s -> i
+tm = \fpath -> {};
+
+/// Returns a random name for a file in "dir" with the scheme 'fpath' + "xxxxxxxx".
+/// The return is checked that does not match any existing file.
+/// If 'dir' is an empty string, '/tmp' is used instead.
+/// \s, s -> s
+tmp = \dir, fpath -> {};
+
+/// Returns working directory.
+/// \-> s
+wd = \-> {};
+
+/// Opens 'fpath' for writing.
+/// \s -> <file>
+wopen = \fpath -> {};
+
+/// Creates, writes and closes 'fpath'.
+/// \s, s -> ()
+write = \fpath, text -> {};
+
+/// Writes 'bs' in 'f'.
+/// \<file>, <bytes> -> ()
+writeBin = \f, bs -> {};
+
+/// Writes 'text' in 'f'.
+/// \<file>, s -> ()
+writeText = \f, text -> {};

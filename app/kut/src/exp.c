@@ -4,8 +4,9 @@
 #include "DEFS.h"
 #include "exp.h"
 #include "kut/js.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "function.h"
+#include "typed/tfunction.h"
 #include "symix.h"
 #include "runner/fail.h"
 #include "runner/stack.h"
@@ -13,7 +14,7 @@
 enum exp_Exp_t {
   EXP_BREAK, EXP_CONTINUE, // Made at run time.
   EXP_BOOL, EXP_INT, EXP_FLOAT, EXP_STRING, EXP_OBJECT,
-  EXP_ARR, EXP_DIC, EXP_FUNC, EXP_SYM,
+  EXP_ARR, EXP_DIC, EXP_FUNC, EXP_TFUNC, EXP_SYM,
   EXP_RANGE,
   EXP_PT, EXP_SQ, EXP_SLICE, EXP_PR, // Point, Square braket - subindex, Sqare braket - slice, Parentheses
   EXP_SWITCH,
@@ -27,13 +28,13 @@ enum exp_Exp_t {
 typedef enum exp_Exp_t Exp_t;
 
 struct exp_Exp {
-  Exp_t type;
   union {
     int b;
     int64_t i;
     double d;
     void *value;
   };
+  Exp_t type;
 };
 
 static Exp empty_exp = { .type = EXP_OBJECT, .value = "<empty expression>" };
@@ -52,6 +53,7 @@ static char *type_to_str (Exp_t type) {
     case EXP_ARR: return "arr";
     case EXP_DIC: return "dic";
     case EXP_FUNC: return "function";
+    case EXP_TFUNC: return "tfunction";
     case EXP_SYM: return "symbol";
     case EXP_RANGE: return "range";
     case EXP_PT: return "point";
@@ -84,29 +86,29 @@ static char *type_to_str (Exp_t type) {
 
 static Exp *newb(Exp_t type, int value) {
   Exp *this = MALLOC(Exp);
-  this->type = type;
   this->b = value;
+  this->type = type;
   return this;
 }
 
 static Exp *newi(Exp_t type, int64_t value) {
   Exp *this = MALLOC(Exp);
-  this->type = type;
   this->i = value;
+  this->type = type;
   return this;
 }
 
 static Exp *newd(Exp_t type, double value) {
   Exp *this = MALLOC(Exp);
-  this->type = type;
   this->d = value;
+  this->type = type;
   return this;
 }
 
 static Exp *new(Exp_t type, void *value) {
   Exp *this = MALLOC(Exp);
-  this->type = type;
   this->value = value;
+  this->type = type;
   return this;
 }
 
@@ -139,8 +141,9 @@ Exp *exp_break (Stack *value) {
 }
 
 Stack *exp_get_break (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_break, "break", this);
-  return this->value;
+  if (this->type == EXP_BREAK) return this->value;
+  EXC_KUT(fail_type("break", this));
+  return 0; // Unreachable.
 }
 
 int exp_is_break (Exp *this) {
@@ -152,8 +155,9 @@ Exp *exp_continue (Stack *value) {
 }
 
 Stack *exp_get_continue (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_continue, "continue", this);
-  return this->value;
+  if (this->type == EXP_CONTINUE) return this->value;
+  EXC_KUT(fail_type("continue", this));
+  return 0; // Unreachable.
 }
 
 int exp_is_continue (Exp *this) {
@@ -165,11 +169,6 @@ Exp *exp_bool (int value) {
 }
 
 int exp_get_bool (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_bool, "bool", this);
-  return this->b;
-}
-
-int exp_rget_bool (Exp *this) {
   if (this->type == EXP_BOOL) return this->b;
   EXC_KUT(fail_type("bool", this));
   return 0; // Unreachable.
@@ -179,10 +178,10 @@ int exp_is_bool(Exp *this) {
   return this->type == EXP_BOOL;
 }
 
-int exp_rget_as_bool (Exp *this) {
+int exp_get_as_bool (Exp *this) {
   if (this->type == EXP_BOOL) return this->b ? TRUE : FALSE;
   if (this->type == EXP_ARR) return arr_size(this->value) ? TRUE : FALSE;
-  EXC_KUT(fail_type("bool, string or array", this));
+  EXC_KUT(fail_type("bool or array", this));
   return 0; // Unreachable
 }
 
@@ -191,11 +190,6 @@ Exp *exp_int (int64_t value) {
 }
 
 int64_t exp_get_int (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_int, "int", this);
-  return this->i;
-}
-
-int64_t exp_rget_int (Exp *this) {
   if (this->type == EXP_INT) return this->i;
   EXC_KUT(fail_type("int", this));
   return 0; // Unreachable.
@@ -210,11 +204,6 @@ Exp *exp_float (double value) {
 }
 
 double exp_get_float (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_float, "float", this);
-  return this->d;
-}
-
-double exp_rget_float (Exp *this) {
   if (this->type == EXP_FLOAT) return this->d;
   EXC_KUT(fail_type("float", this));
   return 0.0; // Unreachable.
@@ -229,11 +218,6 @@ Exp *exp_string (char *value) {
 }
 
 char *exp_get_string (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_string, "string", this);
-  return this->value;
-}
-
-char *exp_rget_string (Exp *this) {
   if (this->type == EXP_STRING) return this->value;
   EXC_KUT(fail_type("string", this));
   return NULL; // Unreachable.
@@ -247,7 +231,7 @@ Exp *exp_object (char *type, void *value) {
   return new(EXP_OBJECT, tp_new(type, value));
 }
 
-void *exp_rget_object (char *type, Exp *this) {
+void *exp_get_object (char *type, Exp *this) {
   if (!exp_is_object(type, this))
     EXC_ILLEGAL_ARGUMENT(
       "Bad expression type",
@@ -267,18 +251,18 @@ int exp_is_some_object (Exp *this) {
   return this->type == EXP_OBJECT;
 }
 
+Tp *exp_get_object_tuple (Exp *this) {
+  if (this->type == EXP_OBJECT) return this->value;
+  EXC_KUT(fail_type("object", this));
+  return NULL; // Unreachable.
+}
+
 Exp *exp_array (Arr *value) {
   return new(EXP_ARR, value);
 }
 
 // <Exp>
 Arr *exp_get_array (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_array, "array", this);
-  return this->value;
-}
-
-// <Exp>
-Arr *exp_rget_array (Exp *this) {
   if (this->type == EXP_ARR) return this->value;
   EXC_KUT(fail_type("array", this));
   return NULL; // Unreachable.
@@ -294,12 +278,6 @@ Exp *exp_dic (Map *value) {
 
 // <Exp>
 Map *exp_get_dic (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_dic, "dictionary", this);
-  return this->value;
-}
-
-// <Exp>
-Map *exp_rget_dic (Exp *this) {
   if (this->type == EXP_DIC) return this->value;
   EXC_KUT(fail_type("dictionary", this));
   return NULL; // Unreachable.
@@ -314,11 +292,6 @@ Exp *exp_function (Function *value) {
 }
 
 Function *exp_get_function (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_function, "function", this);
-  return this->value;
-}
-
-Function *exp_rget_function (Exp *this) {
   if (this->type == EXP_FUNC) return this->value;
   EXC_KUT(fail_type("function", this));
   return NULL; // Unreachable.
@@ -328,16 +301,25 @@ int exp_is_function (Exp *this) {
   return this->type == EXP_FUNC;
 }
 
+Exp *exp_tfunction (Tfunction *value) {
+  return new(EXP_TFUNC, value);
+}
+
+Tfunction *exp_get_tfunction (Exp *this) {
+  if (this->type == EXP_TFUNC) return this->value;
+  EXC_KUT(fail_type("tfunction", this));
+  return NULL; // Unreachable.
+}
+
+int exp_is_tfunction (Exp *this) {
+  return this->type == EXP_TFUNC;
+}
+
 Exp *exp_sym (int value) {
    return newb(EXP_SYM, value);
 }
 
 int exp_get_sym (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_sym, "symbol", this);
-  return this->b;
-}
-
-int exp_rget_sym (Exp *this) {
   if (this->type == EXP_SYM) return this->b;
   EXC_KUT(fail_type("symbol", this));
   return 0; // Unreachable.
@@ -353,8 +335,9 @@ Exp *exp_range (Exp *v1, Exp *v2, Exp *v3) {
 
 // <Exp, Exp, Exp>
 Tp3 *exp_get_range (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_range, "range", this);
-  return this->value;
+  if (this->type == EXP_RANGE) return this->value;
+  EXC_KUT(fail_type("range", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_range (Exp *this) {
@@ -366,8 +349,9 @@ Exp *exp_pt (Exp *v1, Exp *v2) {
 }
 
 Tp *exp_get_pt (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_pt, "point", this);
-  return this->value;
+  if (this->type == EXP_PT) return this->value;
+  EXC_KUT(fail_type("point", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_pt (Exp *this) {
@@ -380,8 +364,9 @@ Exp *exp_sq (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_sq(Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_sq, "square", this);
-  return this->value;
+  if (this->type == EXP_SQ) return this->value;
+  EXC_KUT(fail_type("square", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_sq (Exp *this) {
@@ -394,8 +379,9 @@ Exp *exp_slice (Exp *v1, Exp *v2, Exp *v3) {
 
 // <Exp, Exp, Exp>
 Tp3 *exp_get_slice(Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_slice, "slice", this);
-  return this->value;
+  if (this->type == EXP_SLICE) return this->value;
+  EXC_KUT(fail_type("slice", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_slice (Exp *this) {
@@ -408,8 +394,9 @@ Exp *exp_pr (Exp *value, Arr *arguments) {
 
 // <Exp, Arr<Exp>>
 Tp *exp_get_pr (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_pr, "parenthesis", this);
-  return this->value;
+  if (this->type == EXP_PR) return this->value;
+  EXC_KUT(fail_type("parenthesis", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_pr (Exp *this) {
@@ -422,8 +409,9 @@ Exp *exp_switch (Exp *cond, Arr *cases) {
 
 // <Exp, Arr<Tp<Arr<Exp>, Exp>>>
 Tp *exp_get_switch (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_switch, "switch", this);
-  return this->value;
+  if (this->type == EXP_SWITCH) return this->value;
+  EXC_KUT(fail_type("switch", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_switch (Exp *this) {
@@ -435,8 +423,9 @@ Exp *exp_not (Exp *value) {
 }
 
 Exp *exp_get_not (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_not, "not", this);
-  return this->value;
+  if (this->type == EXP_NOT) return this->value;
+  EXC_KUT(fail_type("not", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_not (Exp *this) {
@@ -448,8 +437,9 @@ Exp *exp_minus (Exp *value) {
 }
 
 Exp *exp_get_minus (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_minus, "minus", this);
-  return this->value;
+  if (this->type == EXP_MINUS) return this->value;
+  EXC_KUT(fail_type("minus", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_minus (Exp *this) {
@@ -462,8 +452,9 @@ Exp *exp_add (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_add (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_add, "add", this);
-  return this->value;
+  if (this->type == EXP_ADD) return this->value;
+  EXC_KUT(fail_type("add", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_add (Exp *this) {
@@ -476,8 +467,9 @@ Exp *exp_sub (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_sub (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_sub, "sub", this);
-  return this->value;
+  if (this->type == EXP_SUB) return this->value;
+  EXC_KUT(fail_type("sub", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_sub (Exp *this) {
@@ -490,8 +482,9 @@ Exp *exp_mul (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_mul (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_mul, "mul", this);
-  return this->value;
+  if (this->type == EXP_MUL) return this->value;
+  EXC_KUT(fail_type("mul", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_mul (Exp *this) {
@@ -504,8 +497,9 @@ Exp *exp_div (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_div (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_div, "div", this);
-  return this->value;
+  if (this->type == EXP_DIV) return this->value;
+  EXC_KUT(fail_type("div", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_div (Exp *this) {
@@ -518,8 +512,9 @@ Exp *exp_mod (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_mod (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_mod, "mod", this);
-  return this->value;
+  if (this->type == EXP_MOD) return this->value;
+  EXC_KUT(fail_type("mod", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_mod (Exp *this) {
@@ -532,8 +527,9 @@ Exp *exp_and (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_and (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_and, "and", this);
-  return this->value;
+  if (this->type == EXP_AND) return this->value;
+  EXC_KUT(fail_type("and", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_and (Exp *this) {
@@ -546,8 +542,9 @@ Exp *exp_or (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_or (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_or, "or", this);
-  return this->value;
+  if (this->type == EXP_OR) return this->value;
+  EXC_KUT(fail_type("or", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_or (Exp *this) {
@@ -560,8 +557,9 @@ Exp *exp_greater (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_greater (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_greater, "greater", this);
-  return this->value;
+  if (this->type == EXP_GREATER) return this->value;
+  EXC_KUT(fail_type("greater", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_greater (Exp *this) {
@@ -574,8 +572,9 @@ Exp *exp_greater_eq (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_greater_eq (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_greater_eq, "greater_eq", this);
-  return this->value;
+  if (this->type == EXP_GREATER_EQ) return this->value;
+  EXC_KUT(fail_type("greater_eq", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_greater_eq (Exp *this) {
@@ -588,8 +587,9 @@ Exp *exp_less (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_less (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_less, "less", this);
-  return this->value;
+  if (this->type == EXP_LESS) return this->value;
+  EXC_KUT(fail_type("less", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_less (Exp *this) {
@@ -602,8 +602,9 @@ Exp *exp_less_eq (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_less_eq (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_less_eq, "less_eq", this);
-  return this->value;
+  if (this->type == EXP_LESS_EQ) return this->value;
+  EXC_KUT(fail_type("less_eq", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_less_eq (Exp *this) {
@@ -616,8 +617,9 @@ Exp *exp_eq (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_eq (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_eq, "eq", this);
-  return this->value;
+  if (this->type == EXP_EQ) return this->value;
+  EXC_KUT(fail_type("eq", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_eq (Exp *this) {
@@ -630,8 +632,9 @@ Exp *exp_neq (Exp *v1, Exp *v2) {
 
 // <Exp, Exp>
 Tp *exp_get_neq (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_neq, "neq", this);
-  return this->value;
+  if (this->type == EXP_NEQ) return this->value;
+  EXC_KUT(fail_type("neq", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_neq (Exp *this) {
@@ -644,8 +647,9 @@ Exp *exp_ternary (Exp *v1, Exp *v2, Exp *v3) {
 
 // <Exp, Exp, Exp>
 Tp3 *exp_get_ternary (Exp *this) {
-  TEST_EXP_TYPE_ERROR(exp_is_ternary, "ternary", this);
-  return this->value;
+  if (this->type == EXP_TERNARY) return this->value;
+  EXC_KUT(fail_type("ternary", this));
+  return NULL; // Unreachable.
 }
 
 int exp_is_ternary (Exp *this) {
@@ -712,11 +716,11 @@ char *exp_to_str (Exp *this) {
     case EXP_STRING:
       return this->value;
     case EXP_INT:
-      return dec_itos(this->i);
+      return math_itos(this->i);
     case EXP_BOOL:
       return this->b ? "true" : "false";
     case EXP_FLOAT:
-      return dec_ftos(this->d, 9);
+      return math_ftos(this->d, 9);
     case EXP_OBJECT:
       return str_f("%s:%ld", exp_type_to_str(this), (long)tp_e2(this->value));
     case EXP_ARR:
@@ -728,6 +732,8 @@ char *exp_to_str (Exp *this) {
       );
     case EXP_FUNC:
       return function_to_str(this->value);
+    case EXP_TFUNC:
+      return tfunction_to_str(this->value);
     case EXP_SYM :
       return symix_get(exp_get_sym(this));
     case EXP_RANGE: {
@@ -863,11 +869,11 @@ char *exp_to_str (Exp *this) {
 
 char *exp_to_js (Exp *this) {
     //--
-    char *fmtf(char *n) { return dec_digits(n) ? str_f("%s.0", n) : n; }
+    char *fmtf(char *n) { return math_digits(n) ? str_f("%s.0", n) : n; }
   return exp_is_string(this)
     ? js_ws(this->value)
     : exp_is_float(this)
-      ? fmtf(dec_ftos(this->d, 9))
+      ? fmtf(math_ftos(this->d, 9))
       : exp_to_str(this);
 }
 

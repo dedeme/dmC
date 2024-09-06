@@ -6,7 +6,7 @@
 #include "kut/file.h"
 #include "kut/path.h"
 #include "kut/js.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "kut/rs.h"
 #include "cts.h"
 
@@ -16,7 +16,7 @@ static Arr *read_dates(char *co, char *qs) {
   Arr *r = arr_new();
   EACH(str_split_trim(qs, "\n"), char, q) {
     char *qdate = str_left(q, 8);
-    if (!dec_digits(qdate))
+    if (!math_digits(qdate))
       EXC_ILLEGAL_ARGUMENT(str_f("Bad date in %s", co), "A valid date", qdate);
     arr_push(r, qdate);
   }_EACH
@@ -29,10 +29,10 @@ static char *check_quote(char *co, char *q) {
   // <char>
   Arr *a = str_csplit(q, '.');
   int sz = arr_size(a);
-  if (sz == 1 && dec_digits(arr_get(a, 0))) return q;
+  if (sz == 1 && math_digits(arr_get(a, 0))) return q;
   if (sz == 2 &&
-    dec_digits(arr_get(a, 0)) &&
-    dec_digits(arr_get(a, 1))
+    math_digits(arr_get(a, 0)) &&
+    math_digits(arr_get(a, 1))
   ) return q;
 
   EXC_ILLEGAL_ARGUMENT(str_f("Bad quote in %s", co), "A valid quote", q);

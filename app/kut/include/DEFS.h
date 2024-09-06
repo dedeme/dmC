@@ -25,16 +25,6 @@
           ); \
       }
 
-    /// Utility to show expression type error messages.
-     #define TEST_EXP_TYPE_ERROR(fn_is, expected, exp) { \
-        char *__expected = expected; \
-        Exp *__exp = exp; \
-        if (!fn_is(this)) \
-          EXC_ILLEGAL_ARGUMENT( \
-            "Bad expression type", __expected, exp_type_to_str(__exp) \
-          ); \
-      }
-
     /// Utility to show statement type error messages.
     #define TEST_STAT_TYPE_ERROR(fn_is, expected, stat) { \
         char *__expected = expected; \
@@ -48,10 +38,11 @@
   #else
     #define TEST_TOKEN_TYPE_ERROR(fn_is, expected, exp)
 
-    #define TEST_EXP_TYPE_ERROR(fn_is, expected, exp)
-
     #define TEST_STAT_TYPE_ERROR(fn_is, expected, stat)
   #endif
+
+  ///
+  #define VERSION "20240906"
 
   ///
   #define exc_kut_t "kut"
@@ -82,8 +73,8 @@
   /// returns its result in 'rs'.
   #define FRUN(rs, fn, params) \
       Exp *rs = NULL; \
-      if (exp_is_function(fn)) rs = function_run(exp_rget_function(fn), (ps)); \
-      if (obj_is_bfunction(fn)) rs = obj_rget_bfunction(fn)(ps); \
+      if (exp_is_function(fn)) rs = function_run(exp_get_function(fn), (ps)); \
+      if (obj_is_bfunction(fn)) rs = obj_get_bfunction(fn)(ps); \
       if (!rs) EXC_KUT(fail_type("function", (fn)));
 
 #endif

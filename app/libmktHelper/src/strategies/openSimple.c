@@ -41,6 +41,7 @@ double *openSimple_calc (Arr *opens, Arr *closes, Arr *refs) {
   Vec **pcloses = (Vec **)arr_begin(closes);
   Vec **prefs = (Vec **)arr_begin(refs);
   REPEAT(ndates) {
+    double day_cash = cash;
     double *ops = (*popens++)->vs;
     double *cls = (*pcloses++)->vs;
     double *rfs = (*prefs++)->vs;
@@ -56,11 +57,13 @@ double *openSimple_calc (Arr *opens, Arr *closes, Arr *refs) {
       if (to_dos[ico]) {
         if (to_sells[ico]) { // there is buy order.
           if (days_traps[ico] < 1) {
-            if (cash > cts_min_to_bet) {
+            if (day_cash > cts_min_to_bet) {
               int stocks_v = (int)(cts_bet / op);
               stocks[ico] = stocks_v;
               prices[ico] = op;
-              cash -= broker_buy(stocks_v, op);
+              double broker = broker_buy(stocks_v, op);
+              cash -= broker;
+              day_cash -= broker;
             }
           }
         } else {
@@ -98,7 +101,7 @@ double *openSimple_calc (Arr *opens, Arr *closes, Arr *refs) {
       double withdraw = -1.0;
       if (cash > dif + securAmount) {
         withdraw = dif;
-      } else if (cash < cts_min_to_bet) {
+      } else if (cash > cts_min_to_bet) {
         withdraw = floor((cash - securAmount) / cts_bet) * cts_bet;
       }
       if (withdraw > 0) {

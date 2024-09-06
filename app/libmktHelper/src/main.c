@@ -16,7 +16,7 @@
 #include "stGroupsHub.h"
 
 char *help (void) {
-  return "Usage: kmarketSpeed [test|pathToJSON]";
+  return "Usage: libmktHelper [constants|pathToJSON]";
 }
 
 int main(int argc, char *argv[]) {
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     if (str_eq(command, "readQuotes")) puts(quotesReader_run(pars));
     else if (str_eq(command, "volumes")) puts(volumes_read(pars));
     else if (str_eq(command, "mkRefs")) puts(modelsHub_run(pars));
+    else if (str_eq(command, "realRefs")) puts(modelsHub_run_real(pars));
     else if (str_eq(command, "strategy")) puts(strategiesHub_run(pars));
     else if (str_eq(command, "group")) puts(stGroupsHub_run(pars));
     else fprintf(stderr, "Unknown command %s\n", command);

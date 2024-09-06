@@ -3,11 +3,12 @@
 
 #include "DEFS.h"
 #include "runner/solver.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "kut/thread.h"
 #include "DEFS.h"
 #include "fileix.h"
 #include "function.h"
+#include "typed/tfunction.h"
 #include "heap.h"
 #include "modules.h"
 #include "bmodule.h"
@@ -93,6 +94,9 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       exp_get_function(exp), is, h0, hs
     ));
   }
+  if (exp_is_tfunction(exp)) {
+    return exp;
+  }
   if (exp_is_sym(exp)) {
     int sym = exp_get_sym(exp);
 
@@ -169,15 +173,15 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
   if (exp_is_range(exp)) {
     // <Exp, Exp, Exp>
     Tp3 *v = exp_get_range(exp);
-    int64_t start = exp_rget_int(solver_solve(is, h0, hs, tp3_e1(v)));
-    int64_t end = exp_rget_int(solver_solve(is, h0, hs, tp3_e2(v)));
+    int64_t start = exp_get_int(solver_solve(is, h0, hs, tp3_e1(v)));
+    int64_t end = exp_get_int(solver_solve(is, h0, hs, tp3_e2(v)));
     if (exp_is_empty(tp3_e3(v))) {
       solver_range_O *o = MALLOC(solver_range_O);
       o->i = start;
       o->end = end;
       return obj_iter(it_new(o, (Opt *(*)(void *))range_next));
     }
-    int64_t step = exp_rget_int(solver_solve(is, h0, hs, tp3_e3(v)));
+    int64_t step = exp_get_int(solver_solve(is, h0, hs, tp3_e3(v)));
     if (!step) EXC_KUT("Range can not have step 0");
     if (step > 0) {
       solver_range2_O *o = MALLOC(solver_range2_O);
@@ -197,8 +201,8 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Tp *v = exp_get_pt(exp);
     Exp *ex0 = solver_solve(is, h0, hs, tp_e1(v));
     if (obj_is_module(ex0)) {
-      Module *md = obj_rget_module(ex0);
-      int sym = exp_rget_sym(tp_e2(v)); // test fi tp_e2(v) is symbol.
+      Module *md = obj_get_module(ex0);
+      int sym = exp_get_sym(tp_e2(v)); // test fi tp_e2(v) is symbol.
       if (exports_contains(module_get_exports(md), sym))
         return solver_solve(
           module_get_imports(md),
@@ -210,12 +214,12 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     }
     if (obj_is_bmodule(ex0)) {
       return obj_bfunction(bmodule_get_function(
-        obj_rget_bmodule(ex0),
-        exp_rget_sym(tp_e2(v))
+        obj_get_bmodule(ex0),
+        exp_get_sym(tp_e2(v))
       ));
     }
     if (exp_is_dic(ex0)) {
-      char *key = symix_get(exp_rget_sym(tp_e2(v)));
+      char *key = symix_get(exp_get_sym(tp_e2(v)));
       return md_dic_fget(exp_get_dic(ex0), key);
     }
     EXC_KUT(fail_type("module or dictionary", ex0));
@@ -226,11 +230,11 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *ct = solver_solve(is, h0, hs, tp_e1(v));
     Exp *ix_key = solver_solve(is, h0, hs, tp_e2(v));
     if (exp_is_string(ct))
-      return md_str_at(exp_get_string(ct), exp_rget_int(ix_key));
+      return md_str_at(exp_get_string(ct), exp_get_int(ix_key));
     if (exp_is_array(ct))
-      return arr_get(exp_get_array(ct), exp_rget_int(ix_key));
+      return arr_get(exp_get_array(ct), exp_get_int(ix_key));
     if (exp_is_dic(ct))
-      return md_dic_fget(exp_get_dic(ct), exp_rget_string(ix_key));
+      return md_dic_fget(exp_get_dic(ct), exp_get_string(ix_key));
     EXC_KUT(fail_type("string, array or dictionary", ct));
   }
   if (exp_is_slice(exp)) {
@@ -239,13 +243,13 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *ct = solver_solve(is, h0, hs, tp3_e1(v));
     int64_t start = exp_is_empty(tp3_e2(v))
       ? 0
-      : exp_rget_int(solver_solve(is, h0, hs, tp3_e2(v)))
+      : exp_get_int(solver_solve(is, h0, hs, tp3_e2(v)))
     ;
     if (exp_is_string(ct)) {
       char *s = exp_get_string(ct);
       int64_t end = exp_is_empty(tp3_e3(v))
         ? strlen(s)
-        : exp_rget_int(solver_solve(is, h0, hs, tp3_e3(v)))
+        : exp_get_int(solver_solve(is, h0, hs, tp3_e3(v)))
       ;
       return exp_string(str_sub(s, start, end));
     }
@@ -254,7 +258,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       Arr *a = exp_get_array(ct);
       int64_t end = exp_is_empty(tp3_e3(v))
         ? arr_size(a)
-        : exp_rget_int(solver_solve(is, h0, hs, tp3_e3(v)))
+        : exp_get_int(solver_solve(is, h0, hs, tp3_e3(v)))
       ;
       if (start < 0) start = arr_size(a) + start;
       if (end < 0) end = arr_size(a) + end;
@@ -268,7 +272,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *ex0 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *pars = solver_solve(is, h0, hs, exp_array(tp_e2(v)));
     if (obj_is_bfunction(ex0)) {
-      Exp *r = obj_rget_bfunction(ex0)(exp_rget_array(pars));
+      Exp *r = obj_get_bfunction(ex0)(exp_get_array(pars));
       if (exp_is_empty(r))
         EXC_KUT(str_f(
           "%s\n<bfunction> does not return any value", exp_to_str(exp)
@@ -276,7 +280,15 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       return r;
     }
     if (exp_is_function(ex0)) {
-      Exp *r = function_run(exp_get_function(ex0), exp_rget_array(pars));
+      Exp *r = function_run(exp_get_function(ex0), exp_get_array(pars));
+      if (exp_is_empty(r))
+        EXC_KUT(str_f(
+          "%s\n<function> does not return any value", exp_to_str(exp)
+        ));
+      return r;
+    }
+    if (exp_is_tfunction(ex0)) {
+      Exp *r = tfunction_run(exp_get_tfunction(ex0), exp_get_array(pars));
       if (exp_is_empty(r))
         EXC_KUT(str_f(
           "%s\n<function> does not return any value", exp_to_str(exp)
@@ -300,7 +312,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
           return solver_solve(is, h0, hs, tp_e2(e));
 
         Exp *cond2 = solver_solve(is, h0, hs, exp);
-        if (exp_rget_bool(solver_solve_isolate(exp_eq(cond, cond2)))) {
+        if (exp_get_bool(solver_solve_isolate(exp_eq(cond, cond2)))) {
           ok = TRUE;
           break;
         }
@@ -314,7 +326,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
   }
   if (exp_is_not(exp)) {
     Exp *v = solver_solve(is, h0, hs, exp_get_not(exp));
-    return exp_bool(!exp_rget_as_bool(v));
+    return exp_bool(!exp_get_as_bool(v));
   }
   if (exp_is_minus(exp)) {
     Exp *v = solver_solve(is, h0, hs, exp_get_minus(exp));
@@ -328,16 +340,16 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
     if (exp_is_string(e1)) return exp_string(str_f(
-      "%s%s", exp_get_string(e1), exp_rget_string(e2)
+      "%s%s", exp_get_string(e1), exp_get_string(e2)
     ));
-    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) + exp_rget_int(e2));
+    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) + exp_get_int(e2));
     if (exp_is_float(e1)) return exp_float(
-      exp_get_float(e1) + exp_rget_float(e2)
+      exp_get_float(e1) + exp_get_float(e2)
     );
     if (exp_is_array(e1)) {
       // <Exp>
       Arr *a = arr_copy(exp_get_array(e1));
-      arr_cat(a, exp_rget_array(e2));
+      arr_cat(a, exp_get_array(e2));
       return exp_array(a);
     }
     EXC_KUT(fail_type("int, float, string, array or vec", e1));
@@ -347,9 +359,9 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Tp *v = exp_get_sub(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
-    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) - exp_rget_int(e2));
+    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) - exp_get_int(e2));
     if (exp_is_float(e1)) return exp_float(
-      exp_get_float(e1) - exp_rget_float(e2)
+      exp_get_float(e1) - exp_get_float(e2)
     );
     EXC_KUT(fail_type("int, float or vec", e1));
   }
@@ -358,9 +370,9 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Tp *v = exp_get_mul(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
-    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) * exp_rget_int(e2));
+    if (exp_is_int(e1)) return exp_int(exp_get_int(e1) * exp_get_int(e2));
     if (exp_is_float(e1)) return exp_float(
-      exp_get_float(e1) * exp_rget_float(e2)
+      exp_get_float(e1) * exp_get_float(e2)
     );
     EXC_KUT(fail_type("int, float or vec", e1));
   }
@@ -370,13 +382,13 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
     if (exp_is_int(e1)) {
-      int64_t dv = exp_rget_int(e2);
+      int64_t dv = exp_get_int(e2);
       if (!dv)
         EXC_KUT("Integer division by 0");
       return exp_int(exp_get_int(e1) / dv);
     }
     if (exp_is_float(e1)) {
-      double dv = exp_rget_float(e2);
+      double dv = exp_get_float(e2);
       if (dv == 0)
         EXC_KUT("Floating division by 0");
       return exp_float(exp_get_float(e1) / dv);
@@ -389,10 +401,10 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
     Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
     if (exp_is_int(e1)) {
-      int64_t dv = exp_rget_int(e2);
+      int64_t dv = exp_get_int(e2);
       if (!dv)
         EXC_KUT("Integer division by 0");
-      return exp_int(exp_rget_int(e1) % dv);
+      return exp_int(exp_get_int(e1) % dv);
     }
     EXC_KUT(fail_type("int or vec", e1));
   }
@@ -400,18 +412,18 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     // <Exp, Exp>
     Tp *v = exp_get_and(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
-    int b1 = exp_rget_bool(e1);
+    int b1 = exp_get_bool(e1);
     if (b1)
-      return exp_bool(exp_rget_bool(solver_solve(is, h0, hs, tp_e2(v))));
+      return exp_bool(exp_get_bool(solver_solve(is, h0, hs, tp_e2(v))));
     return exp_bool(FALSE);
   }
   if (exp_is_or(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_or(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
-    int b1 = exp_rget_bool(e1);
+    int b1 = exp_get_bool(e1);
     if (b1) return exp_bool(TRUE);
-    return exp_bool(exp_rget_bool(solver_solve(is, h0, hs, tp_e2(v))));
+    return exp_bool(exp_get_bool(solver_solve(is, h0, hs, tp_e2(v))));
   }
 
     //--
@@ -419,70 +431,52 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *is_eq(Tp *v) {
       Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
       Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
-      if (exp_is_string(e1)) {
-        if (exp_is_string(e2))
-          return exp_bool(!strcmp(exp_get_string(e1), exp_get_string(e2)));
-        else return exp_bool(FALSE);
-      }
-      if (exp_is_int(e1)) {
-        if (exp_is_int(e2))
-          return exp_bool(exp_get_int(e1) == exp_get_int(e2));
-        else return exp_bool(FALSE);
-      }
-      if (exp_is_float(e1)) {
-        if (exp_is_float(e2))
-          return exp_bool(dec_eq(exp_get_float(e1), exp_get_float(e2)));
-        else return exp_bool(FALSE);
-      }
+      if (exp_is_string(e1))
+        return exp_bool(!strcmp(exp_get_string(e1), exp_get_string(e2)));
+      if (exp_is_int(e1))
+        return exp_bool(exp_get_int(e1) == exp_get_int(e2));
+      if (exp_is_float(e1))
+        return exp_bool(math_eq(exp_get_float(e1), exp_get_float(e2)));
       if (exp_is_array(e1)) {
-        if (exp_is_array(e2)) {
-          // <Exp>
-          Arr *a1 = exp_get_array(e1);
-          // <Exp>
-          Arr *a2 = exp_get_array(e2);
+        // <Exp>
+        Arr *a1 = exp_get_array(e1);
+        // <Exp>
+        Arr *a2 = exp_get_array(e2);
 
-          if (arr_size(a1) != arr_size(a2)) return exp_bool(FALSE);
-          for (int i = 0; i < arr_size(a1); ++i) {
-            Exp *tmp = exp_eq(arr_get(a1, i), arr_get(a2, i));
-            if (!exp_rget_bool(solver_solve_isolate(tmp))) {
-              return exp_bool(FALSE);
-            }
+        if (arr_size(a1) != arr_size(a2)) return exp_bool(FALSE);
+        for (int i = 0; i < arr_size(a1); ++i) {
+          Exp *tmp = exp_eq(arr_get(a1, i), arr_get(a2, i));
+          if (!exp_get_bool(solver_solve_isolate(tmp))) {
+            return exp_bool(FALSE);
           }
-          return exp_bool(TRUE);
         }
-        else return exp_bool(FALSE);
+        return exp_bool(TRUE);
       }
       if (exp_is_bool(e1)) {
-        if (exp_is_bool(e2)) {
-          int b1 = exp_get_bool(e1) ? TRUE : FALSE;
-          int b2 = exp_get_bool(e2) ? TRUE : FALSE;
-          return exp_bool(b1 == b2);
-        }
-        else return exp_bool(FALSE);
+        int b1 = exp_get_bool(e1) ? TRUE : FALSE;
+        int b2 = exp_get_bool(e2) ? TRUE : FALSE;
+        return exp_bool(b1 == b2);
       }
       if (exp_is_dic(e1)) {
-        if (exp_is_dic(e2)) {
-          // <Exp>
-          Map *m1 = exp_get_dic(e1);
-          // <Exp>
-          Map *m2 = exp_get_dic(e2);
+        // <Exp>
+        Map *m1 = exp_get_dic(e1);
+        // <Exp>
+        Map *m2 = exp_get_dic(e2);
 
-          if (map_size(m1) != map_size(m2)) return exp_bool(FALSE);
-          EACH(map_to_array(m1), Kv, kv) {
-            char *key = kv_key(kv);
-            Exp *v2 = opt_get(map_get(m2, key));
-            if (!v2) return FALSE;
-            Exp *tmp = exp_eq(kv_value(kv), v2);
-            if (!exp_rget_bool(solver_solve_isolate(tmp))) {
-              return exp_bool(FALSE);
-            }
-          }_EACH
-          return exp_bool(TRUE);
-        }
-        else return exp_bool(FALSE);
+        if (map_size(m1) != map_size(m2)) return exp_bool(FALSE);
+        EACH(map_to_array(m1), Kv, kv) {
+          char *key = kv_key(kv);
+          Exp *v2 = opt_get(map_get(m2, key));
+          if (!v2) return FALSE;
+          Exp *tmp = exp_eq(kv_value(kv), v2);
+          if (!exp_get_bool(solver_solve_isolate(tmp))) {
+            return exp_bool(FALSE);
+          }
+        }_EACH
+        return exp_bool(TRUE);
       }
 
-      EXC_KUT(fail_type("bool, int, float, string, array, dic or vec", e1));
+      EXC_KUT(fail_type("bool, int, float, string, array or dic", e1));
       return NULL; // Unreachable
     }
     // v is Tp<Exp, Exp>
@@ -491,13 +485,13 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
       Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
       Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
       if (exp_is_string(e1))
-        return exp_bool(strcmp(exp_get_string(e1), exp_rget_string(e2)) > 0);
+        return exp_bool(strcmp(exp_get_string(e1), exp_get_string(e2)) > 0);
       if (exp_is_int(e1))
-        return exp_bool(exp_get_int(e1) > exp_rget_int(e2));
+        return exp_bool(exp_get_int(e1) > exp_get_int(e2));
       if (exp_is_float(e1))
-        return exp_bool(exp_get_float(e1) > exp_rget_float(e2));
+        return exp_bool(exp_get_float(e1) > exp_get_float(e2));
       if (exp_is_bool(e1)) {
-        return exp_bool(exp_get_bool(e1) && !exp_rget_bool(e2));
+        return exp_bool(exp_get_bool(e1) && !exp_get_bool(e2));
       }
 
       EXC_KUT(fail_type("bool, int, float or string", e1));
@@ -507,7 +501,7 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     return is_eq(exp_get_eq(exp));
   }
   if (exp_is_neq(exp)) {
-    return exp_bool(!exp_rget_bool(is_eq(exp_get_neq(exp))));
+    return exp_bool(!exp_get_bool(is_eq(exp_get_neq(exp))));
   }
   if (exp_is_greater(exp)) {
     return is_greater(exp_get_greater(exp));
@@ -516,26 +510,26 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     // <Exp, Exp>
     Tp *v = exp_get_greater_eq(exp);
     return exp_bool(
-      exp_rget_bool(is_greater(v)) ||
-      exp_rget_bool(is_eq(v))
+      exp_get_bool(is_greater(v)) ||
+      exp_get_bool(is_eq(v))
     );
   }
   if (exp_is_less(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_less(exp);
     return exp_bool(
-      !exp_rget_bool(is_greater(v)) &&
-      !exp_rget_bool(is_eq(v))
+      !exp_get_bool(is_greater(v)) &&
+      !exp_get_bool(is_eq(v))
     );
   }
   if (exp_is_less_eq(exp)) {
-    return exp_bool(!exp_rget_bool(is_greater(exp_get_less_eq(exp))));
+    return exp_bool(!exp_get_bool(is_greater(exp_get_less_eq(exp))));
   }
   if (exp_is_ternary(exp)) {
     // <Exp, Exp, Exp>
     Tp3 *v = exp_get_ternary(exp);
     Exp *e1 = solver_solve(is, h0, hs, tp3_e1(v));
-    if (exp_rget_bool(e1)) return solver_solve(is, h0, hs, tp3_e2(v));
+    if (exp_get_bool(e1)) return solver_solve(is, h0, hs, tp3_e2(v));
     else return solver_solve(is, h0, hs, tp3_e3(v));
   }
 

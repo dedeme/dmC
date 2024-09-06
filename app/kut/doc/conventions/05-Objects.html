@@ -61,8 +61,9 @@ window.MathJax = {
 <p>Each public indexed should be in its own file.</p>
 <h4>Indexed with only functions.</h4>
 <p>Functional access will be enabled.</p>
-<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
-// \(\s->s), (\s->()) -> <myobj>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// In module 'myobj'
+
+// \(\s->s), (\s->()) -> &lt;myobj>
 mk : fnA, fnB;
 
 a = \o -> return o[fnA];
@@ -70,8 +71,9 @@ b = \o -> return o[fnB];
 
 ...
 
-:myobj
-obX = mk(f1, f2);
+// Out of module 'myobj'
+
+:myobj obX = mk(f1, f2);
 
 sys.println(obX.a("text"));
 obX.b();
@@ -83,15 +85,17 @@ obX.b();
 </div>
 <script>aceConf("aceEditor-0", "kut");</script>
 <h4>Indexed with mixed functional - value fields.</h4>
-<p>Direct access will be used.</p>
-<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
-// \s, (\s->()) -> <myobj>
+<p>Direct access can be used.</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// In module 'myobj'
+
+// \s, (\s->()) -> &lt;myobj>
 mk : a, fn;
 
 ...
 
-:myobj
-obX = mk("de", f);
+// Out of module 'myobj'
+
+:myobj obX = mk("de", f);
 
 sys.println(obX.a);
 obX.fn#();

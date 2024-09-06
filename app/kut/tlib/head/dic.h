@@ -1,0 +1,14 @@
+typedef struct tarr_Arrs Arrs;
+static void dic_add(Arrs *this, char *key, char *value);
+static Arrs *dic_from_arr (Arrs *a);
+static Arrs *dic_get(Arrs *this, char *key);
+static char *dic_get_or_exc(Arrs *this, char *key);
+static char *dic_get_or_null(Arrs *this, char *key);
+static int dic_has_key(Arrs *this, char *key);
+static Arrs *dic_keys(Arrs *this);
+static Arrs *dic_new();
+static void dic_put(Arrs *this, char *key, char *value);
+static void dic_remove(Arrs *this, char *key);
+static void dic_set(Arrs *this, char *key, char *value);
+static int dic_size(Arrs *this);
+static Arrs *dic_values(Arrs *this);

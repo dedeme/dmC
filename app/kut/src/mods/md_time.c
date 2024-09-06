@@ -6,12 +6,12 @@
 #include <time.h>
 #include "kut/time.h"
 #include "kut/buf.h"
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "exp.h"
 #include "runner/fail.h"
 
 static Exp * from_str_op_aux(char *date) {
-  if (strlen(date) != 8 && !dec_digits(date)) return exp_array(arr_new());
+  if (strlen(date) != 8 && !math_digits(date)) return exp_array(arr_new());
   char tpl[5];
   memset (tpl, 0, 5);
   memcpy(tpl, date + 6, 2);
@@ -62,8 +62,8 @@ static char *time_fmt (int64_t tm, char *template) {
 // if fail, returns -1. 'max' is exclusive.
 static int to_time_number (char *n, int max) {
   if (strlen(n) != 2) return -1;
-  if (!dec_digits(n)) return -1;
-  int nn = dec_stoi(n);
+  if (!math_digits(n)) return -1;
+  int nn = math_stoi(n);
   if (nn >= max) return -1;
   return nn;
 }
@@ -74,8 +74,8 @@ static int to_time_number (char *n, int max) {
 static Exp *add_days (Arr *exps) {
   CHECK_PARS ("time.addDays", 2, exps);
   return exp_int(time_add(
-    exp_rget_int(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1))
+    exp_get_int(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1))
   ));
 }
 
@@ -89,8 +89,8 @@ static Exp *day (Arr *exps) {
 static Exp *df_days (Arr *exps) {
   CHECK_PARS ("time.dfDays", 2, exps);
   return exp_int(time_df(
-    exp_rget_int(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1))
+    exp_get_int(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1))
   ));
 }
 
@@ -98,8 +98,8 @@ static Exp *df_days (Arr *exps) {
 static Exp *eq_day (Arr *exps) {
   CHECK_PARS ("time.eqDay", 2, exps);
   return exp_bool(time_eq(
-    exp_rget_int(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1))
+    exp_get_int(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1))
   ));
 }
 
@@ -107,7 +107,7 @@ static Exp *eq_day (Arr *exps) {
 static Exp *from_clock (Arr *exps) {
   CHECK_PARS ("time.fromClock", 2, exps);
   int64_t tm = exp_get_int(arr_get(exps, 0));
-  char *tms = exp_rget_string(arr_get(exps, 1));
+  char *tms = exp_get_string(arr_get(exps, 1));
   // <char>
   Arr *ps = str_csplit(tms, ':');
   if (arr_size(ps) == 3) {
@@ -134,8 +134,8 @@ static Exp *from_en (Arr *exps) {
   CHECK_PARS ("time.fromEn", 2, exps);
   return from_iso_en_op(
     FALSE,
-    exp_rget_string(arr_get(exps, 0)),
-    *exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    *exp_get_string(arr_get(exps, 1))
   );
 }
 
@@ -144,22 +144,22 @@ static Exp *from_iso (Arr *exps) {
   CHECK_PARS ("time.fromIso", 2, exps);
   return from_iso_en_op(
     TRUE,
-    exp_rget_string(arr_get(exps, 0)),
-    *exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    *exp_get_string(arr_get(exps, 1))
   );
 }
 
 // \s -> [i]|[]
 static Exp *from_str (Arr *exps) {
   CHECK_PARS ("time.fromStr", 1, exps);
-  return from_str_op_aux(exp_rget_string(arr_get(exps, 0)));
+  return from_str_op_aux(exp_get_string(arr_get(exps, 0)));
 }
 
 // \s, i -> s
 static Exp *fmt (Arr *exps) {
   CHECK_PARS ("time.fmt", 2, exps);
-  int64_t tm = exp_rget_int(arr_get(exps, 0));
-  char *s = exp_rget_string(arr_get(exps, 1));
+  int64_t tm = exp_get_int(arr_get(exps, 0));
+  char *s = exp_get_string(arr_get(exps, 1));
 
   int len = strlen(s);
   int p = 0;
@@ -253,12 +253,12 @@ static Exp *month (Arr *exps) {
 static Exp *new (Arr *exps) {
   CHECK_PARS ("time.new", 6, exps);
   return exp_int(time_new_time(
-    exp_rget_int(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1)) - 1,
-    exp_rget_int(arr_get(exps, 2)),
-    exp_rget_int(arr_get(exps, 3)),
-    exp_rget_int(arr_get(exps, 4)),
-    exp_rget_int(arr_get(exps, 5))
+    exp_get_int(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1)) - 1,
+    exp_get_int(arr_get(exps, 2)),
+    exp_get_int(arr_get(exps, 3)),
+    exp_get_int(arr_get(exps, 4)),
+    exp_get_int(arr_get(exps, 5))
   ));
 }
 
@@ -266,9 +266,9 @@ static Exp *new (Arr *exps) {
 static Exp *new_date (Arr *exps) {
   CHECK_PARS ("time.newDate", 3, exps);
   return exp_int(time_new(
-    exp_rget_int(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1)) - 1,
-    exp_rget_int(arr_get(exps, 2))
+    exp_get_int(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1)) - 1,
+    exp_get_int(arr_get(exps, 2))
   ));
 }
 
@@ -329,7 +329,7 @@ Bfunction md_time_get (char *fname) {
   if (!strcmp(fname, "fromEn")) return from_en;
   if (!strcmp(fname, "fromIso")) return from_iso;
   if (!strcmp(fname, "fromStr")) return from_str;
-  if (!strcmp(fname, "format")) return fmt;
+  if (!strcmp(fname, "fmt")) return fmt;
   if (!strcmp(fname, "hour")) return hour;
   if (!strcmp(fname, "millisecond")) return millisecond;
   if (!strcmp(fname, "minute")) return minute;

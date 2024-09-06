@@ -1,0 +1,394 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Expression</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Value'>Value</a><br>
+<a href='#Types'>Types</a>
+</p>
+<hr>
+<a name="Value"></a>
+<h3>Value</h3>
+<p>Values are the basic elements of Kut.</p>
+<p>Each value has a type and each type has a name to be used in the documentation
+annotations.</p>
+<h4>Basic types</h4>
+
+<table border=1>
+<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td>name</td></tr>
+<tr><td>Boolean</td><td><code>true</code></td><td><code>b</code></td></tr>
+<tr><td>Integer</td><td><code>125</code></td><td><code>i</code></td></tr>
+<tr><td>Float</td><td><code>30.15</code></td><td><code>f</code></td></tr>
+<tr><td>String</td><td><code>"Clasic"</code></td><td><code>s</code></td></tr>
+<tr><td>Array</td><td><code>[1, true, 23, "abc"]</code></td>
+  <td>
+  Empty array: <code>[]</code><br>
+  Array of one element of type T: <code>[T]</code><br>
+  Array of two elements of type T, U: <code>[T, U]</code><br>
+  Array of 'n' elements of types T<sub>0</sub> ... T<sub>n</sub>:
+    <code>[T<sub>0</sub>, T<sub>1</sub>,  ..., T<sub>n</sub>]</code><br>
+  Array of 0, 1 or more elements of type T: <code>[T.]</code>
+  </td></tr>
+<tr><td>Dictionary</td><td><code>{"one": 1, "two": 2}</code></td><td>
+  Empty dictionary: <code>{}</code><br>
+  Dictionary of one value of type T: <code>{T}</code><br>
+  Dictionary of two values of type T, U: <code>{T, U}</code><br>
+  Dictionary of 'n' values of types T<sub>0</sub> ... T<sub>n</sub>:
+    <code>{T<sub>0</sub>, T<sub>1</sub>,  ..., T<sub>n</sub>}</code><br>
+  Dictionary of 0, 1 or more values of type T: <code>{T.}</code>
+  </td></tr>
+<tr><td>Function</td><td><code>\a -> {sys.println("a");}</code></td>
+  <td>
+  Function with 'n' parameters of types T<sub>0</sub> ... T<sub>n</sub><br>
+    which returns nothing:<br>
+    <code>&nbsp;&nbsp;\T<sub>0</sub>, T<sub>1</sub>, ..., T<sub>n</sub> -> ()
+      </code><br>
+  Function with 'n' parameters of types T<sub>0</sub> ... T<sub>n</sub><br>
+    which return a value of type U:<br>
+    <code>&nbsp;&nbsp;\T<sub>0</sub>, T<sub>1</sub>, ..., T<sub>n</sub> -> U
+      </code><br>
+  <br>
+  NOTE: For functions without parameters:<br>
+    <code>&nbsp;&nbsp;\ -> ()</code><br>
+    <code>&nbsp;&nbsp;\ -> U</code><br>
+  </td></tr>
+</table>
+<h4>Library types</h4>
+
+<table border=1>
+<tr><td><b>Type</b></td><td><b>Library</b></td><td>name</td></tr>
+<tr><td>Bytes</td><td><code>bytes, b64, file, tcp</code></td><td><code>&lt;bytes></code></td></tr>
+<tr><td>File</td><td><code>file</code></td><td><code>&lt;file></code></td></tr>
+<tr><td>Iterator</td><td><code>iter</code></td><td><code>&lt;iter></code></td></tr>
+<tr><td>Tcp Server</td><td><code>tcp</code></td><td><code>&lt;tcpServer></code></td></tr>
+<tr><td>Tcp Connection</td><td><code>tcp</code></td><td><code>&lt;tcpConn></code></td></tr>
+<tr><td>Thread</td><td><code>thread</code></td><td><code>&lt;thread></code></td></tr>
+</table>
+<h4>User types</h4>
+<p>They are arrays and dictionaries, usually constructed with a function and with
+a name of convenience. Its type name is formed with a name between '&lt;' and '>'.</p>
+<p>Example of a 'person' type.</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// \s, i -> &lt;person>
+new = \name, age -> return [name, age];;
+// &lt;person>
+person1 = new("Peter", 35);</div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<a name="Types"></a>
+<h3>Types</h3>
+<h4>Boolean</h4>
+<p>Only allows thow values: <i>true</i> and <i>false</i>.</p>
+<p>Boolean values have two literals:</p>
+<blockquote>
+<p>- <code>true</code></p>
+<p>- <code>false</code></p>
+</blockquote>
+<p>Example:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = true;
+sys.println(v); // Shows: true
+
+v2 = false;
+sys.println(v == v2); // Shows: false</div>
+<script>aceConf("aceEditor-1", "kut");</script>
+<h4>Integer</h4>
+<p>Integer values stand for Natural numbers.</p>
+<p>Their literals are sequences of one or more digits, optionally preceded by the
+sign '-'.</p>
+<p><code>[-]d+</code></p>
+<p>Using the sign '+' is an error. (Wrong: <code>+115</code>).</p>
+<p>However '_' can be used to improve the reading. (Ok: <code>1_215</code>).</p>
+<p>Example:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">i1 = 0;
+i2 = -0;
+i3 = 11892;
+i4 = -11_892;
+sys.println(i1 == i2); // Shows: true
+sys.println(i3 == -i4); // Shows: true
+sys.println(i2); // Shows: 0
+sys.println(i4); // Shows: -11892
+
+// Wrong integers
+// +115
+// --23
+// 2.1 -> this number is float.
+sys.println(i3 != 11892.0); // Shows: Type error.</div>
+<script>aceConf("aceEditor-2", "kut");</script>
+<h4>Float</h4>
+<p>They are numbers with decimal point or scientific notation.</p>
+<p>Float literals follow the scheme:</p>
+<p><code>[-]d+.[d *][(e|E)[(+|-)]d+]</code></p>
+<p>Starting with the sign '+' or with '.' is an error. (Wrong: <code>+1.0</code>, <code>.123</code>).</p>
+<p>'_' can be used to improve the reading. (Ok: <code>1_215.0</code>).</p>
+<p>The number can end at '.', (Ok: <code>234.</code>, <code>234.e2</code>)</p>
+<p>Example:</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">f1a = 0.;
+f1b = -0.0;
+f1c = 0.0e0;
+f1d = 0.0e-0;
+sys.println(f1d); // Shows: 0
+sys.assert(f1a == f1b);
+sys.assert(f1a == f1c);
+sys.assert(f1a == f1d);
+
+f2a = 100.02;
+f2b = -100.02;
+f2c = 10_002.e-2;
+f2d = 1.0002e+2;
+f2e = 0.10002E3;
+sys.println(f2c); // Shows: 100.02
+sys.assert(f2a == -f2b);
+sys.assert(f2a == f2c);
+sys.assert(f2a == f2d);
+sys.assert(f2a == f2e);
+
+// Wrong floats
+// .12 -> starts with '.'.
+// +1.2 -> starts with '-'.
+// 123 -> this number is integer.
+// 100e3 -> '.' is mising before 'e'.
+// 100.E -> There must be one digit at least after 'e|E'.</div>
+<script>aceConf("aceEditor-3", "kut");</script>
+<h4>String</h4>
+<p>They are sequences of bytes which represent UTF-8 characters.</p>
+<p>Its literals are writen between single or double quotes ( <code>"abc"</code> or <code>'abc'</code> ).</p>
+<p>It is allowed empty strings ( <code>""</code> or <code>''</code> );</p>
+<p>It is allowed escape symbols '\\', '\n', '\t', '\b', '\f', '\r' and '\'' or
+'\"' depending on enclosing quotes ('' -> <code>\'</code> allowed. "" -> <code>\"</code> allowed).</p>
+<p>Also it is posible to use unicode sequences with 4 hexadecimal values
+(e.g. <code>\u23aC</code>)</p>
+<u>Triple quoted strings</u><p>Triple quoted strings generate verbatim strings. They use the following rules:</p>
+<ul>
+<li>
+<p>Escape and unicode characters are no allowed.</p>
+</li>
+<li>
+<p>If the first line is equals to """, it is skipped.</p>
+</li>
+<li>
+<p>The left margin is adjusted to the most left character.</p>
+</li>
+</ul>
+<u>String length</u><p>The string length is measured in bytes:</p>
+<ul>
+<li>
+<p>"a" has 1 byte.</p>
+</li>
+<li>
+<p>"€" has 3 bytes.</p>
+</li>
+</ul>
+<p>If we call UTF-8 symbols as "runes", then:</p>
+<ul>
+<li>
+<p>"a" has 1 rune.</p>
+</li>
+<li>
+<p>"€" has 1 rune.</p>
+</li>
+</ul>
+<p>To measure bytes Kut use the <code>str.len</code> function.</p>
+<p>To measure runes you have to pass the 'string' to an array of 'runes' and then
+measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> which return <code>1</code>).</p>
+<u>String slice</u><p>Slicing string is made in bytes and using indexation "base 0". To slicing in
+runes you have to pass 'string' to 'runes' too:</p>
+<ul>
+<li>
+<p><code>"xabcd"[1:4]</code> gives <code>"abc"</code></p>
+</li>
+<li>
+<p><code>"x€abcd"[1:4]</code> gives <code>"€"</code>. Note that '€' count by 3.</p>
+</li>
+<li>
+<p><code>str.fromRunes(str.toRunes("xabcd")[1:4])</code> gives <code>"abc"</code></p>
+</li>
+<li>
+<p><code>str.fromRunes(str.toRunes("x€abcd")[1:4])</code> gives <code>"€ab"</code></p>
+</li>
+</ul>
+<u>Element access</u><p>String elements can be accessed with indexation "base 0":</p>
+<ul>
+<li>
+<p><code>"xabcd"[4]</code> gives <code>"d"</code></p>
+</li>
+<li>
+<p><code>"a€abcd"[5]</code> gives <code>"b"</code>. Note that '€' count by 3.</p>
+</li>
+<li>
+<p><code>str.fromRunes([str.toRunes("xabcd")[4]])</code> gives <code>"d"</code></p>
+</li>
+<li>
+<p><code>str.fromRunes([str.toRunes("a€abcd")[3]])</code> gives <code>"b"</code></p>
+</li>
+</ul>
+<p>Note that <code>str.fromRunes([str.toRunes("a€abcd")[1]])</code> gives <code>"€"</code>, but
+<code>"a€abcd"[1]</code> returns a not valid UTF-8 character.</p>
+<u>String modification</u><p>Strings can not be modified.</p>
+<u>String library</u><p>To manipulate strings you can use the buit-in 'str' library.</p>
+<p>For example, the function <code>str.trim("  ab  ")</code> returns <code>"ab"</code>.</p>
+<u>String examples</u><div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">s1a = "";
+s1b = '';
+sys.assert(s1a == s1b);
+// Bytes
+sys.assert(str.len(s1a) == 0);
+// Runes
+sys.println(str.toRunes(s1a)); // Shows: []
+sys.assert(arr.size(str.toRunes(s1a)) == 0);
+
+s2a = "ab€c\"'\u00f7n\nLine 2";
+s2b = 'ab€c"\'\u00f7n\nLine 2';
+sys.assert(s2a == s2b);
+// Bytes
+sys.println(s2a); // Shows: ab€c"'÷n
+                  //        Line 2
+sys.assert(str.len(s2a) == 18);
+// Runes
+sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+sys.assert(arr.size(str.toRunes(s2a)) == 15);
+
+s3a = "xabcd";
+// Bytes
+sys.assert(s3a[1:4] == "abc");
+sys.assert(s3a[4] == "d");
+// Runes
+sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
+sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
+
+s3b = "x€abcd";
+// Bytes
+sys.assert(s3b[1:4] == "€");
+sys.assert(s3b[5] == "b");
+sys.test(bytes.toArr(bytes.fromStr(s3b[1])), [226]);
+// Runes
+sys.assert(str.fromRunes(str.toRunes(s3b)[1:4]) == "€ab");
+sys.assert(str.fromRunes(str.toRunes(s3b)[3:4]) == "b");
+sys.assert(str.fromRunes([str.toRunes(s3b)[3]]) == "b");
+sys.assert(str.fromRunes([str.toRunes(s3b)[1]]) == "€");
+
+s4a = """
+  a\b1"2"3
+  b""";
+s4b = "a\\b1\"2\"3\nb";
+sys.println(s4a); // Shows: a\b1"2"3
+                  //        b
+sys.assert(s4a == s4b);
+
+s5a = """a
+  b""";
+s5b = """
+a
+  b""";
+s5c = "a\n  b";
+sys.println(s5a); // Shows: a
+                  //          b
+
+sys.assert(s5a == s5b);
+sys.assert(s5a == s5c);
+
+s6a = """
+  a
+b""";
+s6b = "  a\nb";
+sys.println(s6a); // Shows:   a
+                  //        b
+sys.assert(s6a == s6b);
+
+s7a = """
+  a
+  b
+""";
+sys.println(s7a); // Shows: a
+                  //        b
+s7b = "a\nb\n";
+sys.assert(s7a == s7b);</div>
+<script>aceConf("aceEditor-4", "kut");</script>
+<h4>Arrays</h4>
+<p>They are collections of values. These values has not to have equals type.
+It is posible empty arrays.</p>
+<p><code>[_e1_, <i>e2</i>, ...]</code> (blanks ar not significant)</p>
+<p>Examples:</p>
+<ul>
+<li>
+<p><code>[]</code> (Empty array)</p>
+</li>
+<li>
+<p><code>["a"]</code></p>
+</li>
+<li>
+<p><code>[1, "a", [1, true], -1.0]</code></p>
+</li>
+</ul>
+<h4>Dictionaries</h4>
+<p>Ther are collections of pairs key-value, where key must be a string and
+value can have any type. Values in a same dictionary has not to have equals
+type. It is posible empty dictionaries.</p>
+<p><code>{k1: v1, k2: v2, ...}</code> (blanks are not significant)</p>
+<p>Examples:</p>
+<ul>
+<li>
+<p><code>{}</code> (Empty dictionary)</p>
+</li>
+<li>
+<p><code>{"age": 32}</code></p>
+</li>
+<li>
+<p><code>{"type": "rectangle", "dims": [32.0, 11.24], "complete": true}</code></p>
+</li>
+</ul>
+<hr>
+<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+// Copyright 04-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// String functions.
+///
+/// Beside the functions described below, 'string' also allows:
+///
+/// Subindex (s[ix])
+///   - Returns a the byte in position 'ix'.
+///   - If 'ix >= str.len(s)' or 'ix < 0' an exception is thrown.
+///
+/// Substrings at left (s[:ix]), at right (s[ix:]) and between limits (s[i:j]).
+///   - If subindices are '< 0', they are converted en 'len(s) + i'.
+///   - If the final value is '< 0' or '>= len(s)', it is adjusted to limits.
+///   - In case of 's[i, j]', if 'j < i', an empty string is returned.
+///   - The expresion 's[:]' returns a copy of 's'.
+
+/// Compares using the current locale 's1' with 's2' and returns an integer
+/// '> 0' if 's1 > s2', '< 0' if 's1 < s2' and '== 0' if 's1 == s2'.
+/// It is necessary set the language previously (by default is 'C').
+/// For example:
+///   sys.setLocale("es_ES.utf8");
+///   sys.assert(str.cmp("z", "é") > 0);
+/// \s, s -> i
+cmp = \s1, s2 -> {};
+
+/// Returns 'true' if 's' ends with 'subs'.
+/// \s, s -> b
+ends = \s, subs -> {};
+
+/// Returns the result of fill 'format' with values of 'values'
+/// You only can use:
+///   '%s': for strings.
+///   '%v': for strings.
+///   '%%': produce '%'.
+/// Examples:
+///   str.fmt("%s, %d, %f", ["abc", sys.toStr(33), sys.toStr(12.152)]) ==
+///     "abc, 33, 12.152"
+/// \s, [*.] -> s
+fmt = \ format, values -> {};
+
+/// Returns a normal string from a ISO-8859-1 string.
+/// \s -> s
+fromIso = \s -> {};
+
+/// Returns a string from runes.
+/// \[s.] -> s
+fromRunes = \Runes -> {};
+
+/// Returns a string from codepoints.
+/// \[i.] -> s
+fromUtf16 = \Codepoints -> {};
+
+/// Returns position of the first occurence of 'subs' in 's', counting by bytes,
+/// or -1 if 'subs' is not in 's'.
+/// \s, s -> i
+index = \s, subs -> {};
+
+/// Returns position of the first occurence of 'subs' in 's', counting by bytes,
+/// and searching from 'ix', or -1 if 'subs' is not in 's'.
+/// 'ix' counts number of bytes.
+/// \s, s, i -> i
+indexFrom = \s, subs, ix -> {};
+
+/// Returns position of the last occurence of 'subs' in 's', counting by bytes,
+/// or -1 if 'subs' is not in 's'.
+/// \s, s -> i
+lastIndex = \s, subs -> {};
+
+/// Returns length of 's'.
+/// \s -> i
+len = \s -> {};
+
+/// Returns 's' removing starting spaces.
+/// \s -> s
+ltrim = \s -> {};
+
+/// Returns 's' replacing all ocurreces of 'old' by 'new'.
+/// \s, s, s -> s
+replace = \s, old, new -> {};
+
+/// Returns 's' removing trailing spaces.
+/// \s -> s
+rtrim = \s -> {};
+
+/// Returns an array with 's' splitted by 'sep'.
+/// Examples:
+///   sys.test(arr.size(str.split("", "")), 0);
+///   sys.test(arr.join(str.split("", ""), ""), "");
+///   sys.test(arr.size(str.split("a", "")), 1);
+///   sys.test(arr.join(str.split("a", ""), ""), "a");
+///   sys.test(arr.size(str.split("añ", "")), 2);
+///   sys.test(arr.join(str.split("añ", ""), ""), "añ");
+///   sys.test(arr.size(str.split("", ";")), 1;
+///   sys.test(arr.join(str.split("", ";"), ";"), "");
+///   sys.test(arr.size(str.split("ab;cd;", ";")), 3);
+///   sys.test(arr.join(str.split("ab;cd;", ";"), ";"), "ab;cd;");
+///   sys.test(arr.size(str.split("ab;cd", ";")), 2);
+///   sys.test(arr.join(str.split("ab;cd", ";"), ";"), "ab;cd");
+/// \s, s -> [s.]
+split = \s, sep -> {};
+
+/// Equals to split, but triming each strings in the resulting array.
+/// \s, s -> [s.]
+splitTrim = \s, sep -> {};
+
+/// Returns 'true' if 's' starts with 'subs'.
+/// \s, s -> b
+starts = \s, subs -> {};
+
+/// Returns 's' with all runes in lowercase.
+/// It is necessary set the language previously (by default is 'C').
+/// For example:
+///  sys.setLocale("es_ES.utf8");
+///  sys.test(str.toLower("CAÑÓN"), "cañón");
+/// \s -> s
+toLower = \s -> {};
+
+/// Returns an array with runes of 's'
+/// \s -> [s.]
+toRunes = \s -> {};
+
+/// Returns 's' with all runes in uppercase.
+/// It is necessary set the language previously (by default is 'C').
+/// For example:
+///  sys.setLocale("es_ES.utf8");
+///  sys.test(str.toUpper("cañón"), "CAÑÓN");
+/// \s -> s
+toUpper = \s -> {};
+
+/// Returns an array with codepoints of 's'
+/// \s -> [i.]
+toUtf16 = \s -> {};
+
+/// Returns 's' removing starting and trailing spaces.
+/// \s -> s
+trim = \s -> {};
+

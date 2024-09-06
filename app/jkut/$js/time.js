@@ -36,7 +36,7 @@ export function eqDay (t1, t2) {
 }
 
 // \n, s -> s
-export function format (t, template) {
+export function fmt (t, template) {
   sys.$params(arguments.length, 2);
 
   function f2 (n) {
@@ -210,19 +210,19 @@ export function toDate (t) {
 // \n -> s
 export function toEn (t) {
   sys.$params(arguments.length, 1);
-  return format(t, "%M-%D-%Y");
+  return fmt(t, "%M-%D-%Y");
 }
 
 // \n -> s
 export function toIso (t) {
   sys.$params(arguments.length, 1);
-  return format(t, "%D/%M/%Y");
+  return fmt(t, "%D/%M/%Y");
 }
 
 // \n -> s
 export function toStr (t) {
   sys.$params(arguments.length, 1);
-  return format(t, "%Y%M%D");
+  return fmt(t, "%Y%M%D");
 }
 
 // \n -> n

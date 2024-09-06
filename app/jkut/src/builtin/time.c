@@ -1,4 +1,4 @@
-// Copyright 25-Apr-2024 ºDeme
+// Copyright 04-Sep-2024 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *time_bget (void) {return
@@ -40,7 +40,7 @@ char *time_bget (void) {return
   "}\n"
   "\n"
   "// \\n, s -> s\n"
-  "export function format (t, template) {\n"
+  "export function fmt (t, template) {\n"
   "  sys.$params(arguments.length, 2);\n"
   "\n"
   "  function f2 (n) {\n"
@@ -214,19 +214,19 @@ char *time_bget (void) {return
   "// \\n -> s\n"
   "export function toEn (t) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  return format(t, \"%M-%D-%Y\");\n"
+  "  return fmt(t, \"%M-%D-%Y\");\n"
   "}\n"
   "\n"
   "// \\n -> s\n"
   "export function toIso (t) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  return format(t, \"%D/%M/%Y\");\n"
+  "  return fmt(t, \"%D/%M/%Y\");\n"
   "}\n"
   "\n"
   "// \\n -> s\n"
   "export function toStr (t) {\n"
   "  sys.$params(arguments.length, 1);\n"
-  "  return format(t, \"%Y%M%D\");\n"
+  "  return fmt(t, \"%Y%M%D\");\n"
   "}\n"
   "\n"
   "// \\n -> n\n"

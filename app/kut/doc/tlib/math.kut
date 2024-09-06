@@ -1,0 +1,193 @@
+// Copyright 06-Apr-2023 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+/// Numerical and mathematical functions.
+
+/// Returns the absolute value of n.
+/// \f -> f
+abs = \n -> {};
+
+/// Returns arccosine of n.
+/// \f -> f
+acos = \n -> {};
+
+/// Returns arc-hyperbolic cosine of n.
+/// \f -> f
+acosh = \n -> {};
+
+/// Returns arcsine of n.
+/// \f -> f
+asin = \n -> {};
+
+/// Returns arc-hyperbolic sine of n.
+/// \f -> f
+asinh = \n -> {};
+
+/// Returns arctangent of n.
+/// \f -> f
+atan = \n -> {};
+
+/// Returns arc-hyperbolic tangent of n.
+/// \f -> f
+atanh = \n -> {};
+
+/// Returns the next greater integer of n.
+/// \f -> f
+ceil = \n -> {};
+
+/// Returns cosine of n.
+/// \f -> f
+cos = \n -> {};
+
+/// Returns hyperbolic cosine of n.
+/// \f -> f
+cosh = \n -> {};
+
+/// Returns 'e' constant.
+/// \ -> f
+e = \ -> {};
+
+/// Returns if n1 is equals to n2 +- gap
+/// \f, f, f -> b
+eq = \n1, n2, gap -> {};
+
+/// Returns 'pow(e, n)'.
+/// \f -> f
+exp = \n -> {};
+
+/// Returns 'pow(2, n)'.
+/// \f -> f
+exp2 = \n -> {};
+
+/// Returns the next less integer of n.
+/// \f -> f
+floor = \n -> {};
+
+/// Returns the float value of 's' (option), which contains a number in english
+/// format.
+/// \s -> ([f] | [])
+fromEn = \s -> {};
+
+/// Returns the int value of a hexadecimal string (option).
+/// \s -> ([i] | [])
+fromHex = \s -> {};
+
+/// Returns the float value of 's' (option), which contains a number in ISO
+/// format.
+/// \s -> ([f] | [])
+fromIso = \s -> {};
+
+/// Returns the int value of 'n'.
+/// \f -> i
+ftoi = \n -> {};
+
+/// Returns the string representation of 'n'.
+/// \f -> s
+ftos = \n -> {};
+
+/// Returns 'true' if every character of 's' is a digit.
+/// \s -> b
+isDigits = \s -> {};
+
+/// Returns the float value of 'n'
+/// \i -> f
+itof = \n -> {};
+
+/// Returns the hexadecimal representation of 'n'
+/// \i -> s
+itoh = \n -> {};
+
+/// Returns the string representation of 'n'.
+/// \i -> s
+itos = \n -> {};
+
+/// Returns napierian logarithm of n.
+/// \f -> f
+log = \n -> {};
+
+/// Returns base 10 logarithm of n.
+/// \f -> f
+log10 = \n -> {};
+
+/// Returns base 2 logarithm of n.
+/// \f -> f
+log2 = \n -> {};
+
+/// Returns the greater of n1 and n2.
+/// \f, f -> f
+max = \n1, n2 -> {};
+
+/// Returns the maximum value of a float.
+/// NOTE: There is not 'minFloat'.
+/// \ -> f
+maxFloat = \ -> {};
+
+/// Returns the maximum value of an integer
+/// \ -> i
+maxInt = \ -> {};
+
+/// Returns the less of n1 and n2.
+/// \f, f -> f
+min = \n1, n2 -> {};
+
+/// Returns the minimum value of an integer
+/// \ -> i
+minInt = \ -> {};
+
+/// Returns 'i' constant.
+/// \ -> f
+pi = \ -> {};
+
+/// Returns 'base' raised to the power of 'ex'.
+/// \f, f -> f
+pow = \base, ex -> {};
+
+/// Returns 10 raised to the power of 'ex'.
+/// \i -> f
+pow10 = \ex -> {};
+
+/// Returns a random number between 0 (inclusive) and 1 (exclusive).
+/// \ -> f
+rnd = \ -> {};
+
+/// Returns a random integer between 0 (inclusive) and top (exclusive).
+/// Note: function works with negative numbers too.
+/// \i -> i
+rndi = \top -> {};
+
+/// Rounds 'n' with 'dec' decimals.
+/// \f, i -> f
+round = \n, dec -> {};
+
+/// Returns sine of n.
+/// \f -> f
+sin = \n -> {};
+
+/// Returns hyperbolic sine of n.
+/// \f -> f
+sinh = \n -> {};
+
+/// Returns the square root of n.
+/// \f -> f
+sqrt = \n -> {};
+
+/// Returns the [float] value of 's' or [] if 's' is not a float.
+/// \s -> ([f] | [])
+stof = \s -> {};
+
+/// Returns the [integer] value of 's' or [] if 's' is not an integer.
+/// \s -> ([i] | [])
+stoi = \s -> {};
+
+/// Returns tangent of n.
+/// \f -> f
+tan = \n -> {};
+
+/// Returns hyperbolic tangent of n.
+/// \f -> f
+tanh = \n -> {};
+
+/// Returns the integer part of n.
+/// \f -> f
+trunc = \n -> {};
+

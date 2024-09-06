@@ -13,27 +13,33 @@
 // \s, s -> [s...]
 static Exp *matches (Arr *exps) {
   CHECK_PARS ("regex.matches", 2, exps);
-  char *s = exp_rget_string(arr_get(exps, 0));
-  char *rg = exp_rget_string(arr_get(exps, 1));
+  char *s = exp_get_string(arr_get(exps, 0));
+  char *rg = exp_get_string(arr_get(exps, 1));
   // <RegexOffset>
-  Arr *r = opt_get(regex_matches(rg, s));
-    //--
-    Exp *to_str(RegexOffset* o) {
-      return exp_string(str_sub(s, regexOffset_begin(o), regexOffset_end(o)));
-    }
-  if (r) return exp_array(arr_map(r, (FMAP)to_str));
-  EXC_KUT(str_f("Fail of regular expression:\n%s", rg));
-  return NULL; // Unreachable
+  Arr *ms = opt_get(regex_matches(rg, s));
+  if (!ms) EXC_KUT(str_f("Fail compiling regular expression:\n%s", rg));
+  // <Exp>
+  Arr *r = arr_new();
+  int ix = 0;
+  EACH(ms, RegexOffset, of) {
+    int begin = regexOffset_begin(of);
+    int end = regexOffset_end(of);
+    arr_push(r, exp_string(str_sub(s, ix, begin)));
+    arr_push(r, exp_string(str_sub(s, begin, end)));
+    ix = end;
+  }_EACH
+  arr_push(r, exp_string(str_right(s, ix)));
+  return exp_array(r);
 }
 
 // \s, s, s -> s
 static Exp *replace (Arr *exps) {
   CHECK_PARS ("regex.replace", 3, exps);
-  char *rg = exp_rget_string(arr_get(exps, 1));
+  char *rg = exp_get_string(arr_get(exps, 1));
   char *r = opt_get(regex_replace(
     rg,
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 2))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 2))
   ));
   if (r) return exp_string(r);
   EXC_KUT(str_f("Fail of regular expression:\n%s", rg));
@@ -43,18 +49,18 @@ static Exp *replace (Arr *exps) {
 // \s, s, (\s->s) -> s
 static Exp *replacef (Arr *exps) {
   CHECK_PARS ("regex.replace", 3, exps);
-  char *rg = exp_rget_string(arr_get(exps, 1));
+  char *rg = exp_get_string(arr_get(exps, 1));
   Exp *fn = arr_get(exps, 2);
     //--
     char *c_fn (char *match) {
       // Exp
       Arr *ps = arr_new_from(exp_string(match), NULL);
       FRUN(rs, fn, ps);
-      return exp_rget_string(rs);
+      return exp_get_string(rs);
     }
   char *r = opt_get(regex_replacef(
     rg,
-    exp_rget_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 0)),
     c_fn
   ));
   if (r) return exp_string(r);

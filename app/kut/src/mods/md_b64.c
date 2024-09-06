@@ -11,25 +11,25 @@
 // \s -> s
 static Exp *decode (Arr *exps) {
   CHECK_PARS ("b64.decode", 1, exps);
-  return exp_string(b64_decode(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(b64_decode(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> <bytes>
 static Exp *decode_bytes (Arr *exps) {
   CHECK_PARS ("b64.decodeBytes", 1, exps);
-  return obj_bytes(b64_decode_bytes(exp_rget_string(arr_get(exps, 0))));
+  return obj_bytes(b64_decode_bytes(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> s
 static Exp *encode (Arr *exps) {
   CHECK_PARS ("b64.encode", 1, exps);
-  return exp_string(b64_encode(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(b64_encode(exp_get_string(arr_get(exps, 0))));
 }
 
 // \<bytes> -> s
 static Exp *encode_bytes (Arr *exps) {
   CHECK_PARS ("b64.encodeBytes", 1, exps);
-  return exp_string(b64_encode_bytes(obj_rget_bytes(arr_get(exps, 0))));
+  return exp_string(b64_encode_bytes(obj_get_bytes(arr_get(exps, 0))));
 }
 
 Bfunction md_b64_get (char *fname) {

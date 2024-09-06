@@ -24,28 +24,28 @@ enum stat_Stat_t {
 typedef enum stat_Stat_t Stat_t;
 
 struct stat_Stat {
-  Stat_t type;
   void *value;
+  Stat_t type;
 };
 
 static Stat *new(Stat_t type, void *value) {
   Stat *this = MALLOC(Stat);
-  this->type = type;
   this->value = value;
+  this->type = type;
   return this;
 }
 
 struct stat_StatCode {
+  Stat *stat;
   int file_ix;
   int nline;
-  Stat *stat;
 };
 
 StatCode *stat_code_new(int file_ix, int nline, Stat *stat) {
   StatCode *this = MALLOC(StatCode);
+  this->stat = stat;
   this->file_ix = file_ix;
   this->nline = nline;
-  this->stat = stat;
   return this;
 }
 
@@ -239,7 +239,6 @@ Exp *stat_get_func (Stat *this) {
 int stat_is_func (Stat *this) {
   return this->type == FUNCTION;
 }
-
 
 // stats is Arr<StatCode>
 Stat *stat_block (Arr *stats) {

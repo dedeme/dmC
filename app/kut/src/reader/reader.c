@@ -10,6 +10,7 @@
 #include "function.h"
 #include "reader/st_reader.h"
 #include "reader/cdr/cdr.h"
+#include "typed/tfunction.h"
 
 Module *reader_read_main_block (Cdr *cdr) {
   Imports *imports = imports_new();
@@ -17,7 +18,7 @@ Module *reader_read_main_block (Cdr *cdr) {
   Heap0 *heap0 = heap0_new();
   Types *tps = types_new();
   EACH(arr_new_from(
-      "arr", "b64", "bytes", "cryp",
+      "arr", "b64", "bytes", "cryp", "clc",
       "dic", "iter", "js", "file",
       "math", "path", "regex", "str",
       "sys", "tcp", "thread", "time",
@@ -214,6 +215,10 @@ Module *reader_read_main_block (Cdr *cdr) {
           stat_code_line(arr_peek(stats)) == stat_code_line(st_cd) - 1
         )
           exports_add(exports, id);
+
+        ex = tp_e2(ps);
+        if (exp_is_tfunction(ex))
+          tfunction_set_id(exp_get_tfunction(ex), symix_get(id));
       }
     }
     arr_push(stats, st_cd);

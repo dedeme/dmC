@@ -49,13 +49,13 @@
 ///   - Profits ([n.]):
 ///     Profits ratios. One for each company.
 ///
-/// Output opeSimple:
+/// Output openSimple:
 ///   - sales (n)    :  Number of sales.
 ///   - assets (n)   : cash + withdrawals + portfolio evaluated with closes.
 ///   - accs (n)     : cash + withdrawals + portfolio evaluated with prices.
 ///   - refAssets (n): cash + withdrawals + portfolio evaluated with references.
 ///
-/// Output opeSimple2:
+/// Output openSimple2:
 ///   - sales (n)    :  Number of sales.
 ///   - assets (n)   : cash + withdrawals + portfolio evaluated with closes.
 ///   - accs (n)     : cash + withdrawals + portfolio evaluated with prices.

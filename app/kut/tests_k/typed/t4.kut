@@ -1,0 +1,20 @@
+import "sub/sub2/s21";
+import "sub/s1" : ss;
+
+sys.test(ss.hello21("world"), "hello world");
+sys.test(ss.A!, 1800);
+
+sys.test(ss.hello21Tp("hello"), "hello");
+
+fn1 = \(s|s) v -> {
+  v = v;
+  return s21.helloTp(v+v);
+};
+sys.test(fn1("hello"), "hellohello");
+
+fn2 = \(i|i) n -> {
+  return ss.plus5(n);
+};
+sys.test(fn2(3), 8);
+
+sys.test(ss.b + 2.4, 3.6);

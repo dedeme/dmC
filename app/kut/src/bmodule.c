@@ -39,7 +39,6 @@ Bfunction bmodule_get_function (int md_sym, int fn_sym) {
   if (!strcmp(md, "iter")) return md_iter_get(fn);
   if (!strcmp(md, "js")) return md_js_get(fn);
   if (!strcmp(md, "math")) return md_math_get(fn);
-  if (!strcmp(md, "path")) return md_path_get(fn);
   if (!strcmp(md, "regex")) return md_regex_get(fn);
   if (!strcmp(md, "str")) return md_str_get(fn);
   if (!strcmp(md, "sys")) return md_sys_get(fn);

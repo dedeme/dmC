@@ -1,0 +1,118 @@
+// Copyright 11-Aug-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+import "sub/s1";
+
+// sys.println(s1.hello21Tp("axx"));
+
+
+fn0b = \(b|b) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0b(true), true);
+
+fn0i = \(i|i) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0i(-87), -87);
+fn0f = \(f|f) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0f(11.5), 11.5);
+fn0s = \(s|s) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0s(""), "");
+fn0s2 = \(s|s) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0s2("a"), "a");
+fn0d = \(D|D) v -> {
+  r = v;
+  return r;
+};
+sys.test(fn0d({one: "1", two: "2", three: "3"}), {"one":"1","two":"2","three":"3"});
+
+fn2 = \(f|f) n -> {
+  return n;
+};
+sys.test(fn2(4.4), 4.4);
+
+fn2b = \(f|f) n -> {
+  return n;
+};
+sys.test(fn2b(4.4), 4.4);
+
+fn3 = \(|F) -> {
+  a = 9.0;
+  return [7.0, 8.0, a] + [1.1];
+};
+sys.test(fn3(), [7.0, 8.0, 9.0, 1.1]);
+
+fn4 = \(s|s) tx -> {
+  r = tx[1];
+  return r;
+};
+sys.test(fn4("abc"), "b");
+
+fn5 = \(Si|s) A, i -> {
+  r = A[i];
+  return r;
+};
+sys.test(fn5(["abc", "b2", "b3"], 1), "b2");
+
+fn6 = \(Ds|s) D, k -> {
+  r = D[k];
+  return r;
+};
+sys.test(fn6({one: "1", two: "2", three: "3"}, "two"), "2");
+
+fn6b = \(D|s) D -> {
+  D2 = D;
+  r = D2.two;
+  return r;
+};
+sys.test(fn6b({one: "1", two: "2", three: "3"}), "2");
+
+fn7 = \(Iii|I) A, start, end -> {
+  return A[start:end];
+};
+
+sys.test(fn7([1, 2, 3], -300, 2), [1, 2]);
+fn8 = \(sii|s) s, start, end -> {
+  return s[start:-1];
+};
+sys.test(fn8("abc", 0, -1), "ab");
+
+fn9 = \(s|i) s -> {
+  r = 1 + switch(s) {
+    "one", "a": 1;
+    "two": 2;
+    default: 3;
+  };
+  return r;
+};
+sys.test(fn9("a"), 2);
+
+fn10 = \(|b) -> {
+  return !![3];
+};
+sys.assert(fn10());
+
+fn11 = \(ii|i) n1, n2 -> {
+  if (n1 == 4) return n1 + n2;
+  return  n1 - n2;
+};
+sys.test(fn11(4, 3), 7);
+
+fn12 = \(ff|f) n1, n2 -> {
+  return n1 + n2;
+};
+sys.test(fn12(3.2, 4.1), 7.3);
+
+

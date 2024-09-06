@@ -60,6 +60,7 @@ double *openSimple2_calc (Arr *opens, Arr *closes, Arr *refs) {
   Vec **pcloses = (Vec **)arr_begin(closes);
   Vec **prefs = (Vec **)arr_begin(refs);
   REPEAT(ndates) {
+    double day_cash = cash;
     double *ops = (*popens++)->vs;
     double *cls = (*pcloses++)->vs;
     double *rfs = (*prefs++)->vs;
@@ -77,11 +78,13 @@ double *openSimple2_calc (Arr *opens, Arr *closes, Arr *refs) {
         if (to_sells[ico]) { // there is buy order.
           // Global simulation.
           if (days_traps[ico] < 1) {
-            if (cash > cts_min_to_bet) {
+            if (day_cash > cts_min_to_bet) {
               int stocks_v = (int)(cts_bet / op);
               stocks[ico] = stocks_v;
               prices[ico] = op;
-              cash -= broker_buy(stocks_v, op);
+              double broker = broker_buy(stocks_v, op);
+              cash -= broker;
+              day_cash -= broker;
             }
           }
           // Profits simulation.
@@ -142,7 +145,7 @@ double *openSimple2_calc (Arr *opens, Arr *closes, Arr *refs) {
       double withdraw = -1.0;
       if (cash > dif + securAmount) {
         withdraw = dif;
-      } else if (cash < cts_min_to_bet) {
+      } else if (cash > cts_min_to_bet) {
         withdraw = floor((cash - securAmount) / cts_bet) * cts_bet;
       }
       if (withdraw > 0) {
@@ -186,10 +189,14 @@ double *openSimple2_calc (Arr *opens, Arr *closes, Arr *refs) {
     int stks = *pstks++;
     double cl = *last_cls++;
     double rf = *last_rfs++;
-    if (stks) {
-      profits += (cash + stks * cl - cts_bet) / cts_bet;
-      rf_profits += (cash + stks * (rf < cl ? rf : cl) - cts_bet) / cts_bet;
-    }
+    profits += (cash + (stks > 0 ? stks * cl : 0) - cts_bet) / cts_bet;
+    rf_profits += (cash + (
+        stks > 0
+        ? stks * (rf < cl ? rf : cl)
+        : 0
+      ) - cts_bet) / cts_bet
+    ;
+
   }_REPEAT
 
   double *r = ATOMIC(5 * sizeof(double));

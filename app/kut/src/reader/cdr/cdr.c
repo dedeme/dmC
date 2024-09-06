@@ -72,6 +72,12 @@ static Token *read_operator (Cdr *this, char ch) {
 
       cdr_unread_char(this, ch2);
     }
+    case '{':{
+      char ch2 = cdr_read_char(this);
+      if (ch2 == '*') return token_operator(mk_c2(ch, ch2));
+
+      cdr_unread_char(this, ch2);
+    }
   }
   return token_operator(str_new_c(ch));
 }

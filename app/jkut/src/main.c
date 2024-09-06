@@ -12,6 +12,7 @@
 #include "reader/cdr/cdr.h"
 #include "reader/reader.h"
 #include "checker/checker.h"
+#include "checker/tpchecker.h"
 #include "builtin/builtin.h"
 
 typedef struct main_PathFix {
@@ -39,6 +40,7 @@ static char *help =
 ;
 
 int main(int argc, char *argv[]) {
+  GC_INIT();
   sys_init();
 
   if (argc < 2) {
@@ -118,6 +120,8 @@ int main(int argc, char *argv[]) {
       Module *md = opt_get(omd);
       checker_run(_i, md);
     }_EACH
+
+    tpchecker_run(fix);
 
     if (!check) {
       file_del(target);

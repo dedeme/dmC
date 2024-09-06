@@ -11,7 +11,7 @@
 static Exp *cmp (Arr *exps) {
   CHECK_PARS ("str.cmp", 2, exps);
   return exp_int(str_cmp_locale(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1))
   ));
 }
 
@@ -19,16 +19,16 @@ static Exp *cmp (Arr *exps) {
 static Exp *ends (Arr *exps) {
   CHECK_PARS ("str.ends", 2, exps);
   return exp_bool(str_ends(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1))
   ));
 }
 
 // \s, a -> s
 static Exp *fmt (Arr *exps) {
   CHECK_PARS ("str.fmt", 2, exps);
-  char *s = exp_rget_string(arr_get(exps, 0));
+  char *s = exp_get_string(arr_get(exps, 0));
   // <Exp>
-  Arr *a = exp_rget_array(arr_get(exps, 1));
+  Arr *a = exp_get_array(arr_get(exps, 1));
   int len = strlen(s);
   int ix = 0;
   int p = 0;
@@ -59,16 +59,16 @@ static Exp *fmt (Arr *exps) {
 
       switch (ch) {
       case 't' :
-        buf_add(r, exp_rget_bool(arr_get(a, ix)) ? "true" : "false");
+        buf_add(r, exp_get_bool(arr_get(a, ix)) ? "true" : "false");
         break;
       case 'd':
-        buf_add(r, str_f("%ld", exp_rget_int(arr_get(a, ix))));
+        buf_add(r, str_f("%ld", exp_get_int(arr_get(a, ix))));
         break;
       case 'f':
-        buf_add(r, exp_to_str(exp_float(exp_rget_float(arr_get(a, ix)))));
+        buf_add(r, exp_to_str(exp_float(exp_get_float(arr_get(a, ix)))));
         break;
       case 's':
-        buf_add(r, exp_rget_string(arr_get(a, ix)));
+        buf_add(r, exp_get_string(arr_get(a, ix)));
         break;
       case 'v':
         buf_add(r, exp_to_str(arr_get(a, ix)));
@@ -82,7 +82,7 @@ static Exp *fmt (Arr *exps) {
           if (s[j] != 'f') EXC_KUT("Bad '%' sequence");
           else {
             char *tpl = str_f("%%%s", str_sub(s, i, j + 1));
-            buf_add(r, str_f(tpl, exp_rget_float(arr_get(a, ix))));
+            buf_add(r, str_f(tpl, exp_get_float(arr_get(a, ix))));
             i = j;
           }
         }
@@ -106,14 +106,14 @@ static Exp *fmt (Arr *exps) {
 // \s -> s
 static Exp *from_iso (Arr *exps) {
   CHECK_PARS ("str.fromIso", 1, exps);
-  return exp_string(str_from_iso(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_from_iso(exp_get_string(arr_get(exps, 0))));
 }
 
 // \[s...] -> s
 static Exp *from_runes (Arr *exps) {
   CHECK_PARS ("str.fromRunes", 1, exps);
   // <char>
-  Arr *a = arr_map(exp_rget_array(arr_get(exps, 0)), (FMAP)exp_rget_string);
+  Arr *a = arr_map(exp_get_array(arr_get(exps, 0)), (FMAP)exp_get_string);
   return exp_string(arr_join(a, ""));
 }
 
@@ -121,12 +121,12 @@ static Exp *from_runes (Arr *exps) {
 static Exp *from_utf16 (Arr *exps) {
   CHECK_PARS ("str.fromUtf16", 1, exps);
   // <Exp>
-  Arr *a = exp_rget_array(arr_get(exps, 0));
+  Arr *a = exp_get_array(arr_get(exps, 0));
   int sz = arr_size(a);
   unsigned *r = ATOMIC(sz * sizeof(unsigned) + 1);
   unsigned *p = r;
   EACH(a, Exp, e) {
-    *p++ = exp_rget_int(e);
+    *p++ = exp_get_int(e);
   }_EACH
   *p = 0;
   return exp_string(str_from_unicode(r));
@@ -136,7 +136,7 @@ static Exp *from_utf16 (Arr *exps) {
 static Exp *findex (Arr *exps) {
   CHECK_PARS ("str.index", 2, exps);
   return exp_int(str_index(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1))
   ));
 }
 
@@ -144,8 +144,8 @@ static Exp *findex (Arr *exps) {
 static Exp *index_from (Arr *exps) {
   CHECK_PARS ("str.indexFrom", 3, exps);
   return exp_int(str_index_from(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1)),
-    exp_rget_int(arr_get(exps, 2))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1)),
+    exp_get_int(arr_get(exps, 2))
   ));
 }
 
@@ -153,44 +153,44 @@ static Exp *index_from (Arr *exps) {
 static Exp *last_index (Arr *exps) {
   CHECK_PARS ("str.lastIndex", 2, exps);
   return exp_int(str_last_index(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1))
   ));
 }
 
 // \s -> i
 static Exp *len (Arr *exps) {
   CHECK_PARS ("str.len", 1, exps);
-  return exp_int(strlen(exp_rget_string(arr_get(exps, 0))));
+  return exp_int(strlen(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> s
 static Exp *ltrim (Arr *exps) {
   CHECK_PARS ("str.ltrim", 1, exps);
-  return exp_string(str_ltrim(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_ltrim(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s, s, s -> s
 static Exp *replace (Arr *exps) {
   CHECK_PARS ("str.replace", 3, exps);
   return exp_string(str_replace(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 1)),
-    exp_rget_string(arr_get(exps, 2))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 1)),
+    exp_get_string(arr_get(exps, 2))
   ));
 }
 
 // \s -> s
 static Exp *rtrim (Arr *exps) {
   CHECK_PARS ("str.rtrim", 1, exps);
-  return exp_string(str_rtrim(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_rtrim(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s, s -> [s...]
 static Exp *split (Arr *exps) {
   CHECK_PARS ("str.split", 2, exps);
   return exp_array(arr_map(str_split(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 1))
   ), (FMAP)exp_string));
 }
 
@@ -198,8 +198,8 @@ static Exp *split (Arr *exps) {
 static Exp *split_trim (Arr *exps) {
   CHECK_PARS ("str.splitTrim", 2, exps);
   return exp_array(arr_map(str_split_trim(
-    exp_rget_string(arr_get(exps, 0)),
-    exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)),
+    exp_get_string(arr_get(exps, 1))
   ), (FMAP)exp_string));
 }
 
@@ -207,34 +207,34 @@ static Exp *split_trim (Arr *exps) {
 static Exp *starts (Arr *exps) {
   CHECK_PARS ("str.starts", 2, exps);
   return exp_bool(str_starts(
-    exp_rget_string(arr_get(exps, 0)), exp_rget_string(arr_get(exps, 1))
+    exp_get_string(arr_get(exps, 0)), exp_get_string(arr_get(exps, 1))
   ));
 }
 
 // \s -> s
 static Exp *to_lower (Arr *exps) {
   CHECK_PARS ("str.toLower", 1, exps);
-  return exp_string(str_to_lower(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_to_lower(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> [s...]
 static Exp *to_runes (Arr *exps) {
   CHECK_PARS ("str.toRunes", 1, exps);
   // <char>
-  Arr *a = str_runes(exp_rget_string(arr_get(exps, 0)));
+  Arr *a = str_runes(exp_get_string(arr_get(exps, 0)));
   return exp_array(arr_map(a, (FMAP)exp_string));
 }
 
 // \s -> s
 static Exp *to_upper (Arr *exps) {
   CHECK_PARS ("str.toUpper", 1, exps);
-  return exp_string(str_to_upper(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_to_upper(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> [i...]
 static Exp *to_utf16 (Arr *exps) {
   CHECK_PARS ("str.toRunes", 1, exps);
-  unsigned *u = str_to_unicode(exp_rget_string(arr_get(exps, 0)));
+  unsigned *u = str_to_unicode(exp_get_string(arr_get(exps, 0)));
   // <Exp>
   Arr *r = arr_new();
   while (*u) arr_push(r, exp_int(*u++));
@@ -244,7 +244,7 @@ static Exp *to_utf16 (Arr *exps) {
 // \s -> s
 static Exp *trim (Arr *exps) {
   CHECK_PARS ("str.trim", 1, exps);
-  return exp_string(str_trim(exp_rget_string(arr_get(exps, 0))));
+  return exp_string(str_trim(exp_get_string(arr_get(exps, 0))));
 }
 
 Bfunction md_str_get (char *fname) {

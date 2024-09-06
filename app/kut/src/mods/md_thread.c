@@ -34,7 +34,7 @@ static void thbf (void *fn) {
 // \<trhead> -> ()
 static Exp *join (Arr *exps) {
   CHECK_PARS ("thread.join", 1, exps);
-  thread_join(obj_rget_thread(arr_get(exps, 0)));
+  thread_join(obj_get_thread(arr_get(exps, 0)));
   return exp_empty();
 }
 
@@ -43,12 +43,12 @@ static Exp *run (Arr *exps) {
   CHECK_PARS ("thread.run", 1, exps);
   Exp *exp = arr_get(exps, 0);
   if (exp_is_function(exp)) {
-    Function *fn = exp_rget_function(exp);
+    Function *fn = exp_get_function(exp);
     thread_run2(thfn, fn);
     return exp_empty();
   }
   if (obj_is_bfunction(exp)) {
-    Bfunction fn = obj_rget_bfunction(exp);
+    Bfunction fn = obj_get_bfunction(exp);
     thread_run2(thbf, fn);
     return exp_empty();
   }
@@ -61,11 +61,11 @@ static Exp *start (Arr *exps) {
   CHECK_PARS ("thread.start", 1, exps);
   Exp *exp = arr_get(exps, 0);
   if (exp_is_function(exp)) {
-    Function *fn = exp_rget_function(exp);
+    Function *fn = exp_get_function(exp);
     return obj_thread(thread_start2(thfn, fn));
   }
   if (obj_is_bfunction(exp)) {
-    Bfunction fn = obj_rget_bfunction(exp);
+    Bfunction fn = obj_get_bfunction(exp);
     return obj_thread(thread_start2(thbf, fn));
   }
   EXC_KUT(fail_type("function", exp));
@@ -80,8 +80,8 @@ static Exp *sync (Arr *exps) {
     void fn2(void) {
       // Exp
       Arr *ps = arr_new();
-      if (exp_is_function(fn)) function_run(exp_rget_function(fn), ps);
-      else if (obj_is_bfunction(fn)) obj_rget_bfunction(fn)(ps);
+      if (exp_is_function(fn)) function_run(exp_get_function(fn), ps);
+      else if (obj_is_bfunction(fn)) obj_get_bfunction(fn)(ps);
       else EXC_KUT(fail_type("function", fn));
     }
     thread_sync(fn2);

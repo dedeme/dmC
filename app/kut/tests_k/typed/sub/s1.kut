@@ -1,0 +1,29 @@
+// Copyright 16-Aug-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+import "sub/sub2/s21";
+
+a = 0;
+/// [i]
+A = [a];
+{
+A! = 1800;
+}
+
+/// \s -> s
+hello21 = \n -> return s21.hello(n);;
+
+/// \ -> ()
+other = \ -> {};
+
+/// f
+b = 1.2;
+/// f
+c = b;
+
+
+/// \s -> s
+hello21Tp = \n -> return s21.helloTp(n);;
+
+/// \i -> i
+plus5 = \(i|i) n -> return n + 5;;

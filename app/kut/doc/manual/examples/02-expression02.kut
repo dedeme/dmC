@@ -1,0 +1,5 @@
+v = true;
+sys.println(v); // Shows: true
+
+v2 = false;
+sys.println(v == v2); // Shows: false

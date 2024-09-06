@@ -35,7 +35,7 @@ They should be in a directory in root named *data* and its subdirectories.
 
 They should be in a directory in root named *pgs* and its subdirectories.
 
-Files should be named with suffix '.pg' for complete pages, or '.wg' for
+Files should be named with suffix 'Pg' for complete pages, or 'Wg' for
 widgets.
 
 The main hub of request processing should be in a file in root named *pgs.kut*.

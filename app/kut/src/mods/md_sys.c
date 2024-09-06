@@ -3,12 +3,13 @@
 
 #include "DEFS.h"
 #include "mods/md_sys.h"
+#include "mods/md_js.h"
 #include <unistd.h>
 #include "kut/rs.h"
 #include "kut/sys.h"
+#include "kut/file.h"
 #include "main.h"
 #include "exp.h"
-#include "exmodule.h"
 #include "reader/cdr/cdr.h"
 #include "reader/ex_reader.h"
 #include "reader/types.h"
@@ -29,25 +30,19 @@ static Exp *args (Arr *exps) {
 // \b -> ()
 static Exp *fassert (Arr *exps) {
   CHECK_PARS ("sys.assert", 1, exps);
-  if (exp_rget_bool(arr_get(exps, 0))) return exp_empty();
+  if (exp_get_bool(arr_get(exps, 0))) return exp_empty();
   EXC_KUT("Assert failed");
   return NULL; // Unreachable
-}
-
-// \s, * -> *
-static Exp *c (Arr *exps) {
-  CHECK_PARS ("sys.c", 2, exps);
-  return exmodule_run(exp_rget_string(arr_get(exps, 0)), arr_get(exps, 1));
 }
 
 // \s, [s...] -> [s, b]
 static Exp *cmd (Arr *exps) {
   CHECK_PARS ("sys.cmd", 2, exps);
-  char *c = exp_rget_string(arr_get(exps, 0));
+  char *c = exp_get_string(arr_get(exps, 0));
     //--
-    char *fn (Exp *e) { return str_to_escape(exp_rget_string(e)); }
+    char *fn (Exp *e) { return str_to_escape(exp_get_string(e)); }
   // <char>
-  Arr *ps = arr_map(exp_rget_array(arr_get(exps, 1)), (FMAP)fn);
+  Arr *ps = arr_map(exp_get_array(arr_get(exps, 1)), (FMAP)fn);
   arr_insert(ps, 0, c);
   // <char>
   Rs *rs = sys_cmd(arr_join(ps, " "));
@@ -58,12 +53,12 @@ static Exp *cmd (Arr *exps) {
 
 // \s, [s...] -> [s, s]
 static Exp *cmd2 (Arr *exps) {
-  CHECK_PARS ("sys.cmd", 2, exps);
-  char *c = exp_rget_string(arr_get(exps, 0));
+  CHECK_PARS ("sys.cmd2", 2, exps);
+  char *c = exp_get_string(arr_get(exps, 0));
     //--
-    char *fn (Exp *e) { return str_to_escape(exp_rget_string(e)); }
+    char *fn (Exp *e) { return str_to_escape(exp_get_string(e)); }
   // <char>
-  Arr *ps = arr_map(exp_rget_array(arr_get(exps, 1)), (FMAP)fn);
+  Arr *ps = arr_map(exp_get_array(arr_get(exps, 1)), (FMAP)fn);
   arr_insert(ps, 0, c);
   // <<char>, <char>
   Tp *tp = sys_cmd2(arr_join(ps, " "));
@@ -73,6 +68,44 @@ static Exp *cmd2 (Arr *exps) {
     exp_string(tp_e2(tp)),
     NULL
   ));
+}
+
+// \s, *(JS) -> [*(Js)|s, b] (Result)
+static Exp *cmdf (Arr *exps) {
+  CHECK_PARS ("sys.cmdf", 2, exps);
+  // <Exp>
+  Arr *rq = arr_new_from(arr_get(exps, 1), NULL);
+  Bfunction jsw = md_js_get ("w");
+  char *rqtx = exp_get_string(jsw(rq));
+  char *fname = file_tmp("", "kut-sys.cmdf");
+  Exp *r = exp_array(arr_new_from(
+    exp_string("sys.cmdf generic fail"), exp_bool(0), NULL
+  ));
+  TRY {
+    file_write(fname, rqtx);
+    // <Exp>
+    Arr *cmd_pars = arr_new_from(
+      arr_get(exps, 0),
+      exp_array(arr_new_from(exp_string(fname), NULL)),
+      NULL
+    );
+    r = cmd(cmd_pars);
+    //<Exp>
+    Arr *rarr = exp_get_array(r);
+    if (exp_get_bool(arr_get(rarr, 1))) {
+      // <Exp>
+      Arr *v = arr_new_from(arr_get(rarr, 0), NULL);
+      Bfunction jsr = md_js_get ("r");
+      arr_set(rarr, 0, jsr(v));
+      r = exp_array(rarr);
+    }
+  } CATCH (e) {
+    r = exp_array(arr_new_from(
+      exp_string(exc_msg(e)), exp_bool(0), NULL
+    ));
+  }_TRY
+  file_del(fname);
+  return r;
 }
 
 // \-> {s}
@@ -92,7 +125,7 @@ static Exp *environ (Arr *exps) {
 // \s -> * | ()
 static Exp *eval (Arr *exps) {
   CHECK_PARS ("sys.eval", 1, exps);
-  Cdr *cdr = cdr_new(-1, exp_rget_string(arr_get(exps, 0)));
+  Cdr *cdr = cdr_new(-1, exp_get_string(arr_get(exps, 0)));
   Exp *exp = ex_reader_read(types_new(), cdr);
   return solver_solve_isolate(exp);
 }
@@ -100,7 +133,7 @@ static Exp *eval (Arr *exps) {
 // \i -> ()
 static Exp *fexit (Arr *exps) {
   CHECK_PARS ("sys.exit", 1, exps);
-  exit(exp_rget_int(arr_get(exps, 0)));
+  exit(exp_get_int(arr_get(exps, 0)));
 }
 
 // \-> s
@@ -157,14 +190,14 @@ static Exp *read_line (Arr *exps) {
 // \s-> ()
 static Exp *set_locale (Arr *exps) {
   CHECK_PARS ("sys.setLocale", 1, exps);
-  sys_set_locale(exp_rget_string(arr_get(exps, 0)));
+  sys_set_locale(exp_get_string(arr_get(exps, 0)));
   return exp_empty();
 }
 
 // \i-> ()
 static Exp *f_sleep (Arr *exps) {
   CHECK_PARS ("sys.sleep", 1, exps);
-  sys_sleep(exp_rget_int(arr_get(exps, 0)));
+  sys_sleep(exp_get_int(arr_get(exps, 0)));
   return exp_empty();
 }
 
@@ -173,7 +206,7 @@ static Exp *test (Arr *exps) {
   CHECK_PARS ("sys.test", 2, exps);
   Exp *ex0 = arr_get(exps, 0);
   Exp *ex1 = arr_get(exps, 1);
-  if (exp_rget_bool(solver_solve_isolate(exp_eq(ex0, ex1)))) return exp_empty();
+  if (exp_get_bool(solver_solve_isolate(exp_eq(ex0, ex1)))) return exp_empty();
 
   EXC_KUT(str_f("Test failed.\n  Expected: %s\n    Actual: %s",
     exp_to_js(ex1), exp_to_js(ex0)
@@ -184,7 +217,7 @@ static Exp *test (Arr *exps) {
 // \s -> ()
 static Exp *throw (Arr *exps) {
   CHECK_PARS ("sys.throw", 1, exps);
-  EXC_KUT(exp_rget_string(arr_get(exps, 0)));
+  EXC_KUT(exp_get_string(arr_get(exps, 0)));
   return NULL; // Unreachable
 }
 
@@ -200,6 +233,12 @@ static Exp *type (Arr *exps) {
   return exp_string(exp_type_to_str(arr_get(exps, 0)));
 }
 
+// \* -> ()
+static Exp *used (Arr *exps) {
+  CHECK_PARS ("sys.used", 1, exps);
+  return exp_empty();
+}
+
 // \-> s
 static Exp *user (Arr *exps) {
   CHECK_PARS ("sys.user", 0, exps);
@@ -209,9 +248,9 @@ static Exp *user (Arr *exps) {
 Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "args")) return args;
   if (!strcmp(fname, "assert")) return fassert;
-  if (!strcmp(fname, "c")) return c;
   if (!strcmp(fname, "cmd")) return cmd;
   if (!strcmp(fname, "cmd2")) return cmd2;
+  if (!strcmp(fname, "cmdf")) return cmdf;
   if (!strcmp(fname, "environ")) return environ;
   if (!strcmp(fname, "eval")) return eval;
   if (!strcmp(fname, "exit")) return fexit;
@@ -229,6 +268,7 @@ Bfunction md_sys_get (char *fname) {
   if (!strcmp(fname, "throw")) return throw;
   if (!strcmp(fname, "toStr")) return to_str;
   if (!strcmp(fname, "type")) return type;
+  if (!strcmp(fname, "used")) return used;
   if (!strcmp(fname, "user")) return user;
   EXC_KUT(fail_bfunction("sys", fname));
   return NULL; // Unreachable

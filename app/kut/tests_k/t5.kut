@@ -75,3 +75,9 @@ sys.test(arra, 2);
 arrb,,arrc = [1, 2, 3];
 sys.test(arrb + arrc, 4);
 
+arrd, arre = [1, 2, 3];
+sys.test(arrd + arre, 3);
+
+arrf,  = [1, 2, 3];
+sys.test(arrf, 1);
+

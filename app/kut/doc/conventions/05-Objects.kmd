@@ -13,6 +13,7 @@ Each public indexed should be in its own file.
 Functional access will be enabled.
 
 ``kut
+// In module 'myobj'
 
 // \(\s->s), (\s->()) -> <myobj>
 mk : fnA, fnB;
@@ -22,8 +23,9 @@ b = \o -> return o[fnB];
 
 ...
 
-:myobj
-obX = mk(f1, f2);
+// Out of module 'myobj'
+
+:myobj obX = mk(f1, f2);
 
 sys.println(obX.a("text"));
 obX.b();
@@ -36,17 +38,19 @@ obX.b();
 
 # Indexed with mixed functional - value fields.
 
-Direct access will be used.
+Direct access can be used.
 
 ``kut
+// In module 'myobj'
 
 // \s, (\s->()) -> <myobj>
 mk : a, fn;
 
 ...
 
-:myobj
-obX = mk("de", f);
+// Out of module 'myobj'
+
+:myobj obX = mk("de", f);
 
 sys.println(obX.a);
 obX.fn#();

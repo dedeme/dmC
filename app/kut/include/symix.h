@@ -17,10 +17,9 @@ enum symix_Reserved {
   symix_ENUM_SEPARATOR,
   // Built-in modules
   symix_ARR, symix_B64, symix_BYTES, symix_CRYP,
-  symix_DIC, symix_ITER, symix_JS, symix_FILE,
+  symix_FILE, symix_DIC, symix_ITER, symix_JS,
   symix_MATH, symix_PATH, symix_REGEX, symix_STR,
   symix_SYS, symix_TCP, symix_THREAD, symix_TIME,
-  symix_VEC,
 
   symix_ENUM_END
 };

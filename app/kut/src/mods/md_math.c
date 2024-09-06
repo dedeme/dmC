@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <math.h>
 #include <locale.h>
-#include "kut/dec.h"
+#include "kut/math.h"
 #include "kut/sys.h"
 #include "exp.h"
 #include "runner/fail.h"
@@ -55,164 +55,164 @@ static Exp *pi (Arr *exps) {
 // \f -> f
 static Exp *f_abs (Arr *exps) {
   CHECK_PARS ("math.abs", 1, exps);
-  double v = exp_rget_float(arr_get(exps, 0));
+  double v = exp_get_float(arr_get(exps, 0));
   return exp_float(v < 0 ? -v : v);
 }
 
 // \f -> f
 static Exp *f_acos (Arr *exps) {
   CHECK_PARS ("math.acos", 1, exps);
-  return exp_float(acos(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(acos(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_acosh (Arr *exps) {
   CHECK_PARS ("math.acosh", 1, exps);
-  return exp_float(acosh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(acosh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_asin (Arr *exps) {
   CHECK_PARS ("math.asin", 1, exps);
-  return exp_float(asin(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(asin(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_asinh (Arr *exps) {
   CHECK_PARS ("math.asinh", 1, exps);
-  return exp_float(asinh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(asinh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_atan (Arr *exps) {
   CHECK_PARS ("math.atan", 1, exps);
-  return exp_float(atan(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(atan(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_atanh (Arr *exps) {
   CHECK_PARS ("math.atanh", 1, exps);
-  return exp_float(atanh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(atanh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_ceil (Arr *exps) {
   CHECK_PARS ("math.ceil", 1, exps);
-  return exp_float(ceil(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(ceil(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_cos (Arr *exps) {
   CHECK_PARS ("math.cos", 1, exps);
-  return exp_float(cos(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(cos(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_cosh (Arr *exps) {
   CHECK_PARS ("math.cosh", 1, exps);
-  return exp_float(cosh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(cosh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f, f, f -> b
 static Exp *eq (Arr *exps) {
   CHECK_PARS ("math.eq", 3, exps);
-  return exp_bool(dec_eq_gap(
-    exp_rget_float(arr_get(exps, 0)),
-    exp_rget_float(arr_get(exps, 1)),
-    exp_rget_float(arr_get(exps, 2))
+  return exp_bool(math_eq_gap(
+    exp_get_float(arr_get(exps, 0)),
+    exp_get_float(arr_get(exps, 1)),
+    exp_get_float(arr_get(exps, 2))
   ));
 }
 
 // \f -> f
 static Exp *f_exp (Arr *exps) {
   CHECK_PARS ("math.exp", 1, exps);
-  return exp_float(exp(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(exp(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_exp2 (Arr *exps) {
   CHECK_PARS ("math.exp2", 1, exps);
-  return exp_float(exp2(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(exp2(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_floor (Arr *exps) {
   CHECK_PARS ("math.floor", 1, exps);
-  return exp_float(floor(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(floor(exp_get_float(arr_get(exps, 0))));
 }
 
 // \s -> [f]|[]
 static Exp *from_en (Arr *exps) {
   CHECK_PARS ("math.fromEn", 1, exps);
-  char *s = exp_rget_string(arr_get(exps, 0));
+  char *s = exp_get_string(arr_get(exps, 0));
   return to_float_op_aux(str_replace(s, ",", ""));
 }
 
 // \s -> [i]|[]
 static Exp *from_hex (Arr *exps) {
   CHECK_PARS ("math.fromHex", 1, exps);
-  return to_int_op_aux(exp_rget_string(arr_get(exps, 0)), 16);
+  return to_int_op_aux(exp_get_string(arr_get(exps, 0)), 16);
 }
 
 // \s -> [f]|[]
 static Exp *from_iso (Arr *exps) {
   CHECK_PARS ("math.fromIso", 1, exps);
-  char *s = exp_rget_string(arr_get(exps, 0));
+  char *s = exp_get_string(arr_get(exps, 0));
   return to_float_op_aux(str_replace(str_replace(s, ".", ""), ",", "."));
 }
 
 // \f -> i
 static Exp *ftoi (Arr *exps) {
   CHECK_PARS ("math.ftoi", 1, exps);
-  return exp_int(exp_rget_float(arr_get(exps, 0)));
+  return exp_int(exp_get_float(arr_get(exps, 0)));
 }
 
 // \f -> s
 static Exp *ftos (Arr *exps) {
   CHECK_PARS ("math.ftos", 1, exps);
-  return exp_string(dec_ftos(exp_rget_float(arr_get(exps, 0)), 9));
+  return exp_string(math_ftos(exp_get_float(arr_get(exps, 0)), 9));
 }
 
 // \s -> b
 static Exp *is_digits (Arr *exps) {
   CHECK_PARS ("math.isDigits", 1, exps);
-  return exp_bool(dec_digits(exp_rget_string(arr_get(exps, 0))));
+  return exp_bool(math_digits(exp_get_string(arr_get(exps, 0))));
 }
 
 // \i -> f
 static Exp *itof (Arr *exps) {
   CHECK_PARS ("math.itof", 1, exps);
-  return exp_float(exp_rget_int(arr_get(exps, 0)));
+  return exp_float(exp_get_int(arr_get(exps, 0)));
 }
 
 // \i -> s
 static Exp *itoh (Arr *exps) {
   CHECK_PARS ("math.itoh", 1, exps);
-  return exp_string(str_f("%x", exp_rget_int(arr_get(exps, 0))));
+  return exp_string(str_f("%x", exp_get_int(arr_get(exps, 0))));
 }
 
 // \i -> s
 static Exp *itos (Arr *exps) {
   CHECK_PARS ("math.itos", 1, exps);
-  return exp_string(dec_itos(exp_rget_int(arr_get(exps, 0))));
+  return exp_string(math_itos(exp_get_int(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_log (Arr *exps) {
   CHECK_PARS ("math.log", 1, exps);
-  return exp_float(log(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(log(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_log10 (Arr *exps) {
   CHECK_PARS ("math.log10", 1, exps);
-  return exp_float(log10(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(log10(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_log2 (Arr *exps) {
   CHECK_PARS ("math.log2", 1, exps);
-  return exp_float(log2(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(log2(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f, f -> f
@@ -220,7 +220,7 @@ static Exp *max (Arr *exps) {
   CHECK_PARS ("math.max", 2, exps);
   return arr_get(
     exps,
-    exp_rget_float(arr_get(exps, 0)) >= exp_rget_float(arr_get(exps, 1)) ? 0 : 1
+    exp_get_float(arr_get(exps, 0)) >= exp_get_float(arr_get(exps, 1)) ? 0 : 1
   );
 }
 
@@ -244,7 +244,7 @@ static Exp *min (Arr *exps) {
   CHECK_PARS ("math.min", 2, exps);
   return arr_get(
     exps,
-    exp_rget_float(arr_get(exps, 0)) <= exp_rget_float(arr_get(exps, 1)) ? 0 : 1
+    exp_get_float(arr_get(exps, 0)) <= exp_get_float(arr_get(exps, 1)) ? 0 : 1
   );
 }
 
@@ -261,15 +261,15 @@ static Exp *min_int (Arr *exps) {
 static Exp *f_pow (Arr *exps) {
   CHECK_PARS ("math.pow", 2, exps);
   return exp_float(pow(
-    exp_rget_float(arr_get(exps, 0)),
-    exp_rget_float(arr_get(exps, 1))
+    exp_get_float(arr_get(exps, 0)),
+    exp_get_float(arr_get(exps, 1))
   ));
 }
 
 // \i -> f
 static Exp *f_pow10 (Arr *exps) {
   CHECK_PARS ("math.pow10", 1, exps);
-  int64_t n = exp_rget_int(arr_get(exps, 0));
+  int64_t n = exp_get_int(arr_get(exps, 0));
   double r = 1;
   double mul = n > 0 ? 10 : 0.1;
   n = n >= 0 ? n : -n;
@@ -288,64 +288,64 @@ static Exp *rnd (Arr *exps) {
 // \i -> i
 static Exp *rndi (Arr *exps) {
   CHECK_PARS ("math.rndi", 1, exps);
-  return exp_int(sys_rnd_i(exp_rget_int(arr_get(exps, 0))));
+  return exp_int(sys_rnd_i(exp_get_int(arr_get(exps, 0))));
 }
 
 // \f, i -> f
 static Exp *f_round (Arr *exps) {
   CHECK_PARS ("math.round", 2, exps);
-  return exp_float(dec_round(
-    exp_rget_float(arr_get(exps, 0)),
-    exp_rget_int(arr_get(exps, 1))
+  return exp_float(math_round(
+    exp_get_float(arr_get(exps, 0)),
+    exp_get_int(arr_get(exps, 1))
   ));
 }
 
 // \f -> f
 static Exp *f_sin (Arr *exps) {
   CHECK_PARS ("math.sin", 1, exps);
-  return exp_float(sin(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(sin(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_sinh (Arr *exps) {
   CHECK_PARS ("math.sinh", 1, exps);
-  return exp_float(sinh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(sinh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_sqrt (Arr *exps) {
   CHECK_PARS ("math.sqrt", 1, exps);
-  return exp_float(sqrt(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(sqrt(exp_get_float(arr_get(exps, 0))));
 }
 
 // \s -> [f]|[]
 static Exp *stof (Arr *exps) {
   CHECK_PARS ("math.stof", 1, exps);
-  return to_float_op_aux(exp_rget_string(arr_get(exps, 0)));
+  return to_float_op_aux(exp_get_string(arr_get(exps, 0)));
 }
 
 // \s -> [i]|[]
 static Exp *stoi (Arr *exps) {
   CHECK_PARS ("math.stoi", 1, exps);
-  return to_int_op_aux(exp_rget_string(arr_get(exps, 0)), 10);
+  return to_int_op_aux(exp_get_string(arr_get(exps, 0)), 10);
 }
 
 // \f -> f
 static Exp *f_tan (Arr *exps) {
   CHECK_PARS ("math.tan", 1, exps);
-  return exp_float(tan(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(tan(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_tanh (Arr *exps) {
   CHECK_PARS ("math.tanh", 1, exps);
-  return exp_float(tanh(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(tanh(exp_get_float(arr_get(exps, 0))));
 }
 
 // \f -> f
 static Exp *f_trunc (Arr *exps) {
   CHECK_PARS ("math.trunc", 1, exps);
-  return exp_float(trunc(exp_rget_float(arr_get(exps, 0))));
+  return exp_float(trunc(exp_get_float(arr_get(exps, 0))));
 }
 
 Bfunction md_math_get (char *fname) {

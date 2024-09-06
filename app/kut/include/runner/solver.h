@@ -25,5 +25,4 @@ Exp *solver_solve(Imports *imports, Heap0 *hp0, Heaps *heaps, Exp *exp);
 ///   exp: Expression to solve.
 Exp *solver_solve_isolate(Exp *exp);
 
-
 #endif

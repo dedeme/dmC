@@ -19,7 +19,7 @@ void symix_init(void) {
     "-separator-",
     // Built-in modules
     "arr", "b64", "bytes", "cryp",
-    "dic", "iter", "js", "file",
+    "file", "dic", "iter", "js",
     "math", "path", "regex", "str",
     "sys", "tcp", "thread", "time",
     "-finalizador-",
@@ -82,6 +82,6 @@ char *symix_get (int ix) {
 
 static int id = 0;
 int symix_generate (void) {
-  arr_push(syms, str_f("gen-%d-", id++));
+  arr_push(syms, str_f("gen_%d_", id++));
   return arr_size(syms) - 1;
 }

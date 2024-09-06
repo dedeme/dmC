@@ -1,0 +1,4 @@
+// \s, i -> <person>
+new = \name, age -> return [name, age];;
+// <person>
+person1 = new("Peter", 35);

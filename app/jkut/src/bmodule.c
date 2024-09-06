@@ -87,12 +87,12 @@ static char *md_str[] = {
 };
 
 static char *md_sys[] = {
-  "asBool", "assert", "test", "toStr", "type",
+  "asBool", "assert", "printError", "test", "toStr", "type",
   NULL
 };
 
 static char *md_time[] = {
-  "addDays", "day", "dfDays", "eqDay", "format", "fromClock", "fromClockOp",
+  "addDays", "day", "dfDays", "eqDay", "fmt", "fromClock", "fromClockOp",
   "fromDate", "fromEn", "fromEnOp", "fromIso", "fromIsoOp", "fromStr",
   "fromStrOp", "hour", "millisecond", "minute", "month", "mk", "mkDate", "now",
   "second", "toDate", "toEn", "toIso", "toStr", "weekday", "year", "yearDay",

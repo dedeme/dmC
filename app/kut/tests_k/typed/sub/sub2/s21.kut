@@ -1,0 +1,11 @@
+// Copyright 16-Aug-2024 ºDeme
+// GNU General Public License - V3 <http://www.gnu.org/licenses/>
+
+import "t3";
+
+/// \s -> s
+hello = \n -> return "hello " + n;;
+
+/// \s -> s
+helloTp = \(s|s) n -> return n;;
+
