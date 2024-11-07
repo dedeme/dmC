@@ -52,7 +52,8 @@ window.MathJax = {
 <hr>
 <p style='text-indent:0px'>
 <a href='#Value'>Value</a><br>
-<a href='#Types'>Types</a>
+<a href='#Types'>Types</a><br>
+<a href='#Operators'>Operators</a>
 </p>
 <hr>
 <a name="Value"></a>
@@ -63,7 +64,7 @@ annotations.</p>
 <h4>Basic types</h4>
 
 <table border=1>
-<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td>name</td></tr>
+<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td><b>Name</b></td></tr>
 <tr><td>Boolean</td><td><code>true</code></td><td><code>b</code></td></tr>
 <tr><td>Integer</td><td><code>125</code></td><td><code>i</code></td></tr>
 <tr><td>Float</td><td><code>30.15</code></td><td><code>f</code></td></tr>
@@ -104,7 +105,7 @@ annotations.</p>
 <h4>Library types</h4>
 
 <table border=1>
-<tr><td><b>Type</b></td><td><b>Library</b></td><td>name</td></tr>
+<tr><td><b>Type</b></td><td><b>Library<sup>*</sup></b></td><td><b>Name</b></td></tr>
 <tr><td>Bytes</td><td><code>bytes, b64, file, tcp</code></td><td><code>&lt;bytes></code></td></tr>
 <tr><td>File</td><td><code>file</code></td><td><code>&lt;file></code></td></tr>
 <tr><td>Iterator</td><td><code>iter</code></td><td><code>&lt;iter></code></td></tr>
@@ -112,6 +113,7 @@ annotations.</p>
 <tr><td>Tcp Connection</td><td><code>tcp</code></td><td><code>&lt;tcpConn></code></td></tr>
 <tr><td>Thread</td><td><code>thread</code></td><td><code>&lt;thread></code></td></tr>
 </table>
+<p><b><sup>*</sup></b> <i>Libraries which create or use the types.</i></p>
 <h4>User types</h4>
 <p>They are arrays and dictionaries, usually constructed with a function and with
 a name of convenience. Its type name is formed with a name between '&lt;' and '>'.</p>
@@ -140,7 +142,7 @@ sys.println(v == v2); // Shows: false</div>
 <h4>Integer</h4>
 <p>Integer values stand for Natural numbers.</p>
 <p>Their literals are sequences of one or more digits, optionally preceded by the
-sign '-'.</p>
+sign '-'. They use the follow scheme:</p>
 <p><code>[-]d+</code></p>
 <p>Using the sign '+' is an error. (Wrong: <code>+115</code>).</p>
 <p>However '_' can be used to improve the reading. (Ok: <code>1_215</code>).</p>
@@ -161,8 +163,9 @@ sys.println(i4); // Shows: -11892
 sys.println(i3 != 11892.0); // Shows: Type error.</div>
 <script>aceConf("aceEditor-2", "kut");</script>
 <h4>Float</h4>
-<p>They are numbers with decimal point or scientific notation.</p>
-<p>Float literals follow the scheme:</p>
+<p>They are numbers with floating point.</p>
+<p>Floats literals can be writen with decimal point or in scientific notation.
+They use the follow scheme:</p>
 <p><code>[-]d+.[d *][(e|E)[(+|-)]d+]</code></p>
 <p>Starting with the sign '+' or with '.' is an error. (Wrong: <code>+1.0</code>, <code>.123</code>).</p>
 <p>'_' can be used to improve the reading. (Ok: <code>1_215.0</code>).</p>
@@ -349,9 +352,10 @@ s7b = "a\nb\n";
 sys.assert(s7a == s7b);</div>
 <script>aceConf("aceEditor-4", "kut");</script>
 <h4>Arrays</h4>
-<p>They are collections of values. These values has not to have equals type.
+<p>They are collections of values. These values can be of different types.
 It is posible empty arrays.</p>
-<p><code>[_e1_, <i>e2</i>, ...]</code> (blanks ar not significant)</p>
+<p>Array literals are values between squares, separated by comma.</p>
+<p><code>[ <i>e1</i>, <i>e2</i>, ...]</code> (blanks ar not significant)</p>
 <p>Examples:</p>
 <ul>
 <li>
@@ -366,9 +370,10 @@ It is posible empty arrays.</p>
 </ul>
 <h4>Dictionaries</h4>
 <p>Ther are collections of pairs key-value, where key must be a string and
-value can have any type. Values in a same dictionary has not to have equals
-type. It is posible empty dictionaries.</p>
-<p><code>{k1: v1, k2: v2, ...}</code> (blanks are not significant)</p>
+value can have any type. Values in a same dictionary can be of different
+types. It is posible empty dictionaries.</p>
+<p>Dictionary literals are pairs 'key:value', separated by comma.</p>
+<p><code>{ <i>k1</i>: <i>v1</i>, <i>k2</i>: <i>v2</i>, ...}</code> (blanks are not significant)</p>
 <p>Examples:</p>
 <ul>
 <li>
@@ -381,7 +386,16 @@ type. It is posible empty dictionaries.</p>
 <p><code>{"type": "rectangle", "dims": [32.0, 11.24], "complete": true}</code></p>
 </li>
 </ul>
-<hr>
+<a name="Operators"></a>
+<h3>Operators</h3>
+<h4>Boolean</h4>
+
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td></tr>
+<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b</tt><td><tt>!value</tt></tr>
+<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt></tr>
+<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt></tr>
+</table><hr>
 <p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
 <div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
   <span onclick="location.assign('#hp:START_PAGE');">

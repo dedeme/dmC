@@ -72,7 +72,7 @@ Token *token_operator (char *value) {
 int token_is_unary (Token *this) {
   char *v = this->value;
   return this->type == TOKEN_OPERATOR &&
-    (!strcmp(v, "!") || !strcmp(v, "-"))
+    (!strcmp(v, "!") || !strcmp(v, "-") || !strcmp(v, "<<"))
   ;
 }
 

@@ -208,13 +208,13 @@ Ttype tex_read (Buf *bf, Theap *th, StatCode *stat, Exp *exp) {
         buf_add(bf, str_f(" tarr_get%s(%s,%s)",
           ttype_to_str(tc), buf_str(bf1), buf_str(bf2)
         ));
+        return tc == ttype_AINT
+          ? ttype_INT
+          : tc == ttype_AFLOAT
+            ? ttype_FLOAT
+            : ttype_STRING
+        ;
       }
-      return tc == ttype_AINT
-        ? ttype_INT
-        : tc == ttype_AFLOAT
-          ? ttype_FLOAT
-          : ttype_STRING
-      ;
     }
   }
   if (exp_is_slice(exp)) {
@@ -320,7 +320,7 @@ Ttype tex_read (Buf *bf, Theap *th, StatCode *stat, Exp *exp) {
           if (strcmp(call_type, fn_type))
             tfail_throw(stat,
               "Tfunction type '%s' called with arguments of type '%s'",
-              call_type, fn_type
+              fn_type, call_type
             );
           Ttype tret = tfunction_get_tret(tfn);
           buf_add(bf, str_f(" %s(%s).%s",
@@ -357,7 +357,7 @@ Ttype tex_read (Buf *bf, Theap *th, StatCode *stat, Exp *exp) {
               if (strcmp(call_type, fn_type))
                 tfail_throw(stat,
                   "Tfunction type '%s' called with arguments of type '%s'",
-                  call_type, fn_type
+                  fn_type, call_type
                 );
               Ttype tret = tfunction_get_tret(tfn);
               buf_add(bf, str_f(" %s(%s).%s",

@@ -3,9 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "Val.h"
 
 int
 main(int argc, char **argv)
 {
     puts("here");
+    val();
 }

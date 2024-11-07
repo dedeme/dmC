@@ -18,7 +18,7 @@ Module *reader_read_main_block (Cdr *cdr) {
   Heap0 *heap0 = heap0_new();
   Types *tps = types_new();
   EACH(arr_new_from(
-      "arr", "b64", "bytes", "cryp", "clc",
+      "arr", "b64", "bytes", "cryp",
       "dic", "iter", "js", "file",
       "math", "path", "regex", "str",
       "sys", "tcp", "thread", "time",
@@ -244,16 +244,13 @@ Arr *reader_read_block (Types *tps, Cdr *cdr) {
       EXC_KUT(cdr_fail(cdr, "Unexpected end of text"));
     if (stat_is_import(st))
       EXC_KUT(cdr_fail(cdr, "'import' out of main block"));
+    if (stat_is_export(st))
+      continue;
     if (stat_is_block_close(st))
       break;
 
     arr_push(stats, st_cd);
   }
 
-    //--
-    int filter (StatCode *st_cd) {
-      return !stat_is_export(stat_code_stat(st_cd));
-    }
-  arr_filter_in(stats, (FPRED)filter);
   return stats;
 }

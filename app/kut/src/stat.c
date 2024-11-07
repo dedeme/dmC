@@ -499,14 +499,14 @@ char *stat_type_to_str (Stat *this)  {
 
 char *stat_to_str (Stat *this) {
     //--
-    // tp is Tp<Arr<Exp>, Stat>
+    // tp is Tp<Arr<Exp>, StatCode>
     char *fn_switch(Tp *tp) {
       /// Exp
       Arr *conds = tp_e1(tp);
         //--
         char *fn_map(Exp *exp) { return exp_to_js(exp); }
       char *sconds = arr_join(arr_map(conds, (FMAP)fn_map), ", ");
-      return str_f("%s : %s", sconds, stat_to_str(tp_e2(tp)));
+      return str_f("%s : %s", sconds, stat_to_str(stat_code_stat(tp_e2(tp))));
     }
 
   switch (this->type) {

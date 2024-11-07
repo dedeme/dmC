@@ -210,13 +210,27 @@ static Exp *insert (Arr *exps) {
 
 // \a, i, a -> ()
 static Exp *insert_arr (Arr *exps) {
-  CHECK_PARS ("arr.inserArr", 3, exps);
+  CHECK_PARS ("arr.insertArr", 3, exps);
   // <Exp>
   Arr *a = exp_get_array(arr_get(exps, 0));
   int64_t ix = exp_get_int(arr_get(exps, 1));
   // <Exp>
   Arr *a2 = exp_get_array(arr_get(exps, 2));
   arr_insert_arr(a, ix, a2);
+  return exp_empty();
+}
+
+// \a, i, a, i, i -> ()
+static Exp *insert_range (Arr *exps) {
+  CHECK_PARS ("arr.insertRange", 5, exps);
+  // <Exp>
+  Arr *a = exp_get_array(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
+  // <Exp>
+  Arr *a2 = exp_get_array(arr_get(exps, 2));
+  int64_t begin = exp_get_int(arr_get(exps, 3));
+  int64_t end = exp_get_int(arr_get(exps, 4));
+  arr_insert_range(a, ix, a2, begin, end);
   return exp_empty();
 }
 
@@ -252,19 +266,14 @@ static Exp *new (Arr *exps) {
   if (n < 0) n = 0;
   Exp *e = arr_get(exps, 0);
   // <Exp>
-  Arr *r = arr_new_bf(n + 1);
-  if (exp_is_bool(e)) {
-    int v = exp_get_bool(e);
-    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_bool(v));
-  } else if (exp_is_int(e)) {
-    int64_t v = exp_get_int(e);
-    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_int(v));
-  } else if (exp_is_float(e)) {
-    double v = exp_get_float(e);
-    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_float(v));
-  } else if (exp_is_string(e)) {
-    char *v = exp_get_string(e);
-    for (int64_t i = 0; i < n ; ++i) arr_push(r, exp_string(v));
+  Arr *r = NULL;
+  if (
+    exp_is_bool(e) ||
+    exp_is_int(e) ||
+    exp_is_float(e) ||
+    exp_is_string(e)
+  ) {
+    r = arr_new_fill(e, n);
   } else {
     EXC_ILLEGAL_ARGUMENT(
       "Bad expression type",
@@ -346,6 +355,32 @@ static Exp *reverse (Arr *exps) {
 static Exp *reverse_in (Arr *exps) {
   CHECK_PARS ("arr.reverseIn", 1, exps);
   arr_reverse(exp_get_array(arr_get(exps, 0)));
+  return exp_empty();
+}
+
+// \a, i, a -> ()
+static Exp *set_arr (Arr *exps) {
+  CHECK_PARS ("arr.setArr", 3, exps);
+  // <Exp>
+  Arr *a = exp_get_array(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
+  // <Exp>
+  Arr *a2 = exp_get_array(arr_get(exps, 2));
+  arr_set_arr(a, ix, a2);
+  return exp_empty();
+}
+
+// \a, i, a, i, i -> ()
+static Exp *set_range (Arr *exps) {
+  CHECK_PARS ("arr.setRange", 5, exps);
+  // <Exp>
+  Arr *a = exp_get_array(arr_get(exps, 0));
+  int64_t ix = exp_get_int(arr_get(exps, 1));
+  // <Exp>
+  Arr *a2 = exp_get_array(arr_get(exps, 2));
+  int64_t begin = exp_get_int(arr_get(exps, 3));
+  int64_t end = exp_get_int(arr_get(exps, 4));
+  arr_set_range(a, ix, a2, begin, end);
   return exp_empty();
 }
 
@@ -479,6 +514,7 @@ Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "index")) return findex;
   if (!strcmp(fname, "insert")) return insert;
   if (!strcmp(fname, "insertArr")) return insert_arr;
+  if (!strcmp(fname, "insertRange")) return insert_range;
   if (!strcmp(fname, "join")) return join;
   if (!strcmp(fname, "map")) return map;
   if (!strcmp(fname, "new")) return new;
@@ -490,6 +526,8 @@ Bfunction md_arr_get (char *fname) {
   if (!strcmp(fname, "removeRange")) return remove_range;
   if (!strcmp(fname, "reverse")) return reverse;
   if (!strcmp(fname, "reverseIn")) return reverse_in;
+  if (!strcmp(fname, "setArr")) return set_arr;
+  if (!strcmp(fname, "setRange")) return set_range;
   if (!strcmp(fname, "shift")) return shift;
   if (!strcmp(fname, "shuffle")) return shuffle;
   if (!strcmp(fname, "size")) return size;

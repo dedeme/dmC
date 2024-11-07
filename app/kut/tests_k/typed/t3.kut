@@ -91,7 +91,7 @@ sys.test(fn7(), 6);
 
 fn7b = \(|i) -> {
   sumV = [0];
-  for (i = 4:0:-2) {sumV! += i;}
+  for (i = 1:3:1) {sumV! += i;}
   return sumV!;
 };
 sys.test(fn7b(), 6);

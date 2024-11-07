@@ -5,9 +5,9 @@ void __attribute__ ((constructor)) initLibrary(void) {
 void __attribute__ ((destructor)) cleanUpLibrary(void) {
 }
 
-static void (*built_fail_fn) (char *) = NULL;
-void built_set_fail(void (*fn)(char *)) { // C-Kut connector!!!
-  built_fail_fn = fn;
+static void (*built_exc_fns) (char, void *) = NULL;
+void built_set_exc(void (*fn)(char, void *)) { // C-Kut connector!!!
+  built_exc_fns = fn;
 }
 
 static int built_eqb (int v1, int v2) {

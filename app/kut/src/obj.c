@@ -14,6 +14,7 @@
 #define thread "<thread>"
 #define tcp_server "<tcpServer>"
 #define tcp_conn "<tcpConn>"
+#define typed "<typed>"
 
 Exp *obj_module (Module *value) {
   return exp_object(module, value);
@@ -125,3 +126,30 @@ TcpConn *obj_get_tcp_conn (Exp *this) {
 int obj_is_tcp_conn (Exp *this) {
   return exp_is_object(tcp_conn, this);
 }
+
+struct obj_Typed {
+  Ttype type;
+  Tval value;
+};
+
+Exp *obj_typed (Ttype type, Tval value) {
+  struct obj_Typed *v = MALLOC(struct obj_Typed);
+  v -> type = type;
+  v -> value = value;
+  return exp_object(typed, v);
+}
+
+Ttype obj_get_typed_type (Exp *this) {
+  struct obj_Typed *v = exp_get_object(typed, this);
+  return v->type;
+}
+
+Tval obj_get_typed_value (Exp *this) {
+  struct obj_Typed *v = exp_get_object(typed, this);
+  return v->value;
+}
+
+int obj_is_typed (Exp *this) {
+  return exp_is_object(typed, this);
+}
+

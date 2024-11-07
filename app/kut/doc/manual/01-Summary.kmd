@@ -150,25 +150,29 @@ Every expression has a value.
 
 Literal examples:
 
-  - true
-
-  - 23.12
-
-  - "stop"
+``
+<pre>
+  true
+  23.12
+  "stop"
+</pre>``
 
 Symbol examples:
 
-  - x
-
-  - aVeryLongSymbol
-
-  - p12
+``
+<pre>
+  x
+  aVeryLongSymbol
+  p12
+</pre>``
 
 Operator examples:
 
-  - 3 - (12 + 6)
+``
+<pre>
+  3 - (12 + 6)
+  x > 2 | x < -5
+  str.left("abd", 2)
+</pre>``
 
-  - x > 2 | x < -5
-
-  - str.left("abd", 2)
 

@@ -256,6 +256,16 @@ Exp *exp_get_minus (Exp *this);
 int exp_is_minus (Exp *this);
 
 /// Creates an expression of the indicated type.
+Exp *exp_untype (Exp *value);
+
+/// Read an Exp of the indicate type.
+/// Throws EXC_KUT if 'this' is not of such type.
+Exp *exp_get_untype (Exp *this);
+
+/// Returns TRUE if 'this' match the type.
+int exp_is_untype (Exp *this);
+
+/// Creates an expression of the indicated type.
 Exp *exp_add (Exp *v1, Exp *v2);
 
 /// Read an Exp of the indicate type. Returns a Tp<Exp, Exp>.

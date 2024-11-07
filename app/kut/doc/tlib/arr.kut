@@ -46,7 +46,7 @@
 ///   sz = A.size();
 ///   if (sz == 0) return [!0];
 ///   if (sz == 1) return [A[0]];
-///   ix = A.size() / 2;
+///   ix = sz / 2;
 ///   :arr Left = sort(A.take(ix));
 ///   :arr Right = sort(A.drop(ix));
 ///   R = [!0];
@@ -98,14 +98,20 @@ duplicates = \A -> {};
 index = \A, e -> {};
 
 /// Inserts the element 'e' at position 'ix'.
-/// Throws exception if 'ix' is out of range.
+/// Throws exception if 'ix' is out of limits.
 /// \[*.], i, * -> ()
 insert = \A, ix, e -> {};
 
 /// Inserts the array 'A2' at position 'ix' in 'A'.
-/// Throws exception if 'ix' is out of range.
+/// Throws exception if 'ix' is out of limits.
 /// \[*.], i, [*.] -> ()
 insertArr = \A, ix, A2 -> {};
+
+/// Inserts the array 'A2', from begin (inclusive) to end (exclusive),
+/// at position 'ix' in 'A'.
+/// Throws exception if 'ix', 'begin' or 'end' are out of limits.
+/// \[*.], i, [*.], i, i -> ()
+insertRange = \A, ix, A2, begin, end -> {};
 
 /// Returns a string with elements of A (which are strings) joined with 'sep'.
 /// \[s.], s -> s
@@ -147,6 +153,20 @@ reverse = \A -> {};
 /// \[*.] -> ()
 reverseIn = \A -> {};
 
+/// Sets elements from 'ix' (inclusive) with elements of 'A2'.
+/// Throws exception if 'ix' or 'ix + arr_size(A2)' is out of limits.
+/// \[*.], i, [*.] -> ()
+setArr = \A, ix, A2 -> {};
+
+/// Sets elements from 'ix' (inclusive) with elements of 'A2', from
+/// begin (inclusive) to end (exclusive).
+/// Throws exceptionif 'ix', 'begin', 'end' or 'ix + begin - end' are out of
+/// limits.
+/// \[*.], i, [*.], i, i -> ()
+setRange = \A, ix, A2, begin, end -> {};
+
+///
+
 /// Removes and returns the first element of 'A'.
 /// \[*.] -> *
 shift = \A -> {};
@@ -158,6 +178,10 @@ shuffle = \A  -> {};
 /// Returns the elements number of 'A'.
 /// \[*.] -> i
 size = \A -> {};
+
+/// Sorts 'A'
+/// \[*.], b -> ()
+sort = \A, isAscendant -> {};
 
 /// Returns a shallow copy of 'A' with its 'n' first elements.
 ///   -If 'n <= 0' returns an empty array.

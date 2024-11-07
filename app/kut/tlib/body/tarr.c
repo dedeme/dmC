@@ -182,54 +182,66 @@ static int64_t tarr_indexS (Arrs *this, char *e) {
   while (p < end) if (!strcmp(*p++, e)) return (p - this->begin) - 1;
   return -1;
 }
-#define tarr_INSERT(Atype, copy_fn, clear_fn, cat_fn, take_fn, push_fn, drop_fn) \
+#define tarr_INSERT(Atype, Vtype, fn_push) \
   texc_check_range("arr.insert", 0, this->end - this->begin, ix); \
-  Atype *tmp = copy_fn(this); \
-  clear_fn(this); \
-  cat_fn(this, take_fn(tmp, ix)); \
-  push_fn(this, e); \
-  cat_fn(this, drop_fn(tmp, ix));
+  fn_push(this, e); \
+  Vtype *p = this->end - 1; \
+  Vtype *end = this->begin + ix; \
+  while (p > end) { \
+    *p = *(p - 1); \
+    --p; \
+  } \
+  *end = e;
 static void tarr_insertI (Arri *this, int64_t ix, int64_t e) {
-  tarr_INSERT(
-    Arri, tarr_copyI, tarr_clearI, tarr_catI, tarr_takeI, tarr_pushI, tarr_dropI
-  )
+  tarr_INSERT(Arri, int64_t, tarr_pushI);
 }
 static void tarr_insertF (Arrf *this, int64_t ix, double e) {
-  tarr_INSERT(
-    Arrf, tarr_copyF, tarr_clearF, tarr_catF, tarr_takeF, tarr_pushF, tarr_dropF
-  )
+  tarr_INSERT(Arrf, double, tarr_pushF);
 }
 static void tarr_insertS (Arrs *this, int64_t ix, char *e) {
-  tarr_INSERT(
-    Arrs, tarr_copyS, tarr_clearS, tarr_catS, tarr_takeS, tarr_pushS, tarr_dropS
-  )
+  tarr_INSERT(Arrs, char*, tarr_pushS);
 }
 #undef tarr_INSERT
-#define tarr_INSERT_ARRAY(Atype, copy_fn, clear_fn, cat_fn, take_fn, drop_fn) \
-  texc_check_range("arr.insertArr", 0, this->end - this->begin, ix); \
-  Atype *tmp = copy_fn(this); \
-  clear_fn(this); \
-  cat_fn(this, take_fn(tmp, ix)); \
-  cat_fn(this, other); \
-  cat_fn(this, drop_fn(tmp, ix));
-
 static void tarr_insert_arrayI (Arri *this, int64_t ix, Arri *other) {
-  tarr_INSERT_ARRAY(
-    Arri, tarr_copyI, tarr_clearI, tarr_catI, tarr_takeI, tarr_dropI
-  )
+  tarr_insert_rangeI(this, ix, other, 0, tarr_sizeI(other));
 }
 static void tarr_insert_arrayF (Arrf *this, int64_t ix, Arrf *other) {
-  tarr_INSERT_ARRAY(
-    Arrf, tarr_copyF, tarr_clearF, tarr_catF, tarr_takeF, tarr_dropF
-  )
+  tarr_insert_rangeF(this, ix, other, 0, tarr_sizeF(other));
 }
 static void tarr_insert_arrayS (Arrs *this, int64_t ix, Arrs *other) {
-  tarr_INSERT_ARRAY(
-    Arrs, tarr_copyS, tarr_clearS, tarr_catS, tarr_takeS, tarr_dropS
-  )
+  tarr_insert_rangeS(this, ix, other, 0, tarr_sizeS(other));
 }
-#undef tarr_INSERT_ARRAY
-
+#define tarr_INSERT_RANGE(Atype, Vtype, fn_drop, fn_size, fn_set_range, fn_set_array) \
+  Atype *tmp = fn_drop(this, ix); \
+  int64_t size = fn_size(this) + end - begin; \
+  int64_t bf = size + 15; \
+  this->begin = GC_REALLOC(this->begin, bf * sizeof(Vtype)); \
+  this->end = this->begin + size; \
+  this->bf = this->begin + bf; \
+  fn_set_range(this, ix, other, begin, end); \
+  fn_set_array(this, ix + end - begin, tmp);
+static void tarr_insert_rangeI (
+  Arri *this, int64_t ix, Arri *other, int64_t begin, int64_t end
+) {
+  tarr_INSERT_RANGE(
+    Arri, int64_t, tarr_dropI, tarr_sizeI, tarr_set_rangeI, tarr_set_arrayI
+  );
+}
+static void tarr_insert_rangeF (
+  Arrf *this, int64_t ix, Arrf *other, int64_t begin, int64_t end
+) {
+  tarr_INSERT_RANGE(
+    Arrf, double, tarr_dropF, tarr_sizeF, tarr_set_rangeF, tarr_set_arrayF
+  );
+}
+static void tarr_insert_rangeS (
+  Arrs *this, int64_t ix, Arrs *other, int64_t begin, int64_t end
+) {
+  tarr_INSERT_RANGE(
+    Arrs, char*, tarr_dropS, tarr_sizeS, tarr_set_rangeS, tarr_set_arrayS
+  );
+}
+#undef tarr_INSERT_RANGE
 static int64_t tarr_ix_correctI (Arri *this, int64_t n) {
   return n < 0 ? (this->end - this->begin) + n : n;
 }
@@ -266,11 +278,12 @@ static Arrf *tarr_new_f (void) { tarr_NEW(Arrf, double, ATOMIC) }
 static Arrs *tarr_new_s (void) { tarr_NEW(Arrs, char*, GC_MALLOC) }
 #undef tarr_NEW
 #define tarr_NEW_FROM_C(Atype, Vtype, ALLOC_fn) \
+  int bf_size = n < 15 ? 15 : n; \
   Atype *this = MALLOC(Atype); \
-  this->begin = ALLOC_fn(sizeof(Vtype) * n); \
+  this->begin = ALLOC_fn(sizeof(Vtype) * bf_size); \
   memcpy(this->begin, es, sizeof(Vtype) * n); \
   this->end = this->begin + n; \
-  this->bf = this->begin + (n < 15 ? 15 : n); \
+  this->bf = this->begin + bf_size; \
   return this;
 static Arri *tarr_new_fromi (int64_t *es, int64_t n) {
   tarr_NEW_FROM_C(Arri, int64_t, ATOMIC)
@@ -426,6 +439,37 @@ static void tarr_setS (Arrs *this, int64_t ix, char *e) {
   texc_check_range("arr.set", 0, (this->end - this->begin) - 1, ix);
   *(this->begin + ix) = e;
 }
+static void tarr_set_arrayI (Arri *this, int64_t ix, Arri *other) {
+  tarr_set_rangeI(this, ix, other, 0, tarr_sizeI(other));
+}
+static void tarr_set_arrayF (Arrf *this, int64_t ix, Arrf *other) {
+  tarr_set_rangeF(this, ix, other, 0, tarr_sizeF(other));
+}
+static void tarr_set_arrayS (Arrs *this, int64_t ix, Arrs *other) {
+  tarr_set_rangeS(this, ix, other, 0, tarr_sizeS(other));
+}
+#define tarr_SET_RANGE(Vtype, fn_size) \
+  if (end < begin) \
+    texc_expect("arr.setRange", \
+      "end < begin", str_f("end == %d", end), str_f("end >= %d", begin) \
+    ); \
+  int size = end - begin; \
+  if (!size) return; \
+  texc_check_range("arr.setRange", 0, fn_size(other) - size, begin); \
+  texc_check_range("arr.setRange", 0, fn_size(this) - size, ix); \
+  Vtype *target = this->begin + ix; \
+  Vtype *source = other->begin + begin; \
+  memcpy(target, source, sizeof(void *) * size);
+static void tarr_set_rangeI (
+  Arri *this, int64_t ix, Arri *other, int64_t begin, int64_t end
+) { tarr_SET_RANGE(int64_t, tarr_sizeI) }
+static void tarr_set_rangeF (
+  Arrf *this, int64_t ix, Arrf *other, int64_t begin, int64_t end
+) { tarr_SET_RANGE(double, tarr_sizeF) }
+static void tarr_set_rangeS (
+  Arrs *this, int64_t ix, Arrs *other, int64_t begin, int64_t end
+)  { tarr_SET_RANGE(char*, tarr_sizeS) }
+#undef tarr_SET_RANGE
 static int64_t tarr_shiftI (Arri *this) {
   if (this->begin == this->end) texc_throw("arr.shift", "Array is empty");
   return tarr_removeI(this, 0);
@@ -461,6 +505,89 @@ static void tarr_shuffleS (Arrs *this) { tarr_SHUFFLE(char*) }
 static int tarr_sizeI (Arri *this) { return this->end - this->begin; }
 static int tarr_sizeF (Arrf *this) { return this->end - this->begin; }
 static int tarr_sizeS (Arrs *this) { return this->end - this->begin; }
+
+#define tarr_SORT(Atype, Vtype, less_fn, take_fn, drop_fn, sort_fn) \
+  int sz = this->end - this->begin; \
+  if (sz < 2) return; \
+  if (sz == 2) { \
+    if (less_fn(this->begin[1], this->begin[0])) { \
+      Vtype tmp = this->begin[0]; \
+      this->begin[0] = this->begin[1]; \
+      this->begin[1] = tmp; \
+    } \
+    return; \
+  } \
+  if (sz < 17) { \
+    Vtype *p = this->begin; \
+    Vtype *end = (this->end - 1); \
+    while (p < end) { \
+      Vtype *q = p + 1; \
+      Vtype *qend = (this->end); \
+      while (q < qend) { \
+        if (less_fn(*q, *p)) { \
+          Vtype tmp = *p; \
+          *p = *q; \
+          *q = tmp; \
+        } \
+        ++q; \
+      } \
+      ++p; \
+    } \
+    return; \
+  } \
+  int ix = sz / 2; \
+  Atype *left = take_fn(this, ix); \
+  sort_fn(left); \
+  Atype *right = drop_fn(this, ix); \
+  sort_fn(right); \
+  Vtype *pl = left->begin; \
+  Vtype *endl = left->end; \
+  Vtype *pr = right->begin; \
+  Vtype *endr = right->end; \
+  Vtype *p = this->begin; \
+  while (pl < endl && pr < endr) { \
+    if (less_fn(*pl, *pr)) *p++ = *pl++; \
+    else *p++ = *pr++; \
+  } \
+  while (pl < endl) *p++ = *pl++; \
+  while (pr < endr) *p++ = *pr++;
+static void tarr_sortIa (Arri *this) {
+  int less (int64_t e1, int64_t e2) { return e1 < e2; }
+  tarr_SORT(Arri, int64_t, less, tarr_takeI, tarr_dropI, tarr_sortIa)
+}
+static void tarr_sortId (Arri *this) {
+  int less (int64_t e1, int64_t e2) { return e1 > e2; }
+  tarr_SORT(Arri, int64_t, less, tarr_takeI, tarr_dropI, tarr_sortId)
+}
+static void tarr_sortI (Arri *this, int is_ascendant) {
+  if (is_ascendant) tarr_sortIa(this);
+  else tarr_sortId(this);
+}
+static void tarr_sortFa(Arrf *this) {
+  int less (double e1, double e2) { return e1 < e2; }
+  tarr_SORT(Arrf, double, less, tarr_takeF, tarr_dropF, tarr_sortFa)
+}
+static void tarr_sortFd(Arrf *this) {
+  int less (double e1, double e2) { return e1 > e2; }
+  tarr_SORT(Arrf, double, less, tarr_takeF, tarr_dropF, tarr_sortFd)
+}
+static void tarr_sortF (Arrf *this, int is_ascendant) {
+  if (is_ascendant) tarr_sortFa(this);
+  else tarr_sortFd(this);
+}
+static void tarr_sortSa (Arrs *this) {
+  int less (char * e1, char * e2) { return strcmp(e1, e2) < 0; }
+  tarr_SORT(Arrs, char*, less, tarr_takeS, tarr_dropS, tarr_sortSa)
+}
+static void tarr_sortSd (Arrs *this) {
+  int less (char * e1, char * e2) { return strcmp(e1, e2) > 0; }
+  tarr_SORT(Arrs, char*, less, tarr_takeS, tarr_dropS, tarr_sortSd)
+}
+static void tarr_sortS (Arrs *this, int is_ascendant) {
+  if (is_ascendant) tarr_sortSa(this);
+  else tarr_sortSd(this);
+}
+#undef tarr_SORT
 #define tarr_TAKE(Atype, Vtype, ALLOC_fn) \
   int size = this->end - this->begin; \
   if (n < 0) n = 0; \

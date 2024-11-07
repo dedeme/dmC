@@ -38,13 +38,13 @@ static Exp *aopen (Arr *exps) {
 
 // \s -> s
 static Exp *base (Arr *exps) {
-  CHECK_PARS ("path.base", 1, exps);
+  CHECK_PARS ("file.base", 1, exps);
   return exp_string(path_base(exp_get_string(arr_get(exps, 0))));
 }
 
 // \s -> s
 static Exp *canonical (Arr *exps) {
-  CHECK_PARS ("path.canonical", 1, exps);
+  CHECK_PARS ("file.canonical", 1, exps);
   char *path = exp_get_string(arr_get(exps, 0));
   char *r = opt_get(path_canonical(path));
   if (!r)
@@ -54,7 +54,7 @@ static Exp *canonical (Arr *exps) {
 
 // \[s...] -> s
 static Exp *cat (Arr *exps) {
-  CHECK_PARS ("path.cat", 1, exps);
+  CHECK_PARS ("file.cat", 1, exps);
 
   //<char>
   Arr *a = arr_map(exp_get_array(arr_get(exps, 0)), (FMAP)exp_get_string);
@@ -72,7 +72,7 @@ static Exp *cd (Arr *exps) {
 
 // \s -> s
 static Exp *clean (Arr *exps) {
-  CHECK_PARS ("path.clean", 1, exps);
+  CHECK_PARS ("file.clean", 1, exps);
   return exp_string(path_clean(exp_get_string(arr_get(exps, 0))));
 }
 
@@ -116,7 +116,7 @@ static Exp *exists (Arr *exps) {
 
 // \s -> s
 static Exp *extension (Arr *exps) {
-  CHECK_PARS ("path.extension", 1, exps);
+  CHECK_PARS ("file.extension", 1, exps);
   return exp_string(path_extension(exp_get_string(arr_get(exps, 0))));
 }
 
@@ -157,7 +157,7 @@ static Exp *mklink (Arr *exps) {
 
 // \s -> s
 static Exp *parent (Arr *exps) {
-  CHECK_PARS ("path.parent", 1, exps);
+  CHECK_PARS ("file.parent", 1, exps);
   return exp_string(path_parent(exp_get_string(arr_get(exps, 0))));
 }
 

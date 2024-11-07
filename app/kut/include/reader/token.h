@@ -149,8 +149,10 @@ int token_is_catch (Token *this);
 /// Returns TRUE if 'this' is the symbol 'finally'.
 int token_is_finally (Token *this);
 
+///
 char *token_type_to_str (Token *this);
 
+///
 char *token_to_str (Token *this);
 
 #endif

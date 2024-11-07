@@ -18,7 +18,7 @@ enum exp_Exp_t {
   EXP_RANGE,
   EXP_PT, EXP_SQ, EXP_SLICE, EXP_PR, // Point, Square braket - subindex, Sqare braket - slice, Parentheses
   EXP_SWITCH,
-  EXP_NOT, EXP_MINUS,
+  EXP_NOT, EXP_MINUS, EXP_UNTYPE,
   EXP_ADD, EXP_SUB, EXP_MUL, EXP_DIV, EXP_MOD,
   EXP_AND, EXP_OR,
   EXP_GREATER, EXP_GREATER_EQ, EXP_LESS, EXP_LESS_EQ, EXP_EQ, EXP_NEQ,
@@ -63,6 +63,7 @@ static char *type_to_str (Exp_t type) {
     case EXP_SWITCH: return "switch";
     case EXP_NOT: return "not";
     case EXP_MINUS: return "minus";
+    case EXP_UNTYPE: return "untype";
     case EXP_ADD: return "add";
     case EXP_SUB: return "sub";
     case EXP_MUL: return "mul";
@@ -446,6 +447,24 @@ int exp_is_minus (Exp *this) {
   return this->type == EXP_MINUS;
 }
 
+/// Creates an expression of the indicated type.
+Exp *exp_untype (Exp *value) {
+  return new(EXP_UNTYPE, value);
+}
+
+/// Read an Exp of the indicate type.
+/// Throws EXC_KUT if 'this' is not of such type.
+Exp *exp_get_untype (Exp *this) {
+  if (this->type == EXP_UNTYPE) return this->value;
+  EXC_KUT(fail_type("untype", this));
+  return NULL; // Unreachable.
+}
+
+/// Returns TRUE if 'this' match the type.
+int exp_is_untype (Exp *this) {
+  return this->type == EXP_UNTYPE;
+}
+
 Exp *exp_add (Exp *v1, Exp *v2) {
   return new(EXP_ADD, tp_new(v1, v2));
 }
@@ -788,6 +807,8 @@ char *exp_to_str (Exp *this) {
       return str_f("!%s", exp_to_str(exp_get_not(this)));
     case EXP_MINUS:
       return str_f("-%s", exp_to_str(exp_get_minus(this)));
+    case EXP_UNTYPE:
+      return str_f("<<%s", exp_to_str(exp_get_minus(this)));
     case EXP_ADD: {
       // <Exp, Exp>
       Tp *tp = exp_get_add(this);

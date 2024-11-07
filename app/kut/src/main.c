@@ -135,7 +135,8 @@ int main(int argc, char *argv[]) {
     }
   } CATCH (e) {
     char *msg = exc_msg(e);
-    msg = str_right(msg, str_index(msg, ": ") + 2);
+    int ix = str_index(msg, ": ");
+    msg = ix == -1 ? msg : str_right(msg, ix + 2);
     puts(msg);
   } _TRY
 }

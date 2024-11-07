@@ -334,6 +334,14 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     if (exp_is_float(v)) return exp_float(- exp_get_float(v));
     EXC_KUT(fail_type("int or float", v));
   }
+  if (exp_is_untype(exp)) {
+    Exp *v = solver_solve(is, h0, hs, exp_get_untype(exp));
+    if (obj_is_typed(v))
+      return tfunction_untype(
+        obj_get_typed_type(v), obj_get_typed_value(v)
+      );
+    EXC_KUT(fail_type("object<typed>", v));
+  }
   if (exp_is_add(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_add(exp);

@@ -47,7 +47,7 @@ char *tdb_o_path () {
   return path_cat(sys_user_home(), ".dmCApp", "kut", "tmp.o", NULL);
 }
 
-char *tdb_so_path (char *kut_path) {
+char *tdb_so_path (char *kut_path, int create) {
   char *key = opt_get(path_canonical(str_f("%s.kut", kut_path)));
   if (!key) EXC_KUT(str_f("Search canonical name of '%s' failed", kut_path));
   char *root = path_cat(sys_user_home(), ".dmCApp", "kut", NULL);
@@ -58,12 +58,15 @@ char *tdb_so_path (char *kut_path) {
   Map *scripts_map = js_ro(arr_get(scripts_tb, 1));
   char *so_name = opt_get(map_get(scripts_map, key));
   if (so_name) return path_cat(root, str_f("%s.so", so_name), NULL);
-  // key is not in map
-  clean_scripts(root, scripts_map);
-  char *n = arr_get(scripts_tb, 0);
-  map_put(scripts_map, key, n);
-  arr_set(scripts_tb, 0, js_wi(js_ri(n) + 1));
-  arr_set(scripts_tb, 1, js_wo(scripts_map));
-  file_write(scripts_path, js_wa(scripts_tb));
-  return path_cat(root, str_f("%s.so", n), NULL);
+  if (create) {
+    // key is not in map
+    clean_scripts(root, scripts_map);
+    char *n = arr_get(scripts_tb, 0);
+    map_put(scripts_map, key, n);
+    arr_set(scripts_tb, 0, js_wi(js_ri(n) + 1));
+    arr_set(scripts_tb, 1, js_wo(scripts_map));
+    file_write(scripts_path, js_wa(scripts_tb));
+    return path_cat(root, str_f("%s.so", n), NULL);
+  }
+  return "";
 }

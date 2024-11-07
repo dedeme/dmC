@@ -13,7 +13,7 @@ annotations.
 
 ``
 <table border=1>
-<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td>name</td></tr>
+<tr><td><b>Type</b></td><td><b>Literal Example</b></td><td><b>Name</b></td></tr>
 <tr><td>Boolean</td><td><code>true</code></td><td><code>b</code></td></tr>
 <tr><td>Integer</td><td><code>125</code></td><td><code>i</code></td></tr>
 <tr><td>Float</td><td><code>30.15</code></td><td><code>f</code></td></tr>
@@ -57,7 +57,7 @@ annotations.
 
 ``
 <table border=1>
-<tr><td><b>Type</b></td><td><b>Library</b></td><td>name</td></tr>
+<tr><td><b>Type</b></td><td><b>Library<sup>*</sup></b></td><td><b>Name</b></td></tr>
 <tr><td>Bytes</td><td><code>bytes, b64, file, tcp</code></td><td><code>&lt;bytes></code></td></tr>
 <tr><td>File</td><td><code>file</code></td><td><code>&lt;file></code></td></tr>
 <tr><td>Iterator</td><td><code>iter</code></td><td><code>&lt;iter></code></td></tr>
@@ -65,7 +65,9 @@ annotations.
 <tr><td>Tcp Connection</td><td><code>tcp</code></td><td><code>&lt;tcpConn></code></td></tr>
 <tr><td>Thread</td><td><code>thread</code></td><td><code>&lt;thread></code></td></tr>
 </table>
+<p><b><sup>*</sup></b> <i>Libraries which create or use the types.</i></p>
 ``
+
 
 # User types
 
@@ -106,7 +108,7 @@ sys.println(v == v2); // Shows: false``
 Integer values stand for Natural numbers.
 
 Their literals are sequences of one or more digits, optionally preceded by the
-sign '-'.
+sign '-'. They use the follow scheme:
 
 *\[-]d+*
 
@@ -134,9 +136,10 @@ sys.println(i3 != 11892.0); // Shows: Type error.``
 
 # Float
 
-They are numbers with decimal point or scientific notation.
+They are numbers with floating point.
 
-Float literals follow the scheme:
+Floats literals can be writen with decimal point or in scientific notation.
+They use the follow scheme:
 
 *\[-]d+.\[d *]\[(e|E)\[(+|-)]d+]*
 
@@ -339,10 +342,12 @@ sys.assert(s7a == s7b);``
 
 # Arrays
 
-They are collections of values. These values has not to have equals type.
+They are collections of values. These values can be of different types.
 It is posible empty arrays.
 
-*\[_e1_, _e2_, ...]* (blanks ar not significant)
+Array literals are values between squares, separated by comma.
+
+*\[ _e1_, _e2_, ...]* (blanks ar not significant)
 
 Examples:
 
@@ -355,10 +360,12 @@ Examples:
 # Dictionaries
 
 Ther are collections of pairs key-value, where key must be a string and
-value can have any type. Values in a same dictionary has not to have equals
-type. It is posible empty dictionaries.
+value can have any type. Values in a same dictionary can be of different
+types. It is posible empty dictionaries.
 
-*{k1: v1, k2: v2, ...}* (blanks are not significant)
+Dictionary literals are pairs 'key:value', separated by comma.
+
+*{ _k1_: _v1_, _k2_: _v2_, ...}* (blanks are not significant)
 
 Examples:
 
@@ -367,5 +374,17 @@ Examples:
 * *{"age": 32}*
 
 * *{"type": "rectangle", "dims": \[32.0, 11.24], "complete": true}*
+
+## Operators
+
+# Boolean
+
+``
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td></tr>
+<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b</tt><td><tt>!value</tt></tr>
+<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt></tr>
+<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt></tr>
+</table>``
 
 

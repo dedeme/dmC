@@ -14,8 +14,6 @@
 typedef struct tfunction_Tfunction Tfunction;
 
 /// Constructor.
-/// This function does not generate the typed code. It is done in
-/// 'tfunction_run'.
 ///   id   : C code identifier.
 ///   tpars: Parameters type.
 ///   tret : Return type.
@@ -46,13 +44,24 @@ Iarr *tfunction_get_pars (Tfunction *this);
 /// Returns the statement.
 StatCode *tfunction_get_st_cd (Tfunction *this);
 
-/// Runs 'this' form normal code and returns a value that can be an
-/// empty expression if the Tfunction 'this' return nothing.
-/// If called for first time, the typed code is generated and 'st_cd' is
-/// set to NULL.
-///   this: Function to run.
-///   pars: Arr<Exp> Solved parameter values.
+/// Runs 'this' from normal code and returns a value that can be an
+/// empty expression if the Tfunction 'this' return nothing or an object
+/// <typed>.
+///   this:   Function to run.
+///   pars:   Arr<Exp> Solved parameter values.
+///           Types of <Exp> allowed are:  bool, int, float, string, array,
+///           dictionary and object<typed>.
+///             - Arrays must contain elements of the same type: int, float
+///               or string. It they contains subarrays of the same type, they
+///               are flattened.
+///             - Objects <typed> are retrieved as returns of 'tfunction.run'.
+///   RETURN: object<typed>. It can be converted in normal types bool, int,
+///             float, string, array or dictionary with the unary prefix
+///             operator '<<'.
 Exp *tfunction_run (Tfunction *this, Arr *pars);
+
+/// Returns normal value from typed value.
+Exp *tfunction_untype(Ttype type, Tval value);
 
 ///
 char *tfunction_to_str (Tfunction *this);

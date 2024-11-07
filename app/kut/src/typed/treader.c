@@ -21,10 +21,12 @@ typedef enum stopType {
 } StopType;
 
 static int read_single_stat (
-  Buf *bf, int is_loop, Ttype tret, Theap *th, StatCode *st_cd
+  Buf *bf, int is_loop, int n_try_rt, int n_try_loop,
+  Ttype tret, Theap *th, StatCode *st_cd
 );
 static int read_block (
-  Buf *bf, int is_loop, int without_header, Ttype tret, Theap *th, Arr *sts
+  Buf *bf, int is_loop, int n_try_rt, int n_try_loop,
+  int without_header, Ttype tret, Theap *th, Arr *sts
 );
 
 static int read_assign_xxx (
@@ -122,7 +124,8 @@ static int read_assign_xxx (
 
 /// sts is Arr<StatCode>
 static int read_block (
-  Buf *bf, int is_loop, int without_header, Ttype tret, Theap *th, Arr *sts
+  Buf *bf, int is_loop, int n_try_rt, int n_try_loop,
+  int without_header, Ttype tret, Theap *th, Arr *sts
 ) {
   if (without_header) {
     buf_add(bf, "{\n");
@@ -130,7 +133,7 @@ static int read_block (
   }
   int with_return = FALSE;
   EACH(sts, StatCode, stat) {
-    int r = read_single_stat(bf, is_loop, tret, th, stat);
+    int r = read_single_stat(bf, is_loop, n_try_rt, n_try_loop, tret, th, stat);
     with_return = with_return || r;
   }_EACH
   TheapEntry *e = opt_get(theap_check_used(th));
@@ -143,23 +146,32 @@ static int read_block (
 }
 
 static int read_single_stat (
-  Buf *bf, int is_loop, Ttype tret, Theap *th, StatCode *st_cd
+  Buf *bf, int is_loop, int n_try_rt, int n_try_loop,
+  Ttype tret, Theap *th, StatCode *st_cd
 ) {
   Stat *st = stat_code_stat(st_cd);
 
   // --------------------------------------------------------------------- block
   if (stat_is_block(st)) {
-    return read_block(bf, is_loop, TRUE, tret, th, stat_get_block(st));
+    return read_block(
+      bf, is_loop, n_try_rt, n_try_loop, TRUE, tret, th, stat_get_block(st)
+    );
   // --------------------------------------------------------------------- break
   } else if (stat_is_break(st)) {
     if (!is_loop) tfail_throw(st_cd, "Break out of loop");
     else {
-      buf_add(bf, "break;\n");
+      REPEAT(n_try_loop) {
+        buf_add(bf, "texc_remove();\n");
+      }_REPEAT
+      buf_add(bf,"break;\n");
     }
   // ------------------------------------------------------------------ continue
   } else if (stat_is_continue(st)) {
     if (!is_loop) tfail_throw(st_cd, "Continue out of loop");
     else {
+      REPEAT(n_try_loop) {
+        buf_add(bf, "texc_remove();\n");
+      }_REPEAT
       buf_add(bf, "continue;\n");
     }
   // -------------------------------------------------------------------- return
@@ -171,36 +183,43 @@ static int read_single_stat (
           "Expected not return value, buf it was found\n%s",
           exp_to_js(v)
         );
+      REPEAT(n_try_rt) {
+        buf_add(bf, "texc_remove();\n");
+      }_REPEAT
       buf_add(bf, "return;\n");
     } else {
       Buf* bf2 = buf_new();
       Ttype t = tex_read(bf2, th, st_cd, v);
       tfail_check_etype1(st_cd, v, t, tret);
-      buf_add(bf, "Tval _ret;\n");
+      char *gsym = symix_get(symix_generate());
+      buf_add(bf, str_f("Tval %s_ret;\n", gsym));
       switch (tret) {
         case ttype_BOOL:
-          buf_add(bf, str_f("_ret.b = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.b = %s;\n", gsym, buf_str(bf2)));
           break;
         case ttype_INT:
-          buf_add(bf, str_f("_ret.i = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.i = %s;\n", gsym, buf_str(bf2)));
           break;
         case ttype_FLOAT:
-          buf_add(bf, str_f("_ret.f = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.f = %s;\n", gsym, buf_str(bf2)));
           break;
         case ttype_STRING:
-          buf_add(bf, str_f("_ret.s = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.s = %s;\n", gsym, buf_str(bf2)));
           break;
         case ttype_AINT:
-          buf_add(bf, str_f("_ret.I = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.I = %s;\n", gsym, buf_str(bf2)));
           break;
         case ttype_AFLOAT:
-          buf_add(bf, str_f("_ret.F = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.F = %s;\n", gsym, buf_str(bf2)));
           break;
         default:
-          buf_add(bf, str_f("_ret.S = %s;\n", buf_str(bf2)));
+          buf_add(bf, str_f("%s_ret.S = %s;\n", gsym, buf_str(bf2)));
           break;
       }
-      buf_add(bf, str_f("return _ret;\n", buf_str(bf2)));
+      REPEAT(n_try_rt) {
+        buf_add(bf, "texc_remove();\n");
+      }_REPEAT
+      buf_add(bf, str_f("return %s_ret;\n", gsym));
     }
     return TRUE;
   // --------------------------------------------------------------------- trace
@@ -254,7 +273,7 @@ static int read_single_stat (
           if (strcmp(call_type, fn_type))
             tfail_throw(st_cd,
               "Tfunction type '%s' called with arguments of type '%s'",
-              call_type, fn_type
+              fn_type, call_type
             );
           buf_add(bf, str_f("%s(%s);\n", tfunction_get_cid(tfn), pars_code));
         } else {
@@ -287,7 +306,7 @@ static int read_single_stat (
               if (strcmp(call_type, fn_type))
                 tfail_throw(st_cd,
                   "Tfunction type '%s' called with arguments of type '%s'",
-                  call_type, fn_type
+                  fn_type, call_type
                 );
               buf_add(bf, str_f("%s(%s);\n", tfunction_get_cid(tfn), pars_code));
             } else {
@@ -437,19 +456,28 @@ static int read_single_stat (
       tfail_throw(
         finally_code, "'finally' clause is not allowed in typed functions"
       );
-    buf_add(bf, "if (!setjmp(*texc_push_jump())){\n");
-    int rt1 = read_single_stat(bf, is_loop, tret, th, try_code);
+    buf_add(bf,
+      "{\n"
+      "jmp_buf *__TRY_buf = MALLOC(jmp_buf);\n"
+      "texc_add(__TRY_buf);\n"
+      "if (!setjmp(*__TRY_buf)) {\n"
+    );
+    int rt1 = read_single_stat(
+      bf, is_loop, n_try_rt + 1, n_try_loop + 1, tret, th, try_code
+    );
     buf_add(bf, str_f(
-      "texc_remove_last_jump();\n"
+      "texc_remove();\n"
       "} else {\n"
-      "texc_remove_last_jump();\n"
-      "char *%s = texc_get_msg();\n",
+      "texc_remove();\n"
+      "char *%s = texc_get();\n",
       catch_var
     ));
     theap_add_separator(th);
     theap_add(th, *catch_sym, ttype_STRING, catch_code);
-    int rt2 = read_single_stat(bf, is_loop, tret, th, catch_code);
-    buf_add(bf, "}\n");
+    int rt2 = read_single_stat(
+      bf, is_loop, n_try_rt, n_try_loop, tret, th, catch_code
+    );
+    buf_add(bf, "}}\n");
     theap_remove_block(th);
     return rt1 && rt2;
   // ------------------------------------------------------------------------ if
@@ -461,11 +489,15 @@ static int read_single_stat (
     Ttype tcond = tex_read(bf1, th, st_cd, cond);
     tfail_check_etype1(st_cd, cond, tcond, ttype_BOOL);
     Buf *bf2 = buf_new();
-    int rt1 = read_single_stat(bf2, is_loop, tret, th, arr_get(ps, 1));
+    int rt1 = read_single_stat(
+      bf2, is_loop, n_try_rt, n_try_loop, tret, th, arr_get(ps, 1)
+    );
     StatCode *st_cd2 = opt_get(arr_get(ps, 2));
     if (st_cd2) {
       Buf *bf3 = buf_new();
-      int rt2 = read_single_stat(bf3, is_loop, tret, th, st_cd2);
+      int rt2 = read_single_stat(
+        bf3, is_loop, n_try_rt, n_try_loop, tret, th, st_cd2
+      );
       buf_add(bf, str_f("if(%s){\n%s\n}else{\n%s\n}\n",
         buf_str(bf1), buf_str(bf2), buf_str(bf3)
       ));
@@ -481,7 +513,7 @@ static int read_single_stat (
     StatCode *stat = arr_get(ps, 1);
     if (exp_is_empty(cond)) {
       buf_add(bf, "for (;;){\n");
-      int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+      int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
       buf_add(bf, "}\n");
       return rt1;
     }
@@ -489,7 +521,7 @@ static int read_single_stat (
     Ttype t = tex_read(bf2, th, st_cd, cond);
     tfail_check_etype1(st_cd, cond, t, ttype_BOOL);
     buf_add(bf, str_f("while (%s){\n", buf_str(bf2)));
-    int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+    int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
     buf_add(bf, "}\n");
     return rt1;
   // ----------------------------------------------------------------------- for
@@ -518,7 +550,7 @@ static int read_single_stat (
       ));
       theap_add_separator(th);
       theap_add(th, *vsym, ttype_STRING, st_cd);
-      int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+      int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
       buf_add(bf, "}\n");
       theap_remove_block(th);
       return rt1;
@@ -540,7 +572,7 @@ static int read_single_stat (
       ));
       theap_add_separator(th);
       theap_add(th, *vsym, te, st_cd);
-      int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+      int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
       buf_add(bf, "}\n");
       theap_remove_block(th);
       return rt1;
@@ -577,7 +609,7 @@ static int read_single_stat (
       theap_add_separator(th);
       theap_add(th, *vsym_ix, ttype_STRING, st_cd);
       theap_add(th, *vsym_e, ttype_STRING, st_cd);
-      int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+      int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
       buf_add(bf, "}\n");
       theap_remove_block(th);
       return rt1;
@@ -600,7 +632,7 @@ static int read_single_stat (
       theap_add_separator(th);
       theap_add(th, *vsym_ix, ttype_INT, st_cd);
       theap_add(th, *vsym_e, te, st_cd);
-      int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+      int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
       buf_add(bf, "}\n");
       theap_remove_block(th);
       return rt1;
@@ -630,7 +662,7 @@ static int read_single_stat (
       buf_add(bf, str_f(
         "if (%s == 0) texc_throw_(%s);\n"
         "for (int64_t %s = %s; "
-        "(%s < 0) ? %s >= %s : %s < %s ; "
+        "(%s < 0) ? %s >= %s : %s <= %s ; "
         "%s += %s) {\n",
         buf_str(step_bf),
         js_ws(str_f("For step is 0\n  %s", tfail_position(st_cd))),
@@ -646,10 +678,54 @@ static int read_single_stat (
     }
     theap_add_separator(th);
     theap_add(th, *vsym_ix, ttype_INT, st_cd);
-    int rt1 = read_single_stat(bf, TRUE, tret, th, stat);
+    int rt1 = read_single_stat(bf, TRUE, n_try_rt, 0, tret, th, stat);
     buf_add(bf, "}\n");
     theap_remove_block(th);
     return rt1;
+  // -------------------------------------------------------------------- switch
+  } else if (stat_is_switch(st)) {
+    // [<Exp>, Arr<Tp<Arr<Exp>, StatCode>>]
+    Arr *a = stat_get_switch(st);
+    Exp *lcond = arr_get(a, 0);
+    // Arr<Tp<Arr<Exp>, StatCode>>
+    Arr *entries = arr_get(a, 1);
+    if (!arr_size(entries)) tfail_throw(st_cd, "'switch' without entries");
+    int rt = TRUE;
+
+    EACH(entries, Tp, e) {
+      // <Exp>
+      Arr *rconds = tp_e1(e);
+      StatCode *stat = tp_e2(e);
+
+      Exp *rcond0 = arr_get(rconds, 0);
+      Exp *cond = NULL;
+      if (
+        exp_is_sym(rcond0) &&
+        !strcmp(symix_get(exp_get_sym(rcond0)), "default")
+      ) {
+        cond = exp_bool(TRUE);
+      } else {
+        cond = exp_eq(lcond, rcond0);
+        RANGE(i, 1, arr_size(rconds)) {
+          cond = exp_or(cond, exp_eq(lcond, arr_get(rconds, i)));
+        }_RANGE
+      }
+      Buf *bf1 = buf_new();
+      Ttype tcond = tex_read(bf1, th, st_cd, cond);
+      tfail_check_etype1(st_cd, cond, tcond, ttype_BOOL);
+
+      Buf *bf2 = buf_new();
+      int rt2 = read_single_stat(
+        bf2, is_loop, n_try_rt, n_try_loop, tret, th, stat
+      );
+
+      buf_add(bf, str_f("%s(%s){\n%s\n}\n",
+        _i == 0 ? "if" : "else if", buf_str(bf1), buf_str(bf2)
+      ));
+
+      rt = rt && rt2;
+    }_EACH
+    return rt;
   // ----------------------------------------------------------------------- END
   } else {
     tfail_throw(st_cd,
@@ -661,7 +737,7 @@ static int read_single_stat (
 }
 
 void treader_read (Buf *bf, Ttype tret, Theap *th, StatCode *st) {
-  int r = read_single_stat(bf, FALSE, tret, th, st);
+  int r = read_single_stat(bf, FALSE, 0, 0, tret, th, st);
   if (!r && tret != ttype_NO_RETURN)
     tfail_throw(st,
       "Function with return of type %s, returns nothing",

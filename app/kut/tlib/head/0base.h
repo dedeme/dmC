@@ -32,7 +32,7 @@ typedef struct tarr_Arrf Arrf;
 typedef struct tarr_Arrs Arrs;
 typedef struct obj_Obj Obj;
 
-static void (*built_fail_fn) (char *);
+static void (*built_exc_fns) (char, void *);
 
 static int built_eqb (int v1, int v2);
 static int built_eqi (int64_t v1, int64_t v2);

@@ -10,6 +10,8 @@
 #include "kut/it.h"
 #include "module.h"
 #include "bfunction.h"
+#include "typed/ttype.h"
+#include "typed/tval.h"
 #include "kut/bytes.h"
 #include "kut/file.h"
 #include "kut/tcp.h"
@@ -103,5 +105,19 @@ TcpConn *obj_get_tcp_conn (Exp *this);
 
 /// Returns TRUE if 'this' match the object type.
 int obj_is_tcp_conn (Exp *this);
+
+/// Creates an expression of typed object.
+Exp *obj_typed (Ttype type, Tval value);
+
+/// Read the type of a typed object.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Ttype obj_get_typed_type (Exp *this);
+
+/// Read the value of a typed object.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Tval obj_get_typed_value (Exp *this);
+
+/// Returns TRUE if 'this' match the object type.
+int obj_is_typed (Exp *this);
 
 #endif

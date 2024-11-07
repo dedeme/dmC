@@ -103,13 +103,22 @@ TbmodRs *tbmodules_get (
         : check(FALSE, str_f("%ci%c", *type, *type),
           "", str_f("tarr_insert_array%c(%s)", *type, pars)
         );
+    if (!strcmp(function, "insertRange"))
+      return (as_expression || !*type)
+        ? check(FALSE, str_f("%ci*ii", *type), "", "--??")
+        : check(FALSE, str_f("%ci%cii", *type, *type),
+          "", str_f("tarr_insert_range%c(%s)", *type, pars)
+        );
     if (!strcmp(function, "join"))
       return check(TRUE, "Ss", "s", str_f("tarr_join(%s)", pars));
-    if (!strcmp(function, "new"))
+    if (!strcmp(function, "new")) {
+      if (str_cindex("ifs", *type) == -1)
+        return fail("Type arrays only can be of 'i', 'f' or 's'");
       return check(TRUE, str_f("%ci", *type),
-        *type == 'i' ? "I" : *type == 'f' ? "F" : "S",
+        *type == 'i'? "I" : *type == 'f' ? "F" : "S",
         str_f("tarr_new%c(%s)", *type, pars)
       );
+    }
     if (!strcmp(function, "peek"))
       return check(TRUE, str_new_c(*type),
         str_f("%c", *type == 'I' ? 'i' : *type == 'F' ? 'f': 's'),
@@ -146,6 +155,19 @@ TbmodRs *tbmodules_get (
         : check(FALSE, str_f("%c", *type),
           "", str_f("tarr_reverse_in%c(%s)", *type, pars)
         );
+    if (!strcmp(function, "setArr"))
+      return (as_expression || !*type)
+        ? check(FALSE, str_f("%ci*", *type), "", "--??")
+        : check(FALSE, str_f("%ci%c", *type, *type),
+          "", str_f("tarr_set_array%c(%s)", *type, pars)
+        );
+
+    if (!strcmp(function, "setRange"))
+      return (as_expression || !*type)
+        ? check(FALSE, str_f("%ci*ii", *type), "", "--??")
+        : check(FALSE, str_f("%ci%cii", *type, *type),
+          "", str_f("tarr_set_range%c(%s)", *type, pars)
+        );
     if (!strcmp(function, "shift"))
       return check(TRUE, str_new_c(*type),
         str_f("%c", *type == 'I' ? 'i' : *type == 'F' ? 'f': 's'),
@@ -161,6 +183,12 @@ TbmodRs *tbmodules_get (
       return check(TRUE, str_new_c(*type), "i",
         str_f("tarr_size%c(%s)", *type, pars)
       );
+    if (!strcmp(function, "sort"))
+      return (as_expression || !*type)
+        ? check(FALSE, str_f("%cb", *type), "", "--??")
+        : check(FALSE, str_f("%cb", *type),
+          "", str_f("tarr_sort%c(%s)", *type, pars)
+        );
     if (!strcmp(function, "take"))
       return check(TRUE, str_f("%ci", *type), str_new_c(*type),
         str_f("tarr_take%c(%s)", *type, pars)

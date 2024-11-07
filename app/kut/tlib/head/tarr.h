@@ -61,6 +61,16 @@ static void tarr_insert_arrayI (Arri *this, int64_t ix, Arri *other);
 static void tarr_insert_arrayF (Arrf *this, int64_t ix, Arrf *other);
 static void tarr_insert_arrayS (Arrs *this, int64_t ix, Arrs *other);
 
+static void tarr_insert_rangeI (
+  Arri *this, int64_t ix, Arri *other, int64_t begin, int64_t end
+);
+static void tarr_insert_rangeF (
+  Arrf *this, int64_t ix, Arrf *other, int64_t begin, int64_t end
+);
+static void tarr_insert_rangeS (
+  Arrs *this, int64_t ix, Arrs *other, int64_t begin, int64_t end
+);
+
 // Index correction for slices.
 static int64_t tarr_ix_correctI (Arri *this, int64_t n);
 static int64_t tarr_ix_correctF (Arrf *this, int64_t n);
@@ -116,6 +126,20 @@ static void tarr_setI (Arri *this, int64_t ix, int64_t e);
 static void tarr_setF (Arrf *this, int64_t ix, double e);
 static void tarr_setS (Arrs *this, int64_t ix, char *e);
 
+static void tarr_set_arrayI (Arri *this, int64_t ix, Arri *other);
+static void tarr_set_arrayF (Arrf *this, int64_t ix, Arrf *other);
+static void tarr_set_arrayS (Arrs *this, int64_t ix, Arrs *other);
+
+static void tarr_set_rangeI (
+  Arri *this, int64_t ix, Arri *other, int64_t begin, int64_t end
+);
+static void tarr_set_rangeF (
+  Arrf *this, int64_t ix, Arrf *other, int64_t begin, int64_t end
+);
+static void tarr_set_rangeS (
+  Arrs *this, int64_t ix, Arrs *other, int64_t begin, int64_t end
+);
+
 static int64_t tarr_shiftI (Arri *this);
 static double tarr_shiftF (Arrf *this);
 static char *tarr_shiftS (Arrs *this);
@@ -127,6 +151,10 @@ static void tarr_shuffleS (Arrs *this);
 static int tarr_sizeI (Arri *this);
 static int tarr_sizeF (Arrf *this);
 static int tarr_sizeS (Arrs *this);
+
+static void tarr_sortI (Arri *this, int is_ascendant);
+static void tarr_sortF (Arrf *this, int is_ascendant);
+static void tarr_sortS (Arrs *this, int is_ascendant);
 
 static Arri *tarr_takeI (Arri *this, int64_t n);
 static Arrf *tarr_takeF (Arrf *this, int64_t n);

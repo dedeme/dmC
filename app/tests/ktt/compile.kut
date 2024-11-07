@@ -1,0 +1,9 @@
+
+Fnames = arr.filter(file.dir("./"), \fname -> return str.ends(fname, ".c"););
+for (:file fname = Fnames) {
+  :file foname = fname[:-2] + ".o";
+  if (fname.tm() > foname.tm()) {
+    sys.cmd("gcc", [fname, "-c", foname]);
+    sys.cmd("gcc", ["cd1.c", "cd2.c", "-o", "cd"]);
+  }
+}

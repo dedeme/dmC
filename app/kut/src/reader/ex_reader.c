@@ -233,12 +233,14 @@ Exp *ex_reader_read1 (Types *tps, Cdr *cdr) {
     EXC_KUT(cdr_fail_expect(cdr, ")", token_to_str(tk)));
   }
 
-  if (token_is_unary(tk)) { // - ! ---------------------------------------------
+  if (token_is_unary(tk)) { // - ! << ------------------------------------------
     Exp *exp = ex_reader_read1(tps, cdr);
     exp = pt_sq_pr_reader_read(tps, exp, cdr);
-    return token_is_exclamation(tk)
+    return !strcmp(tk->value, "!")
       ? exp_not(exp)
-      : exp_minus(exp)
+      : !strcmp(tk->value, "-")
+        ? exp_minus(exp)
+        : exp_untype(exp)
     ;
   }
 

@@ -42,16 +42,6 @@ void genc_write (Tfunction *fn) {
     buf_add(head, str_f("Tval %s(Tval *_values);\n", fn_id));
     buf_add(body, str_f("Tval %s(Tval *_values){\n", fn_id));
   }
-  buf_add(body,
-    "int _created = texc_init();\n"
-    "if (_created) {\n"
-    "  jmp_buf *_jb = texc_push_jump();\n"
-    "  if (setjmp(*_jb)) { // Exception not intercepted.\n"
-    "    char *e = texc_get_msg();\n"
-    "    built_fail_fn(e);\n"
-    "  }\n"
-    "}\n"
-  );
 
   Iarr *pars = tfunction_get_pars(fn);
   Iarr *tpars = tfunction_get_tpars(fn);
@@ -95,7 +85,7 @@ void genc_write (Tfunction *fn) {
 void genc_compile (void) {
   if (without_tfunctions) return;
 
-  char *so_path = tdb_so_path(kut_path);
+  char *so_path = tdb_so_path(kut_path, TRUE);
   char *c_path = tdb_c_path();
   char *o_path = tdb_o_path();
 
@@ -118,23 +108,30 @@ void genc_compile (void) {
   }
 }
 
-static void fail_fn (char *msg) {
-  char *e = str_new(msg);
-  EXC_KUT(e);
+void exc_fns (char type, void *data) {
+  switch (type) {
+    case '-': exc_remove(); break;
+    case '+': exc_add(data); break;
+    case '<': *(char **)data = exc_msg(exc_get()); break;
+    default: EXC_KUT(data); // type == ':'
+  }
+}
+void fail_fn (char *msg) {
+  EXC_KUT(msg);
 }
 void genc_load_so (void) {
-  char *so_path = tdb_so_path(kut_path);
+  char *so_path = tdb_so_path(kut_path, FALSE);
   if (file_exists(so_path)) {
     lib_handle = dlopen(so_path, RTLD_LAZY);
     if (!lib_handle) EXC_KUT(dlerror());
     dlerror();    // Clear dl-error
 
-    void (*set_fail)(void (*fn)(char *));
-    *(void **) (&set_fail) = dlsym(lib_handle, "built_set_fail");
+    void (*set_exc)(void (*fn)(char, void *));
+    *(void **) (&set_exc) = dlsym(lib_handle, "built_set_exc");
     char *error = "";
     if ((error = dlerror()) != NULL) EXC_KUT(error);
     dlerror();  // Clear dl-error
-    set_fail(fail_fn);
+    set_exc(exc_fns);
   }
 }
 

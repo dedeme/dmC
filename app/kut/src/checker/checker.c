@@ -128,6 +128,8 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
     check_exp(layers, fix, nline, is, exp_get_not(exp));
   } else if (exp_is_minus(exp)) {
     check_exp(layers, fix, nline, is, exp_get_minus(exp));
+  } else if (exp_is_untype(exp)) {
+    check_exp(layers, fix, nline, is, exp_get_untype(exp));
   } else if (exp_is_add(exp)) {
     // <Exp, Exp>
     Tp *v = exp_get_add(exp);

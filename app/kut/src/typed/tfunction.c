@@ -5,13 +5,17 @@
 #include "kut/thread.h"
 #include "kut/path.h"
 #include "fileix.h"
+#include "symix.h"
+#include "obj.h"
 #include "typed/tfunction.h"
 #include "typed/treader.h"
 #include "typed/tarr.h"
 #include "typed/genc.h"
 
 struct tfunction_Tfunction {
+  char *key;
   char *id;
+  char *cid;
   Iarr *tpars;
   Ttype tret;
   Iarr *pars;
@@ -21,8 +25,24 @@ struct tfunction_Tfunction {
 Tfunction *tfunction_new (
   Iarr *tpars, Ttype tret, Iarr *pars, StatCode *stat
 ) {
+  int fix = stat_code_file_ix(stat);
+  char *f = str_new(fileix_to_fail(fix));
+  char *p = f;
+  while (*p) {
+    char ch = *p;
+    if (!(
+      (ch >= '0' && ch <= '9') ||
+      (ch >= 'A' && ch <= 'Z') ||
+      (ch >= 'a' && ch <= 'z')
+    ))
+      *p = '_';
+    ++p;
+  }
+
   Tfunction *this = MALLOC(Tfunction);
+  this->key = f;
   this->id = "";
+  this->cid = "";
   this->tpars = tpars;
   this->tret = tret;
   this->pars = pars;
@@ -32,6 +52,7 @@ Tfunction *tfunction_new (
 
 void tfunction_set_id (Tfunction *this, char *id) {
   this->id = id;
+  this->cid = str_f("%s_%s", str_left(this->key, -4), id);
 }
 
 char *tfunction_get_id (Tfunction *this) {
@@ -40,11 +61,7 @@ char *tfunction_get_id (Tfunction *this) {
 
 /// Returns tfunction C identifier.
 char *tfunction_get_cid (Tfunction *this) {
-  int fix = stat_code_file_ix(this->st_cd);
-  char *root = opt_eget(path_canonical(fileix_get_root()));
-  char *f = opt_eget(path_canonical(fileix_to_fail(fix)));
-  char *path = str_right(f, str_len(root));
-  return str_f("%s_%s", str_creplace(str_left(path, -4), '/', '_') , this->id);
+  return this->cid;
 }
 
 Iarr *tfunction_get_tpars (Tfunction *this) {
@@ -73,38 +90,50 @@ static Exp *tfunction_run2 (Tfunction *this, Arr *pars) {
   Arr *cpars = arr_new();
   EACH(pars, Exp, e) {
     Tval *v = MALLOC(Tval);
-    switch ((Ttype) iarr_get(tpars, _i)) {
-      case ttype_BOOL:
-        v->i = exp_get_bool(e);
-        break;
-      case ttype_INT:
-        v->i = exp_get_int(e);
-        break;
-      case ttype_FLOAT:
-        v->f = exp_get_float(e);
-        break;
-      case ttype_STRING:
-        v->s = exp_get_string(e);
-        break;
-      case ttype_AINT:
-        v->I = tarr_fromi(exp_get_array(e));
-        break;
-      case ttype_AFLOAT:
-        v->F = tarr_fromf(exp_get_array(e));
-        break;
-      case ttype_ASTRING:
-        v->S = tarr_froms(exp_get_array(e));
-        break;
-      case ttype_DIC: {
-        v->S = tarr_fromd(exp_get_dic(e));
-        break;
-      }
-      default: {
-        v->i = 0; // To avoid warning.
+    if (obj_is_typed(e)) {
+      if (obj_get_typed_type(e) != (Ttype)iarr_get(tpars, _i)) {
         EXC_KUT(str_f(
-          "Unexpected parameter of type '%s'",
-          ttype_to_str((Ttype) iarr_get(tpars, _i))
+          "Expected object<typed> of type '%s' for parameter %d of %d, "
+          "but '%s' was found",
+          ttype_to_str(iarr_get(tpars, _i)), _i, arr_size(pars),
+          obj_get_typed_type(e)
         ));
+      }
+      *v = obj_get_typed_value(e);
+    } else {
+      switch ((Ttype) iarr_get(tpars, _i)) {
+        case ttype_BOOL:
+          v->i = exp_get_bool(e);
+          break;
+        case ttype_INT:
+          v->i = exp_get_int(e);
+          break;
+        case ttype_FLOAT:
+          v->f = exp_get_float(e);
+          break;
+        case ttype_STRING:
+          v->s = exp_get_string(e);
+          break;
+        case ttype_AINT:
+          v->I = tarr_fromi(exp_get_array(e));
+          break;
+        case ttype_AFLOAT:
+          v->F = tarr_fromf(exp_get_array(e));
+          break;
+        case ttype_ASTRING:
+          v->S = tarr_froms(exp_get_array(e));
+          break;
+        case ttype_DIC: {
+          v->S = tarr_fromd(exp_get_dic(e));
+          break;
+        }
+        default: {
+          v->i = 0; // To avoid warning.
+          EXC_KUT(str_f(
+            "Unexpected parameter of type '%s'",
+            ttype_to_str((Ttype) iarr_get(tpars, _i))
+          ));
+        }
       }
     }
     arr_push(cpars, v);
@@ -117,33 +146,12 @@ static Exp *tfunction_run2 (Tfunction *this, Arr *pars) {
     *pvars++ = *v;
   }_EACH
   if (tret == ttype_NO_RETURN) {
-    genc_run_procedure(tfunction_get_cid(this), vpars);
+    genc_run_procedure(this->cid, vpars);
+    return exp_empty_return();
   } else {
-    Tval ret = genc_run_function(tfunction_get_cid(this), vpars);
-    switch ((Ttype) tret) {
-      case ttype_BOOL:
-        return exp_bool(ret.i);
-      case ttype_INT:
-        return exp_int(ret.i);
-      case ttype_FLOAT:
-        return exp_float(ret.f);
-      case ttype_STRING: {
-        char *r = str_new(ret.s);
-        return exp_string(r);
-      }
-      case ttype_AINT:
-        return exp_array(tarr_to_arri(ret.I));
-      case ttype_AFLOAT:
-        return exp_array(tarr_to_arrf(ret.F));
-      case ttype_ASTRING:
-        return exp_array(tarr_to_arrs(ret.S));
-      case ttype_DIC:
-        return exp_dic(tarr_to_arrd(ret.S));
-      default: // do nothing
-    }
+    Tval ret = genc_run_function(this->cid, vpars);
+    return obj_typed(tret, ret);
   }
-
-  return exp_empty_return();
 }
 
 Exp *tfunction_run (Tfunction *this, Arr *pars) {
@@ -155,11 +163,39 @@ Exp *tfunction_run (Tfunction *this, Arr *pars) {
   return r;
 }
 
+Exp *tfunction_untype(Ttype type, Tval value) {
+  switch (type) {
+    case ttype_BOOL:
+      return exp_bool(value.i);
+    case ttype_INT:
+      return exp_int(value.i);
+    case ttype_FLOAT:
+      return exp_float(value.f);
+    case ttype_STRING: {
+      char *r = str_new(value.s);
+      return exp_string(r);
+    }
+    case ttype_AINT:
+      return exp_array(tarr_to_arri(value.I));
+    case ttype_AFLOAT:
+      return exp_array(tarr_to_arrf(value.F));
+    case ttype_ASTRING:
+      return exp_array(tarr_to_arrs(value.S));
+    case ttype_DIC:
+      return exp_dic(tarr_to_arrd(value.S));
+    default: // do nothing
+  }
+
+  EXC_KUT(str_f("Typed value '%s' can not be untyped.", ttype_to_str));
+  return exp_empty_return(); // Unreachable
+}
+
 char *tfunction_to_str (Tfunction *this) {
   return str_f(
-    "Tfunction<%s|%s>",
+    "Tfunction<%s|%s> %s",
     ttype_group_to_str(this->tpars),
-    ttype_to_str(this->tret)
+    ttype_to_str(this->tret),
+    this->id
   );
 }
 

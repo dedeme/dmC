@@ -20,53 +20,82 @@ struct tarr_Arrs {
   char **bf;
 };
 
+static int elements (Arr *a) {
+  int r = arr_size(a);
+  EACH(a, Exp, e) {
+    if (exp_is_array(e)) r += elements(exp_get_array(e)) - 1;
+  }_EACH
+  return r;
+}
+
 #define tarr_FROM(A, V) \
-  int size = arr_size(a); \
+  int size = elements(a); \
+  int bf_size = size < 15 ? 15 : size; \
   A *this = MALLOC(A); \
-  this->begin = ATOMIC(sizeof(V) * size); \
+  this->begin = ATOMIC(sizeof(V) * bf_size); \
   this->end = this->begin + size; \
-  this->bf = this->end;
+  this->bf = this->begin + bf_size;
 
 // a is Arr<Exp(int)>
-Arri *tarr_fromi (Arr *a) {
-  tarr_FROM(Arri, int64_t)
-  int64_t *p = this->begin;
+static int64_t *addi (int64_t *p, Arr *a) {
   EACH(a, Exp, e) {
-    if (!exp_is_int(e))
+    if (exp_is_int(e)) *p++ = exp_get_int(e);
+    else if (exp_is_array(e)) p = addi(p, exp_get_array(e));
+    else
       EXC_KUT(str_f(
         "Expected array of type 'I' has values whose type is not 'int': %s",
         exp_to_js(e)
       ));
-    *p++ = exp_get_int(e);
   }_EACH
+  return p;
+}
+
+// a is Arr<Exp(int)>
+Arri *tarr_fromi (Arr *a) {
+  tarr_FROM(Arri, int64_t)
+  addi(this->begin, a);
   return this;
 }
 
-Arrf *tarr_fromf (Arr *a) {
-  tarr_FROM(Arrf, double)
-  double *p = this->begin;
+// a is Arr<Exp(float)>
+static double *addf (double *p, Arr *a) {
   EACH(a, Exp, e) {
-    if (!exp_is_float(e))
+    if (exp_is_float(e)) *p++ = exp_get_float(e);
+    else if (exp_is_array(e)) p = addf(p, exp_get_array(e));
+    else
       EXC_KUT(str_f(
         "Expected array of type 'F' has values whose type is not 'float': %s",
         exp_to_js(e)
       ));
-    *p++ = exp_get_float(e);
   }_EACH
+  return p;
+}
+
+// a is Arr<Exp(float)>
+Arrf *tarr_fromf (Arr *a) {
+  tarr_FROM(Arrf, double)
+  addf(this->begin, a);
   return this;
 }
 
-Arrs *tarr_froms (Arr *a) {
-  tarr_FROM(Arrs, char*)
-  char **p = this->begin;
+// a is Arr<Exp(string)>
+static char **adds (char **p, Arr *a) {
   EACH(a, Exp, e) {
-    if (!exp_is_string(e))
+    if (exp_is_string(e)) *p++ = exp_get_string(e);
+    else if (exp_is_array(e)) p = adds(p, exp_get_array(e));
+    else
       EXC_KUT(str_f(
         "Expected array of type 'S' has values whose type is not 'string': %s",
         exp_to_js(e)
       ));
-    *p++ = exp_get_string(e);
   }_EACH
+  return p;
+}
+
+// a is Arr<Exp(string)>
+Arrs *tarr_froms (Arr *a) {
+  tarr_FROM(Arrs, char*)
+  adds(this->begin, a);
   return this;
 }
 
@@ -76,10 +105,11 @@ Arrs *tarr_fromd (Map *m) {
   // <Kv<Exp>>
   Arr *a = (Arr *)m;
   int size = arr_size(a) * 2;
+  int bf_size = size < 15 ? 15 : size;
   Arrs *this = MALLOC(Arrs);
-  this->begin = ATOMIC(sizeof(char *) * size);
+  this->begin = ATOMIC(sizeof(char *) * bf_size);
   this->end = this->begin + size;
-  this->bf = this->end;
+  this->bf = this->begin + bf_size;
   char **p = this->begin;
   EACH(a, Kv, kv) {
     *p++ = kv_key(kv);
