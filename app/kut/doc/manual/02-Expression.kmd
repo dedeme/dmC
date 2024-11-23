@@ -2,7 +2,7 @@
 title = Expression
 =
 
-## Value
+## Values
 
 Values are the basic elements of Kut.
 
@@ -86,7 +86,7 @@ person1 = new("Peter", 35);``
 
 # Boolean
 
-Only allows thow values: _true_ and _false_.
+Only allows two values: _true_ and _false_.
 
 Boolean values have two literals:
 
@@ -114,7 +114,7 @@ sign '-'. They use the follow scheme:
 
 Using the sign '+' is an error. (Wrong: *+115*).
 
-However '_' can be used to improve the reading. (Ok: *1_215*).
+However '_' can be used to improve reading. (Ok: *1_215*).
 
 Example:
 
@@ -145,7 +145,7 @@ They use the follow scheme:
 
 Starting with the sign '+' or with '.' is an error. (Wrong: *+1.0*, *.123*).
 
-'_' can be used to improve the reading. (Ok: *1_215.0*).
+'_' can be used to improve reading. (Ok: *1_215.0*).
 
 The number can end at '.', (Ok: *234.*, *234.e2*)
 
@@ -174,7 +174,7 @@ sys.assert(f2a == f2e);
 
 // Wrong floats
 // .12 -> starts with '.'.
-// +1.2 -> starts with '-'.
+// +1.2 -> starts with '+'.
 // 123 -> this number is integer.
 // 100e3 -> '.' is mising before 'e'.
 // 100.E -> There must be one digit at least after 'e|E'.``
@@ -183,12 +183,12 @@ sys.assert(f2a == f2e);
 
 They are sequences of bytes which represent UTF-8 characters.
 
-Its literals are writen between single or double quotes ( *"abc"* or *'abc'* ).
+String literals are writen between single or double quotes ( *"abc"* or *'abc'* ).
 
-It is allowed empty strings ( *""* or *''* );
+It is allowed empty strings ( *""* or *''* ).
 
-It is allowed escape symbols '\\', '\n', '\t', '\b', '\f', '\r' and '\'' or
-'\"' depending on enclosing quotes ('' -> *\'* allowed. "" -> *\"* allowed).
+It is allowed escape symbols *\\*, *\n*, *\t*, *\b*, *\f* and *\r* . The
+escape symbol *\'* is allowed inside single quotes, and *\"* inside double ones.
 
 Also it is posible to use unicode sequences with 4 hexadecimal values
 (e.g. *\u23aC*)
@@ -199,7 +199,7 @@ Triple quoted strings generate verbatim strings. They use the following rules:
 
 * Escape and unicode characters are no allowed.
 
-* If the first line is equals to """, it is skipped.
+* If it start with *"""\[return]*, the first blank line is skipped.
 
 * The left margin is adjusted to the most left character.
 
@@ -217,15 +217,16 @@ If we call UTF-8 symbols as "runes", then:
 
 * "€" has 1 rune.
 
-To measure bytes Kut use the *str.len* function.
+To measure bytes Kut use the *str.len* function (e.g. *str.len("€")* returns
+*3*).
 
-To measure runes you have to pass the 'string' to an array of 'runes' and then
-measure it. (e.g. *arr.size(str.toRunes("€"))* which return *1*).
+To measure runes you have to pass the 'string' to array of 'runes' and then
+measure it. (e.g. *arr.size(str.toRunes("€"))* returns *1*).
 
 ``<u>String slice</u>``
 
-Slicing string is made in bytes and using indexation "base 0". To slicing in
-runes you have to pass 'string' to 'runes' too:
+Slicing string creates a new string. It is made in bytes and using indexation
+"base 0". To slicing in runes you have to pass 'string' to array of 'runes':
 
 * *"xabcd"\[1:4]* gives *"abc"*
 
@@ -234,6 +235,16 @@ runes you have to pass 'string' to 'runes' too:
 * *str.fromRunes(str.toRunes("xabcd")\[1:4])* gives *"abc"*
 
 * *str.fromRunes(str.toRunes("x€abcd")\[1:4])* gives *"€ab"*
+
+Indexes can be empty:
+
+* *\[:]* means *\[0:length]*
+
+* *\[n:]* means *\[n:length]*
+
+* *\[:n]* means *\[0:n]*
+
+Indexes allow negative values. This values are interpreted as _length - n_.
 
 ``<u>Element access</u>``
 
@@ -257,11 +268,11 @@ Strings can not be modified.
 
 ``<u>String library</u>``
 
-To manipulate strings you can use the buit-in 'str' library.
+To manipulate strings, you can use the buit-in 'str' library.
 
 For example, the function *str.trim("  ab  ")* returns *"ab"*.
 
-``<u>String examples</u>``
+``<u>String examples</u><br>&nbsp;``
 
 ``kut
 s1a = "";
@@ -281,13 +292,19 @@ sys.println(s2a); // Shows: ab€c"'÷n
                   //        Line 2
 sys.assert(str.len(s2a) == 18);
 // Runes
-sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", ..., "e", " ", "2"]
 sys.assert(arr.size(str.toRunes(s2a)) == 15);
 
 s3a = "xabcd";
 // Bytes
 sys.assert(s3a[1:4] == "abc");
 sys.assert(s3a[4] == "d");
+sys.assert (s3a[:] == "xabcd");
+sys.assert (s3a[:2] == "xa");
+sys.assert (s3a[:-1] == "xabc");
+sys.assert (s3a[2:] == "bcd");
+sys.assert (s3a[-1:] == "d");
+
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
 sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
@@ -357,6 +374,78 @@ Examples:
 
 * *\[1, "a", \[1, true], -1.0]*
 
+``<u>Array slice</u>``
+
+Slicing array creates a new array which is a shallow copy of the orignal values.
+It uses indexation "base 0".
+
+* *\[2,3,4,5,6]\[1:4]* gives *\[3,4,5]*
+
+Indexes can be empty:
+
+* *\[:]* means *\[0:length]*
+
+* *\[n:]* means *\[n:length]*
+
+* *\[:n]* means *\[0:n]*
+
+Also indexes allow negative values. This values are interpreted as _size - n_.
+
+
+``<u>Element access</u>``
+
+Array elements can be accessed with indexation "base 0":
+
+* *\[2,3,4,5,6]\[1]* gives *3*
+
+``<u>Element modification</u>``
+
+Array elements can be modified with indexation "base 0":
+
+* *\[2,3,4,5,6]\[1] = 100* change the array to *\[2,100,4,5,6]*
+
+``<u>Array library</u>``
+
+To manipulate arrays, you can use the buit-in 'arr' library.
+
+For example, the function *arr.push(A, 12)* adds the element *12* to the
+array *a*.
+
+``<u>Array examples</u><br>&nbsp;``
+
+``kut
+A1 = [];
+sys.assert(arr.size(A1) == 0);
+
+A2 = [100, 101, "tx", 103, 104, true, 106];
+A2b = [100, 101, "tx", 103, 104, true, 106];
+sys.assert(A2 == A2b);
+sys.assert(arr.size(A2) == 7);
+
+sys.assert(A2[1:4] == [101, "tx", 103]);
+sys.assert(A2[4] == 104);
+sys.assert (A2[:] == [100, 101, "tx", 103, 104, true, 106]);
+sys.assert (A2[:2] == [100, 101]);
+sys.assert (A2[:-1] == [100, 101, "tx", 103, 104, true]);
+sys.assert (A2[2:] == ["tx", 103, 104, true, 106]);
+sys.assert (A2[-1:] == [106]);
+
+A3a = A2[:]; // Copy
+A3b = A2; // Asignation
+A2[0] = "Changed";
+sys.assert(A2 == ["Changed", 101, "tx", 103, 104, true, 106]);
+sys.assert(A3a == [100, 101, "tx", 103, 104, true, 106]); // Copy
+sys.assert(A3b == ["Changed", 101, "tx", 103, 104, true, 106]); // Asignation
+
+B = [1, 2.0];
+C = ["a", B, "c"];
+C2 = C[:]; // Shallow copy
+sys.assert(C == ["a", [1, 2.0], "c"]);
+B[1] = "New";
+C[2] = 0;
+sys.assert(C == ["a", [1, "New"], 0]);
+sys.assert(C2 == ["a", [1, "New"], "c"]);``
+
 # Dictionaries
 
 Ther are collections of pairs key-value, where key must be a string and
@@ -375,16 +464,95 @@ Examples:
 
 * *{"type": "rectangle", "dims": \[32.0, 11.24], "complete": true}*
 
+``<u>Element access</u>``
+
+Dictionary elements can be accessed by key:
+
+* {"one": 1, "two": 2]\["one"] gives 1
+
+``<u>Element modification</u>``
+
+Dictionary elements can be modified with its key:
+
+* {"one": 1, "two": 2]\["one"] = 11 change the value of key "one" to 11.
+
+NOTE: This way is not posible to add new pairs key-values.
+
+``<u>Dictionary library</u>``
+
+To manipulate dictionaries, you can use the buit-in 'dic' library.
+
+``<u>Dictionary examples</u><br>&nbsp;``
+
+``kut
+D1 = {};
+sys.assert(dic.size(D1) == 0);
+
+D2 = {"one": 1, "two": 2, "three": 3};
+sys.assert(dic.size(D2) == 3);
+sys.assert(D2["two"] == 2);
+D2["two"] = 22;
+sys.assert(D2["two"] == 22);``
 ## Operators
 
 # Boolean
 
 ``
 <table border=1>
-<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td></tr>
-<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b</tt><td><tt>!value</tt></tr>
-<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt></tr>
-<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt></tr>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td>Return</td>
+</tr>
+<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b<br>\[*.]->b</tt><td><tt>!value</tt>
+<td><tt>Logical 'negation'<br>'true' if '[*.]' is empty. Otherwise 'false'.</tt>
+</tr>
+<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt>
+<td><tt>Logical 'and'</tt></tr>
+<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt>
+<td><tt>Logical 'or'</tr>
+</table>``
+
+# Mathematical
+
+``
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td>Return</td>
+</tr>
+<tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
+<td><tt>Sign change.</tt>
+</tr>
+<tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
+<td><tt>Numbers addition</tt></tr>
+<tr><td><b>-</b></td><td>Subtraction</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 - n2</tt>
+<td><tt>Numbers subtraction</tt></tr>
+<tr><td><b>*</b></td><td>Multiplicaton</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 * n2</tt>
+<td><tt>Numbers multiplicaton</tt></tr>
+<tr><td><b>/</b></td><td>Division</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 / n2</tt>
+<td><tt>Numbers division</tt></tr>
+<tr><td><b>%</b></td><td>Module</td><td><tt>\i,i -> i</tt><td><tt>n1 % n2</tt>
+<td><tt>Module of n1 / n2</tt></tr>
+</table>``
+
+# Relational
+
+``
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td>Return</td>
+</tr>
+<tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
+<td><tt>Sign change.</tt>
+</tr>
+<tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
+<td><tt>Numbers addition</tt></tr>
+<tr><td><b>-</b></td><td>Subtraction</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 - n2</tt>
+<td><tt>Numbers subtraction</tt></tr>
+<tr><td><b>*</b></td><td>Multiplicaton</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 * n2</tt>
+<td><tt>Numbers multiplicaton</tt></tr>
+<tr><td><b>/</b></td><td>Division</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 / n2</tt>
+<td><tt>Numbers division</tt></tr>
+<tr><td><b>%</b></td><td>Module</td><td><tt>\i,i -> i</tt><td><tt>n1 % n2</tt>
+<td><tt>Module of n1 / n2</tt></tr>
 </table>``
 
 

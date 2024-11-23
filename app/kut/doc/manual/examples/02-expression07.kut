@@ -1,0 +1,8 @@
+D1 = {};
+sys.assert(dic.size(D1) == 0);
+
+D2 = {"one": 1, "two": 2, "three": 3};
+sys.assert(dic.size(D2) == 3);
+sys.assert(D2["two"] == 2);
+D2["two"] = 22;
+sys.assert(D2["two"] == 22);

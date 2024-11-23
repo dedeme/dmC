@@ -111,8 +111,8 @@ sys.println(helloText.tx);</div>
 <script>aceConf("aceEditor-3", "kut");</script>
 <a name="Statement"></a>
 <h3>Statement</h3>
-<p>Made by expressions, they are commands to execute by Kut.</p>
-<p>Statements are executed sequentially, from top to bottom, unless this way
+<p>Made of expressions, they are commands to be executed by Kut.</p>
+<p>Statements are executed sequentially, from top to bottom, unless this order
 is changed by a control sequence.</p>
 <p>Example ("hello2.kut"):</p>
 <div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">tx = "Hello World!";
@@ -153,7 +153,7 @@ else sys.println("Hello People!");</div>
 <p><code>Hello People</code></p>
 <a name="Expression"></a>
 <h3>Expression</h3>
-<p>Expressions are literals and symbols mixed by operators.</p>
+<p>Expressions are literals and symbols mixed by operators and functions.</p>
 <p>Every expression has a value.</p>
 <p>Literal examples:</p>
 
@@ -167,12 +167,11 @@ else sys.println("Hello People!");</div>
   x
   aVeryLongSymbol
   p12
-</pre><p>Operator examples:</p>
+</pre><p>Function examples:</p>
 
 <pre>
-  3 - (12 + 6)
-  x > 2 | x < -5
-  str.left("abd", 2)
+  str.left(tx, 2);
+  sys.home();
 </pre><hr>
 <p style="text-indent: 0px"><a href="index.html">Índice</a> · <a href='02-Expression.html'>Posterior (Expression)</a></p>
 <div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">

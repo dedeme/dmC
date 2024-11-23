@@ -193,7 +193,7 @@ sys.test(
   ), 6
 );
 
-// sys.test(3.0, 3);
+sys.assert(3.0 != 3);
 
 /*
 try

@@ -439,13 +439,23 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
     Exp *is_eq(Tp *v) {
       Exp *e1 = solver_solve(is, h0, hs, tp_e1(v));
       Exp *e2 = solver_solve(is, h0, hs, tp_e2(v));
-      if (exp_is_string(e1))
-        return exp_bool(!strcmp(exp_get_string(e1), exp_get_string(e2)));
-      if (exp_is_int(e1))
-        return exp_bool(exp_get_int(e1) == exp_get_int(e2));
-      if (exp_is_float(e1))
-        return exp_bool(math_eq(exp_get_float(e1), exp_get_float(e2)));
+      if (exp_is_string(e1)) {
+        if (exp_is_string(e2))
+          return exp_bool(!strcmp(exp_get_string(e1), exp_get_string(e2)));
+        return exp_bool(FALSE);
+      }
+      if (exp_is_int(e1)) {
+        if (exp_is_int(e2))
+          return exp_bool(exp_get_int(e1) == exp_get_int(e2));
+        return exp_bool(FALSE);
+      }
+      if (exp_is_float(e1)) {
+        if (exp_is_float(e2))
+          return exp_bool(math_eq(exp_get_float(e1), exp_get_float(e2)));
+        return exp_bool(FALSE);
+      }
       if (exp_is_array(e1)) {
+        if (!exp_is_array(e2)) return exp_bool(FALSE);
         // <Exp>
         Arr *a1 = exp_get_array(e1);
         // <Exp>
@@ -461,11 +471,15 @@ Exp *solver_solve(Imports *is, Heap0 *h0, Heaps *hs, Exp *exp) {
         return exp_bool(TRUE);
       }
       if (exp_is_bool(e1)) {
-        int b1 = exp_get_bool(e1) ? TRUE : FALSE;
-        int b2 = exp_get_bool(e2) ? TRUE : FALSE;
-        return exp_bool(b1 == b2);
+        if (exp_is_bool(e2)) {
+          int b1 = exp_get_bool(e1) ? TRUE : FALSE;
+          int b2 = exp_get_bool(e2) ? TRUE : FALSE;
+          return exp_bool(b1 == b2);
+        }
+        return exp_bool(FALSE);
       }
       if (exp_is_dic(e1)) {
+        if (!exp_is_dic(e2)) return exp_bool(FALSE);
         // <Exp>
         Map *m1 = exp_get_dic(e1);
         // <Exp>

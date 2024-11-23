@@ -22,6 +22,12 @@ s3a = "xabcd";
 // Bytes
 sys.assert(s3a[1:4] == "abc");
 sys.assert(s3a[4] == "d");
+sys.assert (s3a[:] == "xabcd");
+sys.assert (s3a[:2] == "xa");
+sys.assert (s3a[:-1] == "xabc");
+sys.assert (s3a[2:] == "bcd");
+sys.assert (s3a[-1:] == "d");
+
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
 sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");

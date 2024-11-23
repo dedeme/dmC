@@ -80,9 +80,9 @@ Example:
 
 ## Statement
 
-Made by expressions, they are commands to execute by Kut.
+Made of expressions, they are commands to be executed by Kut.
 
-Statements are executed sequentially, from top to bottom, unless this way
+Statements are executed sequentially, from top to bottom, unless this order
 is changed by a control sequence.
 
 Example ("hello2.kut"):
@@ -144,7 +144,7 @@ shows:
 
 ## Expression
 
-Expressions are literals and symbols mixed by operators.
+Expressions are literals and symbols mixed by operators and functions.
 
 Every expression has a value.
 
@@ -166,13 +166,12 @@ Symbol examples:
   p12
 </pre>``
 
-Operator examples:
+Function examples:
 
 ``
 <pre>
-  3 - (12 + 6)
-  x > 2 | x < -5
-  str.left("abd", 2)
+  str.left(tx, 2);
+  sys.home();
 </pre>``
 
 

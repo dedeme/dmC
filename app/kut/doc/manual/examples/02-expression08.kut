@@ -1,0 +1,22 @@
+// Boolean
+sys.assert(!false == true);
+sys.assert(!true == false);
+sys.assert(![1] == false);
+sys.assert(![] == true);
+sys.assert(!![1] == true);
+
+// Mathematical
+sys.assert(-3 == ---3);
+sys.assert(3.5 == --3.5);
+sys.assert(3 + 2 == 5);
+sys.assert(3.0 + (-1.5) == 1.5);
+sys.assert(3 - 2 == 1);
+sys.assert(3.0 --1.5 == 4.5);
+sys.assert(3 * 2 == 6);
+sys.assert(3.0 * -1.5 == -4.5);
+sys.assert(3 / 2 == 1);
+sys.assert(3.0 / -1.5 == -2.0);
+sys.assert(3 % 2 == 1);
+
+// Relational
+sys.println({"one":1} == {"one":"a"});

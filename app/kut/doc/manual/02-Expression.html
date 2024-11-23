@@ -51,13 +51,13 @@ window.MathJax = {
 <p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
 <hr>
 <p style='text-indent:0px'>
-<a href='#Value'>Value</a><br>
+<a href='#Values'>Values</a><br>
 <a href='#Types'>Types</a><br>
 <a href='#Operators'>Operators</a>
 </p>
 <hr>
-<a name="Value"></a>
-<h3>Value</h3>
+<a name="Values"></a>
+<h3>Values</h3>
 <p>Values are the basic elements of Kut.</p>
 <p>Each value has a type and each type has a name to be used in the documentation
 annotations.</p>
@@ -126,7 +126,7 @@ person1 = new("Peter", 35);</div>
 <a name="Types"></a>
 <h3>Types</h3>
 <h4>Boolean</h4>
-<p>Only allows thow values: <i>true</i> and <i>false</i>.</p>
+<p>Only allows two values: <i>true</i> and <i>false</i>.</p>
 <p>Boolean values have two literals:</p>
 <blockquote>
 <p>- <code>true</code></p>
@@ -145,7 +145,7 @@ sys.println(v == v2); // Shows: false</div>
 sign '-'. They use the follow scheme:</p>
 <p><code>[-]d+</code></p>
 <p>Using the sign '+' is an error. (Wrong: <code>+115</code>).</p>
-<p>However '_' can be used to improve the reading. (Ok: <code>1_215</code>).</p>
+<p>However '_' can be used to improve reading. (Ok: <code>1_215</code>).</p>
 <p>Example:</p>
 <div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">i1 = 0;
 i2 = -0;
@@ -168,7 +168,7 @@ sys.println(i3 != 11892.0); // Shows: Type error.</div>
 They use the follow scheme:</p>
 <p><code>[-]d+.[d *][(e|E)[(+|-)]d+]</code></p>
 <p>Starting with the sign '+' or with '.' is an error. (Wrong: <code>+1.0</code>, <code>.123</code>).</p>
-<p>'_' can be used to improve the reading. (Ok: <code>1_215.0</code>).</p>
+<p>'_' can be used to improve reading. (Ok: <code>1_215.0</code>).</p>
 <p>The number can end at '.', (Ok: <code>234.</code>, <code>234.e2</code>)</p>
 <p>Example:</p>
 <div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">f1a = 0.;
@@ -193,17 +193,17 @@ sys.assert(f2a == f2e);
 
 // Wrong floats
 // .12 -> starts with '.'.
-// +1.2 -> starts with '-'.
+// +1.2 -> starts with '+'.
 // 123 -> this number is integer.
 // 100e3 -> '.' is mising before 'e'.
 // 100.E -> There must be one digit at least after 'e|E'.</div>
 <script>aceConf("aceEditor-3", "kut");</script>
 <h4>String</h4>
 <p>They are sequences of bytes which represent UTF-8 characters.</p>
-<p>Its literals are writen between single or double quotes ( <code>"abc"</code> or <code>'abc'</code> ).</p>
-<p>It is allowed empty strings ( <code>""</code> or <code>''</code> );</p>
-<p>It is allowed escape symbols '\\', '\n', '\t', '\b', '\f', '\r' and '\'' or
-'\"' depending on enclosing quotes ('' -> <code>\'</code> allowed. "" -> <code>\"</code> allowed).</p>
+<p>String literals are writen between single or double quotes ( <code>"abc"</code> or <code>'abc'</code> ).</p>
+<p>It is allowed empty strings ( <code>""</code> or <code>''</code> ).</p>
+<p>It is allowed escape symbols <code>\\</code>, <code>\n</code>, <code>\t</code>, <code>\b</code>, <code>\f</code> and <code>\r</code> . The
+escape symbol <code>\'</code> is allowed inside single quotes, and <code>\"</code> inside double ones.</p>
 <p>Also it is posible to use unicode sequences with 4 hexadecimal values
 (e.g. <code>\u23aC</code>)</p>
 <u>Triple quoted strings</u><p>Triple quoted strings generate verbatim strings. They use the following rules:</p>
@@ -212,7 +212,7 @@ sys.assert(f2a == f2e);
 <p>Escape and unicode characters are no allowed.</p>
 </li>
 <li>
-<p>If the first line is equals to """, it is skipped.</p>
+<p>If it start with <code>"""[return]</code>, the first blank line is skipped.</p>
 </li>
 <li>
 <p>The left margin is adjusted to the most left character.</p>
@@ -236,11 +236,12 @@ sys.assert(f2a == f2e);
 <p>"€" has 1 rune.</p>
 </li>
 </ul>
-<p>To measure bytes Kut use the <code>str.len</code> function.</p>
-<p>To measure runes you have to pass the 'string' to an array of 'runes' and then
-measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> which return <code>1</code>).</p>
-<u>String slice</u><p>Slicing string is made in bytes and using indexation "base 0". To slicing in
-runes you have to pass 'string' to 'runes' too:</p>
+<p>To measure bytes Kut use the <code>str.len</code> function (e.g. <code>str.len("€")</code> returns
+<code>3</code>).</p>
+<p>To measure runes you have to pass the 'string' to array of 'runes' and then
+measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</code>).</p>
+<u>String slice</u><p>Slicing string creates a new string. It is made in bytes and using indexation
+"base 0". To slicing in runes you have to pass 'string' to array of 'runes':</p>
 <ul>
 <li>
 <p><code>"xabcd"[1:4]</code> gives <code>"abc"</code></p>
@@ -255,6 +256,19 @@ runes you have to pass 'string' to 'runes' too:</p>
 <p><code>str.fromRunes(str.toRunes("x€abcd")[1:4])</code> gives <code>"€ab"</code></p>
 </li>
 </ul>
+<p>Indexes can be empty:</p>
+<ul>
+<li>
+<p><code>[:]</code> means <code>[0:length]</code></p>
+</li>
+<li>
+<p><code>[n:]</code> means <code>[n:length]</code></p>
+</li>
+<li>
+<p><code>[:n]</code> means <code>[0:n]</code></p>
+</li>
+</ul>
+<p>Indexes allow negative values. This values are interpreted as <i>length - n</i>.</p>
 <u>Element access</u><p>String elements can be accessed with indexation "base 0":</p>
 <ul>
 <li>
@@ -273,9 +287,9 @@ runes you have to pass 'string' to 'runes' too:</p>
 <p>Note that <code>str.fromRunes([str.toRunes("a€abcd")[1]])</code> gives <code>"€"</code>, but
 <code>"a€abcd"[1]</code> returns a not valid UTF-8 character.</p>
 <u>String modification</u><p>Strings can not be modified.</p>
-<u>String library</u><p>To manipulate strings you can use the buit-in 'str' library.</p>
+<u>String library</u><p>To manipulate strings, you can use the buit-in 'str' library.</p>
 <p>For example, the function <code>str.trim("  ab  ")</code> returns <code>"ab"</code>.</p>
-<u>String examples</u><div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">s1a = "";
+<u>String examples</u><br>&nbsp;<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">s1a = "";
 s1b = '';
 sys.assert(s1a == s1b);
 // Bytes
@@ -292,13 +306,19 @@ sys.println(s2a); // Shows: ab€c"'÷n
                   //        Line 2
 sys.assert(str.len(s2a) == 18);
 // Runes
-sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", ..., "e", " ", "2"]
 sys.assert(arr.size(str.toRunes(s2a)) == 15);
 
 s3a = "xabcd";
 // Bytes
 sys.assert(s3a[1:4] == "abc");
 sys.assert(s3a[4] == "d");
+sys.assert (s3a[:] == "xabcd");
+sys.assert (s3a[:2] == "xa");
+sys.assert (s3a[:-1] == "xabc");
+sys.assert (s3a[2:] == "bcd");
+sys.assert (s3a[-1:] == "d");
+
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
 sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
@@ -368,6 +388,73 @@ It is posible empty arrays.</p>
 <p><code>[1, "a", [1, true], -1.0]</code></p>
 </li>
 </ul>
+<u>Array slice</u><p>Slicing array creates a new array which is a shallow copy of the orignal values.
+It uses indexation "base 0".</p>
+<ul>
+<li>
+<p><code>[2,3,4,5,6][1:4]</code> gives <code>[3,4,5]</code></p>
+</li>
+</ul>
+<p>Indexes can be empty:</p>
+<ul>
+<li>
+<p><code>[:]</code> means <code>[0:length]</code></p>
+</li>
+<li>
+<p><code>[n:]</code> means <code>[n:length]</code></p>
+</li>
+<li>
+<p><code>[:n]</code> means <code>[0:n]</code></p>
+</li>
+</ul>
+<p>Also indexes allow negative values. This values are interpreted as <i>size - n</i>.</p>
+<u>Element access</u><p>Array elements can be accessed with indexation "base 0":</p>
+<ul>
+<li>
+<p><code>[2,3,4,5,6][1]</code> gives <code>3</code></p>
+</li>
+</ul>
+<u>Element modification</u><p>Array elements can be modified with indexation "base 0":</p>
+<ul>
+<li>
+<p><code>[2,3,4,5,6][1] = 100</code> change the array to <code>[2,100,4,5,6]</code></p>
+</li>
+</ul>
+<u>Array library</u><p>To manipulate arrays, you can use the buit-in 'arr' library.</p>
+<p>For example, the function <code>arr.push(A, 12)</code> adds the element <code>12</code> to the
+array <code>a</code>.</p>
+<u>Array examples</u><br>&nbsp;<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">A1 = [];
+sys.assert(arr.size(A1) == 0);
+
+A2 = [100, 101, "tx", 103, 104, true, 106];
+A2b = [100, 101, "tx", 103, 104, true, 106];
+sys.assert(A2 == A2b);
+sys.assert(arr.size(A2) == 7);
+
+sys.assert(A2[1:4] == [101, "tx", 103]);
+sys.assert(A2[4] == 104);
+sys.assert (A2[:] == [100, 101, "tx", 103, 104, true, 106]);
+sys.assert (A2[:2] == [100, 101]);
+sys.assert (A2[:-1] == [100, 101, "tx", 103, 104, true]);
+sys.assert (A2[2:] == ["tx", 103, 104, true, 106]);
+sys.assert (A2[-1:] == [106]);
+
+A3a = A2[:]; // Copy
+A3b = A2; // Asignation
+A2[0] = "Changed";
+sys.assert(A2 == ["Changed", 101, "tx", 103, 104, true, 106]);
+sys.assert(A3a == [100, 101, "tx", 103, 104, true, 106]); // Copy
+sys.assert(A3b == ["Changed", 101, "tx", 103, 104, true, 106]); // Asignation
+
+B = [1, 2.0];
+C = ["a", B, "c"];
+C2 = C[:]; // Shallow copy
+sys.assert(C == ["a", [1, 2.0], "c"]);
+B[1] = "New";
+C[2] = 0;
+sys.assert(C == ["a", [1, "New"], 0]);
+sys.assert(C2 == ["a", [1, "New"], "c"]);</div>
+<script>aceConf("aceEditor-5", "kut");</script>
 <h4>Dictionaries</h4>
 <p>Ther are collections of pairs key-value, where key must be a string and
 value can have any type. Values in a same dictionary can be of different
@@ -386,15 +473,63 @@ types. It is posible empty dictionaries.</p>
 <p><code>{"type": "rectangle", "dims": [32.0, 11.24], "complete": true}</code></p>
 </li>
 </ul>
+<u>Element access</u><p>Dictionary elements can be accessed by key:</p>
+<ul>
+<li>
+<p>{"one": 1, "two": 2]["one"] gives 1</p>
+</li>
+</ul>
+<u>Element modification</u><p>Dictionary elements can be modified with its key:</p>
+<ul>
+<li>
+<p>{"one": 1, "two": 2]["one"] = 11 change the value of key "one" to 11.</p>
+</li>
+</ul>
+<p>NOTE: This way is not posible to add new pairs key-values.</p>
+<u>Dictionary library</u><p>To manipulate dictionaries, you can use the buit-in 'dic' library.</p>
+<u>Dictionary examples</u><br>&nbsp;<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">D1 = {};
+sys.assert(dic.size(D1) == 0);
+
+D2 = {"one": 1, "two": 2, "three": 3};
+sys.assert(dic.size(D2) == 3);
+sys.assert(D2["two"] == 2);
+D2["two"] = 22;
+sys.assert(D2["two"] == 22);</div>
+<script>aceConf("aceEditor-6", "kut");</script>
 <a name="Operators"></a>
 <h3>Operators</h3>
 <h4>Boolean</h4>
 
 <table border=1>
-<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td></tr>
-<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b</tt><td><tt>!value</tt></tr>
-<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt></tr>
-<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt></tr>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td>Return</td>
+</tr>
+<tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b<br>\[*.]->b</tt><td><tt>!value</tt>
+<td><tt>Logical 'negation'<br>'true' if '[*.]' is empty. Otherwise 'false'.</tt>
+</tr>
+<tr><td><b>&</b></td><td>And</td><td><tt>\b,b -> b</tt><td><tt>v1 & v2</tt>
+<td><tt>Logical 'and'</tt></tr>
+<tr><td><b>|</b></td><td>Or</td><td><tt>\b,b -> b</tt><td><tt>v1 | v2</tt>
+<td><tt>Logical 'or'</tr>
+</table><h4>Mathematical</h4>
+
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td>Return</td>
+</tr>
+<tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
+<td><tt>Sign change.</tt>
+</tr>
+<tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
+<td><tt>Numbers addition</tt></tr>
+<tr><td><b>-</b></td><td>Subtraction</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 - n2</tt>
+<td><tt>Numbers subtraction</tt></tr>
+<tr><td><b>*</b></td><td>Multiplicaton</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 * n2</tt>
+<td><tt>Numbers multiplicaton</tt></tr>
+<tr><td><b>/</b></td><td>Division</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 / n2</tt>
+<td><tt>Numbers division</tt></tr>
+<tr><td><b>%</b></td><td>Module</td><td><tt>\i,i -> i</tt><td><tt>n1 % n2</tt>
+<td><tt>Module of n1 / n2</tt></tr>
 </table><hr>
 <p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
 <div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">

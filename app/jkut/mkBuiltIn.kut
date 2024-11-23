@@ -22,7 +22,7 @@ fhead = \-> return
 ;;
 
 processJs = \fjs -> {
-  fpath = path.cat([sourceDir, fjs]);
+  fpath = file.cat([sourceDir, fjs]);
   id = fjs[:-3];
 
   processH(id);
@@ -45,7 +45,7 @@ processH = \id -> {
   ;
 
   file.write(
-    path.cat([hDir, id + ".h"]),
+    file.cat([hDir, id + ".h"]),
     str.replace(
       str.replace(
         str.replace(
@@ -82,7 +82,7 @@ processC = \id, jsCode -> {
   ;
 
   file.write(
-    path.cat([cDir, id + ".c"]),
+    file.cat([cDir, id + ".c"]),
     str.replace(
       str.replace(
         str.replace(
@@ -142,7 +142,7 @@ processFunctions = \Mods -> {
   ;
 
   file.write(
-    path.cat([cDir, "builtin.c"]),
+    file.cat([cDir, "builtin.c"]),
     str.replace(
       str.replace(
         str.replace(
