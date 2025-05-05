@@ -110,18 +110,18 @@ export function copy (source, target) {
     if (!isDirectory(target))
       throw new Error("'" + target + "' is not a directory");
 
-    const tdir = file.cat([target,  file.base(source)]);
+    const tdir = cat([target, base(source)]);
     del(tdir);
     mkdir(tdir);
     const files = dir(source);
     for (let i = 0; i < files.length; ++i) {
       const fname = files[i];
-      copy(file.cat([source, fname]), tdir);
+      copy(cat([source, fname]), tdir);
     }
     return;
   }
   if (isDirectory(target))
-    target = file.cat([target, file.base(source)]);
+    target = cat([target, base(source)]);
 
   copyFileSync(source, target);
 }
@@ -301,7 +301,7 @@ export function tmp (dir, fpath) {
   while (true) {
     const k = cryp.genK(16);
     const v = cryp.encode(k, "" + pid).substring(0, 8);
-    rpath = file.cat([dir, fpath + v.replaceAll("/", "-")]);
+    rpath = cat([dir, fpath + v.replaceAll("/", "-")]);
     if (!exists(fpath)) break;
   }
   return rpath;

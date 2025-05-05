@@ -2,7 +2,7 @@
 title = Expression
 =
 
-## Values
+## Values and types
 
 Values are the basic elements of Kut.
 
@@ -49,6 +49,11 @@ annotations.
   NOTE: For functions without parameters:<br>
     <code>&nbsp;&nbsp;\ -> ()</code><br>
     <code>&nbsp;&nbsp;\ -> U</code><br>
+  </td></tr>
+<tr><td>Typed<br>Function</td><td><code>\(ii|i) n1, n2 -> {return n1 + n2;}</code></td>
+  <td>
+  Equals to normal functions, but with indication of type.<br>
+  See the 'Typed Functions' section.
   </td></tr>
 </table>
 ``
@@ -141,7 +146,7 @@ They are numbers with floating point.
 Floats literals can be writen with decimal point or in scientific notation.
 They use the follow scheme:
 
-*\[-]d+.\[d *]\[(e|E)\[(+|-)]d+]*
+*\[-]d+.\[d **]\[(e|E)\[(+|-)]d+]*
 
 Starting with the sign '+' or with '.' is an error. (Wrong: *+1.0*, *.123*).
 
@@ -493,6 +498,29 @@ sys.assert(dic.size(D2) == 3);
 sys.assert(D2["two"] == 2);
 D2["two"] = 22;
 sys.assert(D2["two"] == 22);``
+
+# Functions
+
+Functions (normal and typed) are expressions and are called using parentheses
+to send arguments.
+
+Example:
+
+``kut
+fn0 = \msg -> sys.println(msg);;
+fn1 = \ -> return 5;;
+
+// Returns of functions are expressions.
+sys.assert(fn1() == 5);
+fn2 = \n -> return fn1() + n;;
+sys.assert(fn2(3) == 8);
+
+// Functions can be called as statements in any case.
+fn0("abc"); // -> Shows 'abc'
+fn2(3); // -> Shows nothing, but is a correct statement. ``
+
+Functions are explained in its own section.
+
 ## Operators
 
 # Boolean
@@ -500,7 +528,7 @@ sys.assert(D2["two"] == 22);``
 ``
 <table border=1>
 <tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
-<td>Return</td>
+<td><b>Return</b></td>
 </tr>
 <tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b<br>\[*.]->b</tt><td><tt>!value</tt>
 <td><tt>Logical 'negation'<br>'true' if '[*.]' is empty. Otherwise 'false'.</tt>
@@ -516,10 +544,10 @@ sys.assert(D2["two"] == 22);``
 ``
 <table border=1>
 <tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
-<td>Return</td>
+<td><b>Return</b></td>
 </tr>
 <tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
-<td><tt>Sign change.</tt>
+<td><tt>Sign change</tt>
 </tr>
 <tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
 <td><tt>Numbers addition</tt></tr>
@@ -535,24 +563,251 @@ sys.assert(D2["two"] == 22);``
 
 # Relational
 
+Bellow *T* stand for one of types *b|i|f|s* and *T'* for one of
+*T|array|dictionary*.
+
 ``
 <table border=1>
 <tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
-<td>Return</td>
+<td><b>Return<b></td>
 </tr>
-<tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
-<td><tt>Sign change.</tt>
+<tr><td><b>==</b></td><td>Equals</td><td><tt>\T',T' -> b</tt><td><tt>v1 == v2</tt>
+<td><tt>v1 equals to v2</tt>
 </tr>
-<tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
-<td><tt>Numbers addition</tt></tr>
-<tr><td><b>-</b></td><td>Subtraction</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 - n2</tt>
-<td><tt>Numbers subtraction</tt></tr>
-<tr><td><b>*</b></td><td>Multiplicaton</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 * n2</tt>
-<td><tt>Numbers multiplicaton</tt></tr>
-<tr><td><b>/</b></td><td>Division</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 / n2</tt>
-<td><tt>Numbers division</tt></tr>
-<tr><td><b>%</b></td><td>Module</td><td><tt>\i,i -> i</tt><td><tt>n1 % n2</tt>
-<td><tt>Module of n1 / n2</tt></tr>
+<tr><td><b>!=</b></td><td>Different</td><td><tt>\T',T' -> b</tt><td><tt>v1 != v2</tt>
+<td><tt>v1 different from v2</tt>
+</tr>
+<tr><td><b>></b></td><td>Greater</td><td><tt>\T,T -> b</tt><td><tt>v1 > v2</tt>
+<td><tt>v1 is greater than v2</tt>
+</tr>
+<tr><td><b>>=</b></td><td>Greater or Equals</td><td><tt>\T,T -> b</tt><td><tt>v1 >= v2</tt>
+<td><tt>v1 is greater or equals to v2</tt>
+</tr>
+<tr><td><b>&lt;</b></td><td>Less</td><td><tt>\T,T -> b</tt><td><tt>v1 &lt; v2</tt>
+<td><tt>v1 is less than v2</tt>
+</tr>
+<tr><td><b>&lt;=</b></td><td>Less or Equals</td><td><tt>\T,T -> b</tt><td><tt>v1 &lt;= v2</tt>
+<td><tt>v1 is less or equals to v2</tt>
+</tr>
 </table>``
 
+NOTE 1: _Two arrays are equals if they have the same elements in the same
+        order._
+
+NOTE 2: _Two dictionaries are equals if they have the same pairs 'key-value' in
+        any order._
+
+# Others
+
+Bellow T and U stand for any normal type and TT for a typed type.
+
+``
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td><b>Return<b></td>
+</tr>
+<tr><td><b>?</b></td><td>Ternary operator</td><td><tt>\b,T,U -> (T|U)</tt><td><tt>condition ? v1 : v2</tt>
+<td><tt>v1 if 'condition' is <code>true</code>.<br>Otherwise v2.</tt>
+</tr>
+<tr><td><b>&lt;&lt;</b></td><td>Untype</td><td><tt>\TT -> T</tt><td><tt>&lt;&lt;value</tt>
+<td><tt>Converts typed value<br>in untyped</tt>
+</tr>
+</table>``
+
+# Precedence
+
+Operations of less level are greater precedence.
+
+In the same level, the first (leftmost) operation is done before.
+
+``
+<table border=1>
+<tr><td><b>Level</b><td><b>Operations</b></tr>
+<tr><td>0</td><td><tt>! - <<</tt></tr>
+<tr><td>1</td><td><tt>* / %</tt></tr>
+<tr><td>2</td><td><tt>+ - </tt></tr>
+<tr><td>3</td><td><tt>== != > >= < <=</tt></tr>
+<tr><td>4</td><td><tt>& |</tt></tr>
+<tr><td>5</td><td><tt>?</tt></tr>
+</table>``
+
+NOTE: _Assignation operators do not appear here (they will be described in
+the Statement section). Its precedence is the last one._
+
+``<u>Operator examples</u><br>&nbsp;``
+
+``kut
+// Boolean
+sys.assert(!false == true);
+sys.assert(!true == false);
+sys.assert(![1] == false);
+sys.assert(![] == true);
+sys.assert(!![1] == true);
+
+// Mathematical
+sys.assert(-3 == ---3);
+sys.assert(3.5 == --3.5);
+sys.assert(3 + 2 == 5);
+sys.assert(3.0 + (-1.5) == 1.5);
+sys.assert(3 - 2 == 1);
+sys.assert(3.0 --1.5 == 4.5);
+sys.assert(3 * 2 == 6);
+sys.assert(3.0 * -1.5 == -4.5);
+sys.assert(3 / 2 == 1);
+sys.assert(3.0 / -1.5 == -2.0);
+sys.assert(3 % 2 == 1);
+
+// Relational
+sys.assert(3 == 3);
+sys.assert(3 != 3.0); // Types are different
+sys.assert({"one":1} == {"one" : 1 });
+sys.assert({"one":1} != {"one":"a"});
+sys.assert(23 > 4);
+sys.assert(15 <= 15);
+sys.assert([1, 2] == [1, 2]);
+sys.assert([1, 2] != [2, 1]);
+sys.assert({"one": 1, "two": 2} == {"two": 2, "one": 1});
+
+// Others
+sys.assert((1 == 2 ? 1 : "a") == "a");
+sys.assert((1 != 2 ? 1 : "a") == 1);
+sys.assert((true ? 2 : 1 + 10) == 2); // Parentheses 1
+sys.assert((true ? 2 : 1) + 10 == 12); // Parentheses 2
+// Typed function
+sys.assert(<<(\(|i) -> return 3;)() == 3);
+//Equals to
+fn = \(|i) -> return 3;;
+sys.assert(<<fn() == 3);
+
+// Precedence
+sys.assert(3 + -1 * 5 == -2);
+sys.assert((3 + -1) * 5 == 10);
+sys.assert(!(3 > 4 & 3 <= 4));
+sys.assert(3 > 4 | 3 <= 4);
+sys.assert((false & false | true) == true); // equals to (false & false) | true
+sys.assert((false | false & true) == false); // equals to (false | false) & true
+v1 = true ? 2 : 1 + 10;
+v2 = (true ? 2 : 1) + 10;
+sys.assert(v1 == 2);
+sys.assert(v2 == 12);``
+
+## switch
+
+'switch' expression allows to apply the operator *?* multiple times. It has
+the following scheme:
+
+``kut
+// blanks and end lines are optional.
+switch (value) {
+  case1a[, case1b, ...]: exp1;
+  case2a[, case2b, ...]: exp2; ...;
+  default: expN; // Clause 'default' is mandatory.
+}``
+
+'switch' compare 'value' with cases using *==* and produces the corresponding
+expression if the result is *true*.
+
+If no case returns 'true', 'expN' is produced.
+
+Examples:
+
+``kut
+sys.assert(
+  switch (1) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "one");
+
+sys.assert(
+  switch (4) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "fail");
+
+sys.assert(
+  switch (3) {
+    1: "one";
+    2, 3: "two or three";
+    default: "fail";
+  } == "two or three");``
+
+## Range
+
+Range is a way to create an iterator over integers. It syntax is:
+
+*\[start:end\[:step]]*
+
+- start
+> First value of iterator.
+
+- step
+> Optional increment of iterator. If it is not indicated its value is *1*.
+  'step' with value *0* is an error.
+
+- end
+> Last value of iterator. If step is not indicated start is incremented while
+  its value is less than end (exclusive). Otherwise is decremented or
+  incremented while its value is '*>=*' or '*<=*' to end (inclusive).
+
+NOTE 1: _If 'step' is positive and 'start > end' the iterator is empty. Equals
+  is if 'step' is negative and 'start < end' or if 'step' is missing an
+  'start >= end'._
+
+NOTE 2: _Operate with ranges is much more slow than operate with 'for' loops_
+
+Examples:
+
+``kut
+// step missing
+iter.each([0:4], \n -> sys.println(n);); // Prints 0 1 2 3
+
+// step positive
+iter.each([0:4:1], \n -> sys.println(n);); // Prints 0 1 2 3 4
+iter.each([0:4:2], \n -> sys.println(n);); // Prints 0 2 4
+
+// step negative
+iter.each([5:4:-1], \n -> sys.println(n);); // Prints 5 4
+iter.each([0:4:-2], \n -> sys.println(n);); // Prints noting
+
+// Empty iterators
+iter.each([5:5], \n -> sys.println(n);); // Prints noting
+iter.each([0:4:-1], \n -> sys.println(n);); // Prints nothing
+
+// Empty and not empty
+iter.each([5:4:1], \n -> sys.println(n);); // Prints nothing
+iter.each([5:5:1], \n -> sys.println(n);); // 5 ``
+
+## Final notes
+
+# Symbols
+
+Expressions can be assigned to symbols and then used.
+
+``kut
+n = 4;
+sys.assert (n + 2 == 6); ``
+
+Symbols are explained in the 'Statement' section.
+
+# Functions as expressions.
+
+Functions (typed and normal) are expressions. So they can be assigned to
+symbols, used as paremeter and returned by other functions.
+
+``kut
+fn1 = \n -> return \i -> return n + i;;;
+sys.assert(fn1(3)(2) == 5);
+
+fn2 = \v, f -> return f(v);;
+sys.assert(fn2(4, \n -> return n * 2;) == 8); ``
+
+# Return of functions as expression.
+
+The result of calling a function which returns an expression is, of course,
+an expression.
+
+``kut
+sys.assert(\n -> return n * n;(3) == 9); ``
 

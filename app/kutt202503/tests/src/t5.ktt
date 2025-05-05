@@ -1,0 +1,120 @@
+import "t5sub/animal";
+import "t5sub/mammal";
+import "t5sub/pet";
+import "t5sub/rPet";
+import "t5sub/person";
+
+(mapFn|AB) [A|B];
+
+//: [[A] (mapFn|AB) | [B]]
+map2 = \A, f -> return [f(A[0]), f(A[1])];;
+
+//: [(animal)(animal) | b]
+ttest = \a1, a2 -> {
+  return a1 == a2;
+};
+
+//: [AA | b]
+ttest2 = \a1, a2 -> {
+  return a1 == a2; // Compare by identity!!!
+};
+
+{
+  sys.test(person.enum0, 0);
+  sys.test(person.enum1, 1);
+  sys.test(person.enum3, 3);
+
+  //: [A|A]
+  idf = \e -> return e;;
+
+  :animal spider = animal.new(2);
+  sys.test(spider.age, 2);
+  sys.test(spider.getAge(), 2);
+  Animals = [spider, spider, spider, spider, spider, spider, spider];
+
+  :mammal leon = mammal.new(5, "Grrr");
+  // Mammals = [leon, leon, leon, spider];  // Type error
+  Mammals = [leon, leon, leon, leon, leon, leon];
+  Animals[1] = leon;
+
+  dock = pet.new(1, "Kuak", "Dicky");
+  Pets = [dock, dock, dock];
+  Animals[2] = dock;
+  Mammals[1] = dock;
+  // Pets[1] = spider; // Type error
+
+  :rPet dog = rPet.new(2, "Guau", "Rex", 234);
+  cat = rPet.new(8, "Miau", "Kitty", 333);
+  RPets = [dog, cat];
+  Pets[1] = dog;
+  Pets[2] = cat;
+  Mammals[2] = dog;
+  Mammals[3] = cat;
+  Animals[3] = dog;
+  Animals[4] = cat;
+
+  man = person.new(18, "BlaBla", "Peter", "B232");
+
+  :person woman = person.new(2, "BlaBlaBla", "Jane", "A112");
+
+  Mammals[4] = man;
+  Mammals[5] = woman;
+  Animals[5] = man;
+  Animals[6] = woman;
+  // RPets[1] = man;  // Type error
+
+  dog2 = RPets[1];
+  sys.test(dog2, cat);
+  :mammal dog3 = Mammals[2];
+  // sys.test(dog3, dog);  // Type error
+  sys.test(dog3.sound, "Guau");
+  // sys.test(dog3.name, "Rex");  // Index error.
+
+  :person w1 = idf(woman);
+  :person w2 = idf(Mammals[5]);
+  sys.test(sys.type(w1), "(person)");
+  sys.test(sys.type(w2), "(mammal)");
+  sys.test(sys.typeExpand(w1), "[.isss]");
+  sys.test(sys.typeExpand(w2), "[.is]");
+  sys.test(w1.idc, w1.idc);
+  sys.test(w1.age, w2.age);
+  sys.test(sys.type(idf), "[A|A]");
+
+  sys.test(Animals[0], spider);
+  sys.test(Animals[0] == Animals[1], false);
+  sys.test(Animals[0] == Animals[0], true);
+
+  sys.test(map2(RPets, \:rPet m -> return m.name;),  ["Rex", "Kitty"]);
+  //: [(rPet) | s]
+  fn = \:rPet m -> return m.name;;
+  sys.test(map2(RPets, fn),  ["Rex", "Kitty"]);
+  //: (mapFn|(rPet)s)
+  fn2 = \:rPet m -> return m.name;;
+  sys.test(map2(RPets, fn2),  ["Rex", "Kitty"]);
+
+  pdog1 = person.fromRPet(dog);
+  pdog2 = dog.toPerson();
+
+  sys.test(pdog1, pdog2);
+  // sys.test(dog, pdog1); // type error.
+  sys.test(pdog1 == woman, false);
+  sys.test(pdog1 == pdog2, true);
+
+  sys.test(ttest(spider, woman), true);
+  sys.test(ttest(spider, dog), true);
+  sys.test(ttest(spider, pdog2), true);
+  sys.test(ttest(spider, cat), false);
+  sys.test(ttest(spider, man), false);
+  sys.test(ttest(pdog1, pdog2), true);
+  // sys.test(ttest2(spider, man), false); // Type error
+  // sys.test(ttest2(man, spider), false); // Type error
+  sys.test(ttest2(man, woman), false);
+  sys.test(ttest2(pdog1, woman), false);
+  sys.test(ttest2(woman, pdog1), false);
+  sys.test(ttest2(pdog1, pdog2), false); // they are not identical
+  sys.test(ttest2(pdog1, pdog1), true);
+  sys.test(ttest2(dog, dog), true);
+
+}
+
+

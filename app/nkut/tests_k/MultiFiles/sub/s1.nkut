@@ -2,14 +2,14 @@
 import "sub2/s21";
 
 a = 0;
-///
+/// [n.]
 A = [a];
 {
 A! = 1800;
 }
 
-///
+/// \n -> s
 hello21 = \n -> return s21.hello(n);;
 
-///
+/// \ -> ()
 other = \ -> {};

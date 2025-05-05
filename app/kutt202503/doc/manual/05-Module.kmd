@@ -1,0 +1,263 @@
+=
+title = Module
+=
+
+## Overview
+
+A module is a file with Kutt code and extension *.ktt*.
+
+We call main directory to the top directory of a group of modules.
+
+The code inside a module only can contain
+
+* Import statements.
+
+* Constant assignations.
+
+* Function assignations.
+
+* Enumerations.
+
+* Indexeds.
+
+* Only one code block, called main block.
+
+_NOTE: After the main block can not have more code, but comments._
+
+Only can have one module with a main block and should be placed, by convention,
+in the main directory. In this case the modules are an executable program. If
+such module does not exists, the modules make up a library.
+
+A module can refer another through imports statements.
+
+Top declarations (constants, enumerations, indexed and functions) can be
+used when a module is imported with the 'point' operator.
+
+Examples:
+
+``kutt
+
+import "person";
+import "client : cl";
+
+p = person.new("Peter", 45); // Call the function new of module 'person'.
+max = cl.maxNumber; // Assign the value 'maxNumber' of module 'client' to 'max'.
+``
+
+## Private symbols
+
+By default, module main symbols are public (that is, importable). However
+is possible to mark these symbols whith the prefix operator '*__*' to make
+them private (that is, not importable).
+
+This prefix go before the corresponding symbol in constants and enumerations,
+and before the type declaration in indexeds and functions.
+
+Examples:
+
+``kutt
+
+_ x = 24;
+
+_
+y = 32;
+
+_
+// Intermediate comment is possible, but not recomended.
+z = 18;
+
+_
+//: [|]
+x2 = \-> return;;
+
+_
+//: [. si]
+new : name, age;
+
+/*
+Not valid '_' after type declaration.
+
+//: [|]
+_
+x2 = \-> return;;
+*/
+``
+
+## Module marks.
+
+In assignations is posible to indicate that the assgionation symbol is going to
+be used with functions of a module. For that, we annotate '*:module*'
+immediately before the symbol.
+
+Example:
+
+File *person.ktt*
+
+``kutt
+
+(person) [. si];
+
+//: [. si]
+new : name, age;
+
+//: [(person) | b]
+isUnderAge = \p -> return p[age] < 18;;
+``
+
+File *main.ktt*
+
+``kutt
+
+import "person";
+
+{
+  :person p = person.new("Peter", 48);
+  sys.test(p.isUnderAge(), false);
+}
+``
+
+The annotation '*:module sym*' allows to substitute:
+
+*module.function(sym, parameters)*
+
+for
+
+*sym.function(parameters)*
+
+where *parameters* can be skipped if *function* is a function with only one
+parameter.
+
+# Module marks places
+
+The '*:module*' annotation can be placed:
+
+* In assignations.
+
+* In multiassignations.
+
+* In function parameters.
+
+* In *for* parameters.
+
+* In *catch* parameter.
+
+Examples:
+
+``kutt
+
+:person p = person.new("Peter", 48);
+
+:person p1, :person p2 = [. person.new("Ana", 17), person.new("Norma", 72)];
+
+fn = \:person p -> return p.isUnderAge();;
+
+for (:v i, :file f = Dir) ...
+
+try {
+ ...
+} catch (:md e) {
+ ...
+}
+``
+
+# Default module marks
+
+If there is no module mark, the compile puts a default one in the following
+cases of assignation:
+
+- When literal string is assigned.
+> The symbol is marked with '*:str*'.
+
+- When literal array is assigned.
+> The symbol is marked with '*:arr*'.
+
+- When literal dictionary is assigned.
+> The symbol is marked with '*:dic*'.
+
+- When the return of a function module is assigned.
+> The symbol is marked with '*:module*'.
+
+In case of *catch* paramter, this is marked as '*:str*'.
+
+Examples:
+
+``kutt
+
+import "person";
+
+{
+  st = "abc"; // equals to :str st= "abc";
+  sys.test(st.starts("a"), true); // equals to sys.test(str.starts(st, "a"), true);
+
+  a = [1, 2]; // equals to :arr a = [1, 2];
+  sys.test(a.size(), 2); // equals to sys.test(arr.size(a), 2);
+
+  p = person.new("Peter", 48); // equals to :person p = person.new("Peter", 48);
+  sys.test(p.age, 48);
+
+  try {
+    throw "de";
+  } catch (e) { // equals to } catch (:str e) {
+    sys.test(e.ends("de"), true); // equals to sys.test(str.ends(e, "de"), true);
+  }
+}
+``
+
+## Shorthand for constants.
+
+To make useful indexeds, it is possible to use an arrangement similar to
+module mark, substituting
+
+*sym\[module.constant]*
+
+for
+
+*sym.constant*
+
+Example:
+
+``kutt
+
+import "person";
+
+{
+  :person p = person.new("Peter", 48);
+  sys.test(p[person.age], p.age);
+  sys.test(p.age, 48);
+}
+``
+
+# Corner case
+
+When a function returns a container with elements which are functions, we
+can call such functions writing '*#*' beteen the index symbol and the
+first parenthesis.
+
+Example:
+
+File *person.ktt*
+
+``kutt
+
+//: [ | s]
+namef = \ -> return "Peter";;
+
+name = 0;
+
+//: [ | [. [|s]] ]
+new = \ -> return [. namef];;
+``
+
+File *main.ktt*
+
+``kutt
+
+import "person";
+
+{
+  :person p0 = person.new();
+  // sys.test(p0.name(), "Peter"); // <- does not work
+  sys.test(p0.name#(), "Peter");
+}
+``
+

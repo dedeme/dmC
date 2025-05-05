@@ -1,29 +1,29 @@
-///
+/// \n, \ -> (), \ -> () -> <sub>
 mk :
   ixx1, fnixx2, fnixx3;
 
-/// \<sub> -> i
+/// \<sub> -> n
 fn = \s -> return s[fnixx2]();;
 
-/// \<sub>, i, i -> i
+/// \<sub>, n, n -> n
 fn2 = \s, n1, n2 -> return s[fnixx3](n1, n2);;
 
-///
+/// [n, n]
 one, two = [1, 2];
 sys.test(one, 1);
 sys.test(two, 2);
 
-///
+/// {s.}
 sone, stwo : {sone: "1", stwo: "2", sfive: "5"};
 sys.test(sone, "1");
 sys.test(stwo, "2");
 
-///
+/// n
 one2, two2 = ;
 sys.test(one2, 0);
 sys.test(two2, 1);
 
-///
+/// s
 sone2, stwo2 : ;
 sys.test(sone2, "sone2");
 sys.test(stwo2, "stwo2");

@@ -102,11 +102,6 @@ export function $null (v) {
   return [v];
 }
 
-export function $checkExists (left, right) {
-  if (left == null) throw new Error('Index out of range or key not found');
-  return right;
-}
-
 export function $checkNull (v) {
   if (typeof(v) === "number" && !Number.isFinite(v))
     throw new Error ('Bad Number ' + v);

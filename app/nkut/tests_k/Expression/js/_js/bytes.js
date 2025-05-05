@@ -31,9 +31,7 @@ export function fromArr (a) {
 // \s -> <bytes>
 export function fromStr (s) {
   sys.$params(arguments.length, 1);
-  const r = [];
-  for (const ch of str.toUtf8(s)) r.push(ch.codePointAt(0));
-  return new Uint8Array(r);
+  return new TextEncoder().encode(s);
 }
 
 // \n -> <bytes>
@@ -68,8 +66,6 @@ export function toArr (bs) {
 // \<bytes> -> s
 export function toStr (bs) {
   sys.$params(arguments.length, 1);
-  const r = [];
-  bs.forEach(e => r.push(String.fromCodePoint(e)));
-  return str.fromUtf8(r.join(''));
+  return new TextDecoder().decode(bs);
 }
 

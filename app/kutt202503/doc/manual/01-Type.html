@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Type</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kutt. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href="index.html">Índice</a> · <a href='02-Expression.html'>Posterior (Expression)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Description'>Description</a><br>
+<a href='#Type annotation'>Type annotation</a><br>
+<a href='#Type definition'>Type definition</a><br>
+<a href='#Generics'>Generics</a><br>
+<a href='#Compatibility'>Compatibility</a>
+</p>
+<hr>
+<a name="Description"></a>
+<h3>Description</h3>
+<h4>Simple</h4>
+
+<table class='border'>
+<tr><td class='border'><code>b</code></td>
+  <td class='border'>Boolean</td></tr>
+<tr><td class='border'><code>i</code></td>
+  <td class='border'>Integer</td></tr>
+<tr><td class='border'><code>f</code></td>
+  <td class='border'>Float</td></tr>
+<tr><td class='border'><code>s</code></td>
+  <td class='border'>String</td></tr>
+</table>
+<h4>Generic</h4>
+<p><code>A, B, ..., Z</code></p>
+<p>Types generics are substituted by another type.</p>
+<h4>Container</h4>
+
+<table class='border'>
+<tr><td class='border'><code>[A]</code></td>
+  <td class='border'>Array of type A</td></tr>
+<tr><td class='border'><code>[. AB]</code></td>
+  <td class='border'>Tuple of type A-B</td></tr>
+<tr><td class='border'><code>[! A]</td></code>
+  <td class='border'>Iterator fo type A</td></tr>
+<tr><td class='border'><code>{A}</code></td>
+  <td class='border'>Dictionary of type A</td></tr>
+</table>
+<h4>Function</h4>
+<ul>
+<li>
+<p>Without parameters and return: <code>[ | ]</code></p>
+</li>
+<li>
+<p>Without parameters, but with return of type A: <code>[ |A]</code></p>
+</li>
+<li>
+<p>With parameters of type A-B, but without return: <code>[AB|]</code></p>
+</li>
+<li>
+<p>With parameters and return: (examples) <code>[A|B] [ABC|A]</code></p>
+</li>
+</ul>
+<h4>Built-in</h4>
+<p><code>&lt;bytes>, &lt;file>, &lt;thread>, &lt;tcpServer>, &lt;tcpConnection></code></p>
+<h4>Defined</h4>
+<ul>
+<li>
+<p>Without genericis: <code>(identifier)</code></p>
+</li>
+<li>
+<p>With generics: <code>(id|A), (id|KV), ...</code></p>
+</li>
+</ul>
+<a name="Type annotation"></a>
+<h3>Type annotation</h3>
+<p>It must be done:</p>
+<ul>
+<li>
+<p>Before a function defintion.</p>
+</li>
+<li>
+<p>Before an indexed.</p>
+</li>
+<li>
+<p>In most cases, after declarations of empty arrays and dictionaries.</p>
+</li>
+</ul>
+<p>Blanks are not significative inside the type anontation.</p>
+<h4>Before function:</h4>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [|]
+init = \ -> return;;
+
+//: [|i]
+value = \ -> return 3;;
+
+//: [[s]is|]
+set = \ct, ix, value -> return;;
+
+//: [s|i]
+len = \st -> return 112;;
+</div>
+<script>aceConf("aceEditor-0", "kutt");</script>
+<h4>Before indexed:</h4>
+<p>It must be a tuple with parameters type.</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [. si]
+new : name, age;
+</div>
+<script>aceConf("aceEditor-1", "kutt");</script>
+<h4>After empty arrays and dictionaries:</h4>
+<p>The element type has to be indicated.</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+A = []/i/;
+D = {}/[(person)]/;
+</div>
+<script>aceConf("aceEditor-2", "kutt");</script>
+<a name="Type definition"></a>
+<h3>Type definition</h3>
+<p>The right part must be a function or typle type.</p>
+<p>When the right part is a function we use the postfix 'Fn' (<i>convention</i>).</p>
+<p>The left part can apears in the right one, but as element of a container.
+Otherwise will be imposible to construct an expression of such tipe. (e.g.
+<code>(person) [. (person)i]</code> is uncontructible)</p>
+<p>The same situation results in recursive definitions:</p>
+<p>Bad:</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+(owner) [. s(tenant)];
+(tenant) [. s(owner)];
+</div>
+<script>aceConf("aceEditor-3", "kutt");</script>
+<p>Ok:</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+(owner) [. s[(tenant)]];
+(tenant) [. s(owner)];
+
+//: [s | (owner)]
+newOwner = \name -> return [. name, []/(tenant)/];;
+
+//: [s(owner) | (tenant)]
+newTenant = \name, owner -> {
+  t = [. name, owner];
+  arr.push(owner[1], t);
+  return t;
+};
+</div>
+<script>aceConf("aceEditor-4", "kutt");</script>
+<h4>Without generics</h4>
+<p>Examples:</p>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+(person) [. ssi];
+(countFn) [[s]|i];
+</div>
+<script>aceConf("aceEditor-5", "kutt");</script>
+<h4>With generics</h4>
+<p>Generics of the rigth part has to have the same number and names that those
+of the left one.</p>
+<p>Examples:</p>
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+(tree|A) [. [A][(tree|A)]];
+(byMap|KV) [. [[. KV]][[. Kv]]];
+</div>
+<script>aceConf("aceEditor-6", "kutt");</script>
+<a name="Generics"></a>
+<h3>Generics</h3>
+<p>Generic can be replaced by other type (including equals o different generic).</p>
+<p>Examples:</p>
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [AB | A]
+first = \v1, v2 -> return v1;;
+
+n = first(1, "a");
+sys.test(sys.type(n), "i");
+
+tx = first("abc", 3.6);
+sys.test(sys.type(tx), "s");
+</div>
+<script>aceConf("aceEditor-7", "kutt");</script>
+<a name="Compatibility"></a>
+<h3>Compatibility</h3>
+<p>In assignations, returns and function parameters when a type is expected for
+a value, it is necessary that the actual type be compatible.</p>
+<p><i>Actual</i> is compatible with <i>target</i> when, after replacing <i>expected</i> generics by
+<i>actual</i> types and defined types by its right parts:</p>
+<ol>
+<li>
+<p><i>Actual</i> is the same type as <i>expected</i>.</p>
+</li>
+<li>
+<p> If <i>expected</i> and <i>actual</i> are tuples and <i>expected</i> has less <i>elements</i>
+   that <i>actual</i>, every element of <i>expected</i> is compatible with the element
+   of <i>actual</i> in the same position.</p>
+</li>
+</ol>
+<p>Compatible examples (Expected -> Compatible):</p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+i -> i
+[. AbA] -> [. sbs]
+[. bAB] -> [. bif]
+[. bAB] -> [. bff]
+[. bAB] -> [. bBA]
+[. AB] -> [. ifii]
+[. AB] -> [. ssfi]
+
+After defining (t|AB) [. bAB]
+(t|AB) -> [. bif]
+(t|AB) -> [. bff]
+(t|AB) -> [. bifss]
+(t|AB) -> [. sff[s]]
+[. bif] -> (t|if)
+[. bAB] -> (t|si)
+</div>
+<script>aceConf("aceEditor-8", "text");</script>
+<p>Uncompatible examples (Expected -x-> Uncompatible):</p>
+<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+i -x-> s // s must be i
+[. AbA] -x-> [. sbi] // i must be s
+[. bAB] -x-> [. sif] // s must be b
+
+After defining (t|AB) [. bAB]
+(t|AB) -x-> [. sif] // s must be b
+[. sif] -x-> (t|if) // b (in (t|if)) must be s
+[. bAA] -> (t|si) // i must be s
+</div>
+<script>aceConf("aceEditor-9", "text");</script>
+<hr>
+<p style="text-indent: 0px"><a href="index.html">Índice</a> · <a href='02-Expression.html'>Posterior (Expression)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

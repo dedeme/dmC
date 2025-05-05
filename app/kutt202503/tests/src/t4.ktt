@@ -1,0 +1,140 @@
+// age
+(animal) [. i ];
+// age, sound
+(mammal) [. is ];
+// age, sound, name
+(pet) [. iss ];
+// age, sound, name, id
+(rPet) [. issi ];
+// age, sound, name, id
+(person) [. isss ];
+
+//: (animal)
+animalNew : age;
+
+//: (mammal)
+mammalNew : age2, sound2;
+
+//: (pet)
+petNew : age3, sound3, name3;
+
+//: (rPet)
+rPetNew : age4, sound4, name4, id4;
+
+//: (person)
+personNew : age5, sound5, name5, id5;
+
+//: [A|A]
+idf = \e -> return e;;
+
+//: [[A] [A|B] | [B]]
+map2 = \A, f -> return [f(A[0]), f(A[1])];;
+
+//: [i|i]
+fact = \n -> return n <= 0 ? 1 : fact(n - 1) * n;;
+
+//: [i|i]
+incB = \n -> return n >= 4 ? n : inc(n + 1);;
+
+//: [i|i]
+inc = \n -> return incB(n);;
+
+{
+  spider = animalNew(2);
+  sys.test(spider[age], 2);
+  Animals = [spider, spider, spider, spider, spider, spider, spider];
+
+  leon = mammalNew(5, "Grrr");
+  // Mammals = [leon, leon, leon, spider];  // Type error
+  Mammals = [leon, leon, leon, leon, leon, leon];
+  Animals[1] = leon;
+
+  dock = petNew(1, "Kuak", "Dicky");
+  Pets = [dock, dock, dock];
+  Animals[2] = dock;
+  Mammals[1] = dock;
+  // Pets[1] = spider; // Type error
+
+  dog = rPetNew(8, "Guau", "Rex", 234);
+  cat = rPetNew(8, "Miau", "Kitty", 333);
+  RPets = [dog, cat];
+  Pets[1] = dog;
+  Pets[2] = cat;
+  Mammals[2] = dog;
+  Mammals[3] = cat;
+  Animals[3] = dog;
+  Animals[4] = cat;
+
+  man = personNew(18, "BlaBla", "Peter", "B232");
+  woman = personNew(26, "BlaBlaBla", "Jane", "A112");
+
+  Mammals[4] = man;
+  Mammals[5] = woman;
+  Animals[5] = man;
+  Animals[6] = woman;
+  // RPets[1] = man;  // Type error
+
+  dog2 = RPets[1];
+  sys.test(dog2, cat);
+  dog3 = Mammals[2];
+  // sys.test(dog3, dog);  // Type error
+  sys.test(dog3[sound2], "Guau");
+  // sys.test(dog3[name4], "Rex");  // Index error.
+
+  w1 = idf(woman);
+  w2 = idf(Mammals[5]);
+  sys.test(sys.type(w1), "(person)");
+  sys.test(sys.type(w2), "(mammal)");
+  sys.test(sys.typeExpand(w1), "[.isss]");
+  sys.test(sys.typeExpand(w2), "[.is]");
+  sys.test(w1[age], w2[age]);
+  sys.test(sys.type(idf), "[A|A]");
+
+  sys.test(Animals[0], spider);
+  sys.test(Animals[0] == Animals[1], false);
+  sys.test(Animals[0] == Animals[0], true);
+
+  sys.test(map2(RPets, \m -> return m[name4];),  ["Rex", "Kitty"]);
+
+  //: [(rPet) | s]
+  fn = \m -> return m[name4];;
+  sys.test(map2(RPets, fn),  ["Rex", "Kitty"]);
+
+  sys.test(fact(3), 6);
+  sys.test(inc(0), 4);
+
+  //: [i|i]
+  fact2 = \n ->
+    return n <= 0 ? 1 : fact2(n - 1) * n;;
+  sys.test(fact2(3), 6);
+
+  //: [|(pet)]
+  getPet = \ -> return man;;
+  sys.test(sys.toStr(getPet()), '[. 18,"BlaBla","Peter"]');
+  sys.test(getPet() == petNew(18, "BlaBla", "Peter"), true);
+
+  //: [A|A]
+  identity = \v -> return v;;
+
+  sys.test(identity(1), 1);
+  sys.test(identity("q"), "q");
+  sys.test(identity(man) != woman, true);
+  sys.test(identity(man) == man, true);
+  sys.test(identity(man) == [. 18, "BlaBla", "Peter", "B232"], true);
+
+//  //: [A|(pet)] // wrong types
+  //: [(pet)|(pet)]
+  factory = \v -> return v;;
+
+  sys.test(sys.type(factory(man)), "(pet)");
+
+/* Fail because returning an inner function.
+  //: [|[i|i]]
+  rfunc = \ -> {
+    //: [i|i]
+    rf = \n -> return n;;
+    return rf ;
+  };
+*/
+
+}

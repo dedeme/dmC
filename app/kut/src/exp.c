@@ -808,7 +808,7 @@ char *exp_to_str (Exp *this) {
     case EXP_MINUS:
       return str_f("-%s", exp_to_str(exp_get_minus(this)));
     case EXP_UNTYPE:
-      return str_f("<<%s", exp_to_str(exp_get_minus(this)));
+      return str_f("<<%s", exp_to_str(exp_get_untype(this)));
     case EXP_ADD: {
       // <Exp, Exp>
       Tp *tp = exp_get_add(this);

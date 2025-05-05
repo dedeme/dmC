@@ -1,0 +1,63 @@
+
+i0 = 12;
+s0 = "abc";
+
+{
+
+  trace [ [1, 2], [ 3, 4], []];
+  sys.println({"a": [1.0, 2.0], "ñ": [3.2, 4.0], empty: []});
+  sys.println([."xxx", 3, true, 12_571.75]);
+  sys.println([{"a": 1}, {}]);
+  sys.println([.1, "a", true]);
+  sys.println((1));
+  sys.println(!false);
+  sys.println(![ 1]);
+  sys.println(!![ "a"]);
+  sys.println(-3);
+  sys.println(-3.4);
+  sys.println(14 % 3);
+  sys.println(![2] | true);
+  sys.println(true & ![2]);
+  sys.println(4 + 3);
+  sys.println(1 - (4 - 3));
+  sys.println(2.0 + 3.0 * 4.0);
+  sys.println((2+3) * 4);
+  sys.println(7/2);
+  sys.println(7.0 / 2.0);
+  sys.println("a" + "bc" + "d");
+  sys.println([1] + [2, 3] + [4]);
+  sys.println([1] + ((([2, 3] + [ 4]))));
+  sys.println( 1 > 2);
+  sys.println( 1 < 2);
+  sys.println( 1 >= 2);
+  sys.println( 1 <= 2);
+  sys.println("a" > "b");
+  sys.println("a" < "b");
+  sys.println("a" >= "b");
+  sys.println("a" <= "bb");
+
+  b1 = true;
+  b2 = false;
+  b3 = b1 & b2;
+ sys.println(b3);
+
+  i1 = 5;
+  i2 = 2;
+  i3 = i1 + i2 - i0 + 12;
+  sys.println(i3);
+
+  sys.println("x" + s0 + "xx");
+
+  a0 = [ s0];
+  a1 = ["-", s0];
+  a2 = a0 + a1;
+  sys.println(a2);
+
+  sys.println(sys.toStr(4));
+  sys.println();
+  sys.print(3);
+  sys.print();
+  sys.println(4);
+
+  sys.println("Four:", 4);
+}

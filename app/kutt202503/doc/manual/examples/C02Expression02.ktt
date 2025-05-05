@@ -1,0 +1,16 @@
+{
+  v0 = switch (4) {
+    1: "a";
+    2: "b";
+    default: "c";
+  };
+  sys.test(v0, "c");
+
+  v1 = switch (2 + 2) {
+    1, 2: "a";
+    3, 4, 5: "b";
+    6: "c";
+    default: "d";
+  };
+  sys.test(v1, "b");
+}

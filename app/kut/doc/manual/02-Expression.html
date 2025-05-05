@@ -48,16 +48,19 @@ window.MathJax = {
   <span class="kmd-title">Kut. Manual.</span>
 </td></tr></table>
 <hr>
-<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
+<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a> · <a href='03-Statement.html'>Posterior (Statement)</a></p>
 <hr>
 <p style='text-indent:0px'>
-<a href='#Values'>Values</a><br>
+<a href='#Values and types'>Values and types</a><br>
 <a href='#Types'>Types</a><br>
-<a href='#Operators'>Operators</a>
+<a href='#Operators'>Operators</a><br>
+<a href='#switch'>switch</a><br>
+<a href='#Range'>Range</a><br>
+<a href='#Final notes'>Final notes</a>
 </p>
 <hr>
-<a name="Values"></a>
-<h3>Values</h3>
+<a name="Values and types"></a>
+<h3>Values and types</h3>
 <p>Values are the basic elements of Kut.</p>
 <p>Each value has a type and each type has a name to be used in the documentation
 annotations.</p>
@@ -101,6 +104,11 @@ annotations.</p>
     <code>&nbsp;&nbsp;\ -> ()</code><br>
     <code>&nbsp;&nbsp;\ -> U</code><br>
   </td></tr>
+<tr><td>Typed<br>Function</td><td><code>\(ii|i) n1, n2 -> {return n1 + n2;}</code></td>
+  <td>
+  Equals to normal functions, but with indication of type.<br>
+  See the 'Typed Functions' section.
+  </td></tr>
 </table>
 <h4>Library types</h4>
 
@@ -143,9 +151,9 @@ sys.println(v == v2); // Shows: false</div>
 <p>Integer values stand for Natural numbers.</p>
 <p>Their literals are sequences of one or more digits, optionally preceded by the
 sign '-'. They use the follow scheme:</p>
-<p><code>[-]d+</code></p>
+<p><code>-d+</code></p>
 <p>Using the sign '+' is an error. (Wrong: <code>+115</code>).</p>
-<p>However '_' can be used to improve reading. (Ok: <code>1_215</code>).</p>
+<p>However '<i>' can be used to improve reading. (Ok: <code>1</i>215</code>).</p>
 <p>Example:</p>
 <div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">i1 = 0;
 i2 = -0;
@@ -166,9 +174,9 @@ sys.println(i3 != 11892.0); // Shows: Type error.</div>
 <p>They are numbers with floating point.</p>
 <p>Floats literals can be writen with decimal point or in scientific notation.
 They use the follow scheme:</p>
-<p><code>[-]d+.[d *][(e|E)[(+|-)]d+]</code></p>
+<p><code>-d+.[d *][(e|E)[(+|-)]d+]</code></p>
 <p>Starting with the sign '+' or with '.' is an error. (Wrong: <code>+1.0</code>, <code>.123</code>).</p>
-<p>'_' can be used to improve reading. (Ok: <code>1_215.0</code>).</p>
+<p>'<i>' can be used to improve reading. (Ok: <code>1</i>215.0</code>).</p>
 <p>The number can end at '.', (Ok: <code>234.</code>, <code>234.e2</code>)</p>
 <p>Example:</p>
 <div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">f1a = 0.;
@@ -259,7 +267,7 @@ measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</cod
 <p>Indexes can be empty:</p>
 <ul>
 <li>
-<p><code>[:]</code> means <code>[0:length]</code></p>
+<p><code>:</code> means <code>[0:length]</code></p>
 </li>
 <li>
 <p><code>[n:]</code> means <code>[n:length]</code></p>
@@ -272,20 +280,20 @@ measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</cod
 <u>Element access</u><p>String elements can be accessed with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>"xabcd"[4]</code> gives <code>"d"</code></p>
+<p><code>"xabcd"4</code> gives <code>"d"</code></p>
 </li>
 <li>
-<p><code>"a€abcd"[5]</code> gives <code>"b"</code>. Note that '€' count by 3.</p>
+<p><code>"a€abcd"5</code> gives <code>"b"</code>. Note that '€' count by 3.</p>
 </li>
 <li>
-<p><code>str.fromRunes([str.toRunes("xabcd")[4]])</code> gives <code>"d"</code></p>
+<p><code>str.fromRunes([str.toRunes("xabcd")4])</code> gives <code>"d"</code></p>
 </li>
 <li>
-<p><code>str.fromRunes([str.toRunes("a€abcd")[3]])</code> gives <code>"b"</code></p>
+<p><code>str.fromRunes([str.toRunes("a€abcd")3])</code> gives <code>"b"</code></p>
 </li>
 </ul>
-<p>Note that <code>str.fromRunes([str.toRunes("a€abcd")[1]])</code> gives <code>"€"</code>, but
-<code>"a€abcd"[1]</code> returns a not valid UTF-8 character.</p>
+<p>Note that <code>str.fromRunes([str.toRunes("a€abcd")1])</code> gives <code>"€"</code>, but
+<code>"a€abcd"1</code> returns a not valid UTF-8 character.</p>
 <u>String modification</u><p>Strings can not be modified.</p>
 <u>String library</u><p>To manipulate strings, you can use the buit-in 'str' library.</p>
 <p>For example, the function <code>str.trim("  ab  ")</code> returns <code>"ab"</code>.</p>
@@ -398,7 +406,7 @@ It uses indexation "base 0".</p>
 <p>Indexes can be empty:</p>
 <ul>
 <li>
-<p><code>[:]</code> means <code>[0:length]</code></p>
+<p><code>:</code> means <code>[0:length]</code></p>
 </li>
 <li>
 <p><code>[n:]</code> means <code>[n:length]</code></p>
@@ -411,13 +419,13 @@ It uses indexation "base 0".</p>
 <u>Element access</u><p>Array elements can be accessed with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>[2,3,4,5,6][1]</code> gives <code>3</code></p>
+<p><code>[2,3,4,5,6]1</code> gives <code>3</code></p>
 </li>
 </ul>
 <u>Element modification</u><p>Array elements can be modified with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>[2,3,4,5,6][1] = 100</code> change the array to <code>[2,100,4,5,6]</code></p>
+<p><code>[2,3,4,5,6]1 = 100</code> change the array to <code>[2,100,4,5,6]</code></p>
 </li>
 </ul>
 <u>Array library</u><p>To manipulate arrays, you can use the buit-in 'arr' library.</p>
@@ -496,13 +504,30 @@ sys.assert(D2["two"] == 2);
 D2["two"] = 22;
 sys.assert(D2["two"] == 22);</div>
 <script>aceConf("aceEditor-6", "kut");</script>
+<h4>Functions</h4>
+<p>Functions (normal and typed) are expressions and are called using parentheses
+to send arguments.</p>
+<p>Example:</p>
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">fn0 = \msg -> sys.println(msg);;
+fn1 = \ -> return 5;;
+
+// Returns of functions are expressions.
+sys.assert(fn1() == 5);
+fn2 = \n -> return fn1() + n;;
+sys.assert(fn2(3) == 8);
+
+// Functions can be called as statements in any case.
+fn0("abc"); // -> Shows 'abc'
+fn2(3); // -> Shows nothing, but is a correct statement. </div>
+<script>aceConf("aceEditor-7", "kut");</script>
+<p>Functions are explained in its own section.</p>
 <a name="Operators"></a>
 <h3>Operators</h3>
 <h4>Boolean</h4>
 
 <table border=1>
 <tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
-<td>Return</td>
+<td><b>Return</b></td>
 </tr>
 <tr><td><b>!</b></td><td>Negation</td><td><tt>\b -> b<br>\[*.]->b</tt><td><tt>!value</tt>
 <td><tt>Logical 'negation'<br>'true' if '[*.]' is empty. Otherwise 'false'.</tt>
@@ -515,10 +540,10 @@ sys.assert(D2["two"] == 22);</div>
 
 <table border=1>
 <tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
-<td>Return</td>
+<td><b>Return</b></td>
 </tr>
 <tr><td><b>-</b></td><td>Negative</td><td><tt>\i -> i<br>\f -> f</tt><td><tt>-value</tt>
-<td><tt>Sign change.</tt>
+<td><tt>Sign change</tt>
 </tr>
 <tr><td><b>+</b></td><td>Addition</td><td><tt>\i,i -> i<br>\f,f -> f</tt><td><tt>n1 + n2</tt>
 <td><tt>Numbers addition</tt></tr>
@@ -530,8 +555,222 @@ sys.assert(D2["two"] == 22);</div>
 <td><tt>Numbers division</tt></tr>
 <tr><td><b>%</b></td><td>Module</td><td><tt>\i,i -> i</tt><td><tt>n1 % n2</tt>
 <td><tt>Module of n1 / n2</tt></tr>
-</table><hr>
-<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a></p>
+</table><h4>Relational</h4>
+<p>Bellow <code>T</code> stand for one of types <code>b|i|f|s</code> and <code>T'</code> for one of
+<code>T|array|dictionary</code>.</p>
+
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td><b>Return<b></td>
+</tr>
+<tr><td><b>==</b></td><td>Equals</td><td><tt>\T',T' -> b</tt><td><tt>v1 == v2</tt>
+<td><tt>v1 equals to v2</tt>
+</tr>
+<tr><td><b>!=</b></td><td>Different</td><td><tt>\T',T' -> b</tt><td><tt>v1 != v2</tt>
+<td><tt>v1 different from v2</tt>
+</tr>
+<tr><td><b>></b></td><td>Greater</td><td><tt>\T,T -> b</tt><td><tt>v1 > v2</tt>
+<td><tt>v1 is greater than v2</tt>
+</tr>
+<tr><td><b>>=</b></td><td>Greater or Equals</td><td><tt>\T,T -> b</tt><td><tt>v1 >= v2</tt>
+<td><tt>v1 is greater or equals to v2</tt>
+</tr>
+<tr><td><b>&lt;</b></td><td>Less</td><td><tt>\T,T -> b</tt><td><tt>v1 &lt; v2</tt>
+<td><tt>v1 is less than v2</tt>
+</tr>
+<tr><td><b>&lt;=</b></td><td>Less or Equals</td><td><tt>\T,T -> b</tt><td><tt>v1 &lt;= v2</tt>
+<td><tt>v1 is less or equals to v2</tt>
+</tr>
+</table><p>NOTE 1: <i>Two arrays are equals if they have the same elements in the same
+        order.</i></p>
+<p>NOTE 2: <i>Two dictionaries are equals if they have the same pairs 'key-value' in
+        any order.</i></p>
+<h4>Others</h4>
+<p>Bellow T and U stand for any normal type and TT for a typed type.</p>
+
+<table border=1>
+<tr><td><b>Op</b><td><b>Desc.</b></td><td><b>Type</b></td><td><b>Example</b></td>
+<td><b>Return<b></td>
+</tr>
+<tr><td><b>?</b></td><td>Ternary operator</td><td><tt>\b,T,U -> (T|U)</tt><td><tt>condition ? v1 : v2</tt>
+<td><tt>v1 if 'condition' is <code>true</code>.<br>Otherwise v2.</tt>
+</tr>
+<tr><td><b>&lt;&lt;</b></td><td>Untype</td><td><tt>\TT -> T</tt><td><tt>&lt;&lt;value</tt>
+<td><tt>Converts typed value<br>in untyped</tt>
+</tr>
+</table><h4>Precedence</h4>
+<p>Operations of less level are greater precedence.</p>
+<p>In the same level, the first (leftmost) operation is done before.</p>
+
+<table border=1>
+<tr><td><b>Level</b><td><b>Operations</b></tr>
+<tr><td>0</td><td><tt>! - <<</tt></tr>
+<tr><td>1</td><td><tt>* / %</tt></tr>
+<tr><td>2</td><td><tt>+ - </tt></tr>
+<tr><td>3</td><td><tt>== != > >= < <=</tt></tr>
+<tr><td>4</td><td><tt>& |</tt></tr>
+<tr><td>5</td><td><tt>?</tt></tr>
+</table><p>NOTE: <i>Assignation operators do not appear here (they will be described in
+the Statement section). Its precedence is the last one.</i></p>
+<u>Operator examples</u><br>&nbsp;<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// Boolean
+sys.assert(!false == true);
+sys.assert(!true == false);
+sys.assert(![1] == false);
+sys.assert(![] == true);
+sys.assert(!![1] == true);
+
+// Mathematical
+sys.assert(-3 == ---3);
+sys.assert(3.5 == --3.5);
+sys.assert(3 + 2 == 5);
+sys.assert(3.0 + (-1.5) == 1.5);
+sys.assert(3 - 2 == 1);
+sys.assert(3.0 --1.5 == 4.5);
+sys.assert(3 * 2 == 6);
+sys.assert(3.0 * -1.5 == -4.5);
+sys.assert(3 / 2 == 1);
+sys.assert(3.0 / -1.5 == -2.0);
+sys.assert(3 % 2 == 1);
+
+// Relational
+sys.assert(3 == 3);
+sys.assert(3 != 3.0); // Types are different
+sys.assert({"one":1} == {"one" : 1 });
+sys.assert({"one":1} != {"one":"a"});
+sys.assert(23 > 4);
+sys.assert(15 &lt;= 15);
+sys.assert([1, 2] == [1, 2]);
+sys.assert([1, 2] != [2, 1]);
+sys.assert({"one": 1, "two": 2} == {"two": 2, "one": 1});
+
+// Others
+sys.assert((1 == 2 ? 1 : "a") == "a");
+sys.assert((1 != 2 ? 1 : "a") == 1);
+sys.assert((true ? 2 : 1 + 10) == 2); // Parentheses 1
+sys.assert((true ? 2 : 1) + 10 == 12); // Parentheses 2
+// Typed function
+sys.assert(&lt;&lt;(\(|i) -> return 3;)() == 3);
+//Equals to
+fn = \(|i) -> return 3;;
+sys.assert(&lt;&lt;fn() == 3);
+
+// Precedence
+sys.assert(3 + -1 * 5 == -2);
+sys.assert((3 + -1) * 5 == 10);
+sys.assert(!(3 > 4 &amp; 3 &lt;= 4));
+sys.assert(3 > 4 | 3 &lt;= 4);
+sys.assert((false &amp; false | true) == true); // equals to (false &amp; false) | true
+sys.assert((false | false &amp; true) == false); // equals to (false | false) &amp; true
+v1 = true ? 2 : 1 + 10;
+v2 = (true ? 2 : 1) + 10;
+sys.assert(v1 == 2);
+sys.assert(v2 == 12);</div>
+<script>aceConf("aceEditor-8", "kut");</script>
+<a name="switch"></a>
+<h3>switch</h3>
+<p>'switch' expression allows to apply the operator <code>?</code> multiple times. It has
+the following scheme:</p>
+<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// blanks and end lines are optional.
+switch (value) {
+  case1a[, case1b, ...]: exp1;
+  case2a[, case2b, ...]: exp2; ...;
+  default: expN; // Clause 'default' is mandatory.
+}</div>
+<script>aceConf("aceEditor-9", "kut");</script>
+<p>'switch' compare 'value' with cases using <code>==</code> and produces the corresponding
+expression if the result is <code>true</code>.</p>
+<p>If no case returns 'true', 'expN' is produced.</p>
+<p>Examples:</p>
+<div id="aceEditor-10" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">sys.assert(
+  switch (1) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "one");
+
+sys.assert(
+  switch (4) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "fail");
+
+sys.assert(
+  switch (3) {
+    1: "one";
+    2, 3: "two or three";
+    default: "fail";
+  } == "two or three");</div>
+<script>aceConf("aceEditor-10", "kut");</script>
+<a name="Range"></a>
+<h3>Range</h3>
+<p>Range is a way to create an iterator over integers. It syntax is:</p>
+<p><code>[start:end[:step]]</code></p>
+<ol>
+<dt>start</dt>
+<dd>
+<p>First value of iterator.</p>
+</dd>
+<dt>step</dt>
+<dd>
+<p>Optional increment of iterator. If it is not indicated its value is <code>1</code>.
+  'step' with value <code>0</code> is an error.</p>
+</dd>
+<dt>end</dt>
+<dd>
+<p>Last value of iterator. If step is not indicated start is incremented while
+  its value is less than end (exclusive). Otherwise is decremented or
+  incremented while its value is '<code>>=</code>' or '<code>&lt;=</code>' to end (inclusive).</p>
+</dd>
+</ol>
+<p>NOTE 1: <i>If 'step' is positive and 'start > end' the iterator is empty. Equals
+  is if 'step' is negative and 'start &lt; end' or if 'step' is missing an
+  'start >= end'.</i></p>
+<p>NOTE 2: <i>Operate with ranges is much more slow than operate with 'for' loops</i></p>
+<p>Examples:</p>
+<div id="aceEditor-11" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// step missing
+iter.each([0:4], \n -> sys.println(n);); // Prints 0 1 2 3
+
+// step positive
+iter.each([0:4:1], \n -> sys.println(n);); // Prints 0 1 2 3 4
+iter.each([0:4:2], \n -> sys.println(n);); // Prints 0 2 4
+
+// step negative
+iter.each([5:4:-1], \n -> sys.println(n);); // Prints 5 4
+iter.each([0:4:-2], \n -> sys.println(n);); // Prints noting
+
+// Empty iterators
+iter.each([5:5], \n -> sys.println(n);); // Prints noting
+iter.each([0:4:-1], \n -> sys.println(n);); // Prints nothing
+
+// Empty and not empty
+iter.each([5:4:1], \n -> sys.println(n);); // Prints nothing
+iter.each([5:5:1], \n -> sys.println(n);); // 5 </div>
+<script>aceConf("aceEditor-11", "kut");</script>
+<a name="Final notes"></a>
+<h3>Final notes</h3>
+<h4>Symbols</h4>
+<p>Expressions can be assigned to symbols and then used.</p>
+<div id="aceEditor-12" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">n = 4;
+sys.assert (n + 2 == 6); </div>
+<script>aceConf("aceEditor-12", "kut");</script>
+<p>Symbols are explained in the 'Statement' section.</p>
+<h4>Functions as expressions.</h4>
+<p>Functions (typed and normal) are expressions. So they can be assigned to
+symbols, used as paremeter and returned by other functions.</p>
+<div id="aceEditor-13" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">fn1 = \n -> return \i -> return n + i;;;
+sys.assert(fn1(3)(2) == 5);
+
+fn2 = \v, f -> return f(v);;
+sys.assert(fn2(4, \n -> return n * 2;) == 8); </div>
+<script>aceConf("aceEditor-13", "kut");</script>
+<h4>Return of functions as expression.</h4>
+<p>The result of calling a function which returns an expression is, of course,
+an expression.</p>
+<div id="aceEditor-14" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">sys.assert(\n -> return n * n;(3) == 9); </div>
+<script>aceConf("aceEditor-14", "kut");</script>
+<hr>
+<p style="text-indent: 0px"><a href='01-Summary.html'>Anterior (Summary)</a> · <a href="index.html">Índice</a> · <a href='03-Statement.html'>Posterior (Statement)</a></p>
 <div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
   <span onclick="location.assign('#hp:START_PAGE');">
     <img border="0" src="img/up.png" alt="" />

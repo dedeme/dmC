@@ -146,7 +146,7 @@ int cdr_get_next_nline (Cdr *this) {
 }
 
 char *cdr_fail_line (Cdr *this, char *msg, int nline) {
-  return str_f("%s\n  %s:%d:", msg, fileix_to_fail(this->fix), nline);
+  return str_f("%s\n  %s:%d:", msg, fileix_to_str(this->fix), nline);
 }
 
 char *cdr_fail (Cdr *this, char *msg) {

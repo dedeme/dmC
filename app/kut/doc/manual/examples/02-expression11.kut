@@ -1,0 +1,18 @@
+// step missing
+iter.each([0:4], \n -> sys.println(n);); // Prints 0 1 2 3
+
+// step positive
+iter.each([0:4:1], \n -> sys.println(n);); // Prints 0 1 2 3 4
+iter.each([0:4:2], \n -> sys.println(n);); // Prints 0 2 4
+
+// step negative
+iter.each([5:4:-1], \n -> sys.println(n);); // Prints 5 4
+iter.each([0:4:-2], \n -> sys.println(n);); // Prints noting
+
+// Empty iterators
+iter.each([5:5], \n -> sys.println(n);); // Prints noting
+iter.each([0:4:-1], \n -> sys.println(n);); // Prints nothing
+
+// Empty and not empty
+iter.each([5:4:1], \n -> sys.println(n);); // Prints nothing
+iter.each([5:5:1], \n -> sys.println(n);); // 5

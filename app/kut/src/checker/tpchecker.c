@@ -50,7 +50,7 @@ static Pos *pos_new (int fix, int nline, char *line) {
 }
 
 static char *pos_to_str (Pos *pos) {
-  return str_f("%s:%d: %s", fileix_to_fail(pos->fix), pos->nline, pos->line);
+  return str_f("%s:%d: %s", fileix_to_str(pos->fix), pos->nline, pos->line);
 };
 
 // TYPE ------------------------------------------

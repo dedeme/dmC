@@ -1,0 +1,146 @@
+//: [|]
+help = \ -> sys.println("help");;
+
+//: [s|i]
+len = \tx -> {
+  return str.len(tx);
+};
+
+//: [iii|i]
+sumTimes = \v1, v2, v3 -> {
+  v = v1 + v2;
+  return v * v3;
+};
+
+
+{
+  aYes  = true;
+  aNot = false;
+  sys.used(aYes);
+  sys.used(aNot);
+
+  n1 = 0;
+  n2 = -1_456;
+  n3 = 1456;
+  n4 = 010_000;
+  n5 = -0000;
+  sys.used(n1);
+  sys.used(n2);
+  sys.used(n3);
+  sys.used(n4);
+  sys.used(n5);
+
+
+  f1 = 0.0;
+  f2 = -12.02;
+  f3 = 1_333.0;
+  f4 = 1.e-3;
+  f5 = 212.35E+56;
+  sys.used(f1);
+  sys.used(f2);
+  sys.used(f3);
+  sys.used(f4);
+  sys.used(f5);
+
+  s1 = "";
+  s2 = 'abc"d"e';
+  s3 = "a 'text'";
+  sys.used(s1);
+  sys.used(s2);
+  sys.used(s3);
+  s4 = """
+      Line 1
+      Line 2
+    Line 3
+    """; // Equals to: s4 = "  Line 1\n  Line 2\nLine 3\n";
+  sys.test(s4, "  Line 1\n  Line 2\nLine 3\n");
+
+  a1 = []/f/;
+  a2 = [1, 2, 3];
+  a3 = [["a"], ["a", "b", "c"]];
+  sys.used(a1);
+  sys.used(a2);
+  sys.used(a3);
+
+  t1 = [. "a"];
+  t2 = [. 1, "a", [. 1.0, true]];
+  sys.used(t1);
+  sys.used(t2);
+
+  d1 = {}/i/;
+  d2 = {" a key": 1.1, " another key ": 2.34};
+  d3 = {"one": 1, "two": 2};
+  d4 = {one: 1, two: 2};
+  sys.used(d1);
+  sys.used(d2);
+  sys.used(d3);
+  sys.used(d4);
+
+  it1 = [! 23];
+  it2 = [! 1, 4];
+  it3 = [! 4, -4, -2];
+  it4 = [! 1, 4, 1];
+  sys.used(it1);
+  sys.used(it2);
+  sys.used(it3);
+  sys.used(it4);
+
+  //: [i|i]
+  fn = \n -> return n + 3;;
+  v = fn(12);
+  sys.test(v, 15);
+
+
+  v1 = [1, 2][1];
+  Ar = [1, 2];
+  v2 = Ar[1];
+  sys.test(v1, v2);
+  sys.test(v1, 2);
+
+  v1b = [. 1, "a", 1.4][1];
+  Tp = [. 1, "a", 1.4];
+  v2b = Tp[1]; // v1b == v2b == "a"
+  sys.test(v1b, v2b);
+  sys.test(v1b, "a");
+
+  v1c = {one: 1, two: 2}["two"];
+  Dc = {one: 1, two: 2};
+  v2c = Dc["two"];
+  v1d = {one: 1, two: 2}\two;
+  v2d = Dc\two; // v1c == v2c == v1d == v2d == 2
+  sys.test(v1c, v2c);
+  sys.test(v1c, v1d);
+  sys.test(v1c, v2d);
+  sys.test(v1c, 2);
+
+  rsOp = []/b/;
+  if (v1 == 2) arr.push(rsOp, true);
+  vop = rsOp!; // equals to rsOp[0];
+  sys.used(vop);
+
+  finalV = [""];
+  if (v1 == 2) finalV[0] = "2";
+  vv = finalV!; // equals to vv = finalV[0];
+  sys.used(vv);
+
+  neg = -34;
+  pos = --34;
+  pos2 = -neg; // pos and pos2 are equals.
+  sys.test(pos, pos2);
+  sum = -3 + 4; // sum is 1
+  sum2 = -(3 + 4); // sum2 is -7
+  sys.test(sum + sum2, -6);
+
+  f = !true;
+  tr1 = !!true;
+  tr2 = !f; // t1 and t2 are 'true'
+  sys.test(tr1, tr2);
+
+  tb = ![1, 2]; // tb is false;
+  fb = ![]/i/; // tb is true;
+  sys.test(!tb, fb);
+
+  ter1 = (3 > 4) ? "a" : "b";
+  sys.test(ter1, "b");
+
+}

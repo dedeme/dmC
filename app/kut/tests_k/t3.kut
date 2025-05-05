@@ -208,17 +208,17 @@ fnw2 = \ -> {
   while (C! < 4) C! += 1;
   return C!;
 };
-sys.test(fnw1(), 4);
+sys.test(fnw2(), 4);
 
 fnw3 = \ -> {
   C = [0];
-  while ("1") {
+  while ("1" != "") {
     if (C! == 4) return C!;
     C! += 1;
   }
   return -4;
 };
-sys.test(fnw1(), 4);
+sys.test(fnw3(), 4);
 
 C = [23];
 if (!![]) C! = 0;

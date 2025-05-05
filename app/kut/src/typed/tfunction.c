@@ -4,6 +4,7 @@
 #include "DEFS.h"
 #include "kut/thread.h"
 #include "kut/path.h"
+#include "kut/math.h"
 #include "fileix.h"
 #include "symix.h"
 #include "obj.h"
@@ -11,6 +12,8 @@
 #include "typed/treader.h"
 #include "typed/tarr.h"
 #include "typed/genc.h"
+
+static int tfunction_index = 0;
 
 struct tfunction_Tfunction {
   char *key;
@@ -26,7 +29,7 @@ Tfunction *tfunction_new (
   Iarr *tpars, Ttype tret, Iarr *pars, StatCode *stat
 ) {
   int fix = stat_code_file_ix(stat);
-  char *f = str_new(fileix_to_fail(fix));
+  char *f = str_new(fileix_to_str(fix));
   char *p = f;
   while (*p) {
     char ch = *p;
@@ -47,6 +50,10 @@ Tfunction *tfunction_new (
   this->tret = tret;
   this->pars = pars;
   this->st_cd = stat;
+
+  ++tfunction_index;
+  tfunction_set_id (this, math_itos(tfunction_index));
+
   return this;
 }
 

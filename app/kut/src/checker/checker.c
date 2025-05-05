@@ -67,7 +67,7 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
         } CATCH (e) {
           if (e) printf(
             "%s:%d: Function '%s.%s' not found\n",
-            fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2)
+            fileix_to_str(fix), nline, symix_get(sym1), symix_get(sym2)
           );
         }_TRY
       } else {
@@ -79,14 +79,14 @@ static void check_exp(Layers *layers, int fix, int nline, Imports *is, Exp *exp)
           if (!exports_contains(module_get_exports(md), sym2))
             printf(
               "%s:%d: Symbol '%s.%s' not found\n",
-              fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2)
+              fileix_to_str(fix), nline, symix_get(sym1), symix_get(sym2)
             );
         } else {
           char ch = *symix_get(sym1);
           if (ch >= 'a' && ch <= 'z')
             printf(
               "%s:%d: (%s.%s) Lower case symbol '%s' is not a module\n",
-              fileix_to_fail(fix), nline, symix_get(sym1), symix_get(sym2),
+              fileix_to_str(fix), nline, symix_get(sym1), symix_get(sym2),
               symix_get(sym1)
             );
         }
@@ -380,7 +380,7 @@ static void check_block (int isInternal, Layers *layers, Imports *is, Arr *code)
     EACH(layers_not_used(layers), Cksym, sym) {
       printf(
         "%s:%d: Symbol '%s' not used\n",
-        fileix_to_fail(cksym_get_fix(sym)), cksym_get_nline(sym),
+        fileix_to_str(cksym_get_fix(sym)), cksym_get_nline(sym),
         symix_get(cksym_get_id(sym))
       );
     }_EACH

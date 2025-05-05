@@ -8,7 +8,7 @@
 char *tfail_position (StatCode *st) {
   return str_f(
     "%s:%d:",
-    fileix_to_fail(stat_code_file_ix(st)),
+    fileix_to_str(stat_code_file_ix(st)),
     stat_code_line(st)
   );
 }

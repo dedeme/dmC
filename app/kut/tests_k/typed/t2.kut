@@ -95,7 +95,7 @@ fibo = \(i|i) n -> {
   else if (n == 1) return 1;
   else return fibo(n-2) + fibo(n-1);
 };
-sys.test(fibo(10), 55);
+sys.test(<<fibo(10), 55);
 //sys.println(time.now() - t);
 
 t2 = time.now();

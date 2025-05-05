@@ -1,0 +1,21 @@
+sys.assert(
+  switch (1) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "one");
+
+sys.assert(
+  switch (4) {
+    1: "one";
+    2: "two";
+    default: "fail";
+  } == "fail");
+
+sys.assert(
+  switch (3) {
+    1: "one";
+    2, 3: "two or three";
+    default: "fail";
+  } == "two or three");
+

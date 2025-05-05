@@ -6,7 +6,7 @@ readDir = \PreviousV, dir -> {
   Fs = file.dir(dir);
   arr.sort(Fs, \f1, f2 -> return f1 < f2;);
   for (f = Fs) {
-    fpath = file.cat([dir, f]);
+    :file fpath = file.cat([dir, f]);
     if (fpath.isRegular()) {
       PreviousV! += '"// ' + f + ' ----------\\n"\n';
       for (l = str.split(fpath.read(), "\n"))

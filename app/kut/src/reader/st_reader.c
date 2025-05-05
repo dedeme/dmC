@@ -25,7 +25,7 @@ static StatCode *st_in_read(Types *tps, Cdr *cdr) {
   return r;
 }
 
-static Stat *read_multi(Types *tps, int sym, Cdr *cdr) {
+static Stat *read_multi (Types *tps, int sym, Cdr *cdr) {
   // <Exp>
   Arr *syms = arr_new();
   arr_push(syms, sym == -1 ? exp_empty() : exp_sym(sym));
@@ -431,14 +431,6 @@ static Stat *read_symbol(Types *tps, int sym, Cdr *cdr) {
         if (exp_is_string(exp2)) types_add(tps, sym, symix_add("str"));
         else if (exp_is_array(exp2)) types_add(tps, sym, symix_add("arr"));
         else if (exp_is_dic(exp2)) types_add(tps, sym, symix_add("dic"));
-        else if (exp_is_pr(exp2)) {
-          Exp *left = tp_e1(exp_get_pr(exp2));
-          if (exp_is_pt(left)) {
-            left = tp_e1(exp_get_pt(left));
-            if (exp_is_sym(left) && types_contains(tps, exp_get_sym(left)))
-              types_add(tps, sym, exp_get_sym(left));
-          }
-        }
       }
     }
 

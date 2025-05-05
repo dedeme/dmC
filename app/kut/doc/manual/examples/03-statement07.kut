@@ -1,0 +1,17 @@
+A = [101, 102, 103];
+v0, v1 = A;
+sys.assert(v0 == 101);
+sys.assert(v1 == 102);
+
+x0,,x1 = A;
+sys.assert(x0 == 101);
+sys.assert(x1 == 103);
+
+,y0,y1 = A;
+sys.assert(y0 == 102);
+sys.assert(y1 == 103);
+
+// z0,,,z1 = A; <- This is a runtime error (Index out of range).
+
+z0, = A; // One value assignation.
+sys.assert(z0 == 101);

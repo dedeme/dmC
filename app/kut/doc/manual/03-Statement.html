@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Statement</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-Expression.html'>Anterior (Expression)</a> · <a href="index.html">Índice</a> · <a href='04-Control Directives.html'>Posterior (Control Directives)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Description'>Description</a><br>
+<a href='#Block'>Block</a><br>
+<a href='#Symbol'>Symbol</a><br>
+<a href='#Single assignation (=)'>Single assignation (=)</a><br>
+<a href='#Array - Dictionary assignation ([] =)'>Array - Dictionary assignation ([] =)</a><br>
+<a href='#Multiple assignation.'>Multiple assignation.</a><br>
+<a href='#Enumerations'>Enumerations</a><br>
+<a href='#Trace'>Trace</a><br>
+<a href='#Function Calls'>Function Calls</a>
+</p>
+<hr>
+<a name="Description"></a>
+<h3>Description</h3>
+<p>Statements are commands to be executed by Kut virtual machine.</p>
+<p>Each statement is write finishing in <code>';'</code>. Blanks and end of lines are not
+significative.</p>
+<p>Empty statement is not valid (that is, isolate ';').</p>
+<p>Statements are executed sequencially, but when the order is changed by
+commands of control (commands <code>if</code>, <code>while</code>, <code>for</code>, etc.)</p>
+<a name="Block"></a>
+<h3>Block</h3>
+<p>Statements can be gruoped in blocks. A block is write with sentences surounded
+by <code>'{' '}'</code>.</p>
+<p>Empty blocks are valid ones.</p>
+<p>Blocks can be nested.</p>
+<p>Examples:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">{}
+
+{ sys.assert(3 == 3); }
+
+{
+   sys.assert(1 == 1);
+  {
+    sys.assert(2 == 2);
+    sys.assert(3 != "a");
+  }
+} </div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<a name="Symbol"></a>
+<h3>Symbol</h3>
+<p>A symbol is a sequence of characters which start with a letter (a-z | A-Z) and
+continue with a letter or digit (a-z | A-Z | 0-9).</p>
+<p>In particular, the character <code>'_'</code> is not allowed.</p>
+<p>Symbols, by convention (but not mandatory):</p>
+<ul>
+<li>
+<p>Use "camel case" (e.g. <code>mySymbol</code>, <code>aLongSymbol</code>).</p>
+</li>
+<li>
+<p>Start with lowercase, but when they refer arrays or dictionaries, in whose
+  case they start with uppercase.</p>
+</li>
+</ul>
+<a name="Single assignation (=)"></a>
+<h3>Single assignation (=)</h3>
+<p>A single assignation associates an expression to a symbol.</p>
+<p>Example:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">a = 3 + 2;
+b = a;
+sys.assert(b == a); </div>
+<script>aceConf("aceEditor-1", "kut");</script>
+<p>A symbol can not be reassigned in the same block.</p>
+<p>A symbol reassigned in a inner block shadows the first one.</p>
+<p>Examples:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">a = 2;
+
+// a = "b"; &lt;- This is an error
+
+{
+  a = "b"; // This is ok.
+  sys.assert(a == "b");
+  // a = false; &lt;- This is an error.
+}
+
+sys.assert(a == 2); </div>
+<script>aceConf("aceEditor-2", "kut");</script>
+<p>Symbols must be assigned before its use; unless when this use is inside a block
+and the symbol is assigned in the main statement sequence.</p>
+<p>Examples:</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">{
+  sys.assert(a == 2);
+  a = "b";
+  sys.assert(a == "b");
+
+  {
+    sys.assert(a == "b");
+    // sys.assert(b == 104); &lt;- this is an error
+  }
+
+  b = 104;
+  sys.assert(b == 104);
+}
+
+a = 2;
+sys.assert(a == 2); </div>
+<script>aceConf("aceEditor-3", "kut");</script>
+<a name="Array - Dictionary assignation ([] =)"></a>
+<h3>Array - Dictionary assignation ([] =)</h3>
+<p>Values can be set in arrays and dictionaries using <code>'<a href="' '">' '</a>'</code> indexation.</p>
+<p>Arrays are indexed by integers base-0. Dictionries are indexed by 'key'. In
+both cases if the value indexed does not exists previously, a runtime
+exception is raised.</p>
+<p>Examples:</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">A = ["a", "b", "c"];
+A[0] = "new";
+sys.assert(A == ["new", "b", "c"]);
+
+// A[-1] = "x"; &lt;- Runtime exception.
+// A[100] = "x"; &lt;- Runtime excepetion.
+
+D = {"one": 1, "two": 2};
+D["one"] = 505;
+sys.assert(D == {"one": 505, "two": 2});
+
+// D["x"] = 505; &lt;- Runtime exception </div>
+<script>aceConf("aceEditor-4", "kut");</script>
+<h4>Operation + assignation</h4>
+<p>It is posible use the scheme <code>'symbol operation= value'</code>, that is replaced
+as <code>'symbol = symbol operation (value)'</code>.</p>
+<p>There are the following operators: <code>+= -= *= /= %= &amp;= |=</code>.</p>
+<p>Examples:</p>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">A = [1, 200, 44];
+A[0] += 100;
+A[1] /= 2;
+A[2] %= 5;
+sys.assert(A == [101, 100, 4]);
+
+D = {"name": "Peter", "age": 36, "client": false};
+D["age"] /= 10 + 2;
+D["client"] |= true;
+sys.assert(D == {"name": "Peter", "age": 3, "client": true}); </div>
+<script>aceConf("aceEditor-5", "kut");</script>
+<a name="Multiple assignation."></a>
+<h3>Multiple assignation.</h3>
+<p>It is posible to use multiple assignation with arrays and dictionaries.</p>
+<p>The assignation symbol can be '=' for arrays or ':' for dictionaries. In any
+case the left part of assignation must have at least one comma.</p>
+<h4>Arrays</h4>
+<p>Values are assigned matching the array order.</p>
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">A = [101, 102, 103];
+v0, v1 = A;
+sys.assert(v0 == 101);
+sys.assert(v1 == 102); </div>
+<script>aceConf("aceEditor-6", "kut");</script>
+<p>Values can be skipped.</p>
+<p>Assignations out of range are runtime exceptions.</p>
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">A = [101, 102, 103];
+
+x0,,x1 = A;
+sys.assert(x0 == 101);
+sys.assert(x1 == 103);
+
+,y0,y1 = A;
+sys.assert(y0 == 102);
+sys.assert(y1 == 103);
+
+// z0,,,z1 = A; &lt;- This is a runtime error (Index out of range).
+
+z0, = A; // One value assignation.
+sys.assert(z0 == 101); </div>
+<script>aceConf("aceEditor-7", "kut");</script>
+<h4>Dictionaries</h4>
+<p>Values are assgined matching the dictionary key and ussing, as assignation
+simbol, ':'.</p>
+<p>To assign only one value, the statement must start with ','.</p>
+<p>NOTE: <i>Use several commas as separator is ok, but use them at start is not</i>.</p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">D = {"name": "Peter", "age": 32, "amount": 12000.50};
+
+amount, name : D;
+// surname, age: D; &lt;- No valid because 'surname' is not a key.
+, age : D; // One value assignation.
+
+sys.assert(amount == 12000.5);
+sys.assert(name == "Peter");
+sys.assert(age == 32);
+
+
+D2 = {"name2": "Peter", "age2": 32, "amount2": 12000.50};
+// Use several commas as separator is ok
+amount2,, name2 : D2;
+// ,, age2, : D2; &lt;- But use them as start is not.
+
+sys.assert(amount2 == 12000.5);
+sys.assert(name2 == "Peter"); </div>
+<script>aceConf("aceEditor-8", "kut");</script>
+<a name="Enumerations"></a>
+<h3>Enumerations</h3>
+<p>Multiple assignation without right part is used as enumeration.</p>
+<p>Using the sign '=' values 0, 1, 2... are asigned succesively to symbols.</p>
+<p>Using the sign ':' every symbol point out to a string with its name.</p>
+<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">zero, one,, three =;
+,, two =;
+sys.assert(zero == 0);
+sys.assert(one == 1);
+sys.assert(two == 2);
+sys.assert(three == 3);
+
+a, b, c :;
+sys.assert(a == "a");
+sys.assert(b == "b");
+sys.assert(c == "c"); </div>
+<script>aceConf("aceEditor-9", "kut");</script>
+<a name="Trace"></a>
+<h3>Trace</h3>
+<p>Trace statements show in console (stdout) the line and file of the statement
+and the value of one expression translated to string.</p>
+<p>It show only the 70 first runes (UTF-8 characters) of the string with the
+value. To show the complete string, it should be used the symbol ':' between
+<code>trace</code> and expression.</p>
+<p>Examples:</p>
+<div id="aceEditor-10" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">trace 3 + 2;
+trace "abc" + "d";
+v = "012012012012012012012ññññññññññññññññññññññcccccccccccccccc";
+trace [v];
+v4 = v + v;
+trace [v4]; // Show only the first runes
+trace : [v4]; // Show the complete value </div>
+<script>aceConf("aceEditor-10", "kut");</script>
+<a name="Function Calls"></a>
+<h3>Function Calls</h3>
+<p>Functions calls are valid statements (be functions either with or without
+return)</p>
+<p>Functions are explained in its own section.
+</p>
+<hr>
+<p style="text-indent: 0px"><a href='02-Expression.html'>Anterior (Expression)</a> · <a href="index.html">Índice</a> · <a href='04-Control Directives.html'>Posterior (Control Directives)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

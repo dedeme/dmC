@@ -1,0 +1,51 @@
+
+/// Client module
+
+//import "person";
+
+/// Client type.
+(client) [. ss];
+
+/// Minimum age
+minAge = 0;
+
+/// Constructor.
+///   person: Client identifier.
+///   citty: Client citty.
+//: [ss | (client)]
+new = \p, c -> return [. p, c];;
+
+a = 1;
+
+//: [|]
+fn0 = \ -> {
+  sys.test(a, 1); // a preserve its top value.
+};
+
+{
+
+  // Line comment
+
+  /*
+  Multiline comment
+  */
+
+  ax = /* Injected comment */ 123; // Line comment.
+  sys.used(ax);
+
+  sys.test(a, 1); // true because a == 1
+  a = "v"; // a is now equals to "v".
+  sys.test(a, "v");
+
+  //: [|]
+  fn = \ -> {
+    sys.test(a, "v"); // In this point a == "v";
+    a = [1, 2]; // a is now equals to [1, 2].
+    sys.test(a, [1, 2]);
+  };
+  fn(); // Execute fn();
+
+  sys.test(a, "v"); // a preserve its block value
+  fn0();
+}
+

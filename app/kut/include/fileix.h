@@ -27,13 +27,9 @@ char *fileix_get_root (void);
 ///               · Otherwise root/ipath is used.
 int fileix_add(int fix, char *ipath);
 
-/// Returns the path with index 'ix' "shorted" to 50 bytes, to print with
-/// print - trace (Without extension and without making it canonical).
-char *fileix_to_str (int ix);
-
 /// Returns the path with index 'ix' to print in error messages. It is with
 /// extension and made canonical.
-char *fileix_to_fail (int ix);
+char *fileix_to_str (int ix);
 
 /// Read the file with index 'ix'
 /// Throw EXC_IO if file can not be found.

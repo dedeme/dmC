@@ -1,0 +1,16 @@
+
+(person) [. si];
+
+//: [. si]
+new : name, age;
+
+//: [(person) | b]
+isUnderAge = \p -> return p[age] < 18;;
+
+//: [ | s]
+namef = \ -> return "Peter";;
+
+name2 = 0;
+
+//: [ | [. [|s]] ]
+new2 = \ -> return [. namef];;

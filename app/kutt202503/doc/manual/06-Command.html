@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Command</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kutt. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='05-Module.html'>Anterior (Module)</a> · <a href="index.html">Índice</a> · <a href='90-Conventions.html'>Posterior (Conventions)</a></p>
+<hr>
+
+<pre>Use:
+  kutt -h
+  kutt -v
+  kutt --clean
+  kutt --delete
+  kutt kttFile args...
+  kutt -c kttFile
+  kutt -o binFile kttFile
+
+  where
+    &apos;kutt -h&apos; show information about the command.
+    &apos;kttFile&apos; is a file with Kutt code.
+      This file must end with &apos;.ktt&apos;. But you can write it
+      with or without the extension.
+
+  kutt -h
+  Show this message.
+
+  kutt -v
+  Show Kutt version.
+
+  kutt --clean
+  Remove not necessary files in Kutt data base.
+
+  kutt --delete
+  Remove all the files of Kutt data base.
+
+  kutt kttFile args...
+  Compiles and runs &apos;kttFile&apos;.
+  Examples:
+  kutt myPrg.ktt    -&gt; Compiles and execute myPrg.ktt
+  kutt myPrg        -&gt; Compiles and execute myPrg.ktt
+  kutt myPrg a 12   -&gt; Compiles and execute myPrg.ktt with &apos;a&apos; and &apos;12
+                       as parameters.
+
+  kutt -c kttFile
+  Only compiles &apos;kttFile&apos;.
+  Examples:
+  kutt -c myPrg.ktt    -&gt; Compiles myPrg.ktt
+  kutt -c myPrg        -&gt; Compiles myPrg.ktt
+
+  kutt -o binFile kttFile
+  Compiles &apos;kttFile&apos; and copy the binary as &apos;binFile&apos;
+  Examples:
+  kutt -o /prgs/myPrg myPrg.ktt -&gt; Compiles myPrg.ktt as /prgs/myPrg
+  kutt -o /prgs/myPrg myPrg     -&gt; Compiles myPrg.ktt as /prgs/myPrg
+
+  kutt -d kttFile
+  Returns documentation of &apos;kttFile&apos; in stdout.
+  Examples:
+  kutt -d myPrg.ktt    -&gt; Show documentation of myPrg.ktt
+  kutt -d myPrg        -&gt; Show documentation of myPrg.ktt
+</pre>
+<hr>
+<p style="text-indent: 0px"><a href='05-Module.html'>Anterior (Module)</a> · <a href="index.html">Índice</a> · <a href='90-Conventions.html'>Posterior (Conventions)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

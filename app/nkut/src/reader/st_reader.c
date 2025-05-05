@@ -698,14 +698,6 @@ static Stat *read_symbol(Types *tps, Token *token, Cdr *cdr) {
         if (exp_is_string(exp2)) types_add(tps, sym, "str");
         else if (exp_is_array(exp2)) types_add(tps, sym, "arr");
         else if (exp_is_map(exp2)) types_add(tps, sym, "dic");
-        else if (exp_is_pr(exp2)) {
-          Exp *left = tp_e1(exp_get_pr(exp2));
-          if (exp_is_pt(left)) {
-            left = tp_e1(exp_get_pt(left));
-            if (exp_is_sym(left) && types_contains(tps, exp_get_sym(left)))
-              types_add(tps, sym, exp_get_sym(left));
-          }
-        }
       }
     }
 
@@ -747,10 +739,9 @@ static Stat *read_symbol(Types *tps, Token *token, Cdr *cdr) {
         );
       }
     } else {
-      js = str_f("%s%ssys.$checkExists(%s,%s)%s",
+      js = str_f("%s%s%s%s",
         exp_get_js(exp),
         tkjs,
-        exp_to_str(exp),
         exp_can_be_null(exp2)
           ? str_f("sys.$checkNull(%s)", exp2_js)
           : exp2_js,

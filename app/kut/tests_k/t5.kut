@@ -81,3 +81,5 @@ sys.test(arrd + arre, 3);
 arrf,  = [1, 2, 3];
 sys.test(arrf, 1);
 
+:str arrg, = ["1"];
+sys.test(arrg, "1");

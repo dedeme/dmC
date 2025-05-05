@@ -1,0 +1,265 @@
+=
+title = Statement
+=
+
+## Description
+
+Statements are commands to be executed by Kut virtual machine.
+
+Each statement is write finishing in *';'*. Blanks and end of lines are not
+significative.
+
+Empty statement is not valid (that is, isolate ';').
+
+Statements are executed sequencially, but when the order is changed by
+commands of control (commands *if*, *while*, *for*, etc.)
+
+## Block
+
+Statements can be gruoped in blocks. A block is write with sentences surounded
+by *'{' '}'*.
+
+Empty blocks are valid ones.
+
+Blocks can be nested.
+
+Examples:
+
+``kut
+{}
+
+{ sys.assert(3 == 3); }
+
+{
+   sys.assert(1 == 1);
+  {
+    sys.assert(2 == 2);
+    sys.assert(3 != "a");
+  }
+} ``
+
+## Symbol
+
+A symbol is a sequence of characters which start with a letter (a-z | A-Z) and
+continue with a letter or digit (a-z | A-Z | 0-9).
+
+In particular, the character *'__'* is not allowed.
+
+Symbols, by convention (but not mandatory):
+
+* Use "camel case" (e.g. *mySymbol*, *aLongSymbol*).
+
+* Start with lowercase, but when they refer arrays or dictionaries, in whose
+  case they start with uppercase.
+
+## Single assignation (=)
+
+A single assignation associates an expression to a symbol.
+
+Example:
+
+``kut
+a = 3 + 2;
+b = a;
+sys.assert(b == a); ``
+
+A symbol can not be reassigned in the same block.
+
+A symbol reassigned in a inner block shadows the first one.
+
+Examples:
+
+``kut
+a = 2;
+
+// a = "b"; <- This is an error
+
+{
+  a = "b"; // This is ok.
+  sys.assert(a == "b");
+  // a = false; <- This is an error.
+}
+
+sys.assert(a == 2); ``
+
+Symbols must be assigned before its use; unless when this use is inside a block
+and the symbol is assigned in the main statement sequence.
+
+Examples:
+
+``kut
+{
+  sys.assert(a == 2);
+  a = "b";
+  sys.assert(a == "b");
+
+  {
+    sys.assert(a == "b");
+    // sys.assert(b == 104); <- this is an error
+  }
+
+  b = 104;
+  sys.assert(b == 104);
+}
+
+a = 2;
+sys.assert(a == 2); ``
+
+## Array - Dictionary assignation ([] =)
+
+Values can be set in arrays and dictionaries using *'[' ']'* indexation.
+
+Arrays are indexed by integers base-0. Dictionries are indexed by 'key'. In
+both cases if the value indexed does not exists previously, a runtime
+exception is raised.
+
+Examples:
+
+``kut
+A = ["a", "b", "c"];
+A[0] = "new";
+sys.assert(A == ["new", "b", "c"]);
+
+// A[-1] = "x"; <- Runtime exception.
+// A[100] = "x"; <- Runtime excepetion.
+
+D = {"one": 1, "two": 2};
+D["one"] = 505;
+sys.assert(D == {"one": 505, "two": 2});
+
+// D["x"] = 505; <- Runtime exception ``
+
+# Operation + assignation
+
+It is posible use the scheme *'symbol operation= value'*, that is replaced
+as *'symbol = symbol operation (value)'*.
+
+There are the following operators: *+= -= **= /= %= &= |=*.
+
+Examples:
+
+``kut
+A = [1, 200, 44];
+A[0] += 100;
+A[1] /= 2;
+A[2] %= 5;
+sys.assert(A == [101, 100, 4]);
+
+D = {"name": "Peter", "age": 36, "client": false};
+D["age"] /= 10 + 2;
+D["client"] |= true;
+sys.assert(D == {"name": "Peter", "age": 3, "client": true}); ``
+
+## Multiple assignation.
+
+It is posible to use multiple assignation with arrays and dictionaries.
+
+The assignation symbol can be '=' for arrays or ':' for dictionaries. In any
+case the left part of assignation must have at least one comma.
+
+# Arrays
+
+Values are assigned matching the array order.
+
+``kut
+A = [101, 102, 103];
+v0, v1 = A;
+sys.assert(v0 == 101);
+sys.assert(v1 == 102); ``
+
+Values can be skipped.
+
+Assignations out of range are runtime exceptions.
+
+``kut
+A = [101, 102, 103];
+
+x0,,x1 = A;
+sys.assert(x0 == 101);
+sys.assert(x1 == 103);
+
+,y0,y1 = A;
+sys.assert(y0 == 102);
+sys.assert(y1 == 103);
+
+// z0,,,z1 = A; <- This is a runtime error (Index out of range).
+
+z0, = A; // One value assignation.
+sys.assert(z0 == 101); ``
+
+# Dictionaries
+
+Values are assgined matching the dictionary key and ussing, as assignation
+simbol, ':'.
+
+To assign only one value, the statement must start with ','.
+
+NOTE: _Use several commas as separator is ok, but use them at start is not_.
+
+``kut
+D = {"name": "Peter", "age": 32, "amount": 12000.50};
+
+amount, name : D;
+// surname, age: D; <- No valid because 'surname' is not a key.
+, age : D; // One value assignation.
+
+sys.assert(amount == 12000.5);
+sys.assert(name == "Peter");
+sys.assert(age == 32);
+
+
+D2 = {"name2": "Peter", "age2": 32, "amount2": 12000.50};
+// Use several commas as separator is ok
+amount2,, name2 : D2;
+// ,, age2, : D2; <- But use them as start is not.
+
+sys.assert(amount2 == 12000.5);
+sys.assert(name2 == "Peter"); ``
+
+## Enumerations
+
+Multiple assignation without right part is used as enumeration.
+
+Using the sign '=' values 0, 1, 2... are asigned succesively to symbols.
+
+Using the sign ':' every symbol point out to a string with its name.
+
+``kut
+zero, one,, three =;
+,, two =;
+sys.assert(zero == 0);
+sys.assert(one == 1);
+sys.assert(two == 2);
+sys.assert(three == 3);
+
+a, b, c :;
+sys.assert(a == "a");
+sys.assert(b == "b");
+sys.assert(c == "c"); ``
+
+## Trace
+
+Trace statements show in console (stdout) the line and file of the statement
+and the value of one expression translated to string.
+
+It show only the 70 first runes (UTF-8 characters) of the string with the
+value. To show the complete string, it should be used the symbol ':' between
+*trace* and expression.
+
+Examples:
+
+``kut
+trace 3 + 2;
+trace "abc" + "d";
+v = "012012012012012012012ññññññññññññññññññññññcccccccccccccccc";
+trace [v];
+v4 = v + v;
+trace [v4]; // Show only the first runes
+trace : [v4]; // Show the complete value ``
+
+## Function Calls
+
+Functions calls are valid statements (be functions either with or without
+return)
+
+Functions are explained in its own section.

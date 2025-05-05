@@ -1,0 +1,29 @@
+sV = [""];
+s = "123";
+for (ch = s) sV[0] += ch;
+sys.assert(s == sV[0]);
+
+sumV = [0];
+A = [10, 20, 30];
+it = A.toIter();
+for (e = A) sumV[0] += e;
+sys.assert(sumV[0] == 60);
+for (e = it) sumV[0] -= e;
+sys.assert(sumV[0] == 0);
+
+it2 = A.toIter();
+for (i, e = A) sumV[0] += i;
+sys.assert(sumV[0] == 3);
+for (i, e = it2) sumV[0] -= i;
+sys.assert(sumV[0] == 0);
+
+D = {"one": 1, "two": 2};
+for (e = D) sumV[0] += e;
+sys.assert(sumV[0] == 3);
+keysV = [""];
+for (k, e = D) {
+  keysV[0] += k;
+  sumV[0] -= e;
+}
+sys.assert(keysV[0] == "onetwo");
+sys.assert(sumV[0] == 0);

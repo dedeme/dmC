@@ -26,6 +26,8 @@ static void trace (Imports *is, Heap0 *h0, Heaps *hs, StatCode *st_cd) {
   //<int, Exp>
   Tp *v = stat_get_trace(stat_code_stat(st_cd));
   char *sexp = exp_to_js(solver_solve(is, h0, hs, tp_e2(v)));
+  //<char>
+  Arr *runes = str_runes(sexp);
 
   printf(
     "%s:%d: %s\n",
@@ -33,8 +35,8 @@ static void trace (Imports *is, Heap0 *h0, Heaps *hs, StatCode *st_cd) {
     stat_code_line(st_cd),
     *(int *)tp_e1(v)
       ? sexp
-      : strlen(sexp) > 70
-        ? str_f("%s...", str_left(sexp, 67))
+      : arr_size(runes) > 70
+        ? str_f("%s...", arr_join(arr_take(runes, 67),  ""))
         : sexp
   );
 }
@@ -228,9 +230,10 @@ static void assign_xxx (
 static Exp *try (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
   // [<StatCode>, <int>, <StatCode>, <Opt<StatCode>>]
   Arr *ps = stat_get_try(st);
-  Exp *r = exp_empty();
+  Exp *empty = exp_empty();
+  Exp **r = &empty;
   TRY {
-    r = runner_run_stat(stk, is, h0, hs, arr_get(ps, 0));
+    *r = runner_run_stat(stk, is, h0, hs, arr_get(ps, 0));
   } CATCH (e) {
     int *sym = arr_get(ps, 1);
     char *msg = exc_msg(e);
@@ -240,7 +243,7 @@ static Exp *try (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
       exp_string(str_right(msg, str_index(msg, ": ") + 2))
     );
     TRY {
-      r = runner_run_stat(
+      *r = runner_run_stat(
         stk, is, h0, heaps_add(hs, h), arr_get(ps, 2)
       );
     } CATCH (e) {
@@ -253,10 +256,10 @@ static Exp *try (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {
   StatCode *finally = opt_get(arr_get(ps, 3));
   if (finally) {
     Exp *r2 = runner_run_stat(stk, is, h0, hs, finally);
-    if (!exp_is_empty(r2)) r = r2;
+    if (!exp_is_empty(r2)) *r = r2;
   }
 
-  return r;
+  return *r;
 }
 
 static Exp *fwhile (Stack *stk, Imports *is, Heap0 *h0, Heaps *hs, Stat *st) {

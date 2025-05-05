@@ -1,0 +1,51 @@
+
+(t|AB) [. bAB];
+
+//: [A(t|AB)|A]
+gget = \v1, v2 -> return v2[1];;
+
+
+{
+  A0A = []/A/;
+  A0B = []/B/;
+
+  A1 = []/[. AbA]/;
+  A1.push([. "a", true, "b"]);
+
+  A2 = []/[. bAB]/;
+  A2.push([. true, 1, 2.5]);
+  A2.push([. true, 1.4, 2.5]);
+  if (!!A0B & !!A0A) A2.push([. false, A0B!, A0A!]);
+
+  A3 = []/[. AB]/;
+  A3.push([. 1, 2.5, 3, 4]);
+  A3.push([. "a", "b", 3.4, 4]);
+
+  A4 = []/(t|AB)/;
+  A4.push([. true, 1, 2.4]);
+  A4.push([. true, 1.2, 2.4]);
+  A4.push([. true, 1, 2.4, "a", "v"]);
+  A4.push([. true, 1.2, 2.4, [""]]);
+
+  A5a = []/(t|if)/;
+  A5a.push([. true, 3, 4.5]);
+  A5 = []/[. bif]/;
+  A5.push(A5a!);
+
+  A6a = []/(t|si)/;
+  A6a.push([. true, "a", 4]);
+  A6 = []/[. bAB]/;
+  A6.push(A6a!);
+
+  v = gget(18, A5a[0]);
+  sys.test(v, 3);
+
+  // Fails
+  // A1.push([. "a", true, 1]);
+  // A2.push([. "a", 1, 2.5]);
+  // A4.push([. "a", 1, 2.5]);
+  // A7 = []/[. sif]/;
+  // A7.push(A5a!);
+  // A8 = []/[. bAA]/;
+  // A8.push(A6a!);
+}

@@ -1,0 +1,242 @@
+=
+book = Kutt. Manual.
+title = Type
+=
+
+## Description
+
+# Simple
+
+``
+<table class='border'>
+<tr><td class='border'><code>b</code></td>
+  <td class='border'>Boolean</td></tr>
+<tr><td class='border'><code>i</code></td>
+  <td class='border'>Integer</td></tr>
+<tr><td class='border'><code>f</code></td>
+  <td class='border'>Float</td></tr>
+<tr><td class='border'><code>s</code></td>
+  <td class='border'>String</td></tr>
+</table>
+``
+
+# Generic
+
+*A, B, ..., Z*
+
+Types generics are substituted by another type.
+
+
+# Container
+
+``
+<table class='border'>
+<tr><td class='border'><code>[A]</code></td>
+  <td class='border'>Array of type A</td></tr>
+<tr><td class='border'><code>[. AB]</code></td>
+  <td class='border'>Tuple of type A-B</td></tr>
+<tr><td class='border'><code>[! A]</td></code>
+  <td class='border'>Iterator fo type A</td></tr>
+<tr><td class='border'><code>{A}</code></td>
+  <td class='border'>Dictionary of type A</td></tr>
+</table>
+``
+
+# Function
+
+
+* Without parameters and return: *\[ | ]*
+
+* Without parameters, but with return of type A: *\[ |A]*
+
+* With parameters of type A-B, but without return: *\[AB|]*
+
+* With parameters and return: (examples) *\[A|B] \[ABC|A]*
+
+
+# Built-in
+
+*<bytes>, <file>, <thread>, <tcpServer>, <tcpConnection>*
+
+# Defined
+
+* Without genericis: *(identifier)*
+
+* With generics: *(id|A), (id|KV), ...*
+
+## Type annotation
+
+It must be done:
+
+* Before a function defintion.
+
+* Before an indexed.
+
+* In most cases, after declarations of empty arrays and dictionaries.
+
+Blanks are not significative inside the type anontation.
+
+# Before function:
+
+``kutt
+
+//: [|]
+init = \ -> return;;
+
+//: [|i]
+value = \ -> return 3;;
+
+//: [[s]is|]
+set = \ct, ix, value -> return;;
+
+//: [s|i]
+len = \st -> return 112;;
+``
+
+# Before indexed:
+
+It must be a tuple with parameters type.
+
+``kutt
+
+//: [. si]
+new : name, age;
+``
+
+# After empty arrays and dictionaries:
+
+The element type has to be indicated.
+
+``kutt
+
+A = []/i/;
+D = {}/[(person)]/;
+``
+
+## Type definition
+
+The right part must be a function or typle type.
+
+When the right part is a function we use the postfix 'Fn' (_convention_).
+
+The left part can apears in the right one, but as element of a container.
+Otherwise will be imposible to construct an expression of such tipe. (e.g.
+*(person) \[. (person)i]* is uncontructible)
+
+The same situation results in recursive definitions:
+
+Bad:
+
+``kutt
+
+(owner) [. s(tenant)];
+(tenant) [. s(owner)];
+``
+
+Ok:
+
+``kutt
+
+(owner) [. s[(tenant)]];
+(tenant) [. s(owner)];
+
+//: [s | (owner)]
+newOwner = \name -> return [. name, []/(tenant)/];;
+
+//: [s(owner) | (tenant)]
+newTenant = \name, owner -> {
+  t = [. name, owner];
+  arr.push(owner[1], t);
+  return t;
+};
+``
+
+# Without generics
+
+Examples:
+
+``kutt
+
+(person) [. ssi];
+(countFn) [[s]|i];
+``
+
+# With generics
+
+Generics of the rigth part has to have the same number and names that those
+of the left one.
+
+Examples:
+
+``kutt
+
+(tree|A) [. [A][(tree|A)]];
+(byMap|KV) [. [[. KV]][[. Kv]]];
+``
+
+## Generics
+
+Generic can be replaced by other type (including equals o different generic).
+
+Examples:
+
+``kutt
+
+//: [AB | A]
+first = \v1, v2 -> return v1;;
+
+n = first(1, "a");
+sys.test(sys.type(n), "i");
+
+tx = first("abc", 3.6);
+sys.test(sys.type(tx), "s");
+``
+
+## Compatibility
+
+In assignations, returns and function parameters when a type is expected for
+a value, it is necessary that the actual type be compatible.
+
+_Actual_ is compatible with _target_ when, after replacing _expected_ generics by
+_actual_ types and defined types by its right parts:
+
+1. _Actual_ is the same type as _expected_.
+
+2. If _expected_ and _actual_ are tuples and _expected_ has less _elements_
+   that _actual_, every element of _expected_ is compatible with the element
+   of _actual_ in the same position.
+
+Compatible examples (Expected -> Compatible):
+
+``text
+
+i -> i
+[. AbA] -> [. sbs]
+[. bAB] -> [. bif]
+[. bAB] -> [. bff]
+[. bAB] -> [. bBA]
+[. AB] -> [. ifii]
+[. AB] -> [. ssfi]
+
+After defining (t|AB) [. bAB]
+(t|AB) -> [. bif]
+(t|AB) -> [. bff]
+(t|AB) -> [. bifss]
+(t|AB) -> [. sff[s]]
+[. bif] -> (t|if)
+[. bAB] -> (t|si)
+``
+
+Uncompatible examples (Expected -x-> Uncompatible):
+
+``text
+
+i -x-> s // s must be i
+[. AbA] -x-> [. sbi] // i must be s
+[. bAB] -x-> [. sif] // s must be b
+
+After defining (t|AB) [. bAB]
+(t|AB) -x-> [. sif] // s must be b
+[. sif] -x-> (t|if) // b (in (t|if)) must be s
+[. bAA] -> (t|si) // i must be s
+``

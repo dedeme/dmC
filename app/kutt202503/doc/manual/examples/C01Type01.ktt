@@ -1,0 +1,55 @@
+//: [|]
+init = \ -> return;;
+
+//: [|i]
+value = \ -> return 3;;
+
+//: [[s]is|]
+set = \ct, ix, value -> return;;
+
+//: [s|i]
+len = \st -> return 112;;
+
+//: [. si]
+new : name, age;
+
+(owner) [. s[(tenant)]];
+(tenant) [. s(owner)];
+
+(person) [. ssi];
+(countFn) [[s]|i];
+
+(tree|A) [. [A][(tree|A)]];
+(byMap|KV) [. [[. KV]][[. KV]]];
+
+{
+
+  A = []/i/;
+  D = {}/[(person)]/;
+
+  sys.used(A);
+  sys.used(D);
+
+  //: [s | (owner)]
+  newOwner = \name -> return [. name, []/(tenant)/];;
+
+  //: [s(owner) | (tenant)]
+  newTenant = \name, owner -> {
+    t = [. name, owner];
+    arr.push(owner[1], t);
+    return t;
+  };
+
+  sys.used(newOwner);
+  sys.used(newTenant);
+
+  //: [AB | A]
+  first = \v1, v2 -> return v1;;
+  n = first(1, "a");
+  sys.test(sys.type(n), "i");
+
+  tx = first("abc", 3.6);
+  sys.test(sys.type(tx), "s");
+
+
+}

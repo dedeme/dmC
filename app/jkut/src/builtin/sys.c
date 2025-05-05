@@ -1,4 +1,4 @@
-// Copyright 23-Nov-2024 ºDeme
+// Copyright 15-Feb-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *sys_bget (void) {return
@@ -101,11 +101,6 @@ char *sys_bget (void) {return
   "export function $null (v) {\n"
   "  if (v == null) return [];\n"
   "  return [v];\n"
-  "}\n"
-  "\n"
-  "export function $checkExists (left, right) {\n"
-  "  if (left == null) throw new Error('Index out of range or key not found');\n"
-  "  return right;\n"
   "}\n"
   "\n"
   "export function $checkNull (v) {\n"

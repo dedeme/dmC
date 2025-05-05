@@ -1,5 +1,5 @@
 import "s22";
 import "main";
 
-///
+/// \n -> s
 hello = \n -> return "hello " + n;;

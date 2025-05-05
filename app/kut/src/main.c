@@ -41,6 +41,10 @@ static void shandler (int sig) {
   EXC_KUT("Arithmetic exception");
 }
 
+static void sshandler (int sig) {
+  EXC_KUT("Segmentation violation");
+}
+
 int main(int argc, char *argv[]) {
   GC_INIT();
   sys_init();
@@ -51,6 +55,7 @@ int main(int argc, char *argv[]) {
   }
 
   signal (SIGFPE, shandler);
+  signal (SIGSEGV, sshandler);
 
   args = arr_new();
   RANGE0(i, argc) {

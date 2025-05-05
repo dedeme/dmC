@@ -1,8 +1,8 @@
 // Copyright 16-Apr-2023 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
-import { argv, env, pid as ppid, exit as pexit } from "process";
-import {execFile} from "child_process";
+import { argv, env, pid as ppid, exit as pexit, stdout } from "process";
+import {execFileSync} from "child_process";
 
 export function $slice (o, begin, end) {
   if (typeof(o) === 'string') {
@@ -142,30 +142,35 @@ export function asBool (e) {
 // \* -> ()
 export function assert (v) {
   $params(arguments.length, 1);
-  if (!asBool(v))
+  if (!v)
     throw new Error('Assert failed');
 }
 
-// \s, [s.] -> promise([s, b](Result))
-export async function cmd (c, pars) {
+// \s, [s.] -> [s, b](Result)
+export function cmd (c, pars) {
   $params(arguments.length, 2);
-  return new Promise(function (resolve) {
-    execFile(c, pars, (error, stdout, stderr) => {
-      if (error) resolve(["NOEXEC: " + error.message, false]);
-      else resolve(stderr !== "" ? [stderr, false] : [stdout, true]);
-    });
-  })
+  const [ out, err ] = cmd2(c, pars);
+  return out === "" ? [err, false] : [out, true];
 }
 
-// \s, [s.] -> promise([s, s])
+// \s, [s.] -> [s, s]
 export function cmd2 (c, pars) {
   $params(arguments.length, 2);
-  return new Promise(function (resolve) {
-    execFile(c, pars, (error, stdout, stderr) => {
-      if (error) resolve(["", "NOEXEC: " + error.message]);
-      else resolve([stdout, stderr]);
+
+  try {
+    const stdout = execFileSync(c, pars, {
+      stdio: 'pipe',
+      encoding: 'utf8',
     });
-  })
+
+    return [stdout, ""];
+  } catch (err) {
+    if (err.code)
+      return ["", "NOEXEC: " + err.message];
+    else {
+      return ["", err.message];
+    }
+  }
 }
 
 // \ -> {s.}
@@ -205,15 +210,27 @@ export function mainPath () {
 }
 
 // \* -> ()
-export function println (v) {
+export function print (v) {
   $params(arguments.length, 1);
-  console.log(toStr(v));
+  stdout.write(toStr(v));
 }
 
 // \* -> ()
 export function printError (v) {
   $params(arguments.length, 1);
   console.error(toStr(v));
+}
+
+// \* -> ()
+export function println (v) {
+  $params(arguments.length, 1);
+  console.log(toStr(v));
+}
+
+// \s -> ()
+export function raise (v) {
+  $params(arguments.length, 1);
+  throw new Error(v);
 }
 
 // \*, * -> ()
@@ -230,7 +247,7 @@ export function test (actual, expected) {
 export function toStr (v) {
   $params(arguments.length, 1);
   if (v == null) return "<null>";
-  if (typeof(v) === 'object') return JSON.stringify(v);
+  if (type(v) === "[object Object]") return JSON.stringify(v);
   return v.toString();
 }
 

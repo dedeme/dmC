@@ -1,4 +1,4 @@
-// Copyright 23-Nov-2024 ºDeme
+// Copyright 15-Feb-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *bytes_bget (void) {return

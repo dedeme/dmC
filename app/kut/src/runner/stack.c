@@ -31,7 +31,7 @@ Arr *stack_to_arr (Stack *this) {
     this = this->stack;
     arr_push(r, str_f(
       "%s:%d:",
-      fileix_to_fail(stat_code_file_ix(st)),
+      fileix_to_str(stat_code_file_ix(st)),
       stat_code_line(st)
     ));
     ++i;

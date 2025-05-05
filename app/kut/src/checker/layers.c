@@ -34,7 +34,7 @@ void layers_add_symbol(Layers *this, int fix, int nline, int symbol) {
     if (cksym_get_id(sym) == symbol) {
       printf(
         "%s:%d: Symbol '%s' already declared in line %d\n",
-        fileix_to_fail(fix), nline, symix_get(symbol), cksym_get_nline(sym)
+        fileix_to_str(fix), nline, symix_get(symbol), cksym_get_nline(sym)
       );
       return;
     }
@@ -61,7 +61,7 @@ int layers_err_if_not_found(Layers *this, Imports *imports, Cksym *sym) {
 
   printf(
     "%s:%d: Symbol not declared (%s)\n",
-    fileix_to_fail(cksym_get_fix(sym)), cksym_get_nline(sym), symix_get(id)
+    fileix_to_str(cksym_get_fix(sym)), cksym_get_nline(sym), symix_get(id)
   );
   return -1;
 }

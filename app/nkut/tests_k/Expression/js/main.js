@@ -1,4 +1,4 @@
-import * as math from './_js/math.js';import * as js from './_js/js.js';import * as arr from './_js/arr.js';import * as file from './_js/file.js';import * as bytes from './_js/bytes.js';import * as str from './_js/str.js';import * as thread from './_js/thread.js';import * as dic from './_js/dic.js';import * as timer from './_js/timer.js';import * as time from './_js/time.js';import * as b64 from './_js/b64.js';import * as sys from './_js/sys.js';import * as iter from './_js/iter.js';import * as path from './_js/path.js';import * as cryp from './_js/cryp.js';const a =
+import * as arr from './_js/arr.js';import * as bytes from './_js/bytes.js';import * as sys from './_js/sys.js';import * as b64 from './_js/b64.js';import * as js from './_js/js.js';import * as iter from './_js/iter.js';import * as file from './_js/file.js';import * as thread from './_js/thread.js';import * as math from './_js/math.js';import * as str from './_js/str.js';import * as timer from './_js/timer.js';import * as dic from './_js/dic.js';import * as cryp from './_js/cryp.js';import * as time from './_js/time.js';const a =
     12
 ;
 sys.test(a, 12);
@@ -91,10 +91,10 @@ sys.test(sys.toStr(0.012), "0.012");
 sys.test(sys.toStr(""), "");
 sys.test(sys.toStr("abc"), "abc");
 
-sys.test(sys.toStr([]), "[]");
-sys.test(sys.toStr(["a" ]), "[\"a\"]");
+sys.test(sys.toStr([]), "");
+sys.test(sys.toStr(["a" ]), "a");
 sys.test(sys.toStr([ 1 ,
-  2, 3 ]), "[1,2,3]");
+  2, 3 ]), "1,2,3");
 
 sys.test(sys.toStr({}), "{}");
 sys.test(sys.toStr({"a": 1}), '{"a":1}');

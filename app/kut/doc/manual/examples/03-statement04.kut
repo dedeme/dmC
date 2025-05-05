@@ -1,0 +1,16 @@
+{
+  sys.assert(a == 2);
+  a = "b";
+  sys.assert(a == "b");
+
+  {
+    sys.assert(a == "b");
+    // sys.assert(b == 104); <- this is an error
+  }
+
+  b = 104;
+  sys.assert(b == 104);
+}
+
+a = 2;
+sys.assert(a == 2);

@@ -11,7 +11,7 @@
 
 void fcopy (char *source, char *target) {
   if (file_is_directory(source)) {
-    if (!file_is_directory(target))
+    if (file_exists(target) && !file_is_directory(target))
       EXC_KUT(str_f("'%s' is not a directory", target));
 
     char *tdir = path_cat(target, path_base(source), NULL);

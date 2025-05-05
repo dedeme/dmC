@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Conventions</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kutt. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='06-Command.html'>Anterior (Command)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Naming'>Naming</a><br>
+<a href='#! instead [0]'>! instead [0]</a><br>
+<a href='#\abc instead ["abc"]'>\abc instead ["abc"]</a><br>
+<a href='#Module mark'>Module mark</a><br>
+<a href='#Skip module symbol'>Skip module symbol</a><br>
+<a href='#Module order'>Module order</a><br>
+<a href='#Block order'>Block order</a><br>
+<a href='#Library'>Library</a>
+</p>
+<hr>
+<a name="Naming"></a>
+<h3>Naming</h3>
+<ul>
+<li>
+<p>To make visible several words we use 'camelCase': <code>theEnd</code>,
+  <code>severalWordsJoinTogether</code>, ...</p>
+</li>
+<li>
+<p>Every symbol start with lowercase, except in Arrays and dictionaries that
+  starts with uppecase. (<code>Book</code> instead of <code>book</code>)</p>
+</li>
+<li>
+<p>Array symbols, to be used as options, end in 'Op'. (<code>elementOp</code> instead of <code>element</code>)</p>
+</li>
+<li>
+<p>Array symbols, to be used as variables, end in 'V'. (<code>ageV</code> instead of <code>age</code>)</p>
+</li>
+<li>
+<p>Defined types of functions end in 'Fn'. (<code>searchFn</code> instead of <code>search</code>)</p>
+</li>
+</ul>
+<a name="! instead [0]"></a>
+<h3>! instead [0]</h3>
+<p>To get or set Arrays used as options or variables we use '<code>!</code>' instead of
+'<code>0</code>'.</p>
+<p>For example:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+a = ["s"];
+sys.println(a!); // instead of sys.println(a[0]);
+</div>
+<script>aceConf("aceEditor-0", "kutt");</script>
+<a name="\abc instead ["abc"]"></a>
+<h3>\abc instead ["abc"]</h3>
+<p>To get or set dictionaries when the key is of symbol type and it is known that
+it exists, we use '<code>d\symbol</code>" instead of '<code>d["symbol"]</code>'.</p>
+<p>In both cases, if the key does not exists in dictionary, an execption is
+thrown.</p>
+<p>Expample:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+d\k = 1_213; // instead of d["k"] = 1_213;
+sys.println(d\k); // instead of sys.println(d["k"]);
+</div>
+<script>aceConf("aceEditor-1", "kutt");</script>
+<a name="Module mark"></a>
+<h3>Module mark</h3>
+<p>Write '<code>:module</code>' instead of '<code>: module</code>'.</p>
+<a name="Skip module symbol"></a>
+<h3>Skip module symbol</h3>
+<p>Skip the module symbol in expressions when it is possible.</p>
+<p>Example:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+a = []/i/;
+a.push(23); // instead of arr.push(a, 23);
+
+p = person.new("Ana", 32);
+sys.println(p.age); // instead of sys.println(p[person.age]);
+</div>
+<script>aceConf("aceEditor-2", "kutt");</script>
+<a name="Module order"></a>
+<h3>Module order</h3>
+<ol>
+<li>
+<p>Copyright.</p>
+</li>
+<li>
+<p> Documentation summary.</p>
+</li>
+<li>
+<p> Imports.</p>
+</li>
+<li>
+<p> Type definitions.</p>
+</li>
+<li>
+<p> Constants.</p>
+</li>
+<li>
+<p> Enumerations.</p>
+</li>
+<li>
+<p> Indexeds.</p>
+</li>
+<li>
+<p> Functions.</p>
+</li>
+<li>
+<p> Main block.</p>
+</li>
+</ol>
+<p>In each item write first internal and then exported elements.</p>
+<a name="Block order"></a>
+<h3>Block order</h3>
+<ol>
+<li>
+<p>Inner functions.</p>
+</li>
+<li>
+<p> Rest.</p>
+</li>
+</ol>
+<a name="Library"></a>
+<h3>Library</h3>
+<p>We call library to a number of modules inside a parent directory which only
+have imports relative to the current module (that is, there are no imports
+relative to the parent directory).</p>
+<p>A library has not <i>main module</i>.</p>
+<h4>Naming</h4>
+<p>Library names, by convention, should start with 'lib' and finish with its date
+if format YYYYMM.</p>
+<p>In special cases is allowed writing the date in format YYYYMMDD.</p>
+<p>Examples:</p>
+<p><code>libmk202503</code>, <code>libmyLib202506</code>, <code>libcritical20260211</code>.</p>
+<p>Inside the parent directory should be included an empty file with the
+library name.</p>
+<h4>Usage</h4>
+<p>Inside the parent directory of the main module a library can be integred:</p>
+<ul>
+<li>
+<p>Through a symbolic link.</p>
+</li>
+<li>
+<p>Copying its modules in an empty subdirectory.</p>
+</li>
+</ul>
+<p>The name of the link or directory should be the same of the library, without the
+date.
+</p>
+<hr>
+<p style="text-indent: 0px"><a href='06-Command.html'>Anterior (Command)</a> · <a href="index.html">Índice</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

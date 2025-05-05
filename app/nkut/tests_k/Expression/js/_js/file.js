@@ -2,16 +2,24 @@
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 import * as sys from './sys.js';
-import * as path from './path.js';
 import * as bytes from './bytes.js';
 import * as cryp from './cryp.js';
 import {
-  closeSync, copyFileSync, existsSync, lstatSync, mkdirSync, openSync,
-  readdirSync, readFileSync, readSync, renameSync,
-  rmSync, statSync, symlinkSync, writeFileSync, writeSync
+  closeSync, copyFileSync, createReadStream, existsSync, lstatSync,
+  mkdirSync, openSync, readdirSync, readFileSync, readSync, realpathSync,
+  renameSync, rmSync, statSync, symlinkSync, writeFileSync, writeSync
 } from "fs";
+import { once } from 'events';
+import { createInterface } from 'readline';
 import { open } from "fs/promises";
 import { pid, cwd, chdir } from "process";
+
+// \s -> s
+function normalize(p) {
+  let r = p.trim();
+  while (r.endsWith("/")) r = r.substring(0, r.lenght - 1);
+  return r;
+}
 
 // \s -> <file>
 export function aopen (p) {
@@ -19,10 +27,74 @@ export function aopen (p) {
   return openSync(p, "a");
 }
 
+// \s -> s
+export function base (p) {
+  sys.$params(arguments.length, 1);
+  const r = normalize(p);
+  const ix = r.lastIndexOf('/');
+  if (ix !== -1) return r.substring(ix + 1);
+  return r;
+}
+
+// \s -> s
+export function canonical (p) {
+  sys.$params(arguments.length, 1);
+  return realpathSync(p);
+}
+
+// \[s.] -> s
+export function cat (a) {
+  sys.$params(arguments.length, 1);
+  if (a.length === 0) a.push("./");
+  else if (a[0] === "") a[0] = ".";
+  return clean(a.join("/"));
+}
+
 // \s -> ()
 export function cd (p) {
   sys.$params(arguments.length, 1);
   chdir(p);
+}
+
+// \s -> s
+export function clean (p) {
+  sys.$params(arguments.length, 1);
+  let s = p.trim();
+  if (s === "") return "";
+  let bf = [];
+  let isSlash = false;
+  for (let i = 0; i < s.length; ++i) {
+    const ch = s.charAt(i);
+    if (ch === "/") {
+      if (isSlash) continue;
+      isSlash = true;
+      bf.push(ch);
+      continue;
+    }
+    isSlash = false;
+    bf.push(ch);
+  }
+  s = bf.join("");
+  if (s.length === 1) return s;
+  if (s.endsWith("/")) s = s.substring(0, s.length - 1);
+
+  bf = [];
+  const parts = s.split("/");
+  for (let i = 0; i < parts.length; ++i) {
+    const part = parts[i];
+    if (part === ".") continue;
+    if (part === "..") {
+      if (bf.length > 0) bf.pop();
+      else throw new Error("Bad path for cleaning '" + p + "'");
+      continue;
+    }
+    bf.push(part);
+  }
+  s = bf.join("/");
+  if (s === "" && p[0] === "/")
+    throw new Error("Bad path for cleaning '" + p + "'");
+
+  return s;
 }
 
 // \<file> -> ()
@@ -38,18 +110,18 @@ export function copy (source, target) {
     if (!isDirectory(target))
       throw new Error("'" + target + "' is not a directory");
 
-    const tdir = path.cat([target,  path.base(source)]);
+    const tdir = file.cat([target,  file.base(source)]);
     del(tdir);
     mkdir(tdir);
     const files = dir(source);
     for (let i = 0; i < files.length; ++i) {
       const fname = files[i];
-      copy(path.cat([source, fname]), tdir);
+      copy(file.cat([source, fname]), tdir);
     }
     return;
   }
   if (isDirectory(target))
-    target = path.cat([target, path.base(source)]);
+    target = file.cat([target, file.base(source)]);
 
   copyFileSync(source, target);
 }
@@ -70,6 +142,15 @@ export function dir (p) {
 export function exists (p) {
   sys.$params(arguments.length, 1);
   return existsSync(p);
+}
+
+// \s -> s
+export function extension (p) {
+  sys.$params(arguments.length, 1);
+  const r = base(p);
+  const ix = r.lastIndexOf(".");
+  if (ix === -1) return "";
+  return r.substring(ix);
 }
 
 // \s -> b
@@ -103,6 +184,17 @@ export function mklink (p, lk) {
 }
 
 // \s -> s
+export function parent (p) {
+  sys.$params(arguments.length, 1);
+  const r = normalize(p);
+  if (r === "") throw new Error("'" + p + "' has not parent directory");
+  const ix = r.lastIndexOf("/");
+  if (ix === -1) return "";
+  if (ix === 0) return "/";
+  return r.substring(0, ix);
+}
+
+// \s -> s
 export function read (p) {
   sys.$params(arguments.length, 1);
   return readFileSync(p, { encoding: "utf8" });
@@ -119,10 +211,62 @@ export function readBin (f, bufLen) {
 // \s, \s -> () -> ()
 export async function readLines (p, fn) {
   sys.$params(arguments.length, 2);
-  const file = await open(p);
-  for await (const line of file.readLines()) {
+  sys.$fparams(fn, 1);
+
+  const rl = createInterface({
+    input: createReadStream(p)
+  });
+
+  rl.on('line', (line) => {
     fn(line);
+  });
+
+  await once(rl, 'close');
+}
+
+// \[s.], \[([s]|[]).] -> () -> ()
+export async function readLines2 (ps, fn) {
+  sys.$params(arguments.length, 2);
+  sys.$fparams(fn, 1);
+
+  const lineBfs = ps.map(() => []);
+  const closes = ps.map(() => false);
+
+  function control (nstream, isClose, line) {
+    if (isClose) {
+      closes[nstream] = true;
+      return;
+    }
+    lineBfs[nstream].push(line);
+    let ok = true;
+    for (let i = 0; i < lineBfs.length; ++i)
+      if (lineBfs[i].length === 0 && !closes[nstream]) ok = false;
+
+    if (ok) {
+      const pars = [];
+      for (let i = 0; i < lineBfs.length; ++i) {
+        const lb = lineBfs[i];
+        if (lb.length !== 0)  pars.push([lb.shift()]);
+        else pars.push([]);
+      }
+      fn(pars);
+    }
   }
+
+  const rls = [];
+  for (let i = 0; i < ps.length; ++i) {
+    const rl = createInterface({
+      input: createReadStream(ps[i])
+    });
+
+    rl.on('line', (line) => control(i, false, line));
+    rl.on('close', () => control(i, true, ""));
+
+    rls.push(rl);
+  }
+
+  for (let i = 0; i < rls.length; ++i)
+    await once(rls[i], 'close');
 }
 
 // \s, s -> ()
@@ -157,7 +301,7 @@ export function tmp (dir, fpath) {
   while (true) {
     const k = cryp.genK(16);
     const v = cryp.encode(k, "" + pid).substring(0, 8);
-    rpath = path.cat([dir, fpath + v.replaceAll("/", "-")]);
+    rpath = file.cat([dir, fpath + v.replaceAll("/", "-")]);
     if (!exists(fpath)) break;
   }
   return rpath;

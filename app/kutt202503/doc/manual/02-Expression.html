@@ -1,0 +1,464 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Expression</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kutt. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='01-Type.html'>Anterior (Type)</a> · <a href="index.html">Índice</a> · <a href='03-Statement.html'>Posterior (Statement)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Literal'>Literal</a><br>
+<a href='#Symbol'>Symbol</a><br>
+<a href='#Function call'>Function call</a><br>
+<a href='#Monary function'>Monary function</a><br>
+<a href='#Binary functions'>Binary functions</a><br>
+<a href='#Ternary operator <code>?:</code>'>Ternary operator <code>?:</code></a><br>
+<a href='#Switch expression'>Switch expression</a>
+</p>
+<hr>
+<a name="Literal"></a>
+<h3>Literal</h3>
+<h4>Boolean literal</h4>
+<p><code>true</code> and <code>false</code></p>
+<p>Examples:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+aYes  = true;
+aNot = false;
+</div>
+<script>aceConf("aceEditor-0", "kutt");</script>
+<h4>Integer literal</h4>
+<p>Numbers without decimal part.</p>
+<p>Symbol '_' is skipped.</p>
+<p>Examples:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+n1 = 0;
+n2 = -1_456;
+n3 = 1456;
+n4 = 010_000;
+n5 = -0000;
+</div>
+<script>aceConf("aceEditor-1", "kutt");</script>
+<h4>Float literal</h4>
+<p>Numbers with decimal part.</p>
+<p>Symbol '_' in the integer part is skipped.</p>
+<p>Can be used the scientific notation.</p>
+<p><i>NOTE: When there is not decimal point the number is interpreted as integer.</i></p>
+<p>Examples:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+f1 = 0.0;
+f2 = -12.02;
+f3 = 1_333.0;
+f4 = 1.e-3;
+f5 = 212.35E+56;
+
+// Next expressions are not valid:
+
+// f6 = 1e-3; -> decimal point is missing.
+// f6 = .32; -> must be writen as f6 = 0.32;
+// f6 = -.32; -> must be writen as f6 = -0.32;
+</div>
+<script>aceConf("aceEditor-2", "kutt");</script>
+<h4>String literal</h4>
+<p>Text in the same line, between single or double quotes.</p>
+<p>Multiline text between triple 'double quotes'.</p>
+<p>Monoline string allows escape and unicode sequences ('<code>\n</code>', "<code>\u0032</code>", ...).</p>
+<p>Multiline string is of verbatim type and with the margin adjusted to the most
+left line. Also, if the firs line only contains triple quotes, the
+corresponing carry return is skipped.</p>
+<p>Examples:</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+s1 = "";
+s2 = 'abc"d"e';
+s3 = "a 'text'";
+s4 = """
+    Line 1
+    Line 2
+  Line 3
+  """; // Equals to: s4 = "  Line 1\n  Line 2\nLine 3\n";
+</div>
+<script>aceConf("aceEditor-3", "kutt");</script>
+<h4>Array literal</h4>
+<p>Expressions of the same type, between '[' and ']' and separated by comma.</p>
+<p>Empty array must indicate its type.</p>
+<p>Examples:</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+A1 = []/f/;
+A2 = [1, 2, 3];
+A3 = [["a"], ["a", "b", "c"]];
+</div>
+<script>aceConf("aceEditor-4", "kutt");</script>
+<h4>Tuple literal</h4>
+<p>Expressions of any type, between '[.' and ']' and separated by comma.</p>
+<p>Tuple literal must contain at least one element.</p>
+<p>Examples:</p>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+T1 = [. "a"];
+T2 = [. 1, "a", [. 1.0, true]];
+</div>
+<script>aceConf("aceEditor-5", "kutt");</script>
+<h4>Dictionary literal</h4>
+<p>Pairs 'key:value', between '{' and '}' separated by comma, where 'keys' are
+strings and 'values' are of the same type.</p>
+<p>When strins contains only one word of type 'symbol' can be writen without
+quotes.</p>
+<p>Empty dictionary must indicate the type of its values.</p>
+<p>Examples:</p>
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+D1 = {}/i/;
+D2 = {" a key": 1.1, " another key ": 2.34};
+D3 = {"one": 1, "two": 2};
+D4 = {one: 1, two: 2};
+</div>
+<script>aceConf("aceEditor-6", "kutt");</script>
+<h4>Range</h4>
+<p>It is an iterator over integer with three constructors:</p>
+<ul>
+<li>
+<p>From 0 to n-1 with step 1: <code>[! n]</code></p>
+</li>
+<li>
+<p>From 'start' to 'end-1' with step 1: <code>[! start, end]</code></p>
+</li>
+<li>
+<p>From "start" to "end" with step 'step': <code>[! start, end, step]</code></p>
+</li>
+</ul>
+<p>'step' can not be '0'.</p>
+<p>Examples:</p>
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+it1 = [! 23];
+it2 = [! 1, 4];
+it3 = [! 4, -4, -2];
+it4 = [! 1, 4, 1];
+</div>
+<script>aceConf("aceEditor-7", "kutt");</script>
+<p><i>NOTE: <code>it2</code> traverses 1, 2 and 3; but <code>it4</code> traverses '1, 2, 3 and 4'</i></p>
+<h4>Function literal</h4>
+<p>Funtions have the following form:</p>
+<p><code>\parameters->body</code></p>
+<ol>
+<dt>parameters</dt>
+<dd>
+<p>Sequence of 0 or more symbols.</p>
+</dd>
+<dt>body</dt>
+<dd>
+<p>Code statement or block.</p>
+</dd>
+</ol>
+<p>They must be preceded by a type declaration.</p>
+<p>Examples:</p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [|]
+help = \ -> sys.println("help");;
+
+//: [s|i]
+len = \tx -> {
+  return str.len(tx);
+};
+
+//: [iii|i]
+sumTimes = \v1, v2, v3 -> {
+  v = v1 + v2;
+  return v * v3;
+};
+</div>
+<script>aceConf("aceEditor-8", "kutt");</script>
+<a name="Symbol"></a>
+<h3>Symbol</h3>
+<p>A symbol is a word which starts with a letter and con be followed by more letters
+or numbers. Particularly, symbols do not admit the character '_';</p>
+<p>Symbols are associated to values. (Only is allowed one association.)</p>
+<p>We have the following conventions:</p>
+<ul>
+<li>
+<p>To make visible several words we use 'camelCase': <code>theEnd</code>,
+  <code>severalWordsJoinTogether</code>, ...</p>
+</li>
+<li>
+<p>Every symbol start with lowercase, except in Arrays and dictionaries that
+  starts with uppecase. (<code>Book</code> instead of <code>book</code>)</p>
+</li>
+<li>
+<p>Array symbols, to be used as options, end in 'Op'. (<code>elementOp</code> instead of <code>element</code>)</p>
+</li>
+<li>
+<p>Array symbols, to be used as variables, end in 'V'. (<code>ageV</code> instead of <code>age</code>)</p>
+</li>
+<li>
+<p>Defined types of functions end in 'Fn'. (<code>searchFn</code> instead of <code>search</code>)</p>
+</li>
+</ul>
+<a name="Function call"></a>
+<h3>Function call</h3>
+<p>Functions which returns a value.</p>
+<h4>Parenthesis</h4>
+<p>Scheme:</p>
+<p><code>symbol(parameteres)</code></p>
+<ol>
+<dt>symbol</dt>
+<dd>
+<p>Symbol associate to a function.</p>
+</dd>
+<dt>parameters</dt>
+<dd>
+<p>0 or more parameters.</p>
+</dd>
+</ol>
+<p><i>NOTE: Values of parameteres have to be type-compatible with its corresponding
+defined type.</i></p>
+<p>Example:</p>
+<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [i|i]
+fn = \n -> return n + 3;;
+v = fn(12); // v is 15
+</div>
+<script>aceConf("aceEditor-9", "kutt");</script>
+<h4>Square</h4>
+<p>Scheme:</p>
+<p><code>expression[index]</code></p>
+<ol>
+<dt>expression</dt>
+<dd>
+<p>Expression which generate a container of type array, tuple or dictionary.</p>
+</dd>
+<dt>index</dt>
+<dd>
+<p>Integer expression for array and tuple, and string expression for dictionary.<br>  When expression is a tuple the index value must be a literal integer or a
+  symbol also points to a literal integer.</p>
+</dd>
+</ol>
+<p>Returns an element of container. If the element is not found, an exception is
+thrown at run time for array and dictionary and at compile time for typle.</p>
+<p>When the container is a dictionary and the index (key) is of type symbol,
+it can be write <code>expression\symbol</code> instead of <code>expression["symbol"]</code>.</p>
+<p>Examples</p>
+<div id="aceEditor-10" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+v1 = [1, 2][1];
+Ar = [1, 2];
+v2 = Ar[1]; // v1 == v2 == 2
+
+v1b = [. 1, "a", 1.4][1];
+Tp = [. 1, "a", 1.4];
+v2b = Tp[1]; // v1b == v2b == "a"
+
+v1c = {one: 1, two: 2}["two"];
+Dc = {one: 1, two: 2};
+v2c = Dc["two"];
+v1d = {one: 1, two: 2}\two;
+v2d = Dc\two; // v1c == v2c == v1d == v2d == 2
+</div>
+<script>aceConf("aceEditor-10", "kutt");</script>
+<p>When the container is an array or tuple the index <code>[ 0 ]</code> can be changed by
+'<code>!</code>'. By convention this feature is only used when the container is an array
+used as 'option' or 'variable'.</p>
+<p>Examples:</p>
+<div id="aceEditor-11" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+rsOp = []/b/;
+if (v1 == 2) arr.push(rsOp, true);
+vop = rsOp!; // equals to rsOp[0];
+
+finalV = [""];
+if (v1 == 2) finalV[0] = "2";
+vv = finalV!; // equals to vv = finalV[0];
+</div>
+<script>aceConf("aceEditor-11", "kut");</script>
+<a name="Monary function"></a>
+<h3>Monary function</h3>
+<p>There are two monary functions:</p>
+<ol>
+<dt>-</dt>
+<dd>
+<p>Negative symbol. Applied on integers and floats.</p>
+</dd>
+<dt>!</dt>
+<dd>
+<p>Negation symbol. Applied on booleans and arrays. In the last case, it returns
+  the value <code>true</code> if the array is empty and <code>false</code> in other case.</p>
+</dd>
+</ol>
+<p><i>NOTE: Monary functions are precedence over binary or ternary functions.</i></p>
+<p>Examples:</p>
+<div id="aceEditor-12" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+neg = -34;
+pos = --34;
+pos2 = -neg; // pos and pos2 are equals.
+sum = -3 + 4; // sum is 1
+sum2 = -(3 + 4); // sum2 is -7
+
+f = !true;
+tr1 = !!true;
+tr2 = !f; // tr1 and tr2 are 'true'
+
+tb = ![1, 2]; // tb is false;
+fb = ![]/i/; // tb is true;
+</div>
+<script>aceConf("aceEditor-12", "kutt");</script>
+<a name="Binary functions"></a>
+<h3>Binary functions</h3>
+<p>Both function arguments must be of the same type.</p>
+<ol>
+<dt>+</dt>
+<dd>
+<p>Applied over integers, floats, strings and arrays.</p>
+</dd>
+<dt>-, *, /</dt>
+<dd>
+<p>Applied over integers and floats.</p>
+</dd>
+<dt>%</dt>
+<dd>
+<p>Module. Applied over integers.</p>
+</dd>
+<dt>&, |</dt>
+<dd>
+<p>And. Applied over booleans.</p>
+</dd>
+<dt>>, <=, <, <=</dt>
+<dd>
+<p>Applied over integes, floats and strings.</p>
+</dd>
+<dt>==, !=</dt>
+<dd>
+<p>Applied over any type.</p>
+</dd>
+</ol>
+<h4>Precedence.</h4>
+<p>Binary functions are precedence over the ternary operator (<code>?:</code>).</p>
+<p>Inter them there are four levels of precedence, and in each level the
+first operation which appears has the most one.</p>
+<p>The levels are, for greater to lesser.</p>
+
+<table class='border'>
+<tr><td class='border'><code>1</code></td>
+  <td class='border'>*, /, %</td></tr>
+<tr><td class='border'><code>2</code></td>
+  <td class='border'>+, -</td></tr>
+<tr><td class='border'><code>3</code></td>
+  <td class='border'>>, <=, <, <=, ==, !=</td></tr>
+<tr><td class='border'><code>4</code></td>
+  <td class='border'>&, |</td></tr>
+</table>
+<a name="Ternary operator <code>?:</code>"></a>
+<h3>Ternary operator <code>?:</code></h3>
+<p>It has the less precedence.</p>
+<p>Scheme:</p>
+<p><code>condition ? valueTrue : valueFalse</code></p>
+<ol>
+<dt>condition</dt>
+<dd>
+<p>Boolean expression.</p>
+</dd>
+<dt>valueTrue</dt>
+<dd>
+<p>Result if <i>condition</i> is <code>true</code>.</p>
+</dd>
+<dt>valueFalse</dt>
+<dd>
+<p>Result if <i>condition</i> is <code>false</code>.</p>
+</dd>
+</ol>
+<p>Types of <i>valueTrue</i> and <i>valueFalse</i> must be equals.</p>
+<p>Example:</p>
+<div id="aceEditor-13" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+ter1 = (3 > 4) ? "a" : "b"; // ter1 is "b".
+</div>
+<script>aceConf("aceEditor-13", "kutt");</script>
+<a name="Switch expression"></a>
+<h3>Switch expression</h3>
+<p>Scheme:</p>
+<p><code><i>switch</i>(expression){entries <i>default</i>: expressionR;}</code></p>
+<p>where <code>entries</code> are</p>
+<p><code>vals: expressionR</code>;</p>
+<ol>
+<dt>expression</dt>
+<dd>
+<p>Expresion to compare.</p>
+</dd>
+<dt>vals</dt>
+<dd>
+<p>one or more expressions separated by comma.</p>
+</dd>
+<dt>expressionR</dt>
+<dd>
+<p>Expression to return.</p>
+</dd>
+</ol>
+<p><i>expression</i> and each one of <i>vals</i> must be of the same type.</p>
+<p>Every <i>expressionR</i> has to be of the same type.</p>
+<p>Each entry is evaluated with 'expression == val' for each <i>val</i>. If one result
+be <code>true</code>, <code>switch</code> return its <i>expressionR</i>.</p>
+<p>If no one of entries is evaluated as <code>true</code> the <i>expressionR</i> of <code>default</code> is
+returned.</p>
+<p><i>NOTE: Clause <code>default</code> is mandatory.</i></p>
+<p>Examples:</p>
+<div id="aceEditor-14" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+v0 = switch (4) {
+  1: "a";
+  2: "b";
+  default: "c";
+}; // v0 is 'c'
+
+v1 = switch (2 + 2) {
+  1, 2: "a";
+  3, 4, 5: "b";
+  6: "c";
+  default: "d";
+}; // v1 is "b"
+</div>
+<script>aceConf("aceEditor-14", "kutt");</script>
+<hr>
+<p style="text-indent: 0px"><a href='01-Type.html'>Anterior (Type)</a> · <a href="index.html">Índice</a> · <a href='03-Statement.html'>Posterior (Statement)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

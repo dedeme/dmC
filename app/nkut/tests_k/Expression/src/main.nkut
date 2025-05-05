@@ -91,10 +91,10 @@ sys.test(sys.toStr(0.012), "0.012");
 sys.test(sys.toStr(""), "");
 sys.test(sys.toStr("abc"), "abc");
 
-sys.test(sys.toStr([]), "[]");
-sys.test(sys.toStr(["a" ]), "[\"a\"]");
+sys.test(sys.toStr([]), "");
+sys.test(sys.toStr(["a" ]), "a");
 sys.test(sys.toStr([ 1 ,
-  2, 3 ]), "[1,2,3]");
+  2, 3 ]), "1,2,3");
 
 sys.test(sys.toStr({}), "{}");
 sys.test(sys.toStr({"a": 1}), '{"a":1}');
@@ -263,7 +263,7 @@ sys.assert({"a": 1, "b": 2} == {"a": 1, "b": 1 + 1});
 sys.assert({"a": 1, "b": 2} != {"a": 1});
 sys.assert({"a": 1, "b": 2} != {"a": 1, "b": 1});
 
-///
+/// n
 n1 = 23;
 sys.test(n1 + 2, 25);
 A1 = [12];

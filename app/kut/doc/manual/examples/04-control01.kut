@@ -1,0 +1,21 @@
+v = [false];
+msg = ["msg"];
+
+if (v[0]) msg[0] = "msgIf";
+sys.assert(msg[0] == "msg");
+
+if (v[0]) msg[0] = "msgIf";
+else msg[0] = "msgElse";
+sys.assert(msg[0] == "msgElse");
+
+v[0] = true;
+
+if (v[0]) { msg[0] = "msgIf"; }
+sys.assert(msg[0] == "msgIf");
+
+if (v[0]) {
+  msg[0] = "msgIf2";
+} else {
+  msg[0] = "msgElse";
+}
+sys.assert(msg[0] == "msgIf2");

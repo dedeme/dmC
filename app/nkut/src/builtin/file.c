@@ -1,4 +1,4 @@
-// Copyright 23-Nov-2024 ºDeme
+// Copyright 15-Feb-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *file_bget (void) {return
@@ -114,18 +114,18 @@ char *file_bget (void) {return
   "    if (!isDirectory(target))\n"
   "      throw new Error(\"'\" + target + \"' is not a directory\");\n"
   "\n"
-  "    const tdir = file.cat([target,  file.base(source)]);\n"
+  "    const tdir = cat([target, base(source)]);\n"
   "    del(tdir);\n"
   "    mkdir(tdir);\n"
   "    const files = dir(source);\n"
   "    for (let i = 0; i < files.length; ++i) {\n"
   "      const fname = files[i];\n"
-  "      copy(file.cat([source, fname]), tdir);\n"
+  "      copy(cat([source, fname]), tdir);\n"
   "    }\n"
   "    return;\n"
   "  }\n"
   "  if (isDirectory(target))\n"
-  "    target = file.cat([target, file.base(source)]);\n"
+  "    target = cat([target, base(source)]);\n"
   "\n"
   "  copyFileSync(source, target);\n"
   "}\n"
@@ -305,7 +305,7 @@ char *file_bget (void) {return
   "  while (true) {\n"
   "    const k = cryp.genK(16);\n"
   "    const v = cryp.encode(k, \"\" + pid).substring(0, 8);\n"
-  "    rpath = file.cat([dir, fpath + v.replaceAll(\"/\", \"-\")]);\n"
+  "    rpath = cat([dir, fpath + v.replaceAll(\"/\", \"-\")]);\n"
   "    if (!exists(fpath)) break;\n"
   "  }\n"
   "  return rpath;\n"

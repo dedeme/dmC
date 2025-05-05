@@ -1,22 +1,11 @@
-// Boolean
-sys.assert(!false == true);
-sys.assert(!true == false);
-sys.assert(![1] == false);
-sys.assert(![] == true);
-sys.assert(!![1] == true);
+fn0 = \msg -> sys.println(msg);;
+fn1 = \ -> return 5;;
 
-// Mathematical
-sys.assert(-3 == ---3);
-sys.assert(3.5 == --3.5);
-sys.assert(3 + 2 == 5);
-sys.assert(3.0 + (-1.5) == 1.5);
-sys.assert(3 - 2 == 1);
-sys.assert(3.0 --1.5 == 4.5);
-sys.assert(3 * 2 == 6);
-sys.assert(3.0 * -1.5 == -4.5);
-sys.assert(3 / 2 == 1);
-sys.assert(3.0 / -1.5 == -2.0);
-sys.assert(3 % 2 == 1);
+// Returns of functions are expressions.
+sys.assert(fn1() == 5);
+fn2 = \n -> return fn1() + n;;
+sys.assert(fn2(3) == 8);
 
-// Relational
-sys.println({"one":1} == {"one":"a"});
+// Functions can be called as statements en any case.
+fn0("abc"); // -> Shows 'abc'
+fn2(3); // -> Shows nothing, but is a correct statement.

@@ -1,0 +1,11 @@
+A = [1, 200, 44];
+A[0] += 100;
+A[1] /= 2;
+A[2] %= 5;
+sys.assert(A == [101, 100, 4]);
+
+D = {"name": "Peter", "age": 36, "client": false};
+D["age"] /= 10 + 2;
+D["client"] |= true;
+sys.assert(D == {"name": "Peter", "age": 3, "client": true});
+

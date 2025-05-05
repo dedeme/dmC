@@ -9,7 +9,7 @@ test  ( true
 sys.test(1,
 1);
 sys.test(1.34, 1.34);
-/// Coments
+/// n
 sys.test("ab\"ñ\"c\u2acd", "ab\"ñ\"c\u2acd");
 sys.test("", "");
 // Note

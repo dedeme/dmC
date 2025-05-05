@@ -78,6 +78,20 @@ Example:
 // Normal comment.
 /// Documentation command.``
 
+Also multiline comments (between '\*' and '*/' are allowed). They can be seen
+as blanks.
+
+``kut
+/*
+Multiline
+comment
+*/
+
+sys.println(/* age */ 32); // Print '32' and /* age  */ is ignored.
+// but
+// sys.println(3/* age */2);
+// is an error ``
+
 ## Statement
 
 Made of expressions, they are commands to be executed by Kut.

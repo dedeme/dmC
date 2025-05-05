@@ -1,0 +1,12 @@
+A = ["a", "b", "c"];
+A[0] = "new";
+sys.assert(A == ["new", "b", "c"]);
+
+// A[-1] = "x"; <- Runtime exception.
+// A[100] = "x"; <- Runtime excepetion.
+
+D = {"one": 1, "two": 2};
+D["one"] = 505;
+sys.assert(D == {"one": 505, "two": 2});
+
+// D["x"] = 505; <- Runtime exception

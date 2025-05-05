@@ -12,7 +12,7 @@ export function eq (n1, n2, gap) {
 // \s -> [n]|[]
 export function fromEn (n) {
   sys.$params(arguments.length, 1);
-  return fromStr(n.replace(",", ""));
+  return fromStr(n.replaceAll(",", ""));
 }
 
 // \s -> [n]|[]
@@ -29,7 +29,7 @@ export function fromHex (n) {
 // \s -> [n]|[]
 export function fromIso (n) {
   sys.$params(arguments.length, 1);
-  return fromStr(n.replace(".", "").replace(",", "."));
+  return fromStr(n.replaceAll(".", "").replace(",", "."));
 }
 
 // \s -> [n]|[]
@@ -125,7 +125,7 @@ export function toFix (n, dec) {
     return s;
   }
 
-  if (n === -0) n = 0;
+  if (Object.is(n, -0)) n = 0;
   const r1 = "" + round(n, dec);
   const ps = r1.split(".");
   if (ps.length == 1)
@@ -162,7 +162,7 @@ export function toIso(n, dec) {
 // \n -> s
 export function toStr(n) {
   sys.$params(arguments.length, 1);
-  if (n === -0) n = 0;
+  if (Object.is(n, -0)) n = 0;
   return "" + n;
 }
 

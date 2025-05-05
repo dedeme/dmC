@@ -1,0 +1,45 @@
+rOp = [""];
+
+switch (3) {
+  3 + 1: rOp[0] = "1";
+  3 + 0: rOp[0] = "2";
+  3 - 1: rOp[0] = "3";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+  default: rOp[0] = "08";
+}
+sys.assert(rOp[0] == "08");
+
+// Use as multiple ifs.
+
+// This
+rOp[0] = "";
+switch (true) {
+  3 > 5 : rOp[0] = "A";
+  3 == 5 : rOp[0] = "B";
+  3 < 5 : rOp[0] = "C";
+  default: rOp[0] = "D";
+}
+sys.assert(rOp[0] == "C");
+
+// is equals to
+rOp[0] = "";
+
+if (3 > 5) rOp[0] = "A";
+else if (3 == 5) rOp[0] = "B";
+else if (3 < 5) rOp[0] = "C";
+else rOp[0] = "D";
+
+sys.assert(rOp[0] == "C");

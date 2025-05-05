@@ -1,0 +1,569 @@
+=
+title = Control Directives
+=
+
+## if - else
+
+Scheme:
+
+*if (_condition_) _st1_ \[else _st2_]*
+
+* _condition_ is an expression of boolean type.
+
+* _st1_ and _st2_ are statement or block.
+
+*if* executes _st1_ if _condition_ is *true*.
+
+if _condition_ is *false* _st1_ is not executed and, if the clausule *else*
+is set, _st2_ is executed.
+
+Examples:
+
+``kut
+v = [false];
+msg = ["msg"];
+
+if (v[0]) msg[0] = "msgIf";
+sys.assert(msg[0] == "msg");
+
+if (v[0]) msg[0] = "msgIf";
+else msg[0] = "msgElse";
+sys.assert(msg[0] == "msgElse");
+
+v[0] = true;
+
+if (v[0]) { msg[0] = "msgIf"; }
+sys.assert(msg[0] == "msgIf");
+
+if (v[0]) {
+  msg[0] = "msgIf2";
+} else {
+  msg[0] = "msgElse";
+}
+sys.assert(msg[0] == "msgIf2"); ``
+
+## switch - default
+
+Scheme:
+
+*switch (_exp_) {\
+  ··_e00_, \[_e01_, _e02_, ...]: _st0_\
+  ··_e10_, \[_e11_, _e12_, ...]: _st1_\
+  ··...\
+  ··\[default: _stN_]\
+}*
+
+* _exp_ and _eXX's_ are expressions.
+
+* _stX's_ are statement or block.
+
+*switch* compares _exp_ with each _eXX_ with *==* and the first time that
+the result is *true* execute the corresponding _stX_.
+
+If there is a *default* clause and no result is *true*, _stN_ is executed.
+
+Examples:
+
+``kut
+rOp = [""];
+
+switch (3) {
+  3 + 1: rOp[0] = "1";
+  3 + 0: rOp[0] = "2";
+  3 - 1: rOp[0] = "3";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+  default: rOp[0] = "08";
+}
+sys.assert(rOp[0] == "08");
+
+// Use as multiple ifs.
+
+// This
+rOp[0] = "";
+switch (true) {
+  3 > 5 : rOp[0] = "A";
+  3 == 5 : rOp[0] = "B";
+  3 < 5 : rOp[0] = "C";
+  default: rOp[0] = "D";
+}
+sys.assert(rOp[0] == "C");
+
+// is equals to
+rOp[0] = "";
+
+if (3 > 5) rOp[0] = "A";
+else if (3 == 5) rOp[0] = "B";
+else if (3 < 5) rOp[0] = "C";
+else rOp[0] = "D";
+
+sys.assert(rOp[0] == "C"); ``
+
+## while - break - continue
+
+Scheme:
+
+*while (\[ _condition_ ]) _st_*
+
+* _condition_ is an expression of boolean type.
+
+* _st_ is statement or block.
+
+*while* executes _st_ while _condition_ is *true*.
+
+If _condition_ is not indicated, _st_ is executed in an infinite loop.
+
+When inside a *while* block it appears the directive *break*, the loop is
+finished immediately.
+
+Also, when appears the directive *continue* the program flux go to the block
+start.
+
+NOTES:
+
+* _The construction *while () break;* is valid, but does nothing_.
+
+
+* _Also is valid the construction *while () continue;*, but generate an
+  infinite loop_.
+
+Examples:
+
+``kut
+xV = [10];
+sumV = [0];
+while (xV[0] < 20) {
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  if (xV[0] % 2 == 0) {
+    xV[0] += 1;
+    continue;
+  }
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 75);
+
+while () break;
+// while () continue; <- Infinite loop. ``
+
+## for - break - continue
+
+Scheme:
+
+*for ( _assignation-condition_ ) _st_*
+
+* _assignation-condition_ is a mix of assignations of expressions to symbols
+  and condition of loop termination.
+
+* _st_ is statement o block.
+
+*for* executes _st_ while the condition of _assignation-condition_ is *true*.
+
+*break* and *continue* can be called inside _st_ with the same efectos
+explained for *while*.
+
+In _assignation-condition_ some simbols are initialized for each lap of
+loop.
+
+This symbols are out of _st_ scope, so:
+
+* They can be shadowed by a new assignation.
+
+* They can not be used in loop code.
+
+# <code>for</code> with collections
+
+Scheme:
+
+*for ( \[ _i_, ] _e_ = _C_ ) _st_*
+
+* _C_ It is a collection (iterator, array or dictionary) or string.
+
+* _i_ This symbols is assigned:
+
+  * String, iterator and array: Succesively to values 0, 1, 2 ... in each lap.
+
+  * Dictionary: Value of dictionary key.
+
+* _e_ This symbol is assigned to a new value of _C_ in each lap.
+
+  * In strings, iterators and arrays the order in lap assignations is assured.
+    In dictionaries it is not.
+
+Examples:
+
+``kut
+sV = [""];
+s = "123";
+for (ch = s) sV[0] += ch;
+sys.assert(s == sV[0]);
+
+sumV = [0];
+A = [10, 20, 30];
+it = A.toIter();
+for (e = A) sumV[0] += e;
+sys.assert(sumV[0] == 60);
+for (e = it) sumV[0] -= e;
+sys.assert(sumV[0] == 0);
+
+it2 = A.toIter();
+for (i, e = A) sumV[0] += i;
+sys.assert(sumV[0] == 3);
+for (i, e = it2) sumV[0] -= i;
+sys.assert(sumV[0] == 0);
+
+D = {"one": 1, "two": 2};
+for (e = D) sumV[0] += e;
+sys.assert(sumV[0] == 3);
+keysV = [""];
+for (k, e = D) {
+  keysV[0] += k;
+  sumV[0] -= e;
+}
+sys.assert(keysV[0] == "onetwo");
+sys.assert(sumV[0] == 0);``
+
+# <code>for</code> of kind "range"
+
+Scheme:
+
+*for ( _i_ = _start_ : _end_ \[: _step_ ] ) _st_*
+
+* _i_ is a symbol assigned to a value of type integer each lap.
+
+* _start_ is the irst value of _i_.
+
+* _end_ is the last value of _i_.
+
+* _step_ is the increment of _i_. It must be different to 0.
+
+In the first lap *_i_* is assigned to *_start_* then:
+
+- * If <i>step</i> is not defined
+
+> (End exclusive)
+
+  If *_i_ >= _end_* the loop finishes. Otherwise *_st_* is executed once. Then
+  *_i_* is assigned to *_i_ + 1*. If *_i_ >= _end_* the loop finishes.
+  Otherwise *_st_* is executed once more and so succesively.
+
+- * If <i>step</i> is defined and it is positive.
+
+> ( End inclusive)
+
+  If *_i_ > _end_* the loop finishes. Otherwise *_st_* is executed once. Then
+  *_i_* is assigned to *_i_ + _step_*. If *_i_ > _end_* the loop finishes.
+  Otherwise *_st_* is executed once more and so succesively.
+
+- * If <i>step</i> is defined and it is negative.
+
+> ( End inclusive)
+
+  If *_i_ < _end_* the loop finishes. Otherwise *_st_* is executed once. Then
+  *_i_* is assigned to *_i_ + _step_* (decremented). If *_i_ < _end_* the loop
+  finishes. Otherwise *_st_* is executed once more and so succesively.
+
+Examples:
+
+``kut
+sumV = [0];
+for (i = 4 : 4) sumV[0] += i;
+sys.assert(sumV[0] == 0);
+for (i = 0 : 4) sumV[0] += i;
+sys.assert(sumV[0] == 6);
+for (i = 4 : 5) sumV[0] += i;
+sys.assert(sumV[0] == 10);
+
+sumV[0] = 0;
+for (i = 5 : 4 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 0);
+for (i = 0 : 4 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 10);
+for (i = 4 : 5 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 19);
+
+sumV[0] = 0;
+for (i = 0 : 10 : 3) sumV[0] += i;
+sys.assert(sumV[0] == 18);
+for (i = 0 : -9 : -3) sumV[0] += i;
+sys.assert(sumV[0] == 0); ``
+
+## try - catch - finally
+
+Scheme:
+
+*try _st1_ catch( _e_ ) _st2_ finaly _st3_*
+
+* _st1_, _st2_ and _st3_ are statement or block.
+
+* _e_ is a symbol assigned to a string. This string has a message and the
+  stack trace of the line where an exception has happened.
+
+*try* executes *_st1_*, but if it happens an exception, jumps to *_st2_* and
+executes it.
+
+*_st3_* is executed in any case after *_st1_* or *_st2_*.
+
+Exceptions are execution fails which can be raised by the Kut virtual machine
+or 'manually' calling *sys.throw*. An exception out of a *try* block finishes
+the program.
+
+_st2_ has not access to symbols declared in _st1_, but can use the simbol
+*_e_* that point out to the exception message.
+
+_st3_ also has not acces to symbols declared in _st1_.
+
+NOTES:
+
+* _*break* and *continue* can be used inside *st1* and *st2*, but not inside
+  *st3*. After *break* or *continue*, *st3* is executed before exiting or
+  reinitiating the loop._
+
+* _*return* can be called inside either *st1*, *st2* or *st3*._
+
+``kut
+V = [0];
+
+// Without exception.
+try {
+  V[0] += 1;
+} catch (e) {
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 5);
+
+// With cached exception.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 6);
+
+// With cached exception and without finally.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+}
+sys.assert(V[0] == 2);
+
+// Rethrowing a cached exception.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    sys.throw("error");
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 12);
+
+// Throwing a exception in the finally block.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+  } finally {
+    sys.throw("error");
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception and break in the try block.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    V[0] += 1;
+    break;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 5);
+
+// Loop without exception and continue in the try block.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    continue;
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 12);
+
+// Loop with excetion cached and break.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    break;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 6);
+
+// Try without exception and with return.
+V[0] = 0;
+fn0 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn0();
+sys.assert(V[0] == 5);
+
+// Try with cached exception and with return in the catch block.
+V[0] = 0;
+fn1 = \ -> {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    return;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn1();
+sys.assert(V[0] == 6);
+
+// Try with returns in the try and finally blocks.
+V[0] = 0;
+fn2 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    return;
+    V[0] += 4;
+  }
+};
+fn2();
+sys.assert(V[0] == 1); ``
+
+## return
+
+Scheme:
+
+*return \[ _exp_ ]*
+
+* _exp_ is an optional expression
+
+*return* finishes inmediately the execution of a function, sending *_exp_*,
+if exists, as its result.
+
+If *return* is called out of functions:
+
+- In the main module
+
+> It terminates immediately the program.
+
+- In an imported module
+
+> It stops the module execution.
+
+More of *return* in the function and module sections.
+
+## import
+
+Scheme:
+
+*import _module_ \[ : _id_ ]*
+
+* _module_ is a string with the name of a module.
+
+* _id_ is an optional module identifier.
+
+*import* executes a module and makes available its exported symbols in the
+current one.
+
+More of *import* in the module section.

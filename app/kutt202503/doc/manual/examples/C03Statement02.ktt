@@ -1,0 +1,85 @@
+a = 1; // Declared before its use.
+c = 3; // c is not used, but no warning is thrown.
+
+//: [|]
+fn0 = \ -> {
+  sys.test(a, 1); // a == 1.
+  sys.test(b, 2); // b == 2.
+};
+
+b = 2; // Declared after its use.
+
+v1 = true;
+v2 = 1_234;
+v3 = 11.3;
+v4 = "abcd";
+v5 = []/s/;
+//: [i|i]
+v6 = \n -> return n + 4;;
+//: [f|f]
+v7 = \n -> {
+  r = n * n;
+  return r + r;
+};
+
+en1, en2, en3 =;
+
+enn1 ,, enn3 =;
+
+,, ennn3 =;
+
+//:[. si]
+newPerson : name, age;
+
+{
+  fn0();
+
+  x = 1;
+  sys.used(x); // Removes warning.
+
+/*
+  y = 2; // Throws warning (but the code works).
+  sys.println("Code is working");
+*/
+
+  n1, n2, n3 = [. 1, 2.5, "55"];
+  sys.test(n1, 1);
+  sys.test(n2, 2.5);
+  sys.test(n3, "55");
+
+  , m2 = [. 1, 2.5, "55"];
+  sys.test(m2, n2);
+
+  m1 = [. 1, 2.5, "55"]; // Assigns the complete tuple to m1.
+  sys.test(m1[2], "55");
+  m1b = [. 1, 2.5, "55"][0];
+  sys.test(m1b, n1);
+
+  A1 = [1, 2, 3];
+  T1 = [. 1.4, true, "b", [100, 101]];
+  D1 = {"one": 1, thirteen: 8};
+
+  A1[2] += 5;
+  sys.test(A1, [1, 2, 8]);
+  T1[2] += "c";
+  T1[3] += [103, 104];
+  sys.test(T1, [. 1.4, true, "bc", [100, 101, 103, 104]]);
+  A1[1] *= 3;
+  sys.test(A1, [1, 6, 8]);
+  T1[0] /= 2.0;
+  T1[1] &= false;
+  sys.test(T1, [. 0.7, false, "bc", [100, 101, 103, 104]]);
+  T1[1] |= true;
+  sys.test(T1, [. 0.7, true, "bc", [100, 101, 103, 104]]);
+  D1["thirteen"] %= 5;
+  D1\one -= 3 + 1;
+  sys.test(D1, {"one": -3, thirteen: 3});
+
+  sys.test([en1, en2, en3, enn1, enn3, ennn3], [0, 1, 2, 0, 2, 2]);
+
+  p = newPerson("Peter", 15);
+  sys.test(p, [. "Peter", 15]);
+  sys.test(p[name], "Peter");
+  sys.test(p[age], 15);
+
+}

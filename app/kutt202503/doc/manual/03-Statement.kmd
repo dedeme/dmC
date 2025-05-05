@@ -1,0 +1,438 @@
+=
+title = Statement
+=
+
+## Module
+
+Module is the code inside a file with extension '.ktt'.
+
+There are ordinary modules and 'main' modules. The later are modules which
+can be directly executables.
+
+The module code consists in top declarations and, in the main module, a code
+block.
+
+Top declarations only can be assignations (and its variants: indexeds and
+enumerations) and type declarations.
+
+## Comment
+
+Kutt allows two commentary types:
+
+- Line comment
+> It starts with '*//*' and end at end of line.
+
+- Block comment
+> It starts with '*/**' *and end with '***/*'
+
+Commentaries are ignored and can be thought as blanks.
+
+Examples:
+
+``kutt
+
+// Line comment
+
+/**
+Multiline comment
+*/
+
+ax = /* Injected comment */ 123; // Line comment.
+``
+
+# Documentations comment.
+
+Line comments starting with '*///*' immediately before of a top declaration
+or its type annotation, is used to generate code documentation of such
+declaration.
+
+Also the first line comments starting with '*///*' and before of an *import*
+declaration, are used as module documentation.
+
+Example:
+
+``kutt
+
+/// Client module
+
+import "person";
+
+/// Client type.
+(client) [. (person)s];
+
+/// Minimum age
+minAge = 0;
+
+/// Constructor.
+///   person: Client identifier.
+///   citty: Client citty.
+//: [(person)s | (client)]
+new = \p, c -> return [. p, c];;
+``
+
+## Statement
+
+Statement sets an action to be executed by the computer.
+
+Every statement end with a semicolon.
+
+## Flux control
+
+Flux control is made by a set of commands. Those are: *if*, *while*, *switch*,
+*for* and *try-catch-finally*,
+
+## Block
+
+Block groups statements and flux control commands.
+
+In the _main_ module only can have one block. However inside functions there
+are no other limitations that those derivate of the syntaxis.
+
+_NOTE: After the *main* block, it is not allowed more statements or blocks._
+
+## Assignment
+
+Scheme:
+
+*symbol = expression*
+
+It links a symbol with the value of an expression.
+
+The symbol has the same type as the expression.
+
+Symbols can no be reassignable, but the same characters sequence can be used
+in diferents blocks, although as different symbols.
+
+Example:
+
+``kutt
+
+a = 1;
+
+//: [|]
+fn0 = \ -> {
+  sys.test(a, 1); // a preserve its top value.
+};
+
+{
+  sys.test(a, 1); // true because a == 1
+  a = "v"; // a is now equals to "v".
+  sys.test(a, "v");
+
+  //: [|]
+  fn = \ -> {
+    sys.test(a, "v"); // In this point a == "v";
+    a = [1, 2]; // a is now equals to [1, 2].
+    sys.test(a, [1, 2]);
+  };
+  fn(); // Execute fn();
+
+  sys.test(a, "v"); // a preserve its block value
+  fn0();
+}
+``
+
+# Declarations order.
+
+- Top code
+> Inside top code declarations can be done in any order. The efective use of
+  top symbols is not controlled.
+
+- Rest of code
+> Declarations must be done before its use. The efective use it is controlled
+  with a warning. This warning can be removed with the function *sys.used*.
+
+Example:
+
+``kutt
+
+a = 1; // Declared before its use.
+c = 3; // c is not used, but no warning is thrown.
+
+//: [|]
+fn0 = \ -> {
+  sys.test(a, 1); // a == 1.
+  sys.test(b, 2); // b == 2.
+};
+
+b = 2; // Declared after its use.
+
+{
+  fn0();
+
+  x = 1;
+  sys.used(x); // Removes warning.
+
+  y = 2; // Throws warning (but the code works).
+}
+``
+
+# Top declarations
+
+Top code only allows assignments of:
+
+* Literals of type *b*, *i*, *f* or *s*.
+
+* Empty array, indicating its type.
+
+* Literal function, indicating its type.
+
+Examples:
+
+``kutt
+
+v1 = true;
+v2 = 1_234;
+v3 = 11.3;
+v4 = "abcd";
+V5 = []/s/;
+//: [i|i]
+v6 = \n -> return n + 4;;
+//: [f|f]
+v7 = \n -> {
+  r = n * n;
+  return r + r;
+};
+``
+
+## Miltiassignation
+
+It is only allowed inside blocks.
+
+Scheme:
+
+*v1, v2, ..., vN = TupleExpression*
+
+It Assigns *N* first values of an expression of type typle to *v1, v2, ..., vn*.
+
+Any of *vX* can be skipped, but must remain at least one of v2, ..., vn.
+
+In any case the last symbol before '=' can not be comma.
+
+Examples:
+
+``kutt
+
+n1, n2, n3 = [. 1, 2.5, "55"];
+sys.test(n1, 1);
+sys.test(n2, 2.5);
+sys.test(n3, "55");
+
+, m2 = [. 1, 2.5, "55"];
+sys.test(m2, n2);
+
+m1 = [. 1, 2.5, "55"]; // Assigns the complete tuple to m1.
+sys.test(m1[2], "55");
+m1b = [. 1, 2.5, "55"][0];
+sys.test(m1b, n1);
+``
+
+## Setting containers (arrays, tuples and dictionaries)
+
+# Simple setting
+
+Scheme:
+
+*container\[index] = expression*
+
+* _container_ is one of array, tuple or dictionary.
+
+* _index_ is the index of position in array and tuple and the key value in
+  dictionary. For tuples it must be a literal integer or a symbol which also
+  points to a literal integer.
+
+* _expression_ can no be of type function, if such function is not in top code.
+
+* The type of container element must be compatible with the expression type.
+
+If the index is out of range in array and tuple or is a not found key, an
+exception is thrown at run time for arrays and dictonaries and at compile time
+for tuples.
+
+When the container is a dictionary and the index (key) is of type symbol,
+it can be write *container\symbol* instead of *container\["symbol"]*.
+
+# Accumulator setting
+
+Action of setting a container making an operation with its current value and
+an expression.
+
+Scheme:
+
+*container\[index] op expression*
+
+* _container_ is one of array, tuple or dictionary.
+
+* _index_ is the index of position in array and tuple and the key value in
+  dictionary. For tuples it must be a literal integer or a symbol which also
+  points to a literal integer.
+
+* _op_ must be one of *+=*, *-=*, *\[*]=* , */=*, *%=*, *&=* or *|=* .
+
+* _expression_ must be of type compatible with the operation..
+
+* The type of container element must be the same as the expression type.
+
+If the index is out of range in array and tuple or is a not found key, an
+exception is thrown at run time for arrays and dictonaries and at compile time
+for tuples.
+
+When the container is a dictionary and the index (key) is of type symbol,
+it can be write *container\symbol* instead of *container\["symbol"]*.
+
+# Examples
+
+``kut
+
+  A1 = [1, 2, 3];
+  T1 = [. 1.4, true, "b", [100, 101]];
+  D1 = {"one": 1, thirteen: 8};
+
+  A1[2] += 5;
+  sys.test(A1, [1, 2, 8]);
+  T1[2] += "c";
+  T1[3] += [103, 104];
+  sys.test(T1, [. 1.4, true, "bc", [100, 101, 103, 104]]);
+  A1[1] *= 3;
+  sys.test(A1, [1, 6, 8]);
+  T1[0] /= 2.0;
+  T1[1] &= false;
+  sys.test(T1, [. 0.7, false, "bc", [100, 101, 103, 104]]);
+  T1[1] |= true;
+  sys.test(T1, [. 0.7, true, "bc", [100, 101, 103, 104]]);
+  D1["thirteen"] %= 5;
+  D1\one -= 3 + 1;
+  sys.test(D1, {"one": -3, thirteen: 3});
+``
+
+## Enumeration
+
+It is an association name -> integer.
+
+Enumerations only are valid in top code.
+
+Scheme:
+
+*symbols =*
+
+- symbols
+> Sequence of symbols separated by comma.
+
+Integers are assigned to each symbol from 0 to end.
+
+If a symbol is skipped, also its number is skipped.
+
+It is mandatory the existence of at least one comma.
+
+The last character of _symbols_ can no be a comma.
+
+Examples:
+
+``kut
+
+en1, en2, en3 =; // en1 == 0, en2 == 1, en3 == 2,
+
+enn1 ,, enn3 =; // enn1 == 0, enn3 == 2,
+
+,, ennn3 =; // ennn3 == 2,
+
+// Bad
+// ennn1 =;  // <- there is not comma.
+// ennn1, ennn2, =; // <- Symbols end in comma.
+``
+
+## Indexed
+
+In is a mix of a function assignation and an enumeration declaration.
+
+Indexeds only ara valid in top code.
+
+Scheme:
+
+*type*\
+*symbol : parameters*
+
+- type
+> It must be a tuple with the parameters type.
+
+- symbol
+> Identifier of function assignation.
+
+- parameters
+> Function parameters and enumeration symbols, separated by comma.
+
+The indexed is expanded as:
+
+*\\: \[ tps | type ]*\
+*symbol = \parameters -> _return_ \[. parameters];;*\
+*parameters =;*
+
+Where *tps* are the types of the tuple *type*.
+
+Example:
+
+``kut
+
+//:[. si]
+newPerson : name, age;
+
+// Expanded as
+//  //: [ si | [. si] ]
+//  newPerson = \name, age -> return [. name, age];;
+//  name, age =;
+
+{
+  p = newPerson("Peter", 15);
+  sys.test(p, [. "Peter", 15]);
+  sys.test(p[name], "Peter");
+  sys.test(p[age], 15);
+}
+``
+
+## Function
+
+Statement functions can return a value or none. If it returns a value, this is
+discarded.
+
+Scheme:
+
+*symbol(parameteres)*
+
+- symbol
+> Symbol associate to a function.
+
+- parameters
+> 0 or more parameters.
+
+_NOTE: Values of parameteres have to be type-compatible with its corresponding
+defined type._
+
+Example:
+
+``kutt
+
+//: [i|i]
+fn = \n -> return n + 3;;
+fn(12); // the return 15 is discarded,
+``
+
+## trace
+
+Built-in command which returns a string representation of an expression and
+its position in the code file.
+
+It is related to the functions *sys.toStr*, *sys.print* and *sys.println*.
+
+Scheme:
+
+*trace : expression*
+
+The semicolon is optional. Without it, only the first 50 runes (UTF-8 characters)
+are shown.
+
+Example:
+
+``kut
+
+trace 3 + 4;
+``

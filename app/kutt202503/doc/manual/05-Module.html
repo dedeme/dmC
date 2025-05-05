@@ -1,0 +1,304 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Module</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kutt. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='04-Control Directives.html'>Anterior (Control Directives)</a> · <a href="index.html">Índice</a> · <a href='06-Command.html'>Posterior (Command)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Overview'>Overview</a><br>
+<a href='#Private symbols'>Private symbols</a><br>
+<a href='#Module marks.'>Module marks.</a><br>
+<a href='#Shorthand for constants.'>Shorthand for constants.</a>
+</p>
+<hr>
+<a name="Overview"></a>
+<h3>Overview</h3>
+<p>A module is a file with Kutt code and extension <code>.ktt</code>.</p>
+<p>We call main directory to the top directory of a group of modules.</p>
+<p>The code inside a module only can contain</p>
+<ul>
+<li>
+<p>Import statements.</p>
+</li>
+<li>
+<p>Constant assignations.</p>
+</li>
+<li>
+<p>Function assignations.</p>
+</li>
+<li>
+<p>Enumerations.</p>
+</li>
+<li>
+<p>Indexeds.</p>
+</li>
+<li>
+<p>Only one code block, called main block.</p>
+</li>
+</ul>
+<p><i>NOTE: After the main block can not have more code, but comments.</i></p>
+<p>Only can have one module with a main block and should be placed, by convention,
+in the main directory. In this case the modules are an executable program. If
+such module does not exists, the modules make up a library.</p>
+<p>A module can refer another through imports statements.</p>
+<p>Top declarations (constants, enumerations, indexed and functions) can be
+used when a module is imported with the 'point' operator.</p>
+<p>Examples:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+import "person";
+import "client : cl";
+
+p = person.new("Peter", 45); // Call the function new of module 'person'.
+max = cl.maxNumber; // Assign the value 'maxNumber' of module 'client' to 'max'.
+</div>
+<script>aceConf("aceEditor-0", "kutt");</script>
+<a name="Private symbols"></a>
+<h3>Private symbols</h3>
+<p>By default, module main symbols are public (that is, importable). However
+is possible to mark these symbols whith the prefix operator '<code>_</code>' to make
+them private (that is, not importable).</p>
+<p>This prefix go before the corresponding symbol in constants and enumerations,
+and before the type declaration in indexeds and functions.</p>
+<p>Examples:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+_ x = 24;
+
+_
+y = 32;
+
+_
+// Intermediate comment is possible, but not recomended.
+z = 18;
+
+_
+//: [|]
+x2 = \-> return;;
+
+_
+//: [. si]
+new : name, age;
+
+/*
+Not valid '_' after type declaration.
+
+//: [|]
+_
+x2 = \-> return;;
+*/
+</div>
+<script>aceConf("aceEditor-1", "kutt");</script>
+<a name="Module marks."></a>
+<h3>Module marks.</h3>
+<p>In assignations is posible to indicate that the assgionation symbol is going to
+be used with functions of a module. For that, we annotate '<code>:module</code>'
+immediately before the symbol.</p>
+<p>Example:</p>
+<p>File <code>person.ktt</code></p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+(person) [. si];
+
+//: [. si]
+new : name, age;
+
+//: [(person) | b]
+isUnderAge = \p -> return p[age] &lt; 18;;
+</div>
+<script>aceConf("aceEditor-2", "kutt");</script>
+<p>File <code>main.ktt</code></p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+import "person";
+
+{
+  :person p = person.new("Peter", 48);
+  sys.test(p.isUnderAge(), false);
+}
+</div>
+<script>aceConf("aceEditor-3", "kutt");</script>
+<p>The annotation '<code>:module sym</code>' allows to substitute:</p>
+<p><code>module.function(sym, parameters)</code></p>
+<p>for</p>
+<p><code>sym.function(parameters)</code></p>
+<p>where <code>parameters</code> can be skipped if <code>function</code> is a function with only one
+parameter.</p>
+<h4>Module marks places</h4>
+<p>The '<code>:module</code>' annotation can be placed:</p>
+<ul>
+<li>
+<p>In assignations.</p>
+</li>
+<li>
+<p>In multiassignations.</p>
+</li>
+<li>
+<p>In function parameters.</p>
+</li>
+<li>
+<p>In <code>for</code> parameters.</p>
+</li>
+<li>
+<p>In <code>catch</code> parameter.</p>
+</li>
+</ul>
+<p>Examples:</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+:person p = person.new("Peter", 48);
+
+:person p1, :person p2 = [. person.new("Ana", 17), person.new("Norma", 72)];
+
+fn = \:person p -> return p.isUnderAge();;
+
+for (:v i, :file f = Dir) ...
+
+try {
+ ...
+} catch (:md e) {
+ ...
+}
+</div>
+<script>aceConf("aceEditor-4", "kutt");</script>
+<h4>Default module marks</h4>
+<p>If there is no module mark, the compile puts a default one in the following
+cases of assignation:</p>
+<ol>
+<dt>When literal string is assigned.</dt>
+<dd>
+<p>The symbol is marked with '<code>:str</code>'.</p>
+</dd>
+<dt>When literal array is assigned.</dt>
+<dd>
+<p>The symbol is marked with '<code>:arr</code>'.</p>
+</dd>
+<dt>When literal dictionary is assigned.</dt>
+<dd>
+<p>The symbol is marked with '<code>:dic</code>'.</p>
+</dd>
+<dt>When the return of a function module is assigned.</dt>
+<dd>
+<p>The symbol is marked with '<code>:module</code>'.</p>
+</dd>
+</ol>
+<p>In case of <code>catch</code> paramter, this is marked as '<code>:str</code>'.</p>
+<p>Examples:</p>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+import "person";
+
+{
+  st = "abc"; // equals to :str st= "abc";
+  sys.test(st.starts("a"), true); // equals to sys.test(str.starts(st, "a"), true);
+
+  a = [1, 2]; // equals to :arr a = [1, 2];
+  sys.test(a.size(), 2); // equals to sys.test(arr.size(a), 2);
+
+  p = person.new("Peter", 48); // equals to :person p = person.new("Peter", 48);
+  sys.test(p.age, 48);
+
+  try {
+    throw "de";
+  } catch (e) { // equals to } catch (:str e) {
+    sys.test(e.ends("de"), true); // equals to sys.test(str.ends(e, "de"), true);
+  }
+}
+</div>
+<script>aceConf("aceEditor-5", "kutt");</script>
+<a name="Shorthand for constants."></a>
+<h3>Shorthand for constants.</h3>
+<p>To make useful indexeds, it is possible to use an arrangement similar to
+module mark, substituting</p>
+<p><code>sym[module.constant]</code></p>
+<p>for</p>
+<p><code>sym.constant</code></p>
+<p>Example:</p>
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+import "person";
+
+{
+  :person p = person.new("Peter", 48);
+  sys.test(p[person.age], p.age);
+  sys.test(p.age, 48);
+}
+</div>
+<script>aceConf("aceEditor-6", "kutt");</script>
+<h4>Corner case</h4>
+<p>When a function returns a container with elements which are functions, we
+can call such functions writing '<code>#</code>' beteen the index symbol and the
+first parenthesis.</p>
+<p>Example:</p>
+<p>File <code>person.ktt</code></p>
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+//: [ | s]
+namef = \ -> return "Peter";;
+
+name = 0;
+
+//: [ | [. [|s]] ]
+new = \ -> return [. namef];;
+</div>
+<script>aceConf("aceEditor-7", "kutt");</script>
+<p>File <code>main.ktt</code></p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+import "person";
+
+{
+  :person p0 = person.new();
+  // sys.test(p0.name(), "Peter"); // &lt;- does not work
+  sys.test(p0.name#(), "Peter");
+}
+</div>
+<script>aceConf("aceEditor-8", "kutt");</script>
+<hr>
+<p style="text-indent: 0px"><a href='04-Control Directives.html'>Anterior (Control Directives)</a> · <a href="index.html">Índice</a> · <a href='06-Command.html'>Posterior (Command)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

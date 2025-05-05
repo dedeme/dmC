@@ -1,0 +1,59 @@
+=
+title = Command
+=
+
+``
+<pre>Use:
+  kutt -h
+  kutt -v
+  kutt --clean
+  kutt --delete
+  kutt kttFile args...
+  kutt -c kttFile
+  kutt -o binFile kttFile
+
+  where
+    &apos;kutt -h&apos; show information about the command.
+    &apos;kttFile&apos; is a file with Kutt code.
+      This file must end with &apos;.ktt&apos;. But you can write it
+      with or without the extension.
+
+  kutt -h
+  Show this message.
+
+  kutt -v
+  Show Kutt version.
+
+  kutt --clean
+  Remove not necessary files in Kutt data base.
+
+  kutt --delete
+  Remove all the files of Kutt data base.
+
+  kutt kttFile args...
+  Compiles and runs &apos;kttFile&apos;.
+  Examples:
+  kutt myPrg.ktt    -&gt; Compiles and execute myPrg.ktt
+  kutt myPrg        -&gt; Compiles and execute myPrg.ktt
+  kutt myPrg a 12   -&gt; Compiles and execute myPrg.ktt with &apos;a&apos; and &apos;12
+                       as parameters.
+
+  kutt -c kttFile
+  Only compiles &apos;kttFile&apos;.
+  Examples:
+  kutt -c myPrg.ktt    -&gt; Compiles myPrg.ktt
+  kutt -c myPrg        -&gt; Compiles myPrg.ktt
+
+  kutt -o binFile kttFile
+  Compiles &apos;kttFile&apos; and copy the binary as &apos;binFile&apos;
+  Examples:
+  kutt -o /prgs/myPrg myPrg.ktt -&gt; Compiles myPrg.ktt as /prgs/myPrg
+  kutt -o /prgs/myPrg myPrg     -&gt; Compiles myPrg.ktt as /prgs/myPrg
+
+  kutt -d kttFile
+  Returns documentation of &apos;kttFile&apos; in stdout.
+  Examples:
+  kutt -d myPrg.ktt    -&gt; Show documentation of myPrg.ktt
+  kutt -d myPrg        -&gt; Show documentation of myPrg.ktt
+</pre>
+``

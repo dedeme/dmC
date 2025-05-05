@@ -1,0 +1,38 @@
+import "C05Module02" : person;
+
+_
+x = 43;
+
+_
+//: [|]
+x2 = \-> return;;
+
+_
+//: [. si]
+newPerson : name, age;
+
+{
+  :person p = person.new("Peter", 48);
+  sys.test(p.isUnderAge(), false);
+  sys.test(p[person.age], p.age);
+  sys.test(p.age, 48);
+
+  :person p0 = person.new2();
+  sys.test(p0.name2#(), "Peter");
+
+  :person p1, :person p2 = [. person.new("Ana", 17), person.new("Norma", 72)];
+  sys.test(p1.age == p2.age, false);
+
+  st = "abc";
+  sys.test(st.starts("a"), true);
+
+  try {
+    throw "de";
+  } catch (e) {
+    sys.test(e.ends("de"), true);
+  }
+
+}
+
+// This is a comment
+/* any this other */

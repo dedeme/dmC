@@ -1,0 +1,698 @@
+
+//: [i|s]
+isEven = \n -> {
+  if (n % 2 == 0) {
+    s = "Is ";
+    if (true) return s +  "even";
+  } else {
+    if (true) return "Is odd";
+    else return "1";
+  }
+  return "";
+};
+
+//: [i|s]
+isEven2 = \n -> {
+  if (n % 2 == 0) {
+    s = "Is ";
+    return s +  "even";
+  }
+  return "Is odd";
+};
+
+(gr|A) [AA|b];
+//: [ii|b]
+grI = \e1, e2 -> return e1 > e2;;
+//: [ff|b]
+grF = \e1, e2 -> return e1 > e2;;
+//: [ss|b]
+grS = \e1, e2 -> return e1 > e2;;
+
+(addLenable|A) [. [AA|A] [A|i]];
+//: [ss|s]
+addS = \s1, s2 -> return s1 + s2;;
+//: [|(addLenable|s)]
+addLenableS = \ -> return [. addS, str.len];;
+//: [[A][A]|[A]]
+addA = \s1, s2 -> return s1 + s2;;
+//: [[A]|(addLenable|[A])]
+addLenableA = \e -> return [. addA, arr.size];;
+
+(rs|A) [. [A] s];
+(ors|A) [. [A] [A|(rs|A)] [[A]s|(rs|A)] ];
+//: [A|(rs|A)]
+rsOk = \e -> return [. [e], ""];;
+//: [[A]s|(rs|A)]
+rsError = \Arr, s -> return [. Arr, s];;
+//: [[A]| (ors|A)]
+rsNew = \Arr -> return [. Arr, rsOk, rsError];;
+
+//: [(ors|A)s | (rs|A)]
+rsMkError = \res, msg -> return res[2](res[0][:0], msg);;
+//: [(ors|A)A | (rs|A)]
+rsMkOk = \res, v -> return res[1](v);;
+
+
+{
+
+  //: [i|(rs|i)]
+  fn = \i -> {
+    rt = rsNew([]/i/);
+
+    if (i < 3) return rsMkOk(rt, i * 2);
+    else return rsMkError(rt, "error");
+  };
+
+  sys.test(fn(2)!!, 4);
+  sys.test(fn(2)[1], "");
+  sys.test(!fn(200)[0], true);
+  sys.test(fn(200)[1], "error");
+
+  //: [i|[.[i]s]]
+  fn2 = \ix -> {
+    if (ix < 3) return [. [ix * 2], ""];
+    else return [. []/i/, "error"];
+  };
+
+  sys.test(fn2(2)!!, 4);
+  sys.test(fn2(2)[1], "");
+  sys.test(!fn2(200)[0], true);
+  sys.test(fn2(200)[1], "error");
+
+  //: [i|[.[i]s]]
+  fn3 = \i -> {
+    if (i < 3) return rsOk(i * 2);
+    else return rsError([]/i/, "error");
+  };
+
+  sys.test(fn3(2)!!, 4);
+  sys.test(fn3(2)[1], "");
+  sys.test(!fn3(200)[0], true);
+  sys.test(fn3(200)[1], "error");
+
+  A = [0];
+
+  try A! = 1;
+  catch (e) A! = 2;
+  sys.test(A!, 1);
+
+  A! = 0;
+  try {
+    A! = 1;
+    throw("here");
+  } catch (e) {
+    A! = 2;
+  }
+  sys.test(A!, 2);
+
+  /* Not intercepted rethrown exception
+  A! = 0;
+  try {
+    A! = 1;
+    {
+      throw("here");
+    }
+  } catch (e) {
+    A! = 2;
+    throw(e);
+  }
+  sys.test(A!, 2);
+  */
+
+  A! = 0;
+  try A! = 1;
+  catch (e) A! = 2;
+  sys.test(A!, 1);
+
+  A! = 0;
+  try {
+    A! = 1;
+    throw("here");
+  } catch (e) {
+    A! += 2;
+  }
+  sys.test(A!, 3);
+
+  //: [|i]
+  fnt1 = \-> {
+    try return 1;
+    catch (e) {
+      return 2;
+    }
+  };
+  sys.test(fnt1(), 1);
+
+  //: [|i]
+  fnt2 = \-> {
+    try {
+      throw("here");
+    } catch (e) return 2;
+  };
+  sys.test(fnt2(), 2);
+
+  fntV = [0];
+  //: [|]
+  fnl1 = \-> {
+    V = [0];
+    while (V! < 3) {
+      try {
+        fntV! += 1;
+        V! += 1;
+      } catch (e) {
+        trace "here";
+      }
+      fntV! += 1;
+    }
+  };
+  fnl1();
+  sys.test(fntV!, 6);
+
+  fntV! = 0;
+  //: [|]
+  fnl2 = \-> {
+    V = [0];
+    while (V! < 3) {
+      try {
+        fntV! += 1;
+        V! += 1;
+        throw("abc");
+      } catch (e) {
+        sys.test(e[-3:], "abc");
+        fntV! = 102;
+      }
+      fntV! += 1;
+    }
+  };
+  fnl2();
+  sys.test(fntV!, 103);
+
+  fntV! = 0;
+  //: [|]
+  fnl3 = \-> {
+    V = [0];
+    while (V! < 3) {
+      try {
+        fntV! += 1;
+        V! += 1;
+        break;
+      } catch (e) {
+        fntV! = 102;
+      }
+      fntV! += 1;
+    }
+  };
+  fnl3();
+  sys.test(fntV!, 1);
+
+  fntV! = 0;
+  //: [|]
+  fnl4 = \-> {
+    V = [0];
+    while (V! < 3) {
+      try {
+        V! += 1;
+        continue;
+      } catch (e) {
+        fntV! = 102;
+      }
+      fntV! += 1;
+    }
+  };
+  fnl4();
+  sys.test(fntV!, 0);
+
+  fntV! = 0;
+  //: [|i]
+  fnl5 = \-> {
+    try {
+      try {
+        return 1;
+      } catch (e) {
+      }
+    } catch (e) {
+      fntV! = 33;
+    }
+    return 0;
+  };
+  sys.test(fnl5(), 1);
+  sys.test(fntV!, 0);
+
+  fntV! = 0;
+  //: [|i]
+  fnl5b = \-> {
+    try {
+      try {
+        fntV! = 1;
+        if (fntV! >0) throw "error";
+      } catch (e) {
+        sys.test(e[-5:], "error");
+        fntV! += 2;
+        throw "error2";
+      }
+    } catch (e) {
+      sys.test(e[-6:], "error2");
+      fntV! += 3;
+      return 1;
+    }
+    return 0;
+  };
+  sys.test(fnl5b(), 1);
+  sys.test(fntV!, 6);
+
+  fntV! = 0;
+  //: [|i]
+  fnl6 = \-> {
+    while () {
+      try {
+        fntV! = 1;
+        try {
+          break;
+        } catch (e) {
+        }
+        fntV! = 33;
+      } catch (e) {
+        fntV! = 33;
+      }
+      fntV! = 33;
+    }
+    return 0;
+  };
+  sys.test(fnl6(), 0);
+  sys.test(fntV!, 1);
+
+  fntV! = 0;
+  //: [|i]
+  fnl7 = \-> {
+    while (fntV! < 3) {
+      try {
+        fntV! += 1;
+        try {
+          continue;
+        } catch (e) {
+        }
+        fntV! = 33;
+      } catch (e) {
+        fntV! = 33;
+      }
+      fntV! = 33;
+    }
+    return 0;
+  };
+  sys.test(fnl7(), 0);
+  sys.test(fntV!, 3);
+
+  fntV! = 0;
+  //: [|i]
+  fnl8 = \-> {
+    while (fntV! < 3) {
+      try {
+        fntV! += 1;
+        try {
+          fntV! += 1;
+          throw("");
+        } catch (e) {
+          fntV! += 1;
+          throw("");
+        }
+      } catch (e) {
+        fntV! += 1;
+      }
+      fntV! += 1;
+    }
+    return 0;
+  };
+  sys.test(fnl8(), 0);
+  sys.test(fntV!, 5);
+
+  Sum = [0];
+  C1 = [0];
+  while () {
+    Sum! += C1!;
+    C1! += 1;
+    if (C1! >= 5) break;
+    continue;
+  }
+  sys.test(Sum!, 10);
+
+  Sum! = 0;
+  C1! = 0;
+  while () {
+    Sum! += C1!;
+    C1! += 1;
+    if (C1! < 5) continue;
+    break;
+  }
+  sys.test(Sum!, 10);
+
+  sumV = [0];
+  C1V = [0];
+  while () {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! >= 5) break;
+    continue;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  C1V! = 0;
+  while () {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! < 5) continue;
+    break;
+  }
+  sys.test(sumV!, 10);
+
+  //: [|i]
+  fnw1 = \ -> {
+    C = [0];
+    while () {
+      if (C! == 4) return C!;
+      C! += 1;
+    }
+    return -4;
+  };
+  sys.test(fnw1(), 4);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (C1V! < 5) {
+    sumV! += C1V!;
+    C1V! += 1;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (C1V! < 25) {
+    sumV! += C1V!;
+    C1V! += 1;
+  }
+  sys.test(sumV!, 300);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (C1V! < 25) {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! >= 5) break;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (!![1]) {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! < 5) continue;
+    break;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (false) {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! < 5) continue;
+    break;
+  }
+  sys.test(sumV!, 0);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (str.len("a") > 0) {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! < 5) continue;
+    break;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  C1V! = 0;
+  while (str.len("a") == 0) {
+    sumV! += C1V!;
+    C1V! += 1;
+    if (C1V! < 5) continue;
+    break;
+  }
+  sys.test(sumV!, 0);
+
+  //: [|i]
+  fnw2 = \ -> {
+    C = [0];
+    while (C! < 4) C! += 1;
+    return C!;
+  };
+  sys.test(fnw2(), 4);
+
+  //: [|i]
+  fnw3 = \ -> {
+    C = [0];
+    while ("1" != "") {
+      if (C! == 4) return C!;
+      C! += 1;
+    }
+    return -4;
+  };
+  sys.test(fnw3(), 4);
+
+  Is = []/i/;
+  Empty = Is.copy();
+  Is.push(1);
+  sys.test(Is[0], 1);
+  if (Is[0] == 1) Is.push(2);
+  sys.test(Is, [1, 2]);
+
+  if (Is[0] == 1) Is.push(3);
+  else Is.push(2000);
+  sys.test(Is, [1, 2, 3]);
+
+  if (Is[0] == 0) Is.push(2000);
+  else Is.push(4);
+  sys.test(Is, [1, 2, 3, 4]);
+
+  sys.test(isEven(12), "Is even");
+  sys.test(isEven(121), "Is odd");
+  sys.test(isEven2(12), "Is even");
+  sys.test(isEven2(121), "Is odd");
+
+  C = [23];
+  if (!!Empty) C! = 0;
+  else C! = 1;
+  sys.test(C!, 1);
+
+  C! = 23;
+  if (!![1, 4]) C! = 1;
+  else C! = 0;
+  sys.test(C!, 1);
+
+  C! = 23;
+  if (false) C! = 0;
+  else C! = 1;
+  sys.test(C!, 1);
+
+  C! = 23;
+  if (false) throw("fail");
+  else C! = 1;
+  sys.test(C!, 1);
+
+  C! = 23;
+  if (true) {
+    C! = 1;
+  } else {
+    throw("fail");
+  }
+  sys.test(C!, 1);
+
+  //: [ii|s]
+  fni1 = \a, b -> if (a > b) return "up"; else return "down";;
+  //: [ss|s]
+  fni1s = \a, b -> if (a > b) return "up"; else return "down";;
+  sys.test(fni1(3, 2), "up");
+  sys.test(fni1s("a", "z"), "down");
+
+  //: [AA(gr|A)|s]
+  fni2 = \a, b, greater -> {
+    if (greater(a,b)) {
+      return "up";
+    } else if (a == b) {
+      return "eq";
+    } else {
+      return "down";
+    }
+  };
+  sys.test(fni2(3.5, 2.03, grF), "up");
+  sys.test(fni2("a", "z", grS), "down");
+  sys.test(fni2(1, 1, grI), "eq");
+
+  //: [AA(addLenable|A)|i]
+  addSum = \e1, e2, addLen -> {
+    return addLen[1](addLen[0](e1, e2));
+  };
+  sys.test(addSum("", "", addLenableS()), 0);
+  sys.test(addSum("ab", "c", addLenableS()), 3);
+  sys.test(addSum(Empty, Empty, addLenableA([]/i/)), 0);
+  sys.test(addSum([1, 2], [220], addLenableA([]/i/)), 3);
+
+  sumV! = 0;
+  for (e = [1, 2, 3]) sumV! += e;
+  sys.test(sumV!, 6);
+
+  sumV! = 0;
+  sum2V = [0];
+  for (i, e = [1, 2, 3]) {
+    sumV! += e;
+    sum2V! += i;
+  }
+  sys.test(sumV!, 6);
+  sys.test(sum2V!, 3);
+
+  sumV! = 0;
+  for (e = {"one": 1, "two": 2, three: 3}) sumV! += e;
+  sys.test(sumV!, 6);
+  sumV! = 0;
+  sum3V = [""];
+  for (k, e = {one: 1, two: 2, three: 3}) {
+    sumV! += e;
+    sum3V! += k;
+  }
+  sys.test(sumV!, 6);
+  sys.test(sum3V!, "onetwothree");
+
+  sumfV = [0.0];
+  for (e = [1.0, 2.0, 3.0]) sumfV! += e;
+  sys.test(sumfV!, 6.0);
+
+  sumaV = [[]/i/];
+  for (e = [[1], [2], [3]]) sumaV! += e;
+  sys.test(sumaV!, [1, 2, 3]);
+
+  sumV! = 12;
+  for (e = [1, 2, 3]) sumV! -= e;
+  sys.test(sumV!, 6);
+
+  sumfV! = 12.0;
+  for (e = [1.0, 2.0, 3.0]) sumfV! -= e;
+  sys.test(sumfV!, 6.0);
+
+  sumV! = 1;
+  for (e = [1, 2, 3]) sumV! *= e;
+  sys.test(sumV!, 6);
+
+  sumfV! = 1.0;
+  for (e = [1.0, 2.0, 3.0]) sumfV! *= e;
+  sys.test(sumfV!, 6.0);
+
+  sumV! = 36;
+  for (e = [1, 2, 3]) sumV! /= e;
+  sys.test(sumV!, 6);
+
+  sumfV! = 36.0;
+  for (e = [1.0, 2.0, 3.0]) sumfV! /= e;
+  sys.test(sumfV!, 6.0);
+
+  sumV! = 136;
+  for (e = [100, 10]) sumV! %= e;
+  sys.test(sumV!, 6);
+
+  sumbV = [true];
+  for (e = [true, false]) sumbV! &= e;
+  sys.test(sumbV!, false);
+
+  sumbV! = true;
+  for (e = [true, true]) sumbV! &= e;
+  sys.test(sumbV!, true);
+
+  sumbV! = false;
+  for (e = [false, false]) sumbV! |= e;
+  sys.test(sumbV!, false);
+
+  sumbV! = false;
+  for (e = [false, true]) sumbV! |= e;
+  sys.test(sumbV!, true);
+
+  sumV! = 0;
+  for (j = 0:6) sumV! += j;
+  sys.test(sumV!, 15);
+  sumV! = 0;
+  for (j = 4:6) sumV! += j;
+  sys.test(sumV!, 9);
+  sumV! = 0;
+  for (j = -1:6) sumV! += j;
+  sys.test(sumV!, 14);
+  sumV! = 0;
+  for (j = 15:6) sumV! += j;
+  sys.test(sumV!, 0);
+
+  sumV! = 0;
+  for (jj = 0:5:1) sumV! += jj;
+  sys.test(sumV!, 15);
+  sumV! = 0;
+  for (j = 4:5:1) sumV! += j;
+  sys.test(sumV!, 9);
+  sumV! = 0;
+  for (j = -1:5:1) sumV! += j;
+  sys.test(sumV!, 14);
+  sumV! = 0;
+  for (j = 15:6:1) sumV! += j;
+  sys.test(sumV!, 0);
+
+  sumV! = 0;
+  for (jj = 0:-5:-1) sumV! += jj;
+  sys.test(sumV!, -15);
+  sumV! = 0;
+  for (j = -4:-5:-1) sumV! += j;
+  sys.test(sumV!, -9);
+  sumV! = 0;
+  for (j = 1:-5:-1) sumV! += j;
+  sys.test(sumV!, -14);
+  sumV! = 0;
+  for (j = -15:-6:-1) sumV! += j;
+  sys.test(sumV!, 0);
+
+  d1 = {"true": true, "false": false};
+  d1["true"] &= true;
+  sys.test(d1["true"], true);
+  d1["true"] &= false;
+  sys.test(d1["true"], false);
+  d1["false"] |= false;
+  sys.test(d1["false"], false);
+  d1["false"] |= true;
+  sys.test(d1["false"], true);
+
+  d2 = {"one": 1, "two": 2};
+  d2\two += 4;
+  sys.test(d2\two, 6);
+  // d2[2] += 4; // Type error
+  d2\one -= 4;
+  sys.test(d2\one, -3);
+  d2\two *= 7;
+  sys.test(d2\two, 42);
+  d2\two /= 3;
+  sys.test(d2\two, 14);
+  d2\two %= 12;
+  sys.test(d2\two, 2);
+
+  d3 = {"one": 1.0, "two": 2.0};
+  d3\two += 4.0;
+  sys.test(d3\two, 6.0);
+  d3\one -= 4.0;
+  sys.test(d3\one, -3.0);
+  d3\two *= 7.0;
+  sys.test(d3\two, 42.0);
+  d3\two /= 3.0;
+  sys.test(d3\two, 14.0);
+
+  d4 = {"k1": "abc", "k2": "cde"};
+  d4\k2 += "ñ";
+  sys.test(d4\k2, "cdeñ");
+
+  d5 = {"v1": [1, 2], "v2": [3, 4]};
+  d5\v1 += d5\v2;
+  // sys.test(d5\k1, [1, 2, 3, 4]); // Error key not found
+  sys.test(d5\v1, [1, 2, 3, 4]);
+
+}

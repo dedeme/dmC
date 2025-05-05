@@ -109,15 +109,27 @@ sys.println(helloText.tx);</div>
 <div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// Normal comment.
 /// Documentation command.</div>
 <script>aceConf("aceEditor-3", "kut");</script>
+<p>Also multiline comments (between '\<code>' and '</code>/' are allowed). They can be seen
+as blanks.</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">/*
+Multiline
+comment
+*/
+
+sys.println(/* age */ 32); // Print '32' and /* age  */ is ignored.
+// but
+// sys.println(3/* age */2);
+// is an error </div>
+<script>aceConf("aceEditor-4", "kut");</script>
 <a name="Statement"></a>
 <h3>Statement</h3>
 <p>Made of expressions, they are commands to be executed by Kut.</p>
 <p>Statements are executed sequentially, from top to bottom, unless this order
 is changed by a control sequence.</p>
 <p>Example ("hello2.kut"):</p>
-<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">tx = "Hello World!";
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">tx = "Hello World!";
 sys.println(tx);</div>
-<script>aceConf("aceEditor-4", "kut");</script>
+<script>aceConf("aceEditor-5", "kut");</script>
 <p>Which shows:</p>
 <p><code>Hello World</code></p>
 <a name="Block"></a>
@@ -125,30 +137,30 @@ sys.println(tx);</div>
 <p>It is a group of statement enclosed by '{' and '}'.</p>
 <p>Each block has its own referencial frame.</p>
 <p>Example ("helloBlock.kut")</p>
-<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">tx = "World!";
+<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">tx = "World!";
 {
   tx = "Hello ";
   sys.print(tx);
 }
 sys.println(tx);</div>
-<script>aceConf("aceEditor-5", "kut");</script>
+<script>aceConf("aceEditor-6", "kut");</script>
 <p>Which shows:</p>
 <p><code>Hello World</code></p>
 <a name="Control sequence"></a>
 <h3>Control sequence</h3>
 <p>Control sequences change the sequencial order of statements.</p>
 <p>Example: ("helloIf1.kut")</p>
-<div id="aceEditor-6" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = true;
-if (v) sys.println("Hello World!");
-else sys.println("Hello People!");</div>
-<script>aceConf("aceEditor-6", "kut");</script>
-<p>shows:</p>
-<p><code>Hello World</code></p>
-<p>Example: ("helloIf2.kut")</p>
-<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = false;
+<div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = true;
 if (v) sys.println("Hello World!");
 else sys.println("Hello People!");</div>
 <script>aceConf("aceEditor-7", "kut");</script>
+<p>shows:</p>
+<p><code>Hello World</code></p>
+<p>Example: ("helloIf2.kut")</p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = false;
+if (v) sys.println("Hello World!");
+else sys.println("Hello People!");</div>
+<script>aceConf("aceEditor-8", "kut");</script>
 <p>shows:</p>
 <p><code>Hello People</code></p>
 <a name="Expression"></a>

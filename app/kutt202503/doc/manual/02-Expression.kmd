@@ -1,0 +1,448 @@
+=
+title = Expression
+=
+
+## Literal
+
+# Boolean literal
+
+*true* and *false*
+
+Examples:
+
+``kutt
+
+aYes  = true;
+aNot = false;
+``
+
+# Integer literal
+
+Numbers without decimal part.
+
+Symbol '__' is skipped.
+
+Examples:
+
+``kutt
+
+n1 = 0;
+n2 = -1_456;
+n3 = 1456;
+n4 = 010_000;
+n5 = -0000;
+``
+
+# Float literal
+
+Numbers with decimal part.
+
+Symbol '__' in the integer part is skipped.
+
+Can be used the scientific notation.
+
+_NOTE: When there is not decimal point the number is interpreted as integer._
+
+Examples:
+
+``kutt
+
+f1 = 0.0;
+f2 = -12.02;
+f3 = 1_333.0;
+f4 = 1.e-3;
+f5 = 212.35E+56;
+
+// Next expressions are not valid:
+
+// f6 = 1e-3; -> decimal point is missing.
+// f6 = .32; -> must be writen as f6 = 0.32;
+// f6 = -.32; -> must be writen as f6 = -0.32;
+``
+
+# String literal
+
+Text in the same line, between single or double quotes.
+
+Multiline text between triple 'double quotes'.
+
+Monoline string allows escape and unicode sequences ('*\n*', "*\u0032*", ...).
+
+Multiline string is of verbatim type and with the margin adjusted to the most
+left line. Also, if the firs line only contains triple quotes, the
+corresponing carry return is skipped.
+
+Examples:
+
+``kutt
+
+s1 = "";
+s2 = 'abc"d"e';
+s3 = "a 'text'";
+s4 = """
+    Line 1
+    Line 2
+  Line 3
+  """; // Equals to: s4 = "  Line 1\n  Line 2\nLine 3\n";
+``
+
+# Array literal
+
+Expressions of the same type, between '\[' and ']' and separated by comma.
+
+Empty array must indicate its type.
+
+Examples:
+
+``kutt
+
+A1 = []/f/;
+A2 = [1, 2, 3];
+A3 = [["a"], ["a", "b", "c"]];
+``
+
+# Tuple literal
+
+Expressions of any type, between '\[.' and ']' and separated by comma.
+
+Tuple literal must contain at least one element.
+
+Examples:
+
+``kutt
+
+T1 = [. "a"];
+T2 = [. 1, "a", [. 1.0, true]];
+``
+
+# Dictionary literal
+
+Pairs 'key:value', between '{' and '}' separated by comma, where 'keys' are
+strings and 'values' are of the same type.
+
+When strins contains only one word of type 'symbol' can be writen without
+quotes.
+
+Empty dictionary must indicate the type of its values.
+
+Examples:
+
+``kutt
+
+D1 = {}/i/;
+D2 = {" a key": 1.1, " another key ": 2.34};
+D3 = {"one": 1, "two": 2};
+D4 = {one: 1, two: 2};
+``
+
+# Range
+
+It is an iterator over integer with three constructors:
+
+* From 0 to n-1 with step 1: *\[! n]*
+
+* From 'start' to 'end-1' with step 1: *\[! start, end]*
+
+* From "start" to "end" with step 'step': *\[! start, end, step]*
+
+'step' can not be '0'.
+
+Examples:
+
+``kutt
+
+it1 = [! 23];
+it2 = [! 1, 4];
+it3 = [! 4, -4, -2];
+it4 = [! 1, 4, 1];
+``
+
+_NOTE: *it2* traverses 1, 2 and 3; but *it4* traverses '1, 2, 3 and 4'_
+
+# Function literal
+
+Funtions have the following form:
+
+*\parameters->body*
+
+- parameters
+> Sequence of 0 or more symbols.
+
+- body
+> Code statement or block.
+
+They must be preceded by a type declaration.
+
+Examples:
+
+``kutt
+
+//: [|]
+help = \ -> sys.println("help");;
+
+//: [s|i]
+len = \tx -> {
+  return str.len(tx);
+};
+
+//: [iii|i]
+sumTimes = \v1, v2, v3 -> {
+  v = v1 + v2;
+  return v * v3;
+};
+``
+
+## Symbol
+
+A symbol is a word which starts with a letter and con be followed by more letters
+or numbers. Particularly, symbols do not admit the character '__';
+
+Symbols are associated to values. (Only is allowed one association.)
+
+We have the following conventions:
+
+* To make visible several words we use 'camelCase': *theEnd*,
+  *severalWordsJoinTogether*, ...
+
+* Every symbol start with lowercase, except in Arrays and dictionaries that
+  starts with uppecase. (*Book* instead of *book*)
+
+* Array symbols, to be used as options, end in 'Op'. (*elementOp* instead of *element*)
+
+* Array symbols, to be used as variables, end in 'V'. (*ageV* instead of *age*)
+
+* Defined types of functions end in 'Fn'. (*searchFn* instead of *search*)
+
+## Function call
+
+Functions which returns a value.
+
+# Parenthesis
+
+Scheme:
+
+*symbol(parameteres)*
+
+- symbol
+> Symbol associate to a function.
+
+- parameters
+> 0 or more parameters.
+
+_NOTE: Values of parameteres have to be type-compatible with its corresponding
+defined type._
+
+Example:
+
+``kutt
+
+//: [i|i]
+fn = \n -> return n + 3;;
+v = fn(12); // v is 15
+``
+
+# Square
+
+Scheme:
+
+*expression\[index]*
+
+- expression
+> Expression which generate a container of type array, tuple or dictionary.
+
+- index
+> Integer expression for array and tuple, and string expression for dictionary.\
+  When expression is a tuple the index value must be a literal integer or a
+  symbol also points to a literal integer.
+
+Returns an element of container. If the element is not found, an exception is
+thrown at run time for array and dictionary and at compile time for typle.
+
+When the container is a dictionary and the index (key) is of type symbol,
+it can be write *expression\symbol* instead of *expression\["symbol"]*.
+
+Examples
+
+``kutt
+
+v1 = [1, 2][1];
+Ar = [1, 2];
+v2 = Ar[1]; // v1 == v2 == 2
+
+v1b = [. 1, "a", 1.4][1];
+Tp = [. 1, "a", 1.4];
+v2b = Tp[1]; // v1b == v2b == "a"
+
+v1c = {one: 1, two: 2}["two"];
+Dc = {one: 1, two: 2};
+v2c = Dc["two"];
+v1d = {one: 1, two: 2}\two;
+v2d = Dc\two; // v1c == v2c == v1d == v2d == 2
+``
+
+When the container is an array or tuple the index *\[ 0 ]* can be changed by
+'*!*'. By convention this feature is only used when the container is an array
+used as 'option' or 'variable'.
+
+Examples:
+
+``kut
+
+rsOp = []/b/;
+if (v1 == 2) arr.push(rsOp, true);
+vop = rsOp!; // equals to rsOp[0];
+
+finalV = [""];
+if (v1 == 2) finalV[0] = "2";
+vv = finalV!; // equals to vv = finalV[0];
+``
+
+## Monary function
+
+There are two monary functions:
+
+- -
+> Negative symbol. Applied on integers and floats.
+
+- !
+> Negation symbol. Applied on booleans and arrays. In the last case, it returns
+  the value *true* if the array is empty and *false* in other case.
+
+_NOTE: Monary functions are precedence over binary or ternary functions._
+
+Examples:
+
+``kutt
+
+neg = -34;
+pos = --34;
+pos2 = -neg; // pos and pos2 are equals.
+sum = -3 + 4; // sum is 1
+sum2 = -(3 + 4); // sum2 is -7
+
+f = !true;
+tr1 = !!true;
+tr2 = !f; // tr1 and tr2 are 'true'
+
+tb = ![1, 2]; // tb is false;
+fb = ![]/i/; // tb is true;
+``
+
+## Binary functions
+
+Both function arguments must be of the same type.
+
+- +
+> Applied over integers, floats, strings and arrays.
+
+- -, *, /
+> Applied over integers and floats.
+
+- %
+> Module. Applied over integers.
+
+- &, |
+> And. Applied over booleans.
+
+- >, <=, <, <=
+> Applied over integes, floats and strings.
+
+- ==, !=
+> Applied over any type.
+
+# Precedence.
+
+Binary functions are precedence over the ternary operator (*?:*).
+
+Inter them there are four levels of precedence, and in each level the
+first operation which appears has the most one.
+
+The levels are, for greater to lesser.
+
+``
+<table class='border'>
+<tr><td class='border'><code>1</code></td>
+  <td class='border'>*, /, %</td></tr>
+<tr><td class='border'><code>2</code></td>
+  <td class='border'>+, -</td></tr>
+<tr><td class='border'><code>3</code></td>
+  <td class='border'>>, <=, <, <=, ==, !=</td></tr>
+<tr><td class='border'><code>4</code></td>
+  <td class='border'>&, |</td></tr>
+</table>
+``
+
+## Ternary operator <code>?:</code>
+
+It has the less precedence.
+
+Scheme:
+
+*condition ? valueTrue : valueFalse*
+
+- condition
+> Boolean expression.
+
+- valueTrue
+> Result if _condition_ is *true*.
+
+- valueFalse
+> Result if _condition_ is *false*.
+
+Types of _valueTrue_ and _valueFalse_ must be equals.
+
+Example:
+
+``kutt
+
+ter1 = (3 > 4) ? "a" : "b"; // ter1 is "b".
+``
+
+## Switch expression
+
+Scheme:
+
+*_switch_(expression){entries _default_: expressionR;}*
+
+where *entries* are
+
+*vals: expressionR*;
+
+- expression
+> Expresion to compare.
+
+- vals
+> one or more expressions separated by comma.
+
+- expressionR
+> Expression to return.
+
+_expression_ and each one of _vals_ must be of the same type.
+
+Every _expressionR_ has to be of the same type.
+
+Each entry is evaluated with 'expression == val' for each _val_. If one result
+be *true*, *switch* return its _expressionR_.
+
+If no one of entries is evaluated as *true* the _expressionR_ of *default* is
+returned.
+
+_NOTE: Clause *default* is mandatory._
+
+Examples:
+
+``kutt
+
+v0 = switch (4) {
+  1: "a";
+  2: "b";
+  default: "c";
+}; // v0 is 'c'
+
+v1 = switch (2 + 2) {
+  1, 2: "a";
+  3, 4, 5: "b";
+  6: "c";
+  default: "d";
+}; // v1 is "b"
+``

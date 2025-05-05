@@ -1,0 +1,641 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Control Directives</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Manual.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='03-Statement.html'>Anterior (Statement)</a> · <a href="index.html">Índice</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#if - else'>if - else</a><br>
+<a href='#switch - default'>switch - default</a><br>
+<a href='#while - break - continue'>while - break - continue</a><br>
+<a href='#for - break - continue'>for - break - continue</a><br>
+<a href='#try - catch - finally'>try - catch - finally</a><br>
+<a href='#return'>return</a><br>
+<a href='#import'>import</a>
+</p>
+<hr>
+<a name="if - else"></a>
+<h3>if - else</h3>
+<p>Scheme:</p>
+<p><code>if (<i>condition</i>) <i>st1</i> [else <i>st2</i>]</code></p>
+<ul>
+<li>
+<p><i>condition</i> is an expression of boolean type.</p>
+</li>
+<li>
+<p><i>st1</i> and <i>st2</i> are statement or block.</p>
+</li>
+</ul>
+<p><code>if</code> executes <i>st1</i> if <i>condition</i> is <code>true</code>.</p>
+<p>if <i>condition</i> is <code>false</code> <i>st1</i> is not executed and, if the clausule <code>else</code>
+is set, <i>st2</i> is executed.</p>
+<p>Examples:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = [false];
+msg = ["msg"];
+
+if (v[0]) msg[0] = "msgIf";
+sys.assert(msg[0] == "msg");
+
+if (v[0]) msg[0] = "msgIf";
+else msg[0] = "msgElse";
+sys.assert(msg[0] == "msgElse");
+
+v[0] = true;
+
+if (v[0]) { msg[0] = "msgIf"; }
+sys.assert(msg[0] == "msgIf");
+
+if (v[0]) {
+  msg[0] = "msgIf2";
+} else {
+  msg[0] = "msgElse";
+}
+sys.assert(msg[0] == "msgIf2"); </div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<a name="switch - default"></a>
+<h3>switch - default</h3>
+<p>Scheme:</p>
+<p><code>switch (<i>exp</i>) {<br>  &nbsp;&nbsp;<i>e00</i>, [<i>e01</i>, <i>e02</i>, ...]: <i>st0</i><br>  &nbsp;&nbsp;<i>e10</i>, [<i>e11</i>, <i>e12</i>, ...]: <i>st1</i><br>  &nbsp;·..<br>  &nbsp;&nbsp;[default: <i>stN</i>]<br>}</code></p>
+<ul>
+<li>
+<p><i>exp</i> and <i>eXX's</i> are expressions.</p>
+</li>
+<li>
+<p><i>stX's</i> are statement or block.</p>
+</li>
+</ul>
+<p><code>switch</code> compares <i>exp</i> with each <i>eXX</i> with <code>==</code> and the first time that
+the result is <code>true</code> execute the corresponding <i>stX</i>.</p>
+<p>If there is a <code>default</code> clause and no result is <code>true</code>, <i>stN</i> is executed.</p>
+<p>Examples:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">rOp = [""];
+
+switch (3) {
+  3 + 1: rOp[0] = "1";
+  3 + 0: rOp[0] = "2";
+  3 - 1: rOp[0] = "3";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+}
+sys.assert(rOp[0] == "2");
+
+switch (4 * 2) {
+  0: rOp[0] = "01";
+  1: rOp[0] = "02";
+  2: rOp[0] = "03";
+  default: rOp[0] = "08";
+}
+sys.assert(rOp[0] == "08");
+
+// Use as multiple ifs.
+
+// This
+rOp[0] = "";
+switch (true) {
+  3 > 5 : rOp[0] = "A";
+  3 == 5 : rOp[0] = "B";
+  3 &lt; 5 : rOp[0] = "C";
+  default: rOp[0] = "D";
+}
+sys.assert(rOp[0] == "C");
+
+// is equals to
+rOp[0] = "";
+
+if (3 > 5) rOp[0] = "A";
+else if (3 == 5) rOp[0] = "B";
+else if (3 &lt; 5) rOp[0] = "C";
+else rOp[0] = "D";
+
+sys.assert(rOp[0] == "C"); </div>
+<script>aceConf("aceEditor-1", "kut");</script>
+<a name="while - break - continue"></a>
+<h3>while - break - continue</h3>
+<p>Scheme:</p>
+<p><code>while ([ <i>condition</i> ]) <i>st</i></code></p>
+<ul>
+<li>
+<p><i>condition</i> is an expression of boolean type.</p>
+</li>
+<li>
+<p><i>st</i> is statement or block.</p>
+</li>
+</ul>
+<p><code>while</code> executes <i>st</i> while <i>condition</i> is <code>true</code>.</p>
+<p>If <i>condition</i> is not indicated, <i>st</i> is executed in an infinite loop.</p>
+<p>When inside a <code>while</code> block it appears the directive <code>break</code>, the loop is
+finished immediately.</p>
+<p>Also, when appears the directive <code>continue</code> the program flux go to the block
+start.</p>
+<p>NOTES:</p>
+<ul>
+<li>
+<p><i>The construction <code>while () break;</code> is valid, but does nothing</i>.</p>
+</li>
+<li>
+<p><i>Also is valid the construction <code>while () continue;</code>, but generate an
+  infinite loop</i>.</p>
+</li>
+</ul>
+<p>Examples:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">xV = [10];
+sumV = [0];
+while (xV[0] &lt; 20) {
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  if (xV[0] % 2 == 0) {
+    xV[0] += 1;
+    continue;
+  }
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 75);
+
+while () break;
+// while () continue; &lt;- Infinite loop. </div>
+<script>aceConf("aceEditor-2", "kut");</script>
+<a name="for - break - continue"></a>
+<h3>for - break - continue</h3>
+<p>Scheme:</p>
+<p><code>for ( <i>assignation-condition</i> ) <i>st</i></code></p>
+<ul>
+<li>
+<p><i>assignation-condition</i> is a mix of assignations of expressions to symbols
+  and condition of loop termination.</p>
+</li>
+<li>
+<p><i>st</i> is statement o block.</p>
+</li>
+</ul>
+<p><code>for</code> executes <i>st</i> while the condition of <i>assignation-condition</i> is <code>true</code>.</p>
+<p><code>break</code> and <code>continue</code> can be called inside <i>st</i> with the same efectos
+explained for <code>while</code>.</p>
+<p>In <i>assignation-condition</i> some simbols are initialized for each lap of
+loop.</p>
+<p>This symbols are out of <i>st</i> scope, so:</p>
+<ul>
+<li>
+<p>They can be shadowed by a new assignation.</p>
+</li>
+<li>
+<p>They can not be used in loop code.</p>
+</li>
+</ul>
+<h4><code>for</code> with collections</h4>
+<p>Scheme:</p>
+<p><code>for ( [ <i>i</i>, ] <i>e</i> = <i>C</i> ) <i>st</i></code></p>
+<ul>
+<li>
+<p><i>C</i> It is a collection (iterator, array or dictionary) or string.</p>
+</li>
+<li>
+<p><i>i</i> This symbols is assigned:</p>
+<ul>
+<li>
+<p>String, iterator and array: Succesively to values 0, 1, 2 ... in each lap.</p>
+</li>
+<li>
+<p>Dictionary: Value of dictionary key.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><i>e</i> This symbol is assigned to a new value of <i>C</i> in each lap.</p>
+<ul>
+<li>
+<p>In strings, iterators and arrays the order in lap assignations is assured.
+    In dictionaries it is not.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Examples:</p>
+<div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">sV = [""];
+s = "123";
+for (ch = s) sV[0] += ch;
+sys.assert(s == sV[0]);
+
+sumV = [0];
+A = [10, 20, 30];
+it = A.toIter();
+for (e = A) sumV[0] += e;
+sys.assert(sumV[0] == 60);
+for (e = it) sumV[0] -= e;
+sys.assert(sumV[0] == 0);
+
+it2 = A.toIter();
+for (i, e = A) sumV[0] += i;
+sys.assert(sumV[0] == 3);
+for (i, e = it2) sumV[0] -= i;
+sys.assert(sumV[0] == 0);
+
+D = {"one": 1, "two": 2};
+for (e = D) sumV[0] += e;
+sys.assert(sumV[0] == 3);
+keysV = [""];
+for (k, e = D) {
+  keysV[0] += k;
+  sumV[0] -= e;
+}
+sys.assert(keysV[0] == "onetwo");
+sys.assert(sumV[0] == 0);</div>
+<script>aceConf("aceEditor-3", "kut");</script>
+<h4><code>for</code> of kind "range"</h4>
+<p>Scheme:</p>
+<p><code>for ( <i>i</i> = <i>start</i> : <i>end</i> [: <i>step</i> ] ) <i>st</i></code></p>
+<ul>
+<li>
+<p><i>i</i> is a symbol assigned to a value of type integer each lap.</p>
+</li>
+<li>
+<p><i>start</i> is the irst value of <i>i</i>.</p>
+</li>
+<li>
+<p><i>end</i> is the last value of <i>i</i>.</p>
+</li>
+<li>
+<p><i>step</i> is the increment of <i>i</i>. It must be different to 0.</p>
+</li>
+</ul>
+<p>In the first lap <code><i>i</i></code> is assigned to <code><i>start</i></code> then:</p>
+<ol>
+<dt>* If <i>step</i> is not defined
+</dt>
+<dd>
+<p>(End exclusive)</p>
+<p>If <code><i>i</i> >= <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
+  <code><i>i</i></code> is assigned to <code><i>i</i> + 1</code>. If <code><i>i</i> >= <i>end</i></code> the loop finishes.
+  Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
+</dd>
+<dt>* If <i>step</i> is defined and it is positive.
+</dt>
+<dd>
+<p>( End inclusive)</p>
+<p>If <code><i>i</i> > <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
+  <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code>. If <code><i>i</i> > <i>end</i></code> the loop finishes.
+  Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
+</dd>
+<dt>* If <i>step</i> is defined and it is negative.
+</dt>
+<dd>
+<p>( End inclusive)</p>
+<p>If <code><i>i</i> &lt; <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
+  <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code> (decremented). If <code><i>i</i> &lt; <i>end</i></code> the loop
+  finishes. Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
+</dd>
+</ol>
+<p>Examples:</p>
+<div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">sumV = [0];
+for (i = 4 : 4) sumV[0] += i;
+sys.assert(sumV[0] == 0);
+for (i = 0 : 4) sumV[0] += i;
+sys.assert(sumV[0] == 6);
+for (i = 4 : 5) sumV[0] += i;
+sys.assert(sumV[0] == 10);
+
+sumV[0] = 0;
+for (i = 5 : 4 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 0);
+for (i = 0 : 4 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 10);
+for (i = 4 : 5 : 1) sumV[0] += i;
+sys.assert(sumV[0] == 19);
+
+sumV[0] = 0;
+for (i = 0 : 10 : 3) sumV[0] += i;
+sys.assert(sumV[0] == 18);
+for (i = 0 : -9 : -3) sumV[0] += i;
+sys.assert(sumV[0] == 0); </div>
+<script>aceConf("aceEditor-4", "kut");</script>
+<a name="try - catch - finally"></a>
+<h3>try - catch - finally</h3>
+<p>Scheme:</p>
+<p><code>try <i>st1</i> catch( <i>e</i> ) <i>st2</i> finaly <i>st3</i></code></p>
+<ul>
+<li>
+<p><i>st1</i>, <i>st2</i> and <i>st3</i> are statement or block.</p>
+</li>
+<li>
+<p><i>e</i> is a symbol assigned to a string. This string has a message and the
+  stack trace of the line where an exception has happened.</p>
+</li>
+</ul>
+<p><code>try</code> executes <code><i>st1</i></code>, but if it happens an exception, jumps to <code><i>st2</i></code> and
+executes it.</p>
+<p><code><i>st3</i></code> is executed in any case after <code><i>st1</i></code> or <code><i>st2</i></code>.</p>
+<p>Exceptions are execution fails which can be raised by the Kut virtual machine
+or 'manually' calling <code>sys.throw</code>. An exception out of a <code>try</code> block finishes
+the program.</p>
+<p><i>st2</i> has not access to symbols declared in <i>st1</i>, but can use the simbol
+<code><i>e</i></code> that point out to the exception message.</p>
+<p><i>st3</i> also has not acces to symbols declared in <i>st1</i>.</p>
+<p>NOTES:</p>
+<ul>
+<li>
+<p><i><code>break</code> and <code>continue</code> can be used inside <code>st1</code> and <code>st2</code>, but not inside
+  <code>st3</code>. After <code>break</code> or <code>continue</code>, <code>st3</code> is executed before exiting or
+  reinitiating the loop.</i></p>
+</li>
+<li>
+<p><i><code>return</code> can be called inside either <code>st1</code>, <code>st2</code> or <code>st3</code>.</i></p>
+</li>
+</ul>
+<div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">V = [0];
+
+// Without exception.
+try {
+  V[0] += 1;
+} catch (e) {
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 5);
+
+// With cached exception.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 6);
+
+// With cached exception and without finally.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+}
+sys.assert(V[0] == 2);
+
+// Rethrowing a cached exception.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    sys.throw("error");
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 12);
+
+// Throwing a exception in the finally block.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+  } finally {
+    sys.throw("error");
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception.
+V[0] = 0;
+while (V[0] &lt; 9) {
+  try {
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception and break in the try block.
+V[0] = 0;
+while (V[0] &lt; 9) {
+  try {
+    V[0] += 1;
+    break;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 5);
+
+// Loop without exception and continue in the try block.
+V[0] = 0;
+while (V[0] &lt; 9) {
+  try {
+    continue;
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 12);
+
+// Loop with excetion cached and break.
+V[0] = 0;
+while (V[0] &lt; 9) {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    break;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 6);
+
+// Try without exception and with return.
+V[0] = 0;
+fn0 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn0();
+sys.assert(V[0] == 5);
+
+// Try with cached exception and with return in the catch block.
+V[0] = 0;
+fn1 = \ -> {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    return;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn1();
+sys.assert(V[0] == 6);
+
+// Try with returns in the try and finally blocks.
+V[0] = 0;
+fn2 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    return;
+    V[0] += 4;
+  }
+};
+fn2();
+sys.assert(V[0] == 1); </div>
+<script>aceConf("aceEditor-5", "kut");</script>
+<a name="return"></a>
+<h3>return</h3>
+<p>Scheme:</p>
+<p><code>return [ <i>exp</i> ]</code></p>
+<ul>
+<li>
+<p><i>exp</i> is an optional expression</p>
+</li>
+</ul>
+<p><code>return</code> finishes inmediately the execution of a function, sending <code><i>exp</i></code>,
+if exists, as its result.</p>
+<p>If <code>return</code> is called out of functions:</p>
+<ol>
+<dt>In the main module
+</dt>
+<dd>
+<p>It terminates immediately the program.</p>
+</dd>
+<dt>In an imported module
+</dt>
+<dd>
+<p>It stops the module execution.</p>
+</dd>
+</ol>
+<p>More of <code>return</code> in the function and module sections.</p>
+<a name="import"></a>
+<h3>import</h3>
+<p>Scheme:</p>
+<p><code>import <i>module</i> [ : <i>id</i> ]</code></p>
+<ul>
+<li>
+<p><i>module</i> is a string with the name of a module.</p>
+</li>
+<li>
+<p><i>id</i> is an optional module identifier.</p>
+</li>
+</ul>
+<p><code>import</code> executes a module and makes available its exported symbols in the
+current one.</p>
+<p>More of <code>import</code> in the module section.
+</p>
+<hr>
+<p style="text-indent: 0px"><a href='03-Statement.html'>Anterior (Statement)</a> · <a href="index.html">Índice</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+
+//: [i|i]
+topFn0 = \i -> return topFn1(i);;
+
+//: [i|i]
+topFn1 = \i -> {
+  return i + 1;
+};
+
+a = 3;
+
+gt = []/i/;
+
+//: [. is]
+new: age,name;
+
+enum0, enum1,,enum3 =;
+
+{
+  sys.test(enum0, 0);
+  sys.test(enum1, 1);
+  sys.test(enum3, 3);
+
+  b1 = true;
+  b2 = false;
+  sys.test(b1 & b2, b2);
+  sys.test(b1 | b2, b1);
+
+  i1 = 12;
+  i2 = -2;
+  sys.test(i1 + i2, 10);
+  sys.test(i1 - i2, 14);
+  sys.test(i1 * i2, -24);
+  sys.test(i1 / i2, -6);
+  sys.test(i1 % i2, 0);
+  sys.test(-(i1 + 1) % i2, -1);
+
+  n1 = 11.5;
+  n2 = -2.0;
+  sys.test(n1 + n2, 9.5);
+  sys.test(n1 - n2, 13.5);
+  sys.test(n1 * n2, -23.0);
+  sys.test(n1 / n2, -5.75);
+  sys.test(-(n1 + 1.0) / n2, 6.25);
+
+  s1 = "";
+  s2 = "a";
+  s3 = "bc";
+  sys.test(s1, "");
+  sys.test(s2, "a");
+  sys.test(s1 + s2 + s3, "abc");
+
+  a1 = []/i/;
+  a2 = [ 1];
+  a3 = [2, 3];
+  sys.test(a1, a1);
+  sys.test(a2, [1]);
+  sys.test(a1 + a2 + a3, [1, 2, 3]);
+
+  d1 = {}/i/;
+  d2 = {one: 1};
+  sys.test(d1, d1);
+  sys.test(d2, {"one": 1});
+  sys.test({"two": 2, "three": 3, one: 1}, {"one": 1, two: 2, "three": 3});
+
+  t1 = [. 1];
+  t2 = [. 1, "abc", false];
+  sys.test(t1, [. 1]);
+  sys.test(t2, [. 4-3, "ab" + "c", !true]);
+
+  sys.test(true == true, true);
+  sys.test(true != true, false);
+  sys.test(-1 == -1, true);
+  sys.test(1.5 == 4.0-2.5, true);
+  sys.test(1.0 != 1.1, true);
+  sys.test("1" == "1", true);
+  sys.test("" == "", true);
+  sys.test("1" != "", true);
+  sys.test([1, 2] == [1, 2], true);
+  sys.test([1, 2] == [1], false);
+  sys.test([1, 2] != [1], true);
+  sys.test([1, 2] == a1, false);
+  sys.test(a1 == a1, true);
+  sys.test([. 1, 2] == [. 1, 2], true);
+  sys.test([. 1, "2"] != [. 1, "3"], true);
+  sys.test(a1 + a2 + a3 == [1, 2, 3], true);
+
+  sys.test({one: 1, two: 2} == {two: 2, one: 1}, true);
+  sys.test({one: 1, two: 2} == {one: 1}, false);
+  sys.test({one: 1, two: 2} == {two: 1, one: 1, "two": 2}, true);
+  sys.test(d1 == d1, true);
+  sys.test(d1 != d2, true);
+
+  //: [ii|i]
+  fn0 = \a, b -> return a + b;;
+  ///: [i|i]
+  //fn1 = \a -> return a + 4;;
+
+  sys.test(topFn0(3), 4);
+  sys.test(fn0(2, 4), 6);
+
+  p = new(32, "Peter");
+  sys.test(p, [. 32, "Peter"]);
+  sys.test([age, name], [0, 1]);
+
+  sys.test(a3[0], 2);
+  sys.test(t2[1], "abc");
+  key0 = 0;
+  sys.test(t2[key0], 1);
+  sys.test(d2.get("one"), [1]);
+  sys.test(d2["one"], 1);
+  sys.test(d2\one, 1);
+  sys.test(!d2.get("onex"), true);
+  // sys.println(d2["onex"] + 4); // throw exception.
+
+  a3[1] = 55;
+  n55 = a3[1];
+  sys.test(n55 + 10, 65);
+  t2[1] = "zzz";
+  sys.test(t2[1], "zzz");
+  // d1\nine = 9; // throw exception.
+  d1.put("nine", 3);
+  sys.test(d1, {nine: 3});
+  d1["nine"] = 19;
+  sys.test(d1, {nine: 19});
+  d1\nine = 9;
+  sys.test(d1, {nine: 9});
+
+  a4 = [topFn0];
+  a4! = topFn1;
+  f = a4!;
+  sys.test(f(5), 6);
+  sys.test(a4!(8), 9);
+
+  sys.test(gt + [1], a2 );
+
+  sys.test("abcd"[1:3], "bc");
+  sys.test("abcd"[1:], "bcd");
+  sys.test("abcd"[:3], "abc");
+  sys.test("abcd"[3:1], "");
+  sys.test("abcd"[-3:-1], "bc");
+  sys.test("abcd"[-3:], "bcd");
+  sys.test("abcd"[:-1], "abc");
+  sys.test("abcd"[-1:-3], "");
+
+  sys.test([1,2,3,4][1:3], [2, 3]);
+  sys.test([1,2,3,4][1:], [2, 3, 4]);
+  sys.test([1,2,3,4][:3], [1, 2, 3]);
+  sys.test([1,2,3,4][3:1], a1);
+  sys.test([1,2,3,4][-3:-1], [2, 3]);
+  sys.test([1,2,3,4][-3:], [2, 3, 4]);
+  sys.test([1,2,3,4][:-1], [1, 2, 3]);
+  sys.test([1,2,3,4][-1:-3], a1);
+
+  ax, bx  = [. 1, 2];
+  sys.test(ax, 1);
+  sys.test(bx, 2);
+
+  , cx  = [. 1, 2, 3];
+  sys.test(cx, 2);
+  ,, dx  = [. 1, 2, 3];
+  sys.test(dx, 3);
+  ay,by, cy  = [. 1, 2, 3];
+  sys.test(ay, 1);
+  sys.test(by, 2);
+  sys.test(cy, 3);
+}
+
+

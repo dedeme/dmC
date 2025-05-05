@@ -1,0 +1,11 @@
+import "person";
+
+(rPet) [. issi ];
+
+//: (rPet)
+new : age, sound, name, id;
+
+//: [(rPet) | (person)]
+toPerson = \p ->
+  return person.new(p.age, p.sound, p.name, sys.toStr(p.id));;
+

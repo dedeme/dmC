@@ -1,0 +1,53 @@
+// Boolean
+sys.assert(!false == true);
+sys.assert(!true == false);
+sys.assert(![1] == false);
+sys.assert(![] == true);
+sys.assert(!![1] == true);
+
+// Mathematical
+sys.assert(-3 == ---3);
+sys.assert(3.5 == --3.5);
+sys.assert(3 + 2 == 5);
+sys.assert(3.0 + (-1.5) == 1.5);
+sys.assert(3 - 2 == 1);
+sys.assert(3.0 --1.5 == 4.5);
+sys.assert(3 * 2 == 6);
+sys.assert(3.0 * -1.5 == -4.5);
+sys.assert(3 / 2 == 1);
+sys.assert(3.0 / -1.5 == -2.0);
+sys.assert(3 % 2 == 1);
+
+// Relational
+sys.assert(3 == 3);
+sys.assert(3 != 3.0); // Types are different
+sys.assert({"one":1} == {"one" : 1 });
+sys.assert({"one":1} != {"one":"a"});
+sys.assert(23 > 4);
+sys.assert(15 <= 15);
+sys.assert([1, 2] == [1, 2]);
+sys.assert([1, 2] != [2, 1]);
+sys.assert({"one": 1, "two": 2} == {"two": 2, "one": 1});
+
+// Others
+sys.assert((1 == 2 ? 1 : "a") == "a");
+sys.assert((1 != 2 ? 1 : "a") == 1);
+sys.assert((true ? 2 : 1 + 10) == 2); // Parentheses 1
+sys.assert((true ? 2 : 1) + 10 == 12); // Parentheses 2
+// Typed function
+sys.assert(<<(\(|i) -> return 3;)() == 3);
+// is equals to
+fn = \(|i) -> return 3;;
+sys.assert(<<fn() == 3);
+
+// Precedence
+sys.assert(3 + -1 * 5 == -2);
+sys.assert((3 + -1) * 5 == 10);
+sys.assert(!(3 > 4 & 3 <= 4));
+sys.assert(3 > 4 | 3 <= 4);
+sys.assert((false & false | true) == true); // equals to (false & false) | true
+sys.assert((false | false & true) == false); // equals to (false | false) & true
+v1 = true ? 2 : 1 + 10;
+v2 = (true ? 2 : 1) + 10;
+sys.assert(v1 == 2);
+sys.assert(v2 == 12);

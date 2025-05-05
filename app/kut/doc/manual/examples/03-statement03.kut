@@ -1,0 +1,11 @@
+a = 2;
+
+// a = "b"; <- This is an error
+
+{
+  a = "b"; // This is ok.
+  sys.assert(a == "b");
+  // a = false; <- This is an error.
+}
+
+sys.assert(a == 2);

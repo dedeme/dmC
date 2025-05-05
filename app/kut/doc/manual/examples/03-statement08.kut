@@ -1,0 +1,18 @@
+D = {"name": "Peter", "age": 32, "amount": 12000.50};
+
+amount, name : D;
+// surname, age: D; <- No valid because 'surname' is not a key.
+, age : D; // One value assignation.
+
+sys.assert(amount == 12000.5);
+sys.assert(name == "Peter");
+sys.assert(age == 32);
+
+
+D2 = {"name2": "Peter", "age2": 32, "amount2": 12000.50};
+// Use several commas as separator is ok
+amount2,, name2 : D2;
+// ,, age2, : D2; <- But use them as start is not.
+
+sys.assert(amount2 == 12000.5);
+sys.assert(name2 == "Peter");
