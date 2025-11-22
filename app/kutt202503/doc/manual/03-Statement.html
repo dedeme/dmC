@@ -57,8 +57,8 @@ window.MathJax = {
 <a href='#Flux control'>Flux control</a><br>
 <a href='#Block'>Block</a><br>
 <a href='#Assignment'>Assignment</a><br>
-<a href='#Miltiassignation'>Miltiassignation</a><br>
-<a href='#Setting containers (arrays, tuples and dictionaries)'>Setting containers (arrays, tuples and dictionaries)</a><br>
+<a href='#Miltiassignment'>Miltiassignment</a><br>
+<a href='#Setting values of containers (arrays, tuples and dictionaries)'>Setting values of containers (arrays, tuples and dictionaries)</a><br>
 <a href='#Enumeration'>Enumeration</a><br>
 <a href='#Indexed'>Indexed</a><br>
 <a href='#Function'>Function</a><br>
@@ -68,11 +68,11 @@ window.MathJax = {
 <a name="Module"></a>
 <h3>Module</h3>
 <p>Module is the code inside a file with extension '.ktt'.</p>
-<p>There are ordinary modules and 'main' modules. The later are modules which
-can be directly executables.</p>
+<p>There are ordinary modules and 'main' modules. The later ones are modules which
+can be directly executable.</p>
 <p>The module code consists in top declarations and, in the main module, a code
 block.</p>
-<p>Top declarations only can be assignations (and its variants: indexeds and
+<p>Top declarations only can be assignments (and its variants: indexeds and
 enumerations) and type declarations.</p>
 <a name="Comment"></a>
 <h3>Comment</h3>
@@ -80,11 +80,11 @@ enumerations) and type declarations.</p>
 <ol>
 <dt>Line comment</dt>
 <dd>
-<p>It starts with '<code>//</code>' and end at end of line.</p>
+<p>It starts with '<code>//</code>' and ends at end of line.</p>
 </dd>
 <dt>Block comment</dt>
 <dd>
-<p>It starts with '<code>/*' </code>and end with '<code>*/</code>'</p>
+<p>It starts with '<code>/*' </code>and ends with '<code>*/</code>'</p>
 </dd>
 </ol>
 <p>Commentaries are ignored and can be thought as blanks.</p>
@@ -92,17 +92,17 @@ enumerations) and type declarations.</p>
 <div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 // Line comment
 
-/**
+/*
 Multiline comment
 */
 
-ax = /* Injected comment */ 123; // Line comment.
+ax = /* Injected comment */ 123; // abc
+
 </div>
 <script>aceConf("aceEditor-0", "kutt");</script>
 <h4>Documentations comment.</h4>
 <p>Line comments starting with '<code>///</code>' immediately before of a top declaration
-or its type annotation, is used to generate code documentation of such
-declaration.</p>
+or a type annotation, is used to generate code documentation.</p>
 <p>Also the first line comments starting with '<code>///</code>' and before of an <code>import</code>
 declaration, are used as module documentation.</p>
 <p>Example:</p>
@@ -143,9 +143,10 @@ are no other limitations that those derivate of the syntaxis.</p>
 <p>Scheme:</p>
 <p><code>symbol = expression</code></p>
 <p>It links a symbol with the value of an expression.</p>
-<p>The symbol has the same type as the expression.</p>
-<p>Symbols can no be reassignable, but the same characters sequence can be used
-in diferents blocks, although as different symbols.</p>
+<p>The symbol takes the same type as the expression.</p>
+<p>Symbols can not be reassignable, but can be used in nested blocks.</p>
+<p>Simbols can not appear in both parts of the assignment, unless the right part
+be a function definition.</p>
 <p>Example:</p>
 <div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 a = 1;
@@ -177,7 +178,7 @@ fn0 = \ -> {
 <ol>
 <dt>Top code</dt>
 <dd>
-<p>Inside top code declarations can be done in any order. The efective use of
+<p>Inside top code, declarations can be done in any order. The efective use of
   top symbols is not controlled.</p>
 </dd>
 <dt>Rest of code</dt>
@@ -238,12 +239,12 @@ v7 = \n -> {
 };
 </div>
 <script>aceConf("aceEditor-4", "kutt");</script>
-<a name="Miltiassignation"></a>
-<h3>Miltiassignation</h3>
+<a name="Miltiassignment"></a>
+<h3>Miltiassignment</h3>
 <p>It is only allowed inside blocks.</p>
 <p>Scheme:</p>
 <p><code>v1, v2, ..., vN = TupleExpression</code></p>
-<p>It Assigns <code>N</code> first values of an expression of type typle to <code>v1, v2, ..., vn</code>.</p>
+<p>It Assigns <code>N</code> first values of an expression of type tuple to <code>v1, v2, ..., vn</code>.</p>
 <p>Any of <code>vX</code> can be skipped, but must remain at least one of v2, ..., vn.</p>
 <p>In any case the last symbol before '=' can not be comma.</p>
 <p>Examples:</p>
@@ -262,8 +263,8 @@ m1b = [. 1, 2.5, "55"][0];
 sys.test(m1b, n1);
 </div>
 <script>aceConf("aceEditor-5", "kutt");</script>
-<a name="Setting containers (arrays, tuples and dictionaries)"></a>
-<h3>Setting containers (arrays, tuples and dictionaries)</h3>
+<a name="Setting values of containers (arrays, tuples and dictionaries)"></a>
+<h3>Setting values of containers (arrays, tuples and dictionaries)</h3>
 <h4>Simple setting</h4>
 <p>Scheme:</p>
 <p><code>container[index] = expression</code></p>
@@ -273,11 +274,12 @@ sys.test(m1b, n1);
 </li>
 <li>
 <p><i>index</i> is the index of position in array and tuple and the key value in
-  dictionary. For tuples it must be a literal integer or a symbol which also
-  points to a literal integer.</p>
+  dictionary. For tuples it must be a literal integer or a symbol pointing
+  to a literal integer.</p>
 </li>
 <li>
-<p><i>expression</i> can no be of type function, if such function is not in top code.</p>
+<p><i>expression</i> can no be of type function, if such function is not in top code
+  (functions other than top functions can not returned).</p>
 </li>
 <li>
 <p>The type of container element must be compatible with the expression type.</p>
@@ -289,8 +291,8 @@ for tuples.</p>
 <p>When the container is a dictionary and the index (key) is of type symbol,
 it can be write <code>container\symbol</code> instead of <code>container["symbol"]</code>.</p>
 <h4>Accumulator setting</h4>
-<p>Action of setting a container making an operation with its current value and
-an expression.</p>
+<p>Accumulator setting is the action of setting a container making an operation
+with its current value and an expression.</p>
 <p>Scheme:</p>
 <p><code>container[index] op expression</code></p>
 <ul>
@@ -299,8 +301,8 @@ an expression.</p>
 </li>
 <li>
 <p><i>index</i> is the index of position in array and tuple and the key value in
-  dictionary. For tuples it must be a literal integer or a symbol which also
-  points to a literal integer.</p>
+  dictionary. For tuples it must be a literal integer or a symbol pointing
+  to a literal integer.</p>
 </li>
 <li>
 <p><i>op</i> must be one of <code>+=</code>, <code>-=</code>, <code>*=</code> , <code>/=</code>, <code>%=</code>, <code>&amp;=</code> or <code>|=</code> .</p>
@@ -342,8 +344,9 @@ it can be write <code>container\symbol</code> instead of <code>container["symbol
 <script>aceConf("aceEditor-6", "kut");</script>
 <a name="Enumeration"></a>
 <h3>Enumeration</h3>
-<p>It is an association name -> integer.</p>
+<p>It is an association name -> integer or name -> string.</p>
 <p>Enumerations only are valid in top code.</p>
+<h4>Integers enumeration</h4>
 <p>Scheme:</p>
 <p><code>symbols =</code></p>
 <ol>
@@ -355,7 +358,7 @@ it can be write <code>container\symbol</code> instead of <code>container["symbol
 <p>Integers are assigned to each symbol from 0 to end.</p>
 <p>If a symbol is skipped, also its number is skipped.</p>
 <p>It is mandatory the existence of at least one comma.</p>
-<p>The last character of <i>symbols</i> can no be a comma.</p>
+<p>The last character of <i>symbols</i> can not be a comma.</p>
 <p>Examples:</p>
 <div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 en1, en2, en3 =; // en1 == 0, en2 == 1, en3 == 2,
@@ -369,10 +372,33 @@ enn1 ,, enn3 =; // enn1 == 0, enn3 == 2,
 // ennn1, ennn2, =; // &lt;- Symbols end in comma.
 </div>
 <script>aceConf("aceEditor-7", "kut");</script>
+<h4>Strings enumeration</h4>
+<p>Scheme:</p>
+<p><code>symbols =:</code></p>
+<ol>
+<dt>symbols</dt>
+<dd>
+<p>Sequence of symbols separated by comma.</p>
+</dd>
+</ol>
+<p>A string is assigned to each symbol with the same symbol as content.</p>
+<p>Skipped symbols are not allowed.</p>
+<p>It is mandatory the existence of at least one comma.</p>
+<p>The last character of <i>symbols</i> can no be a comma.</p>
+<p>Examples:</p>
+<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+ens1, ens2, ens3 =:; // ens1 == "ens1", ens2 == "ens2", ens3 == "ens3",
+
+// Bad
+// ennsn1 =;  // &lt;- there is not comma.
+// ennsn1, ennsn2, =; // &lt;- Symbols end in comma.
+// ennsn1,, ennsn2 =; // &lt;- Blank symbol between 'ennsn1' and 'ennsn2'.
+</div>
+<script>aceConf("aceEditor-8", "kut");</script>
 <a name="Indexed"></a>
 <h3>Indexed</h3>
-<p>In is a mix of a function assignation and an enumeration declaration.</p>
-<p>Indexeds only ara valid in top code.</p>
+<p>In is a mix of a function assignment and an enumeration declaration.</p>
+<p>Indexeds only are valid in top code.</p>
 <p>Scheme:</p>
 <p><code>type</code><br><code>symbol : parameters</code></p>
 <ol>
@@ -382,7 +408,7 @@ enn1 ,, enn3 =; // enn1 == 0, enn3 == 2,
 </dd>
 <dt>symbol</dt>
 <dd>
-<p>Identifier of function assignation.</p>
+<p>Identifier of function assignment.</p>
 </dd>
 <dt>parameters</dt>
 <dd>
@@ -393,7 +419,7 @@ enn1 ,, enn3 =; // enn1 == 0, enn3 == 2,
 <p><code>\\: [ tps | type ]</code><br><code>symbol = \parameters -> <i>return</i> [. parameters];;</code><br><code>parameters =;</code></p>
 <p>Where <code>tps</code> are the types of the tuple <code>type</code>.</p>
 <p>Example:</p>
-<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 //:[. si]
 newPerson : name, age;
 
@@ -409,7 +435,7 @@ newPerson : name, age;
   sys.test(p[age], 15);
 }
 </div>
-<script>aceConf("aceEditor-8", "kut");</script>
+<script>aceConf("aceEditor-9", "kut");</script>
 <a name="Function"></a>
 <h3>Function</h3>
 <p>Statement functions can return a value or none. If it returns a value, this is
@@ -429,12 +455,12 @@ discarded.</p>
 <p><i>NOTE: Values of parameteres have to be type-compatible with its corresponding
 defined type.</i></p>
 <p>Example:</p>
-<div id="aceEditor-9" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+<div id="aceEditor-10" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 //: [i|i]
 fn = \n -> return n + 3;;
 fn(12); // the return 15 is discarded,
 </div>
-<script>aceConf("aceEditor-9", "kutt");</script>
+<script>aceConf("aceEditor-10", "kutt");</script>
 <a name="trace"></a>
 <h3>trace</h3>
 <p>Built-in command which returns a string representation of an expression and
@@ -445,10 +471,10 @@ its position in the code file.</p>
 <p>The semicolon is optional. Without it, only the first 50 runes (UTF-8 characters)
 are shown.</p>
 <p>Example:</p>
-<div id="aceEditor-10" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
+<div id="aceEditor-11" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 trace 3 + 4;
 </div>
-<script>aceConf("aceEditor-10", "kut");</script>
+<script>aceConf("aceEditor-11", "kut");</script>
 <hr>
 <p style="text-indent: 0px"><a href='02-Expression.html'>Anterior (Expression)</a> · <a href="index.html">Índice</a> · <a href='04-Control Directives.html'>Posterior (Control Directives)</a></p>
 <div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">

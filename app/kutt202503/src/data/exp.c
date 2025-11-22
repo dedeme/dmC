@@ -104,6 +104,63 @@ Exp *exp_new_switch (int ln, Exp *ex, Arr *es) {
   return new(ln, exp_switch, tp_mk(ex, es));
 }
 
+int exp_is_cyclic (Exp *this, char *sym) {
+  int is_cyclic(Exp *ex) {
+    switch (ex->tp) {
+      case exp_array:
+      case exp_tuple:
+      case exp_range:
+        return arr_any(ex->value, (FPRED)is_cyclic);
+      case exp_dictionary: {
+        int is_kv_cyclic (Tp *kv) { return is_cyclic(kv->e2); }
+        return arr_any(ex->value, (FPRED)is_kv_cyclic);
+      }
+      case exp_symbol:
+        return !strcmp(ex->value, sym);
+      case exp_square: {
+        Tp *v = ex->value;
+        return is_cyclic(v->e1) || is_cyclic(v->e2);
+      }
+      case exp_slice: {
+        Tp3 *v = ex->value;
+        Exp *start = opt_get(v->e2);
+        Exp *end = opt_get(v->e3);
+        return is_cyclic(v->e1) ||
+          (start ? is_cyclic(start) : FALSE) ||
+          (end ? is_cyclic(end) : FALSE)
+        ;
+      }
+      case exp_parenthesis: {
+        Tp *v = ex->value;
+        return is_cyclic(v->e1) || arr_any(v->e2, (FPRED)is_cyclic);
+      }
+      case exp_group:
+        return is_cyclic(ex->value);
+      case exp_unary: {
+        Tp *v = ex->value;
+        return is_cyclic(v->e2);
+      }
+      case exp_binary: {
+        Tp3 *v = ex->value;
+        return is_cyclic(v->e2) || is_cyclic(v->e3);
+      }
+      case exp_ternary: {
+        Tp3 *v = ex->value;
+        return is_cyclic(v->e1) || is_cyclic(v->e2) || is_cyclic(v->e3);
+      }
+      case exp_switch: {
+        int is_e_cyclic (Tp *tp) {
+          return arr_any(tp->e1, (FPRED)is_cyclic) || is_cyclic(tp->e2);
+        }
+        Tp *v = ex->value;
+        return is_cyclic(v->e1) || arr_any(v->e2, (FPRED)is_e_cyclic);
+      }
+      default: return FALSE;
+    }
+  }
+  return is_cyclic(this);
+}
+
 char *exp_type_to_str (Exp *this) {
   return ((char*[]) {
     "error", "boolean", "integer", "float", "string",

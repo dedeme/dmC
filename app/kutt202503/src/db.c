@@ -43,18 +43,17 @@ IndexEntry *db_init (char *fmain) {
     file_write(fversion, cts_version);
     file_write(cts_h_built_path(), cheader_code());
     file_write(cts_c_built_path(), cbody_code());
-    Rs *rs = sys_cmd(str_f(
-      "gcc "
-        "-Wall -Wno-div-by-zero -c -rdynamic "
-        "-z execstack "
-        "%s "
-        "-o %s "
-        "-lgc -lm -lpthread",
-      cts_c_built_path(), cts_o_built_path()
+    Rs *rs = sys_cmd(arr_new_from(
+      "gcc ",
+        "-Wall", "-Wno-div-by-zero", "-c", "-rdynamic",
+        "-z", "execstack",
+        cts_c_built_path(),
+        "-o",  cts_o_built_path(),
+        "-lgc", "-lm", "-lpthread", NULL
     ));
     if (*rs_error(rs)) EXC_KUTT(rs_error(rs));
-    Rs *rs2 = sys_cmd(str_f(
-      "ar rcs %s %s", cts_a_built_path(), cts_o_built_path()
+    Rs *rs2 = sys_cmd(arr_new_from(
+      "ar", "rcs", cts_a_built_path(), cts_o_built_path(), NULL
     ));
     if (*rs_error(rs2)) EXC_KUTT(rs_error(rs2));
     file_del(cts_o_built_path());

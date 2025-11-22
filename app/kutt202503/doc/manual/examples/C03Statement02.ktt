@@ -28,6 +28,8 @@ enn1 ,, enn3 =;
 
 ,, ennn3 =;
 
+ens1, ens2, ens3 =:;
+
 //:[. si]
 newPerson : name, age;
 
@@ -76,6 +78,8 @@ newPerson : name, age;
   sys.test(D1, {"one": -3, thirteen: 3});
 
   sys.test([en1, en2, en3, enn1, enn3, ennn3], [0, 1, 2, 0, 2, 2]);
+
+  sys.test([ens1, ens2, ens3], ["ens1", "ens2", "ens3"]);
 
   p = newPerson("Peter", 15);
   sys.test(p, [. "Peter", 15]);

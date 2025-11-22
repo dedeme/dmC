@@ -171,7 +171,7 @@ Examples:
 ``kutt
 
 (tree|A) [. [A][(tree|A)]];
-(byMap|KV) [. [[. KV]][[. Kv]]];
+(byMap|KV) [. [[. KV]][[. KV]]];
 ``
 
 ## Generics
@@ -194,7 +194,7 @@ sys.test(sys.type(tx), "s");
 
 ## Compatibility
 
-In assignations, returns and function parameters when a type is expected for
+In assignments, returns and function parameters when a type is expected for
 a value, it is necessary that the actual type be compatible.
 
 _Actual_ is compatible with _target_ when, after replacing _expected_ generics by

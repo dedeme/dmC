@@ -69,7 +69,7 @@ Multiline text between triple 'double quotes'.
 Monoline string allows escape and unicode sequences ('*\n*', "*\u0032*", ...).
 
 Multiline string is of verbatim type and with the margin adjusted to the most
-left line. Also, if the firs line only contains triple quotes, the
+left line. Also, if the first line only contains triple quotes, the
 corresponing carry return is skipped.
 
 Examples:
@@ -118,9 +118,9 @@ T2 = [. 1, "a", [. 1.0, true]];
 # Dictionary literal
 
 Pairs 'key:value', between '{' and '}' separated by comma, where 'keys' are
-strings and 'values' are of the same type.
+literal strings and 'values' can be of any type, but all of them of the same one.
 
-When strins contains only one word of type 'symbol' can be writen without
+When strings contain only one word of type 'symbol' can be writen without
 quotes.
 
 Empty dictionary must indicate the type of its values.
@@ -137,7 +137,7 @@ D4 = {one: 1, two: 2};
 
 # Range
 
-It is an iterator over integer with three constructors:
+It is an iterator over integers with three constructors:
 
 * From 0 to n-1 with step 1: *\[! n]*
 
@@ -157,7 +157,7 @@ it3 = [! 4, -4, -2];
 it4 = [! 1, 4, 1];
 ``
 
-_NOTE: *it2* traverses 1, 2 and 3; but *it4* traverses '1, 2, 3 and 4'_
+_NOTE: *it2* traverses '1, 2 and 3'; but *it4* traverses '1, 2, 3 and 4'_
 
 # Function literal
 
@@ -172,6 +172,8 @@ Funtions have the following form:
 > Code statement or block.
 
 They must be preceded by a type declaration.
+
+Parameter symbols can not be reassigned in the main block.
 
 Examples:
 
@@ -194,17 +196,17 @@ sumTimes = \v1, v2, v3 -> {
 
 ## Symbol
 
-A symbol is a word which starts with a letter and con be followed by more letters
+A symbol is a word which starts with a letter and can be followed by more letters
 or numbers. Particularly, symbols do not admit the character '__';
 
-Symbols are associated to values. (Only is allowed one association.)
+Symbols are associated to values. (Only one association is allowed per block.)
 
 We have the following conventions:
 
 * To make visible several words we use 'camelCase': *theEnd*,
   *severalWordsJoinTogether*, ...
 
-* Every symbol start with lowercase, except in Arrays and dictionaries that
+* Every symbol start with lowercase, except in arrays and dictionaries that
   starts with uppecase. (*Book* instead of *book*)
 
 * Array symbols, to be used as options, end in 'Op'. (*elementOp* instead of *element*)
@@ -252,11 +254,11 @@ Scheme:
 
 - index
 > Integer expression for array and tuple, and string expression for dictionary.\
-  When expression is a tuple the index value must be a literal integer or a
-  symbol also points to a literal integer.
+  When _expression_ is a tuple the index value must be a literal integer or a
+  symbol pointing to a literal integer.
 
 Returns an element of container. If the element is not found, an exception is
-thrown at run time for array and dictionary and at compile time for typle.
+thrown at run time for array and dictionary and at compile time for tuple.
 
 When the container is a dictionary and the index (key) is of type symbol,
 it can be write *expression\symbol* instead of *expression\["symbol"]*.
@@ -293,7 +295,7 @@ if (v1 == 2) arr.push(rsOp, true);
 vop = rsOp!; // equals to rsOp[0];
 
 finalV = [""];
-if (v1 == 2) finalV[0] = "2";
+if (v1 == 2) finalV! = "2"; // equals to finalV[0] = "2";
 vv = finalV!; // equals to vv = finalV[0];
 ``
 
@@ -325,7 +327,8 @@ tr1 = !!true;
 tr2 = !f; // tr1 and tr2 are 'true'
 
 tb = ![1, 2]; // tb is false;
-fb = ![]/i/; // tb is true;
+fb = ![]/i/;
+  // fb is true;
 ``
 
 ## Binary functions
@@ -342,7 +345,7 @@ Both function arguments must be of the same type.
 > Module. Applied over integers.
 
 - &, |
-> And. Applied over booleans.
+> And, or. Applied over booleans.
 
 - >, <=, <, <=
 > Applied over integes, floats and strings.
@@ -355,7 +358,7 @@ Both function arguments must be of the same type.
 Binary functions are precedence over the ternary operator (*?:*).
 
 Inter them there are four levels of precedence, and in each level the
-first operation which appears has the most one.
+first operation which appears (reading form left to right) has the most one.
 
 The levels are, for greater to lesser.
 
@@ -422,7 +425,7 @@ _expression_ and each one of _vals_ must be of the same type.
 Every _expressionR_ has to be of the same type.
 
 Each entry is evaluated with 'expression == val' for each _val_. If one result
-be *true*, *switch* return its _expressionR_.
+to be *true*, *switch* return its _expressionR_.
 
 If no one of entries is evaluated as *true* the _expressionR_ of *default* is
 returned.

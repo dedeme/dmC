@@ -1,4 +1,4 @@
-// Copyright 15-Feb-2025 ºDeme
+// Copyright 04-Nov-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *ui_bget (void) {return
@@ -181,11 +181,11 @@ char *ui_bget (void) {return
   "  return r;\n"
   "}\n"
   "\n"
-  "// \\\\s, s -> s\n"
+  "// \\\\s, s -> ([s]|[])\n"
   "export function prompt (msg, def) {\n"
   "  sys.$params(arguments.length, 2);\n"
-  "  if (def === \"\") return prompt(msg);\n"
-  "  else return prompt(msg, def);\n"
+  "  if (def === \"\") return sys.$null(window.prompt(msg));\n"
+  "  else return sys.$null(window.prompt(msg, def));\n"
   "}\n"
   "\n"
   "// \\* -> <domo>\n"

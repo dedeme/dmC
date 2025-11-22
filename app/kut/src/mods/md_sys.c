@@ -40,15 +40,15 @@ static Exp *cmd (Arr *exps) {
   CHECK_PARS ("sys.cmd", 2, exps);
   char *c = exp_get_string(arr_get(exps, 0));
     //--
-    char *fn (Exp *e) { return str_to_escape(exp_get_string(e)); }
+    char *fn (Exp *e) { return exp_get_string(e); }
   // <char>
   Arr *ps = arr_map(exp_get_array(arr_get(exps, 1)), (FMAP)fn);
   arr_insert(ps, 0, c);
   // <char>
-  Rs *rs = sys_cmd(arr_join(ps, " "));
+  Rs *rs = sys_cmd(ps);
   char *r = rs_get(rs);
   if (r) return exp_array(arr_new_from(exp_string(r), exp_bool(1), NULL));
-  return  exp_array(arr_new_from(exp_string(rs_error(rs)), exp_bool(0), NULL));
+  return exp_array(arr_new_from(exp_string(rs_error(rs)), exp_bool(0), NULL));
 }
 
 // \s, [s...] -> [s, s]
@@ -56,12 +56,12 @@ static Exp *cmd2 (Arr *exps) {
   CHECK_PARS ("sys.cmd2", 2, exps);
   char *c = exp_get_string(arr_get(exps, 0));
     //--
-    char *fn (Exp *e) { return str_to_escape(exp_get_string(e)); }
+    char *fn (Exp *e) { return exp_get_string(e); }
   // <char>
   Arr *ps = arr_map(exp_get_array(arr_get(exps, 1)), (FMAP)fn);
   arr_insert(ps, 0, c);
   // <<char>, <char>
-  Tp *tp = sys_cmd2(arr_join(ps, " "));
+  Tp *tp = sys_cmd2(ps);
 
   return exp_array(arr_new_from(
     exp_string(tp_e1(tp)),

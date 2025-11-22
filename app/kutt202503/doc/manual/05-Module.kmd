@@ -12,9 +12,9 @@ The code inside a module only can contain
 
 * Import statements.
 
-* Constant assignations.
+* Constant assignments.
 
-* Function assignations.
+* Function assignments.
 
 * Enumerations.
 
@@ -24,9 +24,11 @@ The code inside a module only can contain
 
 _NOTE: After the main block can not have more code, but comments._
 
-Only can have one module with a main block and should be placed, by convention,
-in the main directory. In this case the modules are an executable program. If
-such module does not exists, the modules make up a library.
+Only can have one module with a main block for each program and should be placed, by convention,
+in the main directory.
+
+In this case the modules make up an executable program. If
+such main module does not exists, the modules make up a library.
 
 A module can refer another through imports statements.
 
@@ -46,7 +48,7 @@ max = cl.maxNumber; // Assign the value 'maxNumber' of module 'client' to 'max'.
 
 ## Private symbols
 
-By default, module main symbols are public (that is, importable). However
+By default, module symbols are public (that is, importable). However
 is possible to mark these symbols whith the prefix operator '*__*' to make
 them private (that is, not importable).
 
@@ -85,7 +87,7 @@ x2 = \-> return;;
 
 ## Module marks.
 
-In assignations is posible to indicate that the assgionation symbol is going to
+In assignments is posible to indicate that the assignation symbol is going to
 be used with functions of a module. For that, we annotate '*:module*'
 immediately before the symbol.
 
@@ -113,6 +115,7 @@ import "person";
 {
   :person p = person.new("Peter", 48);
   sys.test(p.isUnderAge(), false);
+  // 'p.isUnderAge()' is equivalent to 'person.isUnderAge(p)'
 }
 ``
 
@@ -124,16 +127,16 @@ for
 
 *sym.function(parameters)*
 
-where *parameters* can be skipped if *function* is a function with only one
-parameter.
+where *parameters* is skipped if *function* is a function with the only
+parameter *sym*.
 
 # Module marks places
 
 The '*:module*' annotation can be placed:
 
-* In assignations.
+* In assignments.
 
-* In multiassignations.
+* In multiassignments.
 
 * In function parameters.
 
@@ -162,22 +165,23 @@ try {
 
 # Default module marks
 
-If there is no module mark, the compile puts a default one in the following
-cases of assignation:
+If there is no module mark, the compiler puts a default one in the following
+cases:
 
-- When literal string is assigned.
+- When a literal string is assigned.
 > The symbol is marked with '*:str*'.
 
-- When literal array is assigned.
+- When a literal array is assigned.
 > The symbol is marked with '*:arr*'.
 
-- When literal dictionary is assigned.
+- When a literal dictionary is assigned.
 > The symbol is marked with '*:dic*'.
 
 - When the return of a function module is assigned.
 > The symbol is marked with '*:module*'.
 
-In case of *catch* paramter, this is marked as '*:str*'.
+- When the directive <code>try-catch</code> is used.
+> The *catch* parameter is marked as '*:str*'.
 
 Examples:
 
@@ -229,9 +233,9 @@ import "person";
 
 # Corner case
 
-When a function returns a container with elements which are functions, we
-can call such functions writing '*#*' beteen the index symbol and the
-first parenthesis.
+When a function returns a tuple or array with elements which are functions, it is
+possible yet to use the shorthand for constants when calling one of such functions,
+using parenthesis.
 
 Example:
 
@@ -256,8 +260,8 @@ import "person";
 
 {
   :person p0 = person.new();
-  // sys.test(p0.name(), "Peter"); // <- does not work
-  sys.test(p0.name#(), "Peter");
+  // sys.test(p0.name(), "Peter"); // <- does not work.
+  sys.test((p0.name2)(), "Peter"); // <- it is ok.
 }
 ``
 

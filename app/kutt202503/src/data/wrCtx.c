@@ -54,7 +54,7 @@ Opt *wrCtx_get_symbol (WrCtx *this, char *sym) {
 ///   mod: Module code name. It can be "" if only the symbol was indicated.
 ///   sym: Definition symbol.
 Rs *wrCtx_canonical_def (WrCtx *this, char *mod, char *sym) {
-  // \ -> s
+  // \ -> Rs<char>
   Rs *error (void) {
     return rs_fail(str_f("Definition of type '%s%s' not found",
       !*mod ? "" : str_f("%s.", mod), sym
@@ -90,7 +90,6 @@ Rs *wrCtx_canonical_def (WrCtx *this, char *mod, char *sym) {
         sym, imp_name, sym, iname, sym
       ));
     }_EACH
-
     if (!mod2) return error();
     return rs_ok(str_f("%s.%s", mod2, sym)); // Ok response
   }

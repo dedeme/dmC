@@ -7,9 +7,10 @@
 #ifndef COMP_CMD_H
   #define COMP_CMD_H
 
+#include "kut/arr.h"
 #include "kut/rs.h"
 
 /// Equals to 'sys_cmd'.
-Rs *cmd_run (char *command);
+Rs *cmd_run (Arr *command);
 
 #endif

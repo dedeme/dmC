@@ -13,7 +13,7 @@
 
 typedef struct stat_Stat Stat;
 
-/// Token types
+/// Expression types
 typedef enum {
   exp_error, exp_boolean, exp_integer, exp_float, exp_string,
   exp_array, exp_array0, exp_dictionary, exp_dictionary0,
@@ -152,6 +152,9 @@ Exp *exp_new_ternary  (int ln, Exp *v1, Exp *v2, Exp *v3);
 ///   ex : Expression to compare.
 ///   es : (Arr<Tp<Arr<Exp>, Exp>>) Switch entries.
 Exp *exp_new_switch (int ln, Exp *ex, Arr *es);
+
+/// Returns TRUE if 'this' contains the symbol 'sym'.
+int exp_is_cyclic (Exp *this, char *sym);
 
 /// Returns a representation of 'this' type.
 char *exp_type_to_str (Exp *this);

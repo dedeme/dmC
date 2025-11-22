@@ -4,6 +4,6 @@
 #include "comp/cmd.h"
 #include "kut/sys.h"
 
-Rs *cmd_run (char *command) {
+Rs *cmd_run (Arr *command) {
   return sys_cmd(command);
 }

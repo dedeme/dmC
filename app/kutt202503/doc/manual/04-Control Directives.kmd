@@ -21,27 +21,27 @@ Examples:
 
 ``kutt
 
-v = [false];
-msg = ["msg"];
+vV = [false];
+msgV = ["msg"];
 
-if (v[0]) msg[0] = "msgIf";
-sys.test(msg[0], "msg");
+if (vV[0]) msgV[0] = "msgIf";
+sys.test(msgV[0], "msg");
 
-if (v[0]) msg[0] = "msgIf";
-else msg[0] = "msgElse";
-sys.test(msg[0], "msgElse");
+if (vV[0]) msgV[0] = "msgIf";
+else msgV[0] = "msgElse";
+sys.test(msgV[0], "msgElse");
 
-v[0] = true;
+vV[0] = true;
 
-if (v[0]) { msg[0] = "msgIf"; }
-sys.test(msg[0], "msgIf");
+if (vV[0]) { msgV[0] = "msgIf"; }
+sys.test(msgV[0], "msgIf");
 
-if (v[0]) {
-  msg[0] = "msgIf2";
+if (vV[0]) {
+  msgV[0] = "msgIf2";
 } else {
-  msg[0] = "msgElse";
+  msgV[0] = "msgElse";
 }
-sys.test(msg[0], "msgIf2");
+sys.test(msgV[0], "msgIf2");
 ``
 
 ## switch - default
@@ -55,7 +55,7 @@ Scheme:
   ··\[default: _stN_]\
 }*
 
-* _exp_ and _eXX's_ are expressions.
+* _exp_ and _eXX's_ are expressions of the same type.
 
 * _stX's_ are statement or block.
 
@@ -68,51 +68,51 @@ Examples:
 
 ``kutt
 
-rOp = [""];
+rV = [""];
 
 switch (3) {
-  3 + 1: rOp[0] = "1";
-  3 + 0: rOp[0] = "2";
-  3 - 1: rOp[0] = "3";
+  3 + 1: rV[0] = "1";
+  3 + 0: rV[0] = "2";
+  3 - 1: rV[0] = "3";
 }
-sys.test(rOp[0], "2");
+sys.test(rV[0], "2");
 
 switch (4 * 2) {
-  0: rOp[0] = "01";
-  1: rOp[0] = "02";
-  2: rOp[0] = "03";
+  0: rV[0] = "01";
+  1: rV[0] = "02";
+  2: rV[0] = "03";
 }
-sys.test(rOp[0], "2");
+sys.test(rV[0], "2");
 
 switch (4 * 2) {
-  0: rOp[0] = "01";
-  1: rOp[0] = "02";
-  2: rOp[0] = "03";
-  default: rOp[0] = "08";
+  0: rV[0] = "01";
+  1: rV[0] = "02";
+  2: rV[0] = "03";
+  default: rV[0] = "08";
 }
-sys.test(rOp[0], "08");
+sys.test(rV[0], "08");
 
-// Used as multiple ifs.
+// Use as multiple ifs.
 
 // This
-rOp[0] = "";
+rV[0] = "";
 switch (true) {
-  3 > 5 : rOp[0] = "A";
-  3 == 5 : rOp[0] = "B";
-  3 < 5 : rOp[0] = "C";
-  default: rOp[0] = "D";
+  3 > 5 : rV[0] = "A";
+  3 == 5 : rV[0] = "B";
+  3 < 5 : rV[0] = "C";
+  default: rV[0] = "D";
 }
-sys.test(rOp[0], "C");
+sys.test(rV[0], "C");
 
 // is equals to
-rOp[0] = "";
+rV[0] = "";
 
-if (3 > 5) rOp[0] = "A";
-else if (3 == 5) rOp[0] = "B";
-else if (3 < 5) rOp[0] = "C";
-else rOp[0] = "D";
+if (3 > 5) rV[0] = "A";
+else if (3 == 5) rV[0] = "B";
+else if (3 < 5) rV[0] = "C";
+else rV[0] = "D";
 
-sys.test(rOp[0], "C");
+sys.test(rV[0], "C");
 ``
 
 ## while - break - continue
@@ -127,12 +127,12 @@ Scheme:
 
 *while* executes _st_ while _condition_ is *true*.
 
-If _condition_ is not indicated, _st_ is executed in an infinite loop.
+If _condition_ is missing, _st_ is executed in an infinite loop.
 
-When inside a *while* block it appears the directive *break*, the loop is
+When inside a *while* block the directive *break* appears, the loop is
 finished immediately.
 
-Also, when appears the directive *continue* the program flux go to the block
+Also, when the directive *continue* appears the program flux go to the block
 start.
 
 NOTES:
@@ -140,7 +140,7 @@ NOTES:
 * _The construction *while () break;* is valid, but does nothing_.
 
 
-* _Also is valid the construction *while () continue;*, but generate an
+* _Also the construction *while () continue;* is valid, but generates an
   infinite loop_.
 
 Examples:
@@ -185,26 +185,22 @@ while () break;
 
 Scheme:
 
-*for ( _assignation-condition_ ) _st_*
+*for ( _assignment-condition_ ) _st_*
 
-* _assignation-condition_ is a mix of assignations of expressions to symbols
+* _assignment-condition_ is a mix of assignments of expressions to symbols
   and condition of loop termination.
 
 * _st_ is statement o block.
 
-*for* executes _st_ while the condition of _assignation-condition_ is *true*.
+*for* executes _st_ while the condition of _assignment-condition_ is *true*.
 
-*break* and *continue* can be called inside _st_ with the same efectos
+*break* and *continue* can be called inside _st_ with the same efects
 explained for *while*.
 
-In _assignation-condition_ some simbols are initialized for each lap of
+In _assignment-condition_ some simbols are initialized for each lap of
 loop.
 
-This symbols are out of _st_ scope, so:
-
-* They can be shadowed by a new assignation.
-
-* They can not be used in loop code.
+This symbols can not be reassigned in the main block.
 
 # <code>for</code> with collections
 
@@ -222,7 +218,7 @@ Scheme:
 
 * _e_ This symbol is assigned to a new value of _C_ in each lap.
 
-  * In iterators and arrays the order in lap assignations is assured.
+  * In iterators and arrays the order in lap assignments is assured.
     In dictionaries it is not.
 
 Examples:
@@ -248,6 +244,7 @@ for (e = D) sumV[0] += e;
 sys.test(sumV[0], 3);
 keysV = [""];
 for (k, e = D) {
+  // k = "x"; <-- Not allowed (duplicated symbol)
   keysV[0] += k;
   sumV[0] -= e;
 }
@@ -263,7 +260,7 @@ Scheme:
 
 * _i_ is a symbol assigned to a value of type integer each lap.
 
-* _start_ is the irst value of _i_.
+* _start_ is the first value of _i_.
 
 * _end_ is the last value of _i_.
 
@@ -275,24 +272,24 @@ In the first lap *_i_* is assigned to *_start_* then:
 
 > (End exclusive)
 
-  If *_i_ >= _end_* the loop finishes. Otherwise *_st_* is executed once. Then
-  *_i_* is assigned to *_i_ + 1* and if *_i_ >= _end_* the loop finishes.
+  If *_i_ >= _end_* the loop finishes. Otherwise *_st_* is executed once.\
+  Then *_i_* is assigned to *_i_ + 1* and if *_i_ >= _end_* the loop finishes.
   Otherwise *_st_* is executed once more and so succesively.
 
 - * If <i>step</i> is defined and it is positive.
 
 > ( End inclusive)
 
-  If *_i_ > _end_* the loop finishes. Otherwise *_st_* is executed once. Then
-  *_i_* is assigned to *_i_ + _step_* and if *_i_ > _end_* the loop finishes.
+  If *_i_ > _end_* the loop finishes. Otherwise *_st_* is executed once.\
+  Then *_i_* is assigned to *_i_ + _step_* and if *_i_ > _end_* the loop finishes.
   Otherwise *_st_* is executed once more and so succesively.
 
 - * If <i>step</i> is defined and it is negative.
 
 > ( End inclusive)
 
-  If *_i_ < _end_* the loop finishes. Otherwise *_st_* is executed once. Then
-  *_i_* is assigned to *_i_ + _step_* (decremented) and if *_i_ < _end_* the loop
+  If *_i_ < _end_* the loop finishes. Otherwise *_st_* is executed once.\
+  Then *_i_* is assigned to *_i_ + _step_* (decremented) and if *_i_ < _end_* the loop
   finishes. Otherwise *_st_* is executed once more and so succesively.
 
 Examples:
@@ -300,7 +297,7 @@ Examples:
 ``kutt
 
 sumV = [0];
-for (i = 4 : 4) sumV[0] += i;
+for (i = 4 : 4) { sumV[0] += i; }
 sys.test(sumV[0], 0);
 for (i = 0 : 4) sumV[0] += i;
 sys.test(sumV[0], 6);
@@ -331,9 +328,9 @@ Scheme:
 * _st1_ and _st2_ are statement or block.
 
 * _e_ is a symbol assigned to a string. This string has a message and the
-  stack trace of the line where an exception has happened.
+  stack trace of the line where an exception happened.
 
-*try* executes *_st1_*, but if it happens an exception, jumps to *_st2_* and
+*try* executes *_st1_*, but if an exception happens, jumps to *_st2_* and
 executes it.
 
 Exceptions are execution fails which can be raised by the built-in code
@@ -341,8 +338,8 @@ or 'manually' calling *throw*. An exception out of a *try* block finishes
 the program.
 
 _st2_ has not access to symbols declared in _st1_, but can use the simbol
-*_e_* that point out to the exception message. Moverover, _e_ is out of
-_st2_ scope and can be reassigned.
+*_e_* that point out to the exception message. Moverover, _e_ can not be
+reassigned in the _catch_ block.
 
 
 ``kutt
@@ -378,7 +375,9 @@ try {
     // V[0] += 1; // <- No allowed after throw.
   } catch (e) {
     V[0] += 2;
-    sys.test(e[-4:], "fail");
+    sys.test(e[str.lastIndex(e, ": ")+2:], "fail");
+    // or better (see Module marks in Module chapter)
+    sys.test(e[e.lastIndex(": ")+2:], "fail");
     throw("error");
     // V[0] += 2;  // <- No allowed after throw.
   }
@@ -438,6 +437,20 @@ while (V[0] < 9) {
   }
 }
 sys.test(V[0], 2);
+
+// Loop with excetion cached and continue.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    throw("fail");
+    // V[0] += 1; // <- No allowed after throw.
+  } catch (e) {
+    sys.test(e[-4:], "fail");
+    V[0] += 35;
+    continue;
+  }
+}
+sys.test(V[0], 35);
 
 // Try without exception and with return.
 V[0] = 0;
@@ -518,7 +531,7 @@ Scheme:
 *import _module_ \[ : _id_ ]*
 
 * _module_ is a string with the relative path of a module. It points out to a
-  file with path _module_*.ktt*. The realative path is searched:
+  file with path _module*.ktt*_. The realative path is searched:
 
   1. Relative to the current module.
 

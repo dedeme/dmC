@@ -12,7 +12,7 @@
 
 /// Token types
 typedef enum {
-  blockWriter_top, blockWriter_function, blockWriter_inner
+  blockWriter_top, blockWriter_function, blockWriter_param, blockWriter_inner
 } BlockT;
 
 /// Write code and returns its result.

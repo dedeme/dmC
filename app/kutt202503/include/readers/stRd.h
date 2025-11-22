@@ -28,6 +28,7 @@ StRd *stRd_new0 (RdCtx *ctx, ExpRd *erd);
 StRd *stRd_new (RdCtx *ctx, char *tx);
 
 /// Returns the current statement and advances the character reader.
+///   this  : Statement reader
 Stat *stRd_next (StRd *this);
 
 /// Returns the current token without avancing the character reader.

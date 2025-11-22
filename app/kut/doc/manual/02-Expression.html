@@ -62,7 +62,7 @@ window.MathJax = {
 <a name="Values and types"></a>
 <h3>Values and types</h3>
 <p>Values are the basic elements of Kut.</p>
-<p>Each value has a type and each type has a name to be used in the documentation
+<p>Each value has a type and each type has a name to be used in documentation
 annotations.</p>
 <h4>Basic types</h4>
 
@@ -142,48 +142,50 @@ person1 = new("Peter", 35);</div>
 </blockquote>
 <p>Example:</p>
 <div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">v = true;
-sys.println(v); // Shows: true
+sys.test(v, true);
 
 v2 = false;
-sys.println(v == v2); // Shows: false</div>
+sys.test(v == v2, false);</div>
 <script>aceConf("aceEditor-1", "kut");</script>
 <h4>Integer</h4>
-<p>Integer values stand for Natural numbers.</p>
+<p>Integer (of 64 bits) values stand for Natural numbers.</p>
 <p>Their literals are sequences of one or more digits, optionally preceded by the
-sign '-'. They use the follow scheme:</p>
-<p><code>-d+</code></p>
+sign '-'. They use the following scheme:</p>
+<p><code>[-]d+</code></p>
 <p>Using the sign '+' is an error. (Wrong: <code>+115</code>).</p>
-<p>However '<i>' can be used to improve reading. (Ok: <code>1</i>215</code>).</p>
+<p>However '_' can be used to improve reading. (Ok: <code>1_215</code>).</p>
 <p>Example:</p>
 <div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">i1 = 0;
 i2 = -0;
 i3 = 11892;
 i4 = -11_892;
-sys.println(i1 == i2); // Shows: true
-sys.println(i3 == -i4); // Shows: true
-sys.println(i2); // Shows: 0
-sys.println(i4); // Shows: -11892
+sys.test(i1 == i2, true);
+sys.test(i3 == -i4, true);
+sys.test(i2, 0);
+sys.test(i4, -11892);
 
 // Wrong integers
 // +115
 // --23
 // 2.1 -> this number is float.
-sys.println(i3 != 11892.0); // Shows: Type error.</div>
+
+// Integer and floats are ever different.
+sys.test(i3 == 11892.0, false);</div>
 <script>aceConf("aceEditor-2", "kut");</script>
 <h4>Float</h4>
-<p>They are numbers with floating point.</p>
+<p>They are numbers with floating point (of C-double precision).</p>
 <p>Floats literals can be writen with decimal point or in scientific notation.
 They use the follow scheme:</p>
-<p><code>-d+.[d *][(e|E)[(+|-)]d+]</code></p>
+<p><code>[-]d+.[d *][(e|E)[(+|-)]d+]</code></p>
 <p>Starting with the sign '+' or with '.' is an error. (Wrong: <code>+1.0</code>, <code>.123</code>).</p>
-<p>'<i>' can be used to improve reading. (Ok: <code>1</i>215.0</code>).</p>
+<p>'_' can be used in the integer part to improve reading. (Ok: <code>1_215.0</code>).</p>
 <p>The number can end at '.', (Ok: <code>234.</code>, <code>234.e2</code>)</p>
 <p>Example:</p>
 <div id="aceEditor-3" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">f1a = 0.;
 f1b = -0.0;
 f1c = 0.0e0;
 f1d = 0.0e-0;
-sys.println(f1d); // Shows: 0
+sys.test(f1d == 0.0, true);
 sys.assert(f1a == f1b);
 sys.assert(f1a == f1c);
 sys.assert(f1a == f1d);
@@ -193,7 +195,7 @@ f2b = -100.02;
 f2c = 10_002.e-2;
 f2d = 1.0002e+2;
 f2e = 0.10002E3;
-sys.println(f2c); // Shows: 100.02
+sys.test(f2c == 100.02, true);
 sys.assert(f2a == -f2b);
 sys.assert(f2a == f2c);
 sys.assert(f2a == f2d);
@@ -201,10 +203,16 @@ sys.assert(f2a == f2e);
 
 // Wrong floats
 // .12 -> starts with '.'.
-// +1.2 -> starts with '+'.
+// +1.2 -> starts with '-'.
 // 123 -> this number is integer.
 // 100e3 -> '.' is mising before 'e'.
-// 100.E -> There must be one digit at least after 'e|E'.</div>
+// 100.E -> There must be one digit at least after 'e|E'.
+
+// n1 == n2 if abs(n1-n2) &lt; 0.0000001
+// n1 != n2 if abs(n1-n2) > 0.0000001
+// if abs(n1-n2) == 0.0000001, the result is unpredictable.
+sys.assert(211.00000009 == 211.0);
+sys.assert(211.0000002 != 211.0);</div>
 <script>aceConf("aceEditor-3", "kut");</script>
 <h4>String</h4>
 <p>They are sequences of bytes which represent UTF-8 characters.</p>
@@ -247,7 +255,7 @@ escape symbol <code>\'</code> is allowed inside single quotes, and <code>\"</cod
 <p>To measure bytes Kut use the <code>str.len</code> function (e.g. <code>str.len("€")</code> returns
 <code>3</code>).</p>
 <p>To measure runes you have to pass the 'string' to array of 'runes' and then
-measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</code>).</p>
+measures it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</code>).</p>
 <u>String slice</u><p>Slicing string creates a new string. It is made in bytes and using indexation
 "base 0". To slicing in runes you have to pass 'string' to array of 'runes':</p>
 <ul>
@@ -267,7 +275,7 @@ measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</cod
 <p>Indexes can be empty:</p>
 <ul>
 <li>
-<p><code>:</code> means <code>[0:length]</code></p>
+<p><code>[:]</code> means <code>[0:length]</code></p>
 </li>
 <li>
 <p><code>[n:]</code> means <code>[n:length]</code></p>
@@ -277,23 +285,35 @@ measure it. (e.g. <code>arr.size(str.toRunes("€"))</code> returns <code>1</cod
 </li>
 </ul>
 <p>Indexes allow negative values. This values are interpreted as <i>length - n</i>.</p>
+<p>Indexes can be out of range.</p>
+<ul>
+<li>
+<p>If the index is greater than <code>string.lenght</code>, the value of <code>string.length</code>
+  will be used instead.</p>
+</li>
+<li>
+<p>If the index is less than <code>0</code>, the value <code>0</code> will be used instead.</p>
+</li>
+</ul>
+<p>If the right index is less than the left one, the slice will be an empty
+string.</p>
 <u>Element access</u><p>String elements can be accessed with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>"xabcd"4</code> gives <code>"d"</code></p>
+<p><code>"xabcd"[4]</code> gives <code>"d"</code></p>
 </li>
 <li>
-<p><code>"a€abcd"5</code> gives <code>"b"</code>. Note that '€' count by 3.</p>
+<p><code>"a€abcd"[5]</code> gives <code>"b"</code>. Note that '€' count by 3.</p>
 </li>
 <li>
-<p><code>str.fromRunes([str.toRunes("xabcd")4])</code> gives <code>"d"</code></p>
+<p><code>str.toRunes("xabcd")[4]</code> gives <code>"d"</code></p>
 </li>
 <li>
-<p><code>str.fromRunes([str.toRunes("a€abcd")3])</code> gives <code>"b"</code></p>
+<p><code>str.toRunes("a€abcd")[1]]</code> gives <code>"€"</code></p>
 </li>
 </ul>
-<p>Note that <code>str.fromRunes([str.toRunes("a€abcd")1])</code> gives <code>"€"</code>, but
-<code>"a€abcd"1</code> returns a not valid UTF-8 character.</p>
+<p>Note that <code>str.toRunes("a€abcd")[1]</code> gives <code>"€"</code>, but
+<code>"a€abcd"[1]</code> returns a not valid UTF-8 character.</p>
 <u>String modification</u><p>Strings can not be modified.</p>
 <u>String library</u><p>To manipulate strings, you can use the buit-in 'str' library.</p>
 <p>For example, the function <code>str.trim("  ab  ")</code> returns <code>"ab"</code>.</p>
@@ -303,33 +323,38 @@ sys.assert(s1a == s1b);
 // Bytes
 sys.assert(str.len(s1a) == 0);
 // Runes
-sys.println(str.toRunes(s1a)); // Shows: []
+sys.test(str.toRunes(s1a), []);
 sys.assert(arr.size(str.toRunes(s1a)) == 0);
 
 s2a = "ab€c\"'\u00f7n\nLine 2";
 s2b = 'ab€c"\'\u00f7n\nLine 2';
 sys.assert(s2a == s2b);
 // Bytes
-sys.println(s2a); // Shows: ab€c"'÷n
-                  //        Line 2
+sys.test(s2a, "ab€c\"'÷n\nLine 2");
 sys.assert(str.len(s2a) == 18);
 // Runes
-sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", ..., "e", " ", "2"]
+sys.test(
+  str.toRunes(s2a),
+  ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+);
 sys.assert(arr.size(str.toRunes(s2a)) == 15);
 
 s3a = "xabcd";
 // Bytes
 sys.assert(s3a[1:4] == "abc");
 sys.assert(s3a[4] == "d");
-sys.assert (s3a[:] == "xabcd");
-sys.assert (s3a[:2] == "xa");
-sys.assert (s3a[:-1] == "xabc");
-sys.assert (s3a[2:] == "bcd");
-sys.assert (s3a[-1:] == "d");
-
+sys.assert(s3a[:] == "xabcd");
+sys.assert(s3a[:2] == "xa");
+sys.assert(s3a[:-1] == "xabc");
+sys.assert(s3a[2:] == "bcd");
+sys.assert(s3a[-1:] == "d");
+sys.assert(s3a[2:1] == "");
+sys.assert(s3a[-100:40] == s3a);
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
 sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
+sys.assert(str.fromRunes(str.toRunes(s3a)[2:1]) == "");
+sys.assert(str.fromRunes(str.toRunes(s3a)[-100:40]) == s3a);
 
 s3b = "x€abcd";
 // Bytes
@@ -339,15 +364,13 @@ sys.test(bytes.toArr(bytes.fromStr(s3b[1])), [226]);
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3b)[1:4]) == "€ab");
 sys.assert(str.fromRunes(str.toRunes(s3b)[3:4]) == "b");
-sys.assert(str.fromRunes([str.toRunes(s3b)[3]]) == "b");
-sys.assert(str.fromRunes([str.toRunes(s3b)[1]]) == "€");
+sys.assert(str.toRunes(s3b)[3] == "b");
+sys.assert(str.toRunes(s3b)[1] == "€");
 
 s4a = """
   a\b1"2"3
   b""";
 s4b = "a\\b1\"2\"3\nb";
-sys.println(s4a); // Shows: a\b1"2"3
-                  //        b
 sys.assert(s4a == s4b);
 
 s5a = """a
@@ -356,9 +379,6 @@ s5b = """
 a
   b""";
 s5c = "a\n  b";
-sys.println(s5a); // Shows: a
-                  //          b
-
 sys.assert(s5a == s5b);
 sys.assert(s5a == s5c);
 
@@ -366,16 +386,12 @@ s6a = """
   a
 b""";
 s6b = "  a\nb";
-sys.println(s6a); // Shows:   a
-                  //        b
 sys.assert(s6a == s6b);
 
 s7a = """
   a
   b
 """;
-sys.println(s7a); // Shows: a
-                  //        b
 s7b = "a\nb\n";
 sys.assert(s7a == s7b);</div>
 <script>aceConf("aceEditor-4", "kut");</script>
@@ -383,7 +399,7 @@ sys.assert(s7a == s7b);</div>
 <p>They are collections of values. These values can be of different types.
 It is posible empty arrays.</p>
 <p>Array literals are values between squares, separated by comma.</p>
-<p><code>[ <i>e1</i>, <i>e2</i>, ...]</code> (blanks ar not significant)</p>
+<p><code>[ <i>e1</i>, <i>e2</i>, ...]</code> (blanks are not significant)</p>
 <p>Examples:</p>
 <ul>
 <li>
@@ -406,7 +422,7 @@ It uses indexation "base 0".</p>
 <p>Indexes can be empty:</p>
 <ul>
 <li>
-<p><code>:</code> means <code>[0:length]</code></p>
+<p><code>[:]</code> means <code>[0:length]</code></p>
 </li>
 <li>
 <p><code>[n:]</code> means <code>[n:length]</code></p>
@@ -419,13 +435,13 @@ It uses indexation "base 0".</p>
 <u>Element access</u><p>Array elements can be accessed with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>[2,3,4,5,6]1</code> gives <code>3</code></p>
+<p><code>[2,3,4,5,6][1]</code> gives <code>3</code></p>
 </li>
 </ul>
 <u>Element modification</u><p>Array elements can be modified with indexation "base 0":</p>
 <ul>
 <li>
-<p><code>[2,3,4,5,6]1 = 100</code> change the array to <code>[2,100,4,5,6]</code></p>
+<p><code>[2,3,4,5,6][1] = 100</code> change the array to <code>[2,100,4,5,6]</code></p>
 </li>
 </ul>
 <u>Array library</u><p>To manipulate arrays, you can use the buit-in 'arr' library.</p>
@@ -581,10 +597,28 @@ fn2(3); // -> Shows nothing, but is a correct statement. </div>
 <tr><td><b>&lt;=</b></td><td>Less or Equals</td><td><tt>\T,T -> b</tt><td><tt>v1 &lt;= v2</tt>
 <td><tt>v1 is less or equals to v2</tt>
 </tr>
-</table><p>NOTE 1: <i>Two arrays are equals if they have the same elements in the same
-        order.</i></p>
-<p>NOTE 2: <i>Two dictionaries are equals if they have the same pairs 'key-value' in
+</table><h4><i>Equality notes</i></h4>
+<ol>
+<li>
+<p><i>When comparing float and integer values, the result is ever 'not equals'.</i></p>
+</li>
+<li>
+<p> <i>Two float number are equals if <code>abs(n1 - n2) &lt; 0.0000001</code>. If you need
+   greater precision, you can use the function <code>math.eq</code> wich allows
+   precision until <code>0.0000000001</code>.</i></p>
+</li>
+<li>
+<p> <i>If <code>n1</code> and <code>n2</code> are floats:<br>   <code>n1 == n2</code> if <code>abs(n1 - n2) &lt;  0.0000001</code><br>   <code>n1 != n2</code> if <code>abs(n1 - n2) >  0.0000001</code><br>   if <code>abs(n1 - n2) ==  0.0000001</code>, the result is unprecitable.</i></p>
+</li>
+<li>
+<p> <i>Two arrays are equals if they have the same elements in the same
+   order.</i></p>
+</li>
+<li>
+<p> <i>Two dictionaries are equals if they have the same pairs 'key-value' in
         any order.</i></p>
+</li>
+</ol>
 <h4>Others</h4>
 <p>Bellow T and U stand for any normal type and TT for a typed type.</p>
 
@@ -610,8 +644,9 @@ fn2(3); // -> Shows nothing, but is a correct statement. </div>
 <tr><td>3</td><td><tt>== != > >= < <=</tt></tr>
 <tr><td>4</td><td><tt>& |</tt></tr>
 <tr><td>5</td><td><tt>?</tt></tr>
-</table><p>NOTE: <i>Assignation operators do not appear here (they will be described in
-the Statement section). Its precedence is the last one.</i></p>
+<tr><td>6</td><td><tt>= += -= *= /= %= &= |= </tt></tr>
+</table><p>NOTE: <i>Assignation operators (<code>=</code>) will be described in
+the Statement section).</i></p>
 <u>Operator examples</u><br>&nbsp;<div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">// Boolean
 sys.assert(!false == true);
 sys.assert(!true == false);

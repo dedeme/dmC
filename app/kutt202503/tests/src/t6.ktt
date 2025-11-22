@@ -54,7 +54,6 @@ rsMkOk = \res, v -> return res[1](v);;
 
 
 {
-
   //: [i|(rs|i)]
   fn = \i -> {
     rt = rsNew([]/i/);

@@ -142,8 +142,8 @@ T2 = [. 1, "a", [. 1.0, true]];
 <script>aceConf("aceEditor-5", "kutt");</script>
 <h4>Dictionary literal</h4>
 <p>Pairs 'key:value', between '{' and '}' separated by comma, where 'keys' are
-strings and 'values' are of the same type.</p>
-<p>When strins contains only one word of type 'symbol' can be writen without
+literal strings and 'values' can be of any type, but all of them of the same one.</p>
+<p>When strings contain only one word of type 'symbol' can be writen without
 quotes.</p>
 <p>Empty dictionary must indicate the type of its values.</p>
 <p>Examples:</p>
@@ -155,7 +155,7 @@ D4 = {one: 1, two: 2};
 </div>
 <script>aceConf("aceEditor-6", "kutt");</script>
 <h4>Range</h4>
-<p>It is an iterator over integer with three constructors:</p>
+<p>It is an iterator over integers with three constructors:</p>
 <ul>
 <li>
 <p>From 0 to n-1 with step 1: <code>[! n]</code></p>
@@ -176,7 +176,7 @@ it3 = [! 4, -4, -2];
 it4 = [! 1, 4, 1];
 </div>
 <script>aceConf("aceEditor-7", "kutt");</script>
-<p><i>NOTE: <code>it2</code> traverses 1, 2 and 3; but <code>it4</code> traverses '1, 2, 3 and 4'</i></p>
+<p><i>NOTE: <code>it2</code> traverses '1, 2 and 3'; but <code>it4</code> traverses '1, 2, 3 and 4'</i></p>
 <h4>Function literal</h4>
 <p>Funtions have the following form:</p>
 <p><code>\parameters->body</code></p>
@@ -191,6 +191,7 @@ it4 = [! 1, 4, 1];
 </dd>
 </ol>
 <p>They must be preceded by a type declaration.</p>
+<p>Parameter symbols can not be reassigned in the main block.</p>
 <p>Examples:</p>
 <div id="aceEditor-8" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 //: [|]
@@ -210,9 +211,9 @@ sumTimes = \v1, v2, v3 -> {
 <script>aceConf("aceEditor-8", "kutt");</script>
 <a name="Symbol"></a>
 <h3>Symbol</h3>
-<p>A symbol is a word which starts with a letter and con be followed by more letters
+<p>A symbol is a word which starts with a letter and can be followed by more letters
 or numbers. Particularly, symbols do not admit the character '_';</p>
-<p>Symbols are associated to values. (Only is allowed one association.)</p>
+<p>Symbols are associated to values. (Only one association is allowed per block.)</p>
 <p>We have the following conventions:</p>
 <ul>
 <li>
@@ -220,7 +221,7 @@ or numbers. Particularly, symbols do not admit the character '_';</p>
   <code>severalWordsJoinTogether</code>, ...</p>
 </li>
 <li>
-<p>Every symbol start with lowercase, except in Arrays and dictionaries that
+<p>Every symbol start with lowercase, except in arrays and dictionaries that
   starts with uppecase. (<code>Book</code> instead of <code>book</code>)</p>
 </li>
 <li>
@@ -268,12 +269,12 @@ v = fn(12); // v is 15
 </dd>
 <dt>index</dt>
 <dd>
-<p>Integer expression for array and tuple, and string expression for dictionary.<br>  When expression is a tuple the index value must be a literal integer or a
-  symbol also points to a literal integer.</p>
+<p>Integer expression for array and tuple, and string expression for dictionary.<br>  When <i>expression</i> is a tuple the index value must be a literal integer or a
+  symbol pointing to a literal integer.</p>
 </dd>
 </ol>
 <p>Returns an element of container. If the element is not found, an exception is
-thrown at run time for array and dictionary and at compile time for typle.</p>
+thrown at run time for array and dictionary and at compile time for tuple.</p>
 <p>When the container is a dictionary and the index (key) is of type symbol,
 it can be write <code>expression\symbol</code> instead of <code>expression["symbol"]</code>.</p>
 <p>Examples</p>
@@ -303,7 +304,7 @@ if (v1 == 2) arr.push(rsOp, true);
 vop = rsOp!; // equals to rsOp[0];
 
 finalV = [""];
-if (v1 == 2) finalV[0] = "2";
+if (v1 == 2) finalV! = "2"; // equals to finalV[0] = "2";
 vv = finalV!; // equals to vv = finalV[0];
 </div>
 <script>aceConf("aceEditor-11", "kut");</script>
@@ -335,7 +336,8 @@ tr1 = !!true;
 tr2 = !f; // tr1 and tr2 are 'true'
 
 tb = ![1, 2]; // tb is false;
-fb = ![]/i/; // tb is true;
+fb = ![]/i/;
+  // fb is true;
 </div>
 <script>aceConf("aceEditor-12", "kutt");</script>
 <a name="Binary functions"></a>
@@ -356,7 +358,7 @@ fb = ![]/i/; // tb is true;
 </dd>
 <dt>&, |</dt>
 <dd>
-<p>And. Applied over booleans.</p>
+<p>And, or. Applied over booleans.</p>
 </dd>
 <dt>>, <=, <, <=</dt>
 <dd>
@@ -370,7 +372,7 @@ fb = ![]/i/; // tb is true;
 <h4>Precedence.</h4>
 <p>Binary functions are precedence over the ternary operator (<code>?:</code>).</p>
 <p>Inter them there are four levels of precedence, and in each level the
-first operation which appears has the most one.</p>
+first operation which appears (reading form left to right) has the most one.</p>
 <p>The levels are, for greater to lesser.</p>
 
 <table class='border'>
@@ -431,7 +433,7 @@ ter1 = (3 > 4) ? "a" : "b"; // ter1 is "b".
 <p><i>expression</i> and each one of <i>vals</i> must be of the same type.</p>
 <p>Every <i>expressionR</i> has to be of the same type.</p>
 <p>Each entry is evaluated with 'expression == val' for each <i>val</i>. If one result
-be <code>true</code>, <code>switch</code> return its <i>expressionR</i>.</p>
+to be <code>true</code>, <code>switch</code> return its <i>expressionR</i>.</p>
 <p>If no one of entries is evaluated as <code>true</code> the <i>expressionR</i> of <code>default</code> is
 returned.</p>
 <p><i>NOTE: Clause <code>default</code> is mandatory.</i></p>

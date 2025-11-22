@@ -69,7 +69,7 @@ char *doc_make (char *fpath, char *id, char *tx) {
     ;
   }
 
-  // id is in form 'name = \'
+  // id is in form 'name = \' or '' for enumerations
   // pars is Arr<char>
   char *getFnCode (char *id, Arr *pars) {
     int len = 80;
@@ -281,7 +281,7 @@ char *doc_make (char *fpath, char *id, char *tx) {
 
       char ch = rt->id[0];
 
-      if (ch == 'b') { // enumeration
+      if (ch == 'i') { // enumeration - int
         EACH(pars, char, p) {
           if (!*p) continue;
 
@@ -312,7 +312,38 @@ char *doc_make (char *fpath, char *id, char *tx) {
             st->ln,
             getDoc2(st->ln)
           ));
+      } else if (ch == 's') { // enumeration - string
+        EACH(pars, char, p) {
+          if (!*p) return fail(ln, "String enumerations do not allow blanks");
 
+          int ffind (TypedSym *s) { return str_eq(s->id, p); }
+          TypedSym *old_sym = opt_get(arr_find(top_syms, (FPRED)ffind));
+          if (old_sym)
+            return fail(ln, str_f(
+              "Symbol '%s' is duplicated (first assigned in line %d)",
+              p, old_sym->ln
+            ));
+          Imp *imp = opt_get(map_get(imports, p));
+          if (imp)
+            return fail(ln, str_f(
+              "Symbol '%s' is duplicated (first assigned in line %d)",
+              p, imp->ln
+            ));
+
+          TypedSym *ts = typedSym_new(
+            ln, p, type_string(), opt_some(js_ws(p)), TRUE
+          );
+          arr_push(top_syms, ts);
+
+        }_EACH
+
+        if (public)
+          arr_push(es, docE_new_enum(
+            str_f("(%d)", enum_ix++),
+            str_f("%s =:", getFnCode("", pars)),
+            st->ln,
+            getDoc2(st->ln)
+          ));
       } else { // Indexed
         Type *ft = rt;
         if (ch == '(') {

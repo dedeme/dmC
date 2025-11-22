@@ -24,7 +24,7 @@ export function dfDays (t1, t2) {
   const df = Math.trunc((t1 / 86400000) - (t2 / 86400000));
   const t1b = addDays(t2, df);
   return day(t1b) != day(t1)
-    ? t1b > t1 ? df + 1 : df - 1
+    ? t1b > t1 ? df - 1 : df + 1
     : df
   ;
 }

@@ -6,7 +6,7 @@ title = Expression
 
 Values are the basic elements of Kut.
 
-Each value has a type and each type has a name to be used in the documentation
+Each value has a type and each type has a name to be used in documentation
 annotations.
 
 # Basic types
@@ -103,23 +103,23 @@ Example:
 
 ``kut
 v = true;
-sys.println(v); // Shows: true
+sys.test(v, true);
 
 v2 = false;
-sys.println(v == v2); // Shows: false``
+sys.test(v == v2, false);``
 
 # Integer
 
-Integer values stand for Natural numbers.
+Integer (of 64 bits) values stand for Natural numbers.
 
 Their literals are sequences of one or more digits, optionally preceded by the
-sign '-'. They use the follow scheme:
+sign '-'. They use the following scheme:
 
-*\[-]d+*
+*\[[]-]d+*
 
 Using the sign '+' is an error. (Wrong: *+115*).
 
-However '_' can be used to improve reading. (Ok: *1_215*).
+However '__' can be used to improve reading. (Ok: *1__215*).
 
 Example:
 
@@ -128,29 +128,31 @@ i1 = 0;
 i2 = -0;
 i3 = 11892;
 i4 = -11_892;
-sys.println(i1 == i2); // Shows: true
-sys.println(i3 == -i4); // Shows: true
-sys.println(i2); // Shows: 0
-sys.println(i4); // Shows: -11892
+sys.test(i1 == i2, true);
+sys.test(i3 == -i4, true);
+sys.test(i2, 0);
+sys.test(i4, -11892);
 
 // Wrong integers
 // +115
 // --23
 // 2.1 -> this number is float.
-sys.println(i3 != 11892.0); // Shows: Type error.``
+
+// Integer and floats are ever different.
+sys.test(i3 == 11892.0, false);``
 
 # Float
 
-They are numbers with floating point.
+They are numbers with floating point (of C-double precision).
 
 Floats literals can be writen with decimal point or in scientific notation.
 They use the follow scheme:
 
-*\[-]d+.\[d **]\[(e|E)\[(+|-)]d+]*
+*\[[]-]d+.\[d **]\[(e|E)\[(+|-)]d+]*
 
 Starting with the sign '+' or with '.' is an error. (Wrong: *+1.0*, *.123*).
 
-'_' can be used to improve reading. (Ok: *1_215.0*).
+'__' can be used in the integer part to improve reading. (Ok: *1__215.0*).
 
 The number can end at '.', (Ok: *234.*, *234.e2*)
 
@@ -161,7 +163,7 @@ f1a = 0.;
 f1b = -0.0;
 f1c = 0.0e0;
 f1d = 0.0e-0;
-sys.println(f1d); // Shows: 0
+sys.test(f1d == 0.0, true);
 sys.assert(f1a == f1b);
 sys.assert(f1a == f1c);
 sys.assert(f1a == f1d);
@@ -171,7 +173,7 @@ f2b = -100.02;
 f2c = 10_002.e-2;
 f2d = 1.0002e+2;
 f2e = 0.10002E3;
-sys.println(f2c); // Shows: 100.02
+sys.test(f2c == 100.02, true);
 sys.assert(f2a == -f2b);
 sys.assert(f2a == f2c);
 sys.assert(f2a == f2d);
@@ -179,10 +181,16 @@ sys.assert(f2a == f2e);
 
 // Wrong floats
 // .12 -> starts with '.'.
-// +1.2 -> starts with '+'.
+// +1.2 -> starts with '-'.
 // 123 -> this number is integer.
 // 100e3 -> '.' is mising before 'e'.
-// 100.E -> There must be one digit at least after 'e|E'.``
+// 100.E -> There must be one digit at least after 'e|E'.
+
+// n1 == n2 if abs(n1-n2) < 0.0000001
+// n1 != n2 if abs(n1-n2) > 0.0000001
+// if abs(n1-n2) == 0.0000001, the result is unpredictable.
+sys.assert(211.00000009 == 211.0);
+sys.assert(211.0000002 != 211.0);``
 
 # String
 
@@ -226,7 +234,7 @@ To measure bytes Kut use the *str.len* function (e.g. *str.len("€")* returns
 *3*).
 
 To measure runes you have to pass the 'string' to array of 'runes' and then
-measure it. (e.g. *arr.size(str.toRunes("€"))* returns *1*).
+measures it. (e.g. *arr.size(str.toRunes("€"))* returns *1*).
 
 ``<u>String slice</u>``
 
@@ -243,7 +251,7 @@ Slicing string creates a new string. It is made in bytes and using indexation
 
 Indexes can be empty:
 
-* *\[:]* means *\[0:length]*
+* *\[[]:]* means *\[0:length]*
 
 * *\[n:]* means *\[n:length]*
 
@@ -251,21 +259,31 @@ Indexes can be empty:
 
 Indexes allow negative values. This values are interpreted as _length - n_.
 
+Indexes can be out of range.
+
+* If the index is greater than *string.lenght*, the value of *string.length*
+  will be used instead.
+
+* If the index is less than *0*, the value *0* will be used instead.
+
+If the right index is less than the left one, the slice will be an empty
+string.
+
 ``<u>Element access</u>``
 
 String elements can be accessed with indexation "base 0":
 
-* *"xabcd"\[4]* gives *"d"*
+* *"xabcd"\[[]4]* gives *"d"*
 
-* *"a€abcd"\[5]* gives *"b"*. Note that '€' count by 3.
+* *"a€abcd"\[[]5]* gives *"b"*. Note that '€' count by 3.
 
-* *str.fromRunes(\[str.toRunes("xabcd")\[4]])* gives *"d"*
+* *str.toRunes("xabcd")\[[]4]* gives *"d"*
 
-* *str.fromRunes(\[str.toRunes("a€abcd")\[3]])* gives *"b"*
+* *str.toRunes("a€abcd")\[[]1]]* gives *"€"*
 
 
-Note that *str.fromRunes(\[str.toRunes("a€abcd")\[1]])* gives *"€"*, but
-*"a€abcd"\[1]* returns a not valid UTF-8 character.
+Note that *str.toRunes("a€abcd")\[[]1]* gives *"€"*, but
+*"a€abcd"\[[]1]* returns a not valid UTF-8 character.
 
 ``<u>String modification</u>``
 
@@ -286,33 +304,38 @@ sys.assert(s1a == s1b);
 // Bytes
 sys.assert(str.len(s1a) == 0);
 // Runes
-sys.println(str.toRunes(s1a)); // Shows: []
+sys.test(str.toRunes(s1a), []);
 sys.assert(arr.size(str.toRunes(s1a)) == 0);
 
 s2a = "ab€c\"'\u00f7n\nLine 2";
 s2b = 'ab€c"\'\u00f7n\nLine 2';
 sys.assert(s2a == s2b);
 // Bytes
-sys.println(s2a); // Shows: ab€c"'÷n
-                  //        Line 2
+sys.test(s2a, "ab€c\"'÷n\nLine 2");
 sys.assert(str.len(s2a) == 18);
 // Runes
-sys.println(str.toRunes(s2a)); // Shows: ["a", "b", "€", "c", ..., "e", " ", "2"]
+sys.test(
+  str.toRunes(s2a),
+  ["a", "b", "€", "c", "\"", "'", "÷", "n", "\n", "L", "i", "n", "e", " ", "2"]
+);
 sys.assert(arr.size(str.toRunes(s2a)) == 15);
 
 s3a = "xabcd";
 // Bytes
 sys.assert(s3a[1:4] == "abc");
 sys.assert(s3a[4] == "d");
-sys.assert (s3a[:] == "xabcd");
-sys.assert (s3a[:2] == "xa");
-sys.assert (s3a[:-1] == "xabc");
-sys.assert (s3a[2:] == "bcd");
-sys.assert (s3a[-1:] == "d");
-
+sys.assert(s3a[:] == "xabcd");
+sys.assert(s3a[:2] == "xa");
+sys.assert(s3a[:-1] == "xabc");
+sys.assert(s3a[2:] == "bcd");
+sys.assert(s3a[-1:] == "d");
+sys.assert(s3a[2:1] == "");
+sys.assert(s3a[-100:40] == s3a);
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3a)[1:4]) == "abc");
 sys.assert(str.fromRunes([str.toRunes(s3a)[4]]) == "d");
+sys.assert(str.fromRunes(str.toRunes(s3a)[2:1]) == "");
+sys.assert(str.fromRunes(str.toRunes(s3a)[-100:40]) == s3a);
 
 s3b = "x€abcd";
 // Bytes
@@ -322,15 +345,13 @@ sys.test(bytes.toArr(bytes.fromStr(s3b[1])), [226]);
 // Runes
 sys.assert(str.fromRunes(str.toRunes(s3b)[1:4]) == "€ab");
 sys.assert(str.fromRunes(str.toRunes(s3b)[3:4]) == "b");
-sys.assert(str.fromRunes([str.toRunes(s3b)[3]]) == "b");
-sys.assert(str.fromRunes([str.toRunes(s3b)[1]]) == "€");
+sys.assert(str.toRunes(s3b)[3] == "b");
+sys.assert(str.toRunes(s3b)[1] == "€");
 
 s4a = """
   a\b1"2"3
   b""";
 s4b = "a\\b1\"2\"3\nb";
-sys.println(s4a); // Shows: a\b1"2"3
-                  //        b
 sys.assert(s4a == s4b);
 
 s5a = """a
@@ -339,9 +360,6 @@ s5b = """
 a
   b""";
 s5c = "a\n  b";
-sys.println(s5a); // Shows: a
-                  //          b
-
 sys.assert(s5a == s5b);
 sys.assert(s5a == s5c);
 
@@ -349,16 +367,12 @@ s6a = """
   a
 b""";
 s6b = "  a\nb";
-sys.println(s6a); // Shows:   a
-                  //        b
 sys.assert(s6a == s6b);
 
 s7a = """
   a
   b
 """;
-sys.println(s7a); // Shows: a
-                  //        b
 s7b = "a\nb\n";
 sys.assert(s7a == s7b);``
 
@@ -369,7 +383,7 @@ It is posible empty arrays.
 
 Array literals are values between squares, separated by comma.
 
-*\[ _e1_, _e2_, ...]* (blanks ar not significant)
+*\[ _e1_, _e2_, ...]* (blanks are not significant)
 
 Examples:
 
@@ -388,7 +402,7 @@ It uses indexation "base 0".
 
 Indexes can be empty:
 
-* *\[:]* means *\[0:length]*
+* *\[\[:]]* means *\[0:length]*
 
 * *\[n:]* means *\[n:length]*
 
@@ -401,13 +415,13 @@ Also indexes allow negative values. This values are interpreted as _size - n_.
 
 Array elements can be accessed with indexation "base 0":
 
-* *\[2,3,4,5,6]\[1]* gives *3*
+* *\[2,3,4,5,6]\[[]1]* gives *3*
 
 ``<u>Element modification</u>``
 
 Array elements can be modified with indexation "base 0":
 
-* *\[2,3,4,5,6]\[1] = 100* change the array to *\[2,100,4,5,6]*
+* *\[2,3,4,5,6]\[[]1] = 100* change the array to *\[2,100,4,5,6]*
 
 ``<u>Array library</u>``
 
@@ -591,10 +605,23 @@ Bellow *T* stand for one of types *b|i|f|s* and *T'* for one of
 </tr>
 </table>``
 
-NOTE 1: _Two arrays are equals if they have the same elements in the same
-        order._
+# <i>Equality notes</i>
 
-NOTE 2: _Two dictionaries are equals if they have the same pairs 'key-value' in
+1. _When comparing float and integer values, the result is ever 'not equals'._
+
+1. _Two float number are equals if *abs(n1 - n2) < 0.0000001*. If you need
+   greater precision, you can use the function *math.eq* wich allows
+   precision until *0.0000000001*._
+
+1. _If *n1* and *n2* are floats:\
+   *n1 == n2* if *abs(n1 - n2) <  0.0000001*\
+   *n1 != n2* if *abs(n1 - n2) >  0.0000001*\
+   if *abs(n1 - n2) ==  0.0000001*, the result is unprecitable._
+
+1. _Two arrays are equals if they have the same elements in the same
+   order._
+
+1. _Two dictionaries are equals if they have the same pairs 'key-value' in
         any order._
 
 # Others
@@ -629,10 +656,11 @@ In the same level, the first (leftmost) operation is done before.
 <tr><td>3</td><td><tt>== != > >= < <=</tt></tr>
 <tr><td>4</td><td><tt>& |</tt></tr>
 <tr><td>5</td><td><tt>?</tt></tr>
+<tr><td>6</td><td><tt>= += -= *= /= %= &= |= </tt></tr>
 </table>``
 
-NOTE: _Assignation operators do not appear here (they will be described in
-the Statement section). Its precedence is the last one._
+NOTE: _Assignation operators (*=*) will be described in
+the Statement section)._
 
 ``<u>Operator examples</u><br>&nbsp;``
 

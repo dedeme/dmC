@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Lector</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-comprobador.html'>Posterior (Comprobador)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Lector del bloque principal'>Lector del bloque principal</a><br>
+<a href='#Lector bloque no principal'>Lector bloque no principal</a>
+</p>
+<hr>
+<p>(Archivos <code>reader/reader.h</code> y <code>reader/reader.c</code>)</p>
+<p>Dispone de dos funciones de lectura, una para el bloque principal (el propio
+archivo <code>.kut</code>) y otro para los demás bloques (bloques interiores).</p>
+<a name="Lector del bloque principal"></a>
+<h3>Lector del bloque principal</h3>
+<p>Lee un archivo <code>.kut</code> y retorna el <a href="81-clases.html#Módulo">módulo</a> correspondiente.</p>
+<p>Esta función necesita que se le pase un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a>.</p>
+<p>Inicializa los campos <code>imports</code>, <code>exports</code> y <code>heap0</code> del módulo.</p>
+<p>Además inicializa un array <code>tps</code> que contendrá los símbolos con los que se accede
+a los módulos de los que depende el módulo que se está leyendo. La inicialización
+se hace añadiendo los símbolos correspondientes a los módulos-base de
+<code>kut</code>.</p>
+<p>A continuación se van leyendo las sucesivas <a href="81-clases.html.StatCode">instrucciones</a>
+y añadiéndolas en un array.</p>
+<p>Por último se invoca el constructor de la clase <a href="81-clases.html#Módulo">module</a>
+y se retorna el objeto creado.</p>
+<h4>Lectura de las sucesivas instrucciones</h4>
+<p>Se realiza dentro de un bucle que se desarrolla según el siguiete esquema:</p>
+<p>Se lee la siguiente instrucción (<a href="81-clases.html.StatCode">StatCode</a>) y se
+obtiene la <a href="[81-clases.html.StatCode">Stat</a> (<code><i>st</i></code>) correspondinente.</p>
+<ol>
+<dt>Si <code>st</code> es de tipo <code>break</code>
+</dt>
+<dd>
+<p>Se finaliza el bloque.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>import</code>
+</dt>
+<dd>
+<p>- Se comprueba que el simbolo identificador del módulo importado no ha sido
+  previamente importado o incluido en el <a href="Heap0">Heap0</a> del módulo.<br>  - Acto seguido se comprueba que el archivo que se importa es accesible para su
+    lectura.<br>  - Por último se añaden los datos correspodientes de los objecto <code>imports</code>, <code>heap0</code>
+    y <code>tps</code>.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>indexed</code>
+</dt>
+<dd>
+<p>- Primero se determina si los símbolos del <code>indexed</code> se van a exportar.<br>  - A continuación se asigna una función de tipo <code>\p1, p2 ... -> return <a href="p1, p2 ...">p1, p2 ...</a></code>
+    al primer símbolo del <code>indexed</code> (donde <i>p1</i>, <i>p2</i> ... son los símbolo del
+    <code>indexed</code> que sigen al primero -- eventualmente puede no haber ninguno).<br>  - Hecho esto, se asignan los símbolos <i>p1</i>, <i>p2</i>, ... a los enteros <code>0</code>, <code>1</code>, ...<br>  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los <code>imports</code> ni en el <code>heap0</code>, se añaden a los <code>exports</code>, si
+    procede, al <code>heap0</code> y al array de instrucciones.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>arr_multi</code> o <code>dic_multi</code>
+</dt>
+<dd>
+<p>Con el fin de actualizar los <code>exports</code> y el <code>heap0</code>: <br>  <br>  - Primero se determina si los símbolos de la instrucción se van a exportar.<br>  - A continuación se extraen los valores <code>new_sym</code>, <code>syms</code> y <code>exp</code> del
+    constructor de la instrucción.<br>  - Con <code>new_sym</code> se crea una instrucción interna que le asigna: En el
+    caso de <code>arr_multi</code>, un array de enteros de 0, inclusive, al número de
+    elementos de <code>syms</code>, exclusive. En el caso de <code>dic_multi</code>, un diccionario
+    que asocia los simbolos de <code>syms</code> a expresiones de cadena con el mismo
+    símbolo (p.e. a -> "a").<br>  - Hecho esto, se crean instrucciones de tipo <code>sym = exp[new_sym[<i>i</i>]]</code>
+    en el caso de <code>arr_multi</code>, o <code>sym = exp[new_sym[<i>symbol</i>]]</code> en
+    el de <code>dic_multi</code>. Una para cada valor de <code>syms</code> que no sea una
+    <i>expresión vacía</i>.<br>  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los <code>imports</code> ni en el <code>heap0</code>, se añaden a los <code>exports</code>, si
+    procede, y al <code>heap0</code>.<br>  <br>  <i>NOTA</i>: Estas asignaciones NO se registran el array de instrucciones. Lo que
+  añade a tal array es la propia instrucción de tipo <code>arr_multi</code> o
+  <code>dic_multi</code>.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>asign</code>
+</dt>
+<dd>
+<p>- Con el fin de actualizar los <code>exports</code> y el <code>heap0</code> se comprueva que el símbolo
+  de la asignación no está ya registrado en los <code>imports</code> ni en el <code>heap0</code>,
+  y se añade a los <code>exports</code>, si se determina que es una instrucción para
+  exportar, y al <code>heap0</code>.<br>  - Hecho esto se añade al array de instrucciones.</p>
+</dd>
+<dt>Cualquier otra <code>st</code>
+</dt>
+<dd>
+<p>Se añade al array de instrucciones.</p>
+</dd>
+</ol>
+<p>Una vez finalizada la inserción de instrucciones en su array:</p>
+<ol>
+<li>
+<p>Se eliminan del mismo las instrucciones de tipo <code>export</code>, que ya no son
+   necesarias.</p>
+</li>
+<li>
+<p> Se crea y retorna el módulo correspondiente con los datos de los <code>imports</code>,
+   <code>exports</code>, <code>heap0</code> y array de instrucciones.</p>
+</li>
+</ol>
+<a name="Lector bloque no principal"></a>
+<h3>Lector bloque no principal</h3>
+<p>Lee un bloque interno (situado entre los <i>tokens</i> <code>{</code> y <code>}</code>).</p>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-comprobador.html'>Posterior (Comprobador)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

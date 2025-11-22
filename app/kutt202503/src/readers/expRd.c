@@ -19,13 +19,13 @@ static Exp *faile (int ln, char *expected, char *actual);
 // Read next single expression. The token reader is modified.
 static Exp *read_single (ExpRd *this);
 
-// Cases when esym is in symMods: Read a token (tk) and then if
-//    - tk == # -> Reading a field - function or not function:
-//                 remove # -> return md.fn(sym)
-//    - tk == ( -> Reading a module - function with 1 or more arguments:
-//                 Read 'pars)' -> return md.fn(sym, pars)
-//    - Other   -> Reading a field - noFunction:
-//                 return md.fn(sym)
+// Cases when esym is in symMods: Reads one symbol (f) and one token (tk)
+// and then if
+//    - tk == ( -> Reads a function with 1 or more arguments:
+//                 Reads 'pars)' -> return md.fn(sym, pars)
+//                                  or md.fn(sym) if pars is empty.
+//    - Other   -> Reads a field:
+//                 return sym[md.field]
 //    this: Expression reader.
 //    esym: Expression of type symbol.
 static Exp *read_symbol (ExpRd *this, Exp *esym);
@@ -435,10 +435,7 @@ static Exp *read_symbol (ExpRd *this, Exp *esym) {
 
   Token *tk3 = tokenRd_peek(tkr);
   if (tk3->tp == token_operator) {
-    if (*tk3->value == '#') {
-      tokenRd_next(tkr);
-      // go below
-    } else if (*tk3->value == '(') {
+    if (*tk3->value == '(') {
       tokenRd_next(tkr);
       Arr *es = arr_new_from(esym, NULL);
       Token *tk4 = tokenRd_peek(tkr);
@@ -497,7 +494,10 @@ static Exp *read_continuation (ExpRd *this, Exp *e) {
       Token *tk1 = tokenRd_peek(tkr);
       if (token_is_op(tk1, "]") && start_with_colon) {
         tokenRd_next(tkr);
-        return exp_new_slice(ln, e, opt_none(), opt_none());
+        return read_continuation(
+          this,
+          exp_new_slice(ln, e, opt_none(), opt_none())
+        );
       }
 
       Exp *e1 = expRd_next(this);
@@ -508,7 +508,10 @@ static Exp *read_continuation (ExpRd *this, Exp *e) {
 
       if (start_with_colon) {
         if (tp == token_operator && *v == ']')
-          return exp_new_slice(ln, e, opt_none(), opt_some(e1));
+          return read_continuation(
+            this,
+            exp_new_slice(ln, e, opt_none(), opt_some(e1))
+          );
         return faile(tk->ln, "]", token_to_str(tk));
       }
 
@@ -520,14 +523,20 @@ static Exp *read_continuation (ExpRd *this, Exp *e) {
           Token *tk1 = tokenRd_peek(tkr);
           if (token_is_op(tk1, "]")) {
             tokenRd_next(tkr);
-            return exp_new_slice(ln, e, opt_some(e1), opt_none());
+            return read_continuation(
+              this,
+              exp_new_slice(ln, e, opt_some(e1), opt_none())
+            );
           }
 
           Exp *e2 = expRd_next(this);
           if (e2->tp == exp_error) return e2;
           Token *tk2 = tokenRd_next(tkr);
           if (token_is_op(tk2, "]"))
-            return exp_new_slice(ln, e, opt_some(e1), opt_some(e2));
+            return read_continuation(
+              this,
+              exp_new_slice(ln, e, opt_some(e1), opt_some(e2))
+            );
 
           return faile(tk2->ln, "]", token_to_str(tk2));
         }

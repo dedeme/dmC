@@ -16,10 +16,16 @@ new: age,name;
 
 enum0, enum1,,enum3 =;
 
+enumA, enumB, enumC =:;
+
 {
   sys.test(enum0, 0);
   sys.test(enum1, 1);
   sys.test(enum3, 3);
+
+  sys.test(enumA, "enumA");
+  sys.test(enumB, "enumB");
+  sys.test(enumC, "enumC");
 
   b1 = true;
   b2 = false;

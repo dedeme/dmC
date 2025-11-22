@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Objetos</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='05-ejecutor.html'>Anterior (Ejecutor)</a> · <a href="index.html">Índice</a> · <a href='81-clases.html'>Posterior (Clases)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#symix'>symix</a><br>
+<a href='#fileix'>fileix</a><br>
+<a href='#Módulos'>Módulos</a><br>
+<a href='#Tipos'>Tipos</a>
+</p>
+<hr>
+<a name="symix"></a>
+<h3>symix</h3>
+<p>(Archivos <code>symix.h</code> y <code>symix.c</code>)</p>
+<p>Objeto que vincula índices con símbolos.</p>
+<p><code>symix.h</code> código:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">/// Index of reserverd symbols.
+enum symix_Reserved {
+  // Reserverd words
+  symix_BREAK, symix_CATCH, symix_CONTINUE, symix_DEFAULT,
+  symix_ELSE, symix_FALSE, symix_FINALLY, symix_FOR,
+  symix_IF, symix_IMPORT, symix_RETURN, symix_SWITCH,
+  symix_TRACE, symix_TRUE, symix_TRY, symix_WHILE,
+
+  symix_ENUM_SEPARATOR,
+  // Built-in modules
+  symix_ARR, symix_B64, symix_BYTES, symix_CRYP,
+  symix_FILE, symix_DIC, symix_ITER, symix_JS,
+  symix_MATH, symix_PATH, symix_REGEX, symix_STR,
+  symix_SYS, symix_TCP, symix_THREAD, symix_TIME,
+
+  symix_ENUM_END
+};
+
+/// Initialize symbols array.
+void symix_init(void);
+
+/// If 'sym' is not in symbols array, it is added. Otherwise do nothing.
+/// In any case this function returns the symbol index.
+int symix_add(char *sym);
+
+/// Returns the symnbol with index 'ix'.
+/// If such index does no exist, it throws an exception.
+char *symix_get (int ix);
+
+/// Returns the index of a new internal symbol, whose string representation
+/// is of type "gen_INDEX_" (e.g. gen_234_).
+int symix_generate (void);</div>
+<script>aceConf("aceEditor-0", "c_cpp");</script>
+<a name="fileix"></a>
+<h3>fileix</h3>
+<p>(Archivos <code>fileix.h</code> y <code>fileix.c</code>)</p>
+<p>Objecto que mantiene las lista de rutas de los archivos de código Kut que han
+sido procesados o estan siéndolo.</p>
+<p><code>fileix.h</code> código:</p>
+<div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">/// Initialize code file paths array.
+void fileix_init(void);
+
+/// Set the program working directory.
+void fileix_set_root (char *root);
+
+/// Returns the program working directory.
+char *fileix_get_root (void);
+
+/// Adds 'ipath' to code file paths array and returns its index.
+/// If path is not found, it returns -1.
+/// If path already has been added, it do nothing and also returns its index.
+///    fix  : Index of file which imports 'ipath' or -1 if such file is the main
+///           one.
+///    ipath: Relative file path without the extesion ".kut":
+///             * If 'fix' == -1, 'root/ipath' is used (used for 'main' module).
+///             * Otherwise:
+///               · If 'file pointed by fix'/ipath exists, such path is used.
+///               · Otherwise root/ipath is used.
+int fileix_add(int fix, char *ipath);
+
+/// Returns the path with index 'ix' to print in runtime messages. It is with
+/// extension and made canonical.
+/// Throw EXC_RANGE if 'ix' is not a valid index.
+char *fileix_to_str (int ix);
+
+/// Read the file with index 'ix'
+/// Throw EXC_RANGE if 'ix' is not a valid index.
+/// Throw EXC_IO if file can not be found.
+char *fileix_read (int ix);</div>
+<script>aceConf("aceEditor-1", "c_cpp");</script>
+<a name="Módulos"></a>
+<h3>Módulos</h3>
+<p>(Archivos <code>modules.h</code> y <code>modules.c</code>)</p>
+<p>Array que mantiene una indexación de <a href="81-clases.html#Módulo">módulos</a>.</p>
+<p>El índice de cada módulo en el array es el mismo que el del archivo que lo
+contiene en <code>fileix</code>.</p>
+<p>Dada una entrada en el array pueden resultar tres casos:</p>
+<ol>
+<dt><code>option_none() [Modulo no registrado]</code></dt>
+<dd>
+<p>No hay módulo que corresponda al índice.</p>
+</dd>
+<dt><code>option_some(option_none()) [Modulo pendiente de lectura]</code></dt>
+<dd>
+<p>Hay un módulo asociado al índice, pero aún no está definido. (Se encuentra en
+  proceso de lectura)</p>
+</dd>
+<dt><code>option_some(option_some(módulo)) [Módulo leido]</code></dt>
+<dd>
+<p>Hay un módulo asociado al índice que está definido. (El módulo ha sido leído
+  completamente)</p>
+</dd>
+</ol>
+<p><code>modules.h</code> código:</p>
+<div id="aceEditor-2" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">/// Creates the modules array.
+void modules_init (void);
+
+/// Adds a module pending to be read.
+/// NOTE1: Every 'index &lt; fix' id added as 'Module not registred'.
+/// NOTE3: Adding an already registred 'ix' is ok, but dones not make any change.
+///   fix: Index of module file.
+void modules_add (int fix);
+
+/// Set the value of module 'ix' as 'Module read'.
+///   ix : Index of module (and module file)
+///   mod: Module
+void modules_set (int ix, Module *mod);
+
+/// Returns Opt&lt;Opt&lt;Module>> with the module 'ix':
+///   - Module alredy read: opt_some(opt_some(module))
+///   - Module pending to be read: opt_some(opt_none())
+///   - Module not registered: opt_none()
+///   ix: Index of mudule (and module file)
+Opt *modules_get(int ix);
+
+/// Returns Opt&lt;Module> with the module 'ix' or raise an EXC_IO if module is
+/// not registered
+/// The module returned can be:
+///   - Module alredy read: opt_some(module)
+///   - Module pending to be read: opt_none()
+///   ix: Index of mudule (and module file)
+Opt *modules_get_ok(int ix);
+
+/// Returns Arr&lt;Opt&lt;Opt&lt;Module>>> with a shallow copy of the module array.
+Arr *modules_get_array(void);</div>
+<script>aceConf("aceEditor-2", "c_cpp");</script>
+<a name="Tipos"></a>
+<h3>Tipos</h3>
+<p>(Archivos <code>reader/types.h</code> y <code>reader/types.c</code>)</p>
+<p>Lista vinculada de pares <i>símboloÍndice-móduloÍndice</i>.</p>
+<p>Cuando se vincula un símbolo con un módulo, se añade una entrada en la lista.
+En tal caso decimos que el símbolo está <i>tipado</i>.</p>
+<p>Es posible identificar si un símbolo está <i>tipado</i> (<code>types_find</code>), si ha
+sido <i>tipado</i> en el actual bloque (<code>types_in_block</code>) o si un modulo ha
+sido incluido como tipo de algún símbolo (<code>types_contains</code>).
+</p>
+<hr>
+<p style="text-indent: 0px"><a href='05-ejecutor.html'>Anterior (Ejecutor)</a> · <a href="index.html">Índice</a> · <a href='81-clases.html'>Posterior (Clases)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

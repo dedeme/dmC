@@ -77,27 +77,27 @@ window.MathJax = {
 is set, <i>st2</i> is executed.</p>
 <p>Examples:</p>
 <div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
-v = [false];
-msg = ["msg"];
+vV = [false];
+msgV = ["msg"];
 
-if (v[0]) msg[0] = "msgIf";
-sys.test(msg[0], "msg");
+if (vV[0]) msgV[0] = "msgIf";
+sys.test(msgV[0], "msg");
 
-if (v[0]) msg[0] = "msgIf";
-else msg[0] = "msgElse";
-sys.test(msg[0], "msgElse");
+if (vV[0]) msgV[0] = "msgIf";
+else msgV[0] = "msgElse";
+sys.test(msgV[0], "msgElse");
 
-v[0] = true;
+vV[0] = true;
 
-if (v[0]) { msg[0] = "msgIf"; }
-sys.test(msg[0], "msgIf");
+if (vV[0]) { msgV[0] = "msgIf"; }
+sys.test(msgV[0], "msgIf");
 
-if (v[0]) {
-  msg[0] = "msgIf2";
+if (vV[0]) {
+  msgV[0] = "msgIf2";
 } else {
-  msg[0] = "msgElse";
+  msgV[0] = "msgElse";
 }
-sys.test(msg[0], "msgIf2");
+sys.test(msgV[0], "msgIf2");
 </div>
 <script>aceConf("aceEditor-0", "kutt");</script>
 <a name="switch - default"></a>
@@ -106,7 +106,7 @@ sys.test(msg[0], "msgIf2");
 <p><code>switch (<i>exp</i>) {<br>  &nbsp;&nbsp;<i>e00</i>, [<i>e01</i>, <i>e02</i>, ...]: <i>st0</i><br>  &nbsp;&nbsp;<i>e10</i>, [<i>e11</i>, <i>e12</i>, ...]: <i>st1</i><br>  &nbsp; ...<br>  &nbsp;&nbsp;[default: <i>stN</i>]<br>}</code></p>
 <ul>
 <li>
-<p><i>exp</i> and <i>eXX's</i> are expressions.</p>
+<p><i>exp</i> and <i>eXX's</i> are expressions of the same type.</p>
 </li>
 <li>
 <p><i>stX's</i> are statement or block.</p>
@@ -117,51 +117,51 @@ the result is <code>true</code>, it executes the corresponding <i>stX</i>.</p>
 <p>If there is a <code>default</code> clause and no result is <code>true</code>, <i>stN</i> is executed.</p>
 <p>Examples:</p>
 <div id="aceEditor-1" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
-rOp = [""];
+rV = [""];
 
 switch (3) {
-  3 + 1: rOp[0] = "1";
-  3 + 0: rOp[0] = "2";
-  3 - 1: rOp[0] = "3";
+  3 + 1: rV[0] = "1";
+  3 + 0: rV[0] = "2";
+  3 - 1: rV[0] = "3";
 }
-sys.test(rOp[0], "2");
+sys.test(rV[0], "2");
 
 switch (4 * 2) {
-  0: rOp[0] = "01";
-  1: rOp[0] = "02";
-  2: rOp[0] = "03";
+  0: rV[0] = "01";
+  1: rV[0] = "02";
+  2: rV[0] = "03";
 }
-sys.test(rOp[0], "2");
+sys.test(rV[0], "2");
 
 switch (4 * 2) {
-  0: rOp[0] = "01";
-  1: rOp[0] = "02";
-  2: rOp[0] = "03";
-  default: rOp[0] = "08";
+  0: rV[0] = "01";
+  1: rV[0] = "02";
+  2: rV[0] = "03";
+  default: rV[0] = "08";
 }
-sys.test(rOp[0], "08");
+sys.test(rV[0], "08");
 
-// Used as multiple ifs.
+// Use as multiple ifs.
 
 // This
-rOp[0] = "";
+rV[0] = "";
 switch (true) {
-  3 > 5 : rOp[0] = "A";
-  3 == 5 : rOp[0] = "B";
-  3 &lt; 5 : rOp[0] = "C";
-  default: rOp[0] = "D";
+  3 > 5 : rV[0] = "A";
+  3 == 5 : rV[0] = "B";
+  3 &lt; 5 : rV[0] = "C";
+  default: rV[0] = "D";
 }
-sys.test(rOp[0], "C");
+sys.test(rV[0], "C");
 
 // is equals to
-rOp[0] = "";
+rV[0] = "";
 
-if (3 > 5) rOp[0] = "A";
-else if (3 == 5) rOp[0] = "B";
-else if (3 &lt; 5) rOp[0] = "C";
-else rOp[0] = "D";
+if (3 > 5) rV[0] = "A";
+else if (3 == 5) rV[0] = "B";
+else if (3 &lt; 5) rV[0] = "C";
+else rV[0] = "D";
 
-sys.test(rOp[0], "C");
+sys.test(rV[0], "C");
 </div>
 <script>aceConf("aceEditor-1", "kutt");</script>
 <a name="while - break - continue"></a>
@@ -177,10 +177,10 @@ sys.test(rOp[0], "C");
 </li>
 </ul>
 <p><code>while</code> executes <i>st</i> while <i>condition</i> is <code>true</code>.</p>
-<p>If <i>condition</i> is not indicated, <i>st</i> is executed in an infinite loop.</p>
-<p>When inside a <code>while</code> block it appears the directive <code>break</code>, the loop is
+<p>If <i>condition</i> is missing, <i>st</i> is executed in an infinite loop.</p>
+<p>When inside a <code>while</code> block the directive <code>break</code> appears, the loop is
 finished immediately.</p>
-<p>Also, when appears the directive <code>continue</code> the program flux go to the block
+<p>Also, when the directive <code>continue</code> appears the program flux go to the block
 start.</p>
 <p>NOTES:</p>
 <ul>
@@ -188,7 +188,7 @@ start.</p>
 <p><i>The construction <code>while () break;</code> is valid, but does nothing</i>.</p>
 </li>
 <li>
-<p><i>Also is valid the construction <code>while () continue;</code>, but generate an
+<p><i>Also the construction <code>while () continue;</code> is valid, but generates an
   infinite loop</i>.</p>
 </li>
 </ul>
@@ -231,30 +231,22 @@ while () break;
 <a name="for - break - continue"></a>
 <h3>for - break - continue</h3>
 <p>Scheme:</p>
-<p><code>for ( <i>assignation-condition</i> ) <i>st</i></code></p>
+<p><code>for ( <i>assignment-condition</i> ) <i>st</i></code></p>
 <ul>
 <li>
-<p><i>assignation-condition</i> is a mix of assignations of expressions to symbols
+<p><i>assignment-condition</i> is a mix of assignments of expressions to symbols
   and condition of loop termination.</p>
 </li>
 <li>
 <p><i>st</i> is statement o block.</p>
 </li>
 </ul>
-<p><code>for</code> executes <i>st</i> while the condition of <i>assignation-condition</i> is <code>true</code>.</p>
-<p><code>break</code> and <code>continue</code> can be called inside <i>st</i> with the same efectos
+<p><code>for</code> executes <i>st</i> while the condition of <i>assignment-condition</i> is <code>true</code>.</p>
+<p><code>break</code> and <code>continue</code> can be called inside <i>st</i> with the same efects
 explained for <code>while</code>.</p>
-<p>In <i>assignation-condition</i> some simbols are initialized for each lap of
+<p>In <i>assignment-condition</i> some simbols are initialized for each lap of
 loop.</p>
-<p>This symbols are out of <i>st</i> scope, so:</p>
-<ul>
-<li>
-<p>They can be shadowed by a new assignation.</p>
-</li>
-<li>
-<p>They can not be used in loop code.</p>
-</li>
-</ul>
+<p>This symbols can not be reassigned in the main block.</p>
 <h4><code>for</code> with collections</h4>
 <p>Scheme:</p>
 <p><code>for ( [ <i>i</i>, ] <i>e</i> = <i>C</i> ) <i>st</i></code></p>
@@ -277,7 +269,7 @@ loop.</p>
 <p><i>e</i> This symbol is assigned to a new value of <i>C</i> in each lap.</p>
 <ul>
 <li>
-<p>In iterators and arrays the order in lap assignations is assured.
+<p>In iterators and arrays the order in lap assignments is assured.
     In dictionaries it is not.</p>
 </li>
 </ul>
@@ -304,6 +296,7 @@ for (e = D) sumV[0] += e;
 sys.test(sumV[0], 3);
 keysV = [""];
 for (k, e = D) {
+  // k = "x"; &lt;-- Not allowed (duplicated symbol)
   keysV[0] += k;
   sumV[0] -= e;
 }
@@ -319,7 +312,7 @@ sys.test(sumV[0], 0);
 <p><i>i</i> is a symbol assigned to a value of type integer each lap.</p>
 </li>
 <li>
-<p><i>start</i> is the irst value of <i>i</i>.</p>
+<p><i>start</i> is the first value of <i>i</i>.</p>
 </li>
 <li>
 <p><i>end</i> is the last value of <i>i</i>.</p>
@@ -334,31 +327,28 @@ sys.test(sumV[0], 0);
 </dt>
 <dd>
 <p>(End exclusive)</p>
-<p>If <code><i>i</i> >= <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
-  <code><i>i</i></code> is assigned to <code><i>i</i> + 1</code> and if <code><i>i</i> >= <i>end</i></code> the loop finishes.
+<p>If <code><i>i</i> >= <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once.<br>  Then <code><i>i</i></code> is assigned to <code><i>i</i> + 1</code> and if <code><i>i</i> >= <i>end</i></code> the loop finishes.
   Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
 </dd>
 <dt>* If <i>step</i> is defined and it is positive.
 </dt>
 <dd>
 <p>( End inclusive)</p>
-<p>If <code><i>i</i> > <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
-  <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code> and if <code><i>i</i> > <i>end</i></code> the loop finishes.
+<p>If <code><i>i</i> > <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once.<br>  Then <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code> and if <code><i>i</i> > <i>end</i></code> the loop finishes.
   Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
 </dd>
 <dt>* If <i>step</i> is defined and it is negative.
 </dt>
 <dd>
 <p>( End inclusive)</p>
-<p>If <code><i>i</i> &lt; <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once. Then
-  <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code> (decremented) and if <code><i>i</i> &lt; <i>end</i></code> the loop
+<p>If <code><i>i</i> &lt; <i>end</i></code> the loop finishes. Otherwise <code><i>st</i></code> is executed once.<br>  Then <code><i>i</i></code> is assigned to <code><i>i</i> + <i>step</i></code> (decremented) and if <code><i>i</i> &lt; <i>end</i></code> the loop
   finishes. Otherwise <code><i>st</i></code> is executed once more and so succesively.</p>
 </dd>
 </ol>
 <p>Examples:</p>
 <div id="aceEditor-4" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 sumV = [0];
-for (i = 4 : 4) sumV[0] += i;
+for (i = 4 : 4) { sumV[0] += i; }
 sys.test(sumV[0], 0);
 for (i = 0 : 4) sumV[0] += i;
 sys.test(sumV[0], 6);
@@ -390,17 +380,17 @@ sys.test(sumV[0], 0);
 </li>
 <li>
 <p><i>e</i> is a symbol assigned to a string. This string has a message and the
-  stack trace of the line where an exception has happened.</p>
+  stack trace of the line where an exception happened.</p>
 </li>
 </ul>
-<p><code>try</code> executes <code><i>st1</i></code>, but if it happens an exception, jumps to <code><i>st2</i></code> and
+<p><code>try</code> executes <code><i>st1</i></code>, but if an exception happens, jumps to <code><i>st2</i></code> and
 executes it.</p>
 <p>Exceptions are execution fails which can be raised by the built-in code
 or 'manually' calling <code>throw</code>. An exception out of a <code>try</code> block finishes
 the program.</p>
 <p><i>st2</i> has not access to symbols declared in <i>st1</i>, but can use the simbol
-<code><i>e</i></code> that point out to the exception message. Moverover, <i>e</i> is out of
-<i>st2</i> scope and can be reassigned.</p>
+<code><i>e</i></code> that point out to the exception message. Moverover, <i>e</i> can not be
+reassigned in the <i>catch</i> block.</p>
 <div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 V = [0];
 
@@ -433,7 +423,9 @@ try {
     // V[0] += 1; // &lt;- No allowed after throw.
   } catch (e) {
     V[0] += 2;
-    sys.test(e[-4:], "fail");
+    sys.test(e[str.lastIndex(e, ": ")+2:], "fail");
+    // or better (see Module marks in Module chapter)
+    sys.test(e[e.lastIndex(": ")+2:], "fail");
     throw("error");
     // V[0] += 2;  // &lt;- No allowed after throw.
   }
@@ -493,6 +485,20 @@ while (V[0] &lt; 9) {
   }
 }
 sys.test(V[0], 2);
+
+// Loop with excetion cached and continue.
+V[0] = 0;
+while (V[0] &lt; 9) {
+  try {
+    throw("fail");
+    // V[0] += 1; // &lt;- No allowed after throw.
+  } catch (e) {
+    sys.test(e[-4:], "fail");
+    V[0] += 35;
+    continue;
+  }
+}
+sys.test(V[0], 35);
 
 // Try without exception and with return.
 V[0] = 0;
@@ -572,7 +578,7 @@ current one.</p>
 <ul>
 <li>
 <p><i>module</i> is a string with the relative path of a module. It points out to a
-  file with path <i>module</i><code>.ktt</code>. The realative path is searched:</p>
+  file with path <i>module<code>.ktt</code></i>. The realative path is searched:</p>
 <ol>
 <li>
 <p>Relative to the current module.</p>

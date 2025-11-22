@@ -1,0 +1,156 @@
+=
+title = Objetos
+=
+
+## symix
+
+(Archivos *symix.h* y *symix.c*)
+
+Objeto que vincula índices con símbolos.
+
+*symix.h* código:
+
+``c_cpp
+/// Index of reserverd symbols.
+enum symix_Reserved {
+  // Reserverd words
+  symix_BREAK, symix_CATCH, symix_CONTINUE, symix_DEFAULT,
+  symix_ELSE, symix_FALSE, symix_FINALLY, symix_FOR,
+  symix_IF, symix_IMPORT, symix_RETURN, symix_SWITCH,
+  symix_TRACE, symix_TRUE, symix_TRY, symix_WHILE,
+
+  symix_ENUM_SEPARATOR,
+  // Built-in modules
+  symix_ARR, symix_B64, symix_BYTES, symix_CRYP,
+  symix_FILE, symix_DIC, symix_ITER, symix_JS,
+  symix_MATH, symix_PATH, symix_REGEX, symix_STR,
+  symix_SYS, symix_TCP, symix_THREAD, symix_TIME,
+
+  symix_ENUM_END
+};
+
+/// Initialize symbols array.
+void symix_init(void);
+
+/// If 'sym' is not in symbols array, it is added. Otherwise do nothing.
+/// In any case this function returns the symbol index.
+int symix_add(char *sym);
+
+/// Returns the symnbol with index 'ix'.
+/// If such index does no exist, it throws an exception.
+char *symix_get (int ix);
+
+/// Returns the index of a new internal symbol, whose string representation
+/// is of type "gen_INDEX_" (e.g. gen_234_).
+int symix_generate (void);``
+
+## fileix
+
+(Archivos *fileix.h* y *fileix.c*)
+
+Objecto que mantiene las lista de rutas de los archivos de código Kut que han
+sido procesados o estan siéndolo.
+
+*fileix.h* código:
+
+``c_cpp
+/// Initialize code file paths array.
+void fileix_init(void);
+
+/// Set the program working directory.
+void fileix_set_root (char *root);
+
+/// Returns the program working directory.
+char *fileix_get_root (void);
+
+/// Adds 'ipath' to code file paths array and returns its index.
+/// If path is not found, it returns -1.
+/// If path already has been added, it do nothing and also returns its index.
+///    fix  : Index of file which imports 'ipath' or -1 if such file is the main
+///           one.
+///    ipath: Relative file path without the extesion ".kut":
+///             * If 'fix' == -1, 'root/ipath' is used (used for 'main' module).
+///             * Otherwise:
+///               · If 'file pointed by fix'/ipath exists, such path is used.
+///               · Otherwise root/ipath is used.
+int fileix_add(int fix, char *ipath);
+
+/// Returns the path with index 'ix' to print in runtime messages. It is with
+/// extension and made canonical.
+/// Throw EXC_RANGE if 'ix' is not a valid index.
+char *fileix_to_str (int ix);
+
+/// Read the file with index 'ix'
+/// Throw EXC_RANGE if 'ix' is not a valid index.
+/// Throw EXC_IO if file can not be found.
+char *fileix_read (int ix);``
+
+## Módulos
+
+(Archivos *modules.h* y *modules.c*)
+
+Array que mantiene una indexación de [81-clases.html#Módulo](módulos).
+
+El índice de cada módulo en el array es el mismo que el del archivo que lo
+contiene en *fileix*.
+
+Dada una entrada en el array pueden resultar tres casos:
+
+- <code>option_none() [Modulo no registrado]</code>
+> No hay módulo que corresponda al índice.
+
+- <code>option_some(option_none()) [Modulo pendiente de lectura]</code>
+> Hay un módulo asociado al índice, pero aún no está definido. (Se encuentra en
+  proceso de lectura)
+
+- <code>option_some(option_some(módulo)) [Módulo leido]</code>
+> Hay un módulo asociado al índice que está definido. (El módulo ha sido leído
+  completamente)
+
+*modules.h* código:
+
+``c_cpp
+/// Creates the modules array.
+void modules_init (void);
+
+/// Adds a module pending to be read.
+/// NOTE1: Every 'index < fix' id added as 'Module not registred'.
+/// NOTE3: Adding an already registred 'ix' is ok, but dones not make any change.
+///   fix: Index of module file.
+void modules_add (int fix);
+
+/// Set the value of module 'ix' as 'Module read'.
+///   ix : Index of module (and module file)
+///   mod: Module
+void modules_set (int ix, Module *mod);
+
+/// Returns Opt<Opt<Module>> with the module 'ix':
+///   - Module alredy read: opt_some(opt_some(module))
+///   - Module pending to be read: opt_some(opt_none())
+///   - Module not registered: opt_none()
+///   ix: Index of mudule (and module file)
+Opt *modules_get(int ix);
+
+/// Returns Opt<Module> with the module 'ix' or raise an EXC_IO if module is
+/// not registered
+/// The module returned can be:
+///   - Module alredy read: opt_some(module)
+///   - Module pending to be read: opt_none()
+///   ix: Index of mudule (and module file)
+Opt *modules_get_ok(int ix);
+
+/// Returns Arr<Opt<Opt<Module>>> with a shallow copy of the module array.
+Arr *modules_get_array(void);``
+
+## Tipos
+
+(Archivos *reader/types.h* y *reader/types.c*)
+
+Lista vinculada de pares _símboloÍndice-móduloÍndice_.
+
+Cuando se vincula un símbolo con un módulo, se añade una entrada en la lista.
+En tal caso decimos que el símbolo está _tipado_.
+
+Es posible identificar si un símbolo está _tipado_ (*types__find*), si ha
+sido _tipado_ en el actual bloque (*types__in__block*) o si un modulo ha
+sido incluido como tipo de algún símbolo (*types__contains*).

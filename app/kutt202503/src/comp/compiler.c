@@ -68,10 +68,10 @@ static char *compile_module(char *header, Module *m) {
   char *ofile =
     path_cat(cts_compilation_path(), str_f("%s.o", md_id), NULL);
 
-  Rs *rs = cmd_run(str_f(
-    "gcc -Wno-div-by-zero -c -rdynamic -z execstack %s -o %s -I %s -L %s "
-    "-lbuilt -lgc -lm -lpthread",
-    cfile, ofile, cts_data_path(), cts_data_path()
+  Rs *rs = cmd_run(arr_new_from(
+    "gcc", "-Wno-div-by-zero", "-c", "-rdynamic", "-z", "execstack",
+    cfile, "-o", ofile, "-I", cts_data_path(), "-L", cts_data_path(),
+    "-lbuilt", "-lgc", "-lm", "-lpthread", NULL
   ));
   if (!rs_get(rs)) return rs_error(rs);
 
@@ -147,11 +147,16 @@ char *compiler_run (int only_compile) {
 
   if (only_compile) return "";
 
-  Rs *rs = cmd_run(str_f(
-    "gcc -Wno-div-by-zero -Wmain -rdynamic -z execstack %s -o %s -L %s "
-    "-lbuilt -lgc -lm -lpthread",
-    arr_cjoin(fos, ' '), fexe, cts_data_path()
+  Arr *cm = arr_new_from(
+    "gcc", "-Wno-div-by-zero", "-Wmain", "-rdynamic", "-z", "execstack", NULL
+  );
+  arr_cat(cm, fos);
+  arr_cat(cm, arr_new_from(
+    "-o", fexe, "-L", cts_data_path(),
+    "-lbuilt", "-lgc", "-lm", "-lpthread", NULL
   ));
+
+  Rs *rs = cmd_run(cm);
   if (!rs_get(rs)) return rs_error(rs);
 
   return "";

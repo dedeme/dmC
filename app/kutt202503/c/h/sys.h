@@ -21,9 +21,6 @@ Val __sys_compilerRoot (void);
 // () -> {s}
 Val __sys_environ (void);
 
-// s, [s] -> i
-Val __sys_exec (char *pos, Val command, Val args);
-
 // i -> ()
 void __sys_exit (Val code);
 

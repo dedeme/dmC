@@ -1,0 +1,109 @@
+=
+title = Lector
+=
+
+(Archivos *reader/reader.h* y *reader/reader.c*)
+
+Dispone de dos funciones de lectura, una para el bloque principal (el propio
+archivo *.kut*) y otro para los demás bloques (bloques interiores).
+
+## Lector del bloque principal
+
+Lee un archivo *.kut* y retorna el [81-clases.html#Módulo](módulo) correspondiente.
+
+Esta función necesita que se le pase un un objeto de la clase
+[81-clases.html#Lector de caracteres](lector de caracteres).
+
+Inicializa los campos *imports*, *exports* y *heap0* del módulo.
+
+Además inicializa un array *tps* que contendrá los símbolos con los que se accede
+a los módulos de los que depende el módulo que se está leyendo. La inicialización
+se hace añadiendo los símbolos correspondientes a los módulos-base de
+*kut*.
+
+A continuación se van leyendo las sucesivas [81-clases.html.StatCode](instrucciones)
+y añadiéndolas en un array.
+
+Por último se invoca el constructor de la clase [81-clases.html#Módulo](module)
+y se retorna el objeto creado.
+
+# Lectura de las sucesivas instrucciones
+
+Se realiza dentro de un bucle que se desarrolla según el siguiete esquema:
+
+Se lee la siguiente instrucción ([81-clases.html.StatCode](StatCode)) y se
+obtiene la [[81-clases.html.StatCode](Stat) (*_st_*) correspondinente.
+
+- Si <code>st</code> es de tipo <code>break</code>
+
+> Se finaliza el bloque.
+
+- Si <code>st</code> es de tipo <code>import</code>
+
+> - Se comprueba que el simbolo identificador del módulo importado no ha sido
+  previamente importado o incluido en el [Heap0](Heap0) del módulo.\
+  - Acto seguido se comprueba que el archivo que se importa es accesible para su
+    lectura.\
+  - Por último se añaden los datos correspodientes de los objecto *imports*, *heap0*
+    y *tps*.
+
+- Si <code>st</code> es de tipo <code>indexed</code>
+
+> - Primero se determina si los símbolos del *indexed* se van a exportar.\
+  - A continuación se asigna una función de tipo *\p1, p2 ... -> return [p1, p2 ...]*
+    al primer símbolo del *indexed* (donde _p1_, _p2_ ... son los símbolo del
+    *indexed* que sigen al primero -- eventualmente puede no haber ninguno).\
+  - Hecho esto, se asignan los símbolos _p1_, _p2_, ... a los enteros *0*, *1*, ...\
+  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los *imports* ni en el *heap0*, se añaden a los *exports*, si
+    procede, al *heap0* y al array de instrucciones.
+
+- Si <code>st</code> es de tipo <code>arr_multi</code> o <code>dic_multi</code>
+
+> Con el fin de actualizar los *exports* y el *heap0*: \
+  \
+  - Primero se determina si los símbolos de la instrucción se van a exportar.\
+  - A continuación se extraen los valores *new\[_]sym*, *syms* y *exp* del
+    constructor de la instrucción.\
+  - Con *new\[_]sym* se crea una instrucción interna que le asigna: En el
+    caso de *arr\[_]multi*, un array de enteros de 0, inclusive, al número de
+    elementos de *syms*, exclusive. En el caso de *dic\[_]multi*, un diccionario
+    que asocia los simbolos de *syms* a expresiones de cadena con el mismo
+    símbolo (p.e. a -> "a").\
+  - Hecho esto, se crean instrucciones de tipo *sym = exp\[[]new\[_]sym\[[]_i_]]*
+    en el caso de *arr\[_]multi*, o *sym = exp\[[]new\[_]sym\[[]_symbol_]]* en
+    el de *dic\[_]multi*. Una para cada valor de *syms* que no sea una
+    _expresión vacía_.\
+  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los *imports* ni en el *heap0*, se añaden a los *exports*, si
+    procede, y al *heap0*.\
+  \
+  _NOTA_: Estas asignaciones NO se registran el array de instrucciones. Lo que
+  añade a tal array es la propia instrucción de tipo *arr\[_]multi* o
+  *dic\[_]multi*.
+
+- Si <code>st</code> es de tipo <code>asign</code>
+
+> - Con el fin de actualizar los *exports* y el *heap0* se comprueva que el símbolo
+  de la asignación no está ya registrado en los *imports* ni en el *heap0*,
+  y se añade a los *exports*, si se determina que es una instrucción para
+  exportar, y al *heap0*.\
+  - Hecho esto se añade al array de instrucciones.
+
+- Cualquier otra <code>st</code>
+
+> Se añade al array de instrucciones.
+
+Una vez finalizada la inserción de instrucciones en su array:
+
+1. Se eliminan del mismo las instrucciones de tipo *export*, que ya no son
+   necesarias.
+
+2. Se crea y retorna el módulo correspondiente con los datos de los *imports*,
+   *exports*, *heap0* y array de instrucciones.
+
+## Lector bloque no principal
+
+Lee un bloque interno (situado entre los _tokens_ *{* y *}*).
+
+

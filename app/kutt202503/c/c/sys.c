@@ -49,10 +49,10 @@ Val __sys_cmd2 (Val command, Val args) {
 
   Val *p = args.a->begin;
   Val *end = args.a->end;
-  while (p < end) arr_push(acmd, str_to_escape((*p++).s));
+  while (p < end) arr_push(acmd, (*p++).s);
 
   // Tp<char, char>
-  Tp *tp = sys_cmd2(arr_cjoin(acmd, ' '));
+  Tp *tp = sys_cmd2(acmd);
   Val r = __arr_new();
   __arr_push(r, (Val)tp->e1);
   __arr_push(r, (Val)tp->e2);
@@ -72,19 +72,6 @@ Val __sys_environ (void) {
 // i -> ()
 void __sys_exit (Val code) {
   exit(code.i);
-}
-
-// s, [s] -> ()
-Val __sys_exec (char *pos, Val command, Val args) {
-  // Arr<char>
-  Arr *acmd = arr_new();
-  arr_push(acmd, command.s);
-
-  Val *p = args.a->begin;
-  Val *end = args.a->end;
-  while (p < end) arr_push(acmd, str_to_escape((*p++).s));
-
-  return (Val)(int64_t)system(arr_cjoin(acmd, ' '));
 }
 
 // () -> s

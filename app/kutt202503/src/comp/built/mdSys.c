@@ -11,7 +11,6 @@ WrERs *mdSys_process (WrCtx *ctx, int ln, char *md, char *sym) {
   if (!strcmp(sym, "cmd2")) return built_mk_rs("[s[s]|[. ss]]", md, sym);
   if (!strcmp(sym, "compilerRoot")) return built_mk_rs("[|s]", md, sym);
   if (!strcmp(sym, "environ")) return built_mk_rs("[|{s}]", md, sym);
-  if (!strcmp(sym, "exec")) return built_mk_rs_ex("[s[s]|i]", ctx, ln, md, sym);
   if (!strcmp(sym, "exit")) return built_mk_rs("[i|]", md, sym);
   if (!strcmp(sym, "getLocale")) return built_mk_rs("[|s]", md, sym);
   if (!strcmp(sym, "home")) return built_mk_rs("[|s]", md, sym);

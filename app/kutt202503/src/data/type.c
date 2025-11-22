@@ -515,7 +515,6 @@ Rs *type_eq (WrCtx *ctx, Type *tp1, Type *tp2) {
           Rs *rs2 = wrCtx_canonical_def(ctx, type_dmd(tp2), type_did(tp2));
           char *can2 = rs_get(rs2);
           if (!can2) return rs_fail(rs_error(rs2));
-
           if (strcmp(can1, can2)) {
             int fany1 (char *id) { return str_eq(can1, id); }
             int in1 = arr_any(pool, (FPRED)fany1);

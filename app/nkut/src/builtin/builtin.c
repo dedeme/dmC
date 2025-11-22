@@ -1,4 +1,4 @@
-// Copyright 15-Feb-2025 ºDeme
+// Copyright 21-Jun-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 #include "builtin/builtin.h"

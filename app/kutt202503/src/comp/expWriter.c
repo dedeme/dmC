@@ -153,7 +153,9 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
 
 
         if (key->tp != exp_string)
-          return wrERs_failE(ctx, key->ln, "string", exp_to_str(key));
+          return wrERs_failE(
+            ctx, key->ln, "literal string or symbol", exp_to_str(key)
+          );
 
         WrERs *ers = expWriter_run(ctx, val);
         if (ers->is_error) return ers;
@@ -408,7 +410,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
       switch (t1->id[0]) {
         case 's': {
           if (t2->id[0] != 'i')
-            return wrERs_failE(ctx, e2->ln, "integer", exp_to_str(e2));
+            return wrERs_failT(ctx, e1->ln, type_int(), e2, t2);
           return wrERs_mk(type_string(), fun_code, str_f(
             "__str_get(%s,%s,%s)",
             fns_mk_pos(ctx->md_id, ln), rs1->code, rs2->code
@@ -416,7 +418,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
         }
         case 'a': {
           if (t2->id[0] != 'i')
-            return wrERs_failE(ctx, e2->ln, "integer", exp_to_str(e2));
+            return wrERs_failT(ctx, e1->ln, type_int(), e2, t2);
           return wrERs_mk(*arr_begin(t1->subtypes), fun_code, str_f(
             "__arr_get2(%s,%s,%s)",
             fns_mk_pos(ctx->md_id, ln), rs1->code, rs2->code
@@ -424,7 +426,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
         }
         case 't': {
           if (t2->id[0] != 'i')
-            return wrERs_failE(ctx, e2->ln, "integer", exp_to_str(e2));
+            return wrERs_failT(ctx, e1->ln, type_int(), e2, t2);
           char *ix = "";
           switch (e2->tp) {
             case exp_integer: {
@@ -463,7 +465,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
         }
         case 'd': {
           if (t2->id[0] != 's')
-            return wrERs_failE(ctx, e2->ln, "string", exp_to_str(e2));
+            return wrERs_failT(ctx, e1->ln, type_string(), e2, t2);
           return wrERs_mk(*arr_begin(t1->subtypes), fun_code, str_f(
             "__dic_get2(%s, %s,%s)",
             fns_mk_pos(ctx->md_id, ln), rs1->code, rs2->code
@@ -489,7 +491,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
         if (rs->is_error) return rs;
         Type *t = rs->tp;
         if (t->id[0] != 'i')
-          return wrERs_failE(ctx, e->ln, "integer", exp_to_str(e));
+          return wrERs_failT(ctx, e->ln, type_int(), e, t);
         arr_push(fns, rs->fun_code);
         code_l = rs->code;
       }
@@ -501,7 +503,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
         if (rs->is_error) return rs;
         Type *t = rs->tp;
         if (t->id[0] != 'i')
-          return wrERs_failE(ctx, e->ln, "integer", exp_to_str(e));
+          return wrERs_failT(ctx, e->ln, type_int(), e, t);
         arr_push(fns, rs->fun_code);
         code_r = rs->code;
       }
@@ -524,7 +526,10 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
           );
         }
         default:
-          return wrERs_failE(ctx, ct->ln, "string or array", exp_to_str(ct));
+          return wrERs_failE(ctx, ct->ln,
+            "Expression of type string or array",
+            str_f("%s (of type %s)", exp_to_str(ct), type_to_str(t_ct)
+          ));
       }
     }
     case exp_parenthesis: {
@@ -549,16 +554,22 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
           case 'b': return wrERs_mk(type_bool(), ers->fun_code,
               str_f("((Val)!(%s).b)", ers->code));
           default:
-            return wrERs_failE(ctx, e->ln, "boolean or array", exp_to_str(e));
+          return wrERs_failE(ctx, e->ln,
+            "Expression of type boolean or array",
+            str_f("%s (of type %s)", exp_to_str(e), type_to_str(tp)
+          ));
         }
       }
       // opertor -
       switch (tp->id[0]) {
         case 'i':
-        case 'f': return wrERs_mk(ers->tp, ers->fun_code,
+        case 'f': return wrERs_mk(tp, ers->fun_code,
             str_f("((Val)-(%s).%s)", ers->code, tp->id));
         default:
-          return wrERs_failE(ctx, e->ln, "integer or float", exp_to_str(e));
+          return wrERs_failE(ctx, e->ln,
+            "Expression of type integer or float",
+            str_f("%s (of type %s)", exp_to_str(e), type_to_str(tp)
+          ));
       }
     }
     case exp_binary: {
@@ -709,7 +720,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
       if (ers1->is_error) return ers1;
       Type *tp1 = ers1->tp;
       if (tp1->id[0] != 'b')
-        wrERs_failT(ctx, e1->ln, type_bool(), e1, tp1);
+        return wrERs_failT(ctx, e1->ln, type_bool(), e1, tp1);
 
       Exp *e2 = tuple->e2;
       WrERs *ers2 = expWriter_run(ctx, e2);
@@ -719,9 +730,10 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
       WrERs *ers3 = expWriter_run(ctx, e3);
       if (ers3->is_error) return ers3;
       Type *tp3 = ers3->tp;
+
       Rs *okrs = type_eq(ctx, tp2, tp3);
       int *ok = rs_get(okrs);
-      if (!ok) wrERs_fail(ctx, e3->ln, rs_error(okrs));
+      if (!ok) return wrERs_fail(ctx, e3->ln, rs_error(okrs));
       if (!*ok)
         return wrERs_failT(ctx, e3->ln, tp2, e3, tp3);
 
@@ -738,7 +750,7 @@ WrERs *expWriter_run(WrCtx *ctx, Exp *ex) {
       Tp *tp = v;
       Exp *var = tp->e1;
       // Arr<Tp<Arr<Exp>, Exp>>
-      Arr *entries = tp->e2;
+      Arr *entries = arr_copy(tp->e2);
 
       WrERs *rs = expWriter_run(ctx, var);
       if (rs->is_error) return rs;
@@ -1063,7 +1075,7 @@ WrERs *expWriter_parenthesis (WrCtx *ctx, Exp *ex, int is_stat) {
       WrERs *rs = expWriter_run(ctx, e);
       if (rs->is_error) return rs;
       if (rs->tp != type_string())
-        wrERs_failT(ctx, e->ln, type_string(), e, rs->tp);
+        return wrERs_failT(ctx, e->ln, type_string(), e, rs->tp);
       char *tmp = fns_next_id(ctx->md_id);
       // Arr<char>
       Arr *fns = arr_new();
@@ -1166,9 +1178,9 @@ WrERs *expWriter_parenthesis (WrCtx *ctx, Exp *ex, int is_stat) {
       if (!aok) return wrERs_fail(ctx, p->ln, rs_error(ors));
       if (!aok)
         return wrERs_failE(ctx, p->ln,
-        str_f("Expression of type %s", type_to_str(texpected)),
-        exp_to_str(p)
-      );
+          str_f("Expression of type %s", type_to_str(texpected)),
+          str_f("%s (of type %s)", exp_to_str(p), exp_type_to_str(p))
+        );
 
       arr_push(fns, rs->fun_code);
       arr_set(cpars, _i, rs->code);

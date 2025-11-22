@@ -37,6 +37,8 @@ Write a file "helloText.kut":
 ///
 tx = "Hello World!";``
 
+_(NOTE: The comment '///' is mandatory)._
+
 And another "helloMain.kut":
 
 ``kut
@@ -48,7 +50,7 @@ After writing in console
 
 *kut helloText*
 
-we can see too:
+we can see:
 
 *Hello World*
 
@@ -56,7 +58,7 @@ we can see too:
 
 Each file with extension '.kut' and Kut code is a module.
 
-It is writen in plain text and contains:
+It is writen in plain UTF-8 text and contains:
 
   - Comments.
 
@@ -78,7 +80,7 @@ Example:
 // Normal comment.
 /// Documentation command.``
 
-Also multiline comments (between '\*' and '*/' are allowed). They can be seen
+Also multiline comments (between '/**' and '**/' are allowed). They can be seen
 as blanks.
 
 ``kut
@@ -87,7 +89,7 @@ Multiline
 comment
 */
 
-sys.println(/* age */ 32); // Print '32' and /* age  */ is ignored.
+sys.println(/* age */ 32); // Equals to 'sys.println( 32)'.
 // but
 // sys.println(3/* age */2);
 // is an error ``
@@ -105,13 +107,13 @@ Example ("hello2.kut"):
 tx = "Hello World!";
 sys.println(tx);``
 
-Which shows:
+shows:
 
-*Hello World*
+*Hello World!*
 
 ## Block
 
-It is a group of statement enclosed by '{' and '}'.
+It is a group of statement enclosed between '{' and '}'.
 
 Each block has its own referencial frame.
 
@@ -125,9 +127,9 @@ tx = "World!";
 }
 sys.println(tx);``
 
-Which shows:
+shows:
 
-*Hello World*
+*Hello World!*
 
 ## Control sequence
 
@@ -142,7 +144,7 @@ else sys.println("Hello People!");``
 
 shows:
 
-*Hello World*
+*Hello World!*
 
 Example: ("helloIf2.kut")
 
@@ -153,7 +155,7 @@ else sys.println("Hello People!");``
 
 shows:
 
-*Hello People*
+*Hello People!*
 
 
 ## Expression

@@ -179,7 +179,7 @@ Rs *moduleRd_read (int is_main, char *fpath, char *id, char *tx) {
 
       char ch = rt->id[0];
 
-      if (ch == 'b') { // enumeration
+      if (ch == 'i') { // enumeration - int
         EACH(pars, char, p) {
           if (!*p) continue;
 
@@ -203,6 +203,33 @@ Rs *moduleRd_read (int is_main, char *fpath, char *id, char *tx) {
           if (public) arr_push(exports, ts);
           arr_push(code, stat_new_assign(
             ln, exp_new_symbol(ln, p), exp_new_integer(ln, itos)
+          ));
+        }_EACH
+      } else if (ch == 's') { // enumeration - string
+        EACH(pars, char, p) {
+          if (!*p) return fail(ln, "String enumerations do not allow blanks");
+
+          int ffind (TypedSym *s) { return str_eq(s->id, p); }
+          TypedSym *old_sym = opt_get(arr_find(top_syms, (FPRED)ffind));
+          if (old_sym)
+            return fail(ln, str_f(
+              "Symbol '%s' is duplicated (first assigned in line %d)",
+              p, old_sym->ln
+            ));
+          Imp *imp = opt_get(map_get(imports, p));
+          if (imp)
+            return fail(ln, str_f(
+              "Symbol '%s' is duplicated (first assigned in line %d)",
+              p, imp->ln
+            ));
+
+          TypedSym *ts = typedSym_new(
+            ln, p, type_string(), opt_some(js_ws(p)), TRUE
+          );
+          arr_push(top_syms, ts);
+          if (public) arr_push(exports, ts);
+          arr_push(code, stat_new_assign(
+            ln, exp_new_symbol(ln, p), exp_new_string(ln, p)
           ));
         }_EACH
       } else { // Indexed

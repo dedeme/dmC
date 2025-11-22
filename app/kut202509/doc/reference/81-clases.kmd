@@ -1,0 +1,673 @@
+=
+title = Clases
+=
+
+## Token
+
+(Archivos *reader/token.h* y *reader/token.c*)
+
+Es la unidad mínima sintáctica.
+
+Tabla de tokens:
+
+``
+<table border=1>
+<tr><td>Índice</td><td>Descripción</td><td>Ejemplos</td></tr>
+<tr><td>BOOL</td><td>Literales <code>true</code> y <code>false</code></td>
+  <td></td></tr>
+<tr><td>INT</td><td>Secuencia de dígitos (0-9) o caracteres '_'.<br>
+    Los caracteres '_' son eliminados en la lectura.</td>
+  <td><code>2<br>2_150<br>003</code></td></tr>
+<tr><td>FLOAT</td><td>Secuencia de INT más punto<br>
+    más, opcionalmente, una sucuencia de dígitos, <br>
+    mas, opcionalmente, un exponente ([e|E][+|-]digitos).</td>
+  <td><code>2.<br>2_150.32<br>00.3<br>1.2e2<br>1.00E-1</code></td></tr>
+<tr><td>STRING</td><td>Secuencia de símbolos entre comillas dobles,<br>
+    comillas simples o triples comillas dobles.<br>
+    Cadenas entre comillas simples o dobles permiten las secuencias de escape<br>
+    <code>\\</code>, <code>\n</code>, <code>\t</code>, <code>\b</code>,
+    <code>\f</code>, <code>\r</code>,     <code>\uXXXX</code>(donde XXXX es
+    un número hexadecimal).<br>
+    Las cadenas entre comillas simples permiten la secuencia <code>\'</code> y<br>
+    las cadenas entre comillas dobles permiten la secuencia <code>\"</code>.<br>
+    Sólo las cadenas entre triples comillas dobles permiten secuencias <br>
+    que se alarguen más de una línea.<br>
+    En este último caso los saltos de línea se intepretan de la siguiente
+    forma:<br><pre>
+    - Los finales de línea son regitrados como <code>\n</code>, salvo
+      si el final de línea se produce en la primera, cuando
+      ésta solo  contiene <code>"""</code>.
+    - El márgen se ajusta a la línea situada más a la izquierda.</pre></td>
+  <td><code>"Año"</code><br><code>''</code><br><code>"ab\nc"</code><br>
+    <code>'un \'1\''</code><br>
+    <code>"""<br>&nbsp;&nbsp;Una cadena<br>multilínea."""</code></td></tr>
+<tr><td>LINE_COMMENT</td><td>Secuencia de símbolos desde la primera
+    aparición de <code>//</code> fuera<br>
+    de una cadena, hasta el final de la línea.</td>
+  <td><code>a = b; // Esto es un comentario</code></td></tr>
+<tr><td>COMMENT</td><td>Secuencia de símbolos desde la primera
+    aparición de <code>/*</code> fuera<br>
+    de una cadena, hasta la primera aparición de <code>*/</code>.
+  <td><code>a = /*Esto<br>es un comentario*/ b;</code></td></tr>
+<tr><td>SYMBOL</td><td>Es una secuencia de letras (a-z, A-Z) y dígitos que
+    comienza con una letra.</td>
+  <td><code>x</code><br><code>maxValor221</code></td></tr>
+<tr><td>OPERATOR</td><td>Es una secuencia válida de uno o más de los
+  siguientes caracteres:<br>
+    <code>;=,.()+-*/!<>[]{}%&|?:\#</code></td>
+  <td></td></tr>
+</table>``
+
+Existen funciones para construir los tokens (*token__bool*, *token__int*,
+*token__float*, *token__string*, *token__line__comment*, *token__comment*,
+*token__symbol* y *token__operator*), para convertir en cadena
+(*token__to__str* y *token__type__to__str*) y para obtener información de
+los mismos (*token__is__xxxx*).
+
+## Lector de caracteres
+
+(Archivos\
+*reader/cdr/cdr.h*, *reader/cdr/cdr.c*\
+*reader/cdr/number__reader.h*, *reader/cdr/number__reader.c*\
+*reader/cdr/comment__reader.h*, *reader/cdr/comment__reader.c*\
+*reader/cdr/string__reader.h*, *reader/cdr/string__reader.c*\
+)
+
+Lee caracteres (_char_) y _tokens_ a partir de un archivo *.kut*.
+
+El lector de caracteres utiliza un puntero que señala al siguiente carácter
+a leer y permite:
+
+- <code>cdr_read_char</code>. Leer un caracter (_char_) y avanzar el puntero de caracteres.
+> Devuelve el siguiente caracter o '0' si no hay más caracteres para leer.
+
+- <code>cdr_unread_char</code>. Retroceder el puntero de caracteres.
+> Si el puntero está en el primer caracater lanza una excepción.
+
+- <code>cdr_read_token</code>. Leer el siguiente _token_ y avanzar el puntero de caracteres.
+> Produce una excepcion si no hay más _tokens_ para leer.
+
+- <code>cdr_read_token_op</code>. Leer el siguiente _token_ y avanzar el puntero de caracteres.
+> Devuelve *opt__none* si no hay mñas _tokens_ para leer.
+
+Asi mismo permite obtener información sobre el índice del archivo que se está
+leyendo y el número de línea, con las funciones *cdr__get__xxx*.
+
+Se dispone de funciones *cdr__next__token__is__xxxx* que dan información sobre
+el siguiente _token_ a leer.:
+
+NOTAS:
+
+* Las funciones *cdr__fail* se utilizan para simplificar el proceso de lanzamiento
+  de excepciones.
+
+* Los archivos *number__reader*, *comment__reader* y *string__reader* son
+  utilizados como archivos auxiliares para leer el correpondiente tipo de
+  _token_.
+
+## Expresion
+
+(Archivos *exp.h* y *exp.c*)\
+(Archivos *obj.h* y *obj.c*)
+
+Es la mínima unidad semántica. Representa un valor u objeto.
+
+Sintácticamente es un conjunto de [#Token](tokens).
+
+Tabla de expresiones:
+
+``
+<table border=1>
+<tr><td>Índice</td><td>Objeto</td><td>Componentes</td></tr>
+<tr><td>--</td><td>&lt;empty expression></td><td>--</td></tr>
+<tr><td>--</td><td>&lt;empty return></td><td>--</td></tr>
+<tr><td>--</td><td>&lt;cyclic expression></td><td>--</td></tr>
+<tr><td>BREAK</td><td>Detener bucles</td><td><a href="#Stack">Stack</a></td></tr>
+<tr><td>CONTINUE</td><td>Reiniciar bucles</td><td><a href="#Stack">Stack</a></td></tr>
+<tr><td>BOOL</td><td>Valor</td><td><code>int</code></td></tr>
+<tr><td>INT</td><td>Valor</td><td><code>int64_t</code></td></tr>
+<tr><td>FLOAT</td><td>Valor</td><td><code>double</code></td></tr>
+<tr><td>STRING</td><td>Valor</td><td><code>char *</code></td></tr>
+<tr><td>OBJECT</td><td>Valor</td>
+  <td><code>Tp&lt;char, void><br>[identificador, puntero]</code></td></tr>
+<tr><td>ARR</td><td>Valor</td><td><code>Arr&lt;void></code></td></tr>
+<tr><td>DIC</td><td>Valor</td><td><code>Map&lt;void></code></td></tr>
+<tr><td>FUNC</td><td>Valor</td><td><a href="#Función">Función</a></td></tr>
+<tr><td>SYM</td><td>Índice de símbolo</td><td><code>int</code></td></tr>
+<tr><td>RANGE</td><td>Iterador de enteros</td>
+  <td><code>Tp3&ltExp, Exp, Exp> :: [int, int, int]</td></tr>
+<tr><td>PT</td><td>Expresión 'punto'</td>
+  <td><code>Tp&ltExp, Exp> :: símbolo.símbolo</code></td></tr>
+<tr><td>SQ</td><td>Expresión 'corchete'</td>
+  <td><code>Tp&ltExp, Exp> :: Exp[int] o Exp[char *]</code></td></tr>
+<tr><td>SLICE</td><td>Expresión 'rango de array'</td>
+  <td><code>Tp3&ltExp, Exp, Exp> :: Exp[int:int]</code></td></tr>
+<tr><td>PR</td><td>Expresión 'paréntesis'</td>
+  <td><code>Tp&ltExp, Arr&lt;Exp>> :: Exp() o Exp(Exp, ...)</code></td></tr>
+<tr><td>SWITCH</td><td>Expresión 'switch'</td>
+  <td><code>Tp&ltExp, Arr&lt;Tp&lt;Arr&lt;Exp>, Exp>>> ::<br>
+    (Exp :: int) { opciones default}<br>
+    </code><i>donde cada opción es:</i><code> valor, ...: Exp;<br>
+    </code><i>y default es:</i><code> default; Exp;
+  </code></td></tr>
+<tr><td>NOT</td><td>Función</td><td><code>Exp :: !int o !Arr</code></td></tr>
+<tr><td>MINUS</td><td>Función</td><td><code>Exp :: -número</code></td></tr>
+<tr><td>ADD</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: número + número</code></td></tr>
+<tr><td>SUB</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: número - número</code></td></tr>
+<tr><td>MUL</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: número * número</code></td></tr>
+<tr><td>DIV</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: número / número</code></td></tr>
+<tr><td>MOD</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: int64_t % int64_t</code></td></tr>
+<tr><td>AND</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: int & int</code></td></tr>
+<tr><td>OR</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: int | int</code></td></tr>
+<tr><td>GREATER</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: comparable > comparable<br>
+    </code><i>donde comparabe es:</i><code><br>
+    int, int64_t, double o char*;
+  </code></td></tr>
+<tr><td>GREATER_EQ</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: comparable >= comparable<br>
+    </code><i>donde comparabe es:</i><code><br>
+    int, int64_t, double o char*;
+  </code></td></tr>
+<tr><td>LESS</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: comparable < comparable<br>
+    </code><i>donde comparabe es:</i><code><br>
+    int, int64_t, double o char*;
+  </code></td></tr>
+<tr><td>LESS_EQ</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: comparable < comparable<br>
+    </code><i>donde comparabe es:</i><code><br>
+    int, int64_t, double o char*;
+  </code></td></tr>
+<tr><td>EQ</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: Exp == Exp</code></td></tr>
+<tr><td>NEQ</td><td>Función</td>
+  <td><code>Tp&ltExp, Exp> :: Exp != Exp</code></td></tr>
+<tr><td>TERNARY</td><td>Función</td>
+  <td><code>Tp3&ltExp, Exp, Exp> :: int ? Exp : Exp</code></td></tr>
+</table>``
+
+Salvo para las expresiones 'empty', 'cyclic' están disponibles las siguientes
+functiones:
+
+* Constructor:  P.ej. *Exp \[*]exp__sub (Exp \[*]v1, Exp \[*]v2)*
+
+* Checker: P.ej. *int exp__is__sub (Exp \[*]this)*
+
+* Geter: P.ej. *Tp \[*]exp__get__sub (Exp \[*]this)*
+
+Existen las siguientes funciones especiales:
+
+``c_cpp
+// EMPTY EXPRESSIONS
+
+/// Returns an empty expression for using with functions which not have return.
+Exp *exp_empty (void);
+
+/// Returns TRUE if 'this' is an empty expression.
+int exp_is_empty (Exp *this);
+
+/// Returns an empty-return expression for using with such type of return.
+Exp *exp_empty_return (void);
+
+/// Returns TRUE if 'this' is an empty-return expression.
+int exp_is_empty_return (Exp *this);
+
+/// Returns a 'cyclic symbol' expression used to prevent cyclic references.
+Exp *exp_cyclic (void);
+
+/// Returns TRUE if 'this' is a cyclic expression.
+int exp_is_cyclic (Exp *this);
+
+// OBJECT EXPRESSIONS
+
+/// Creates an expression of the indicated type.
+/// Types mut be of the form "<symbol>" (e.g. <file>).
+Exp *exp_object (char *type, void *value);
+
+/// Read an Exp of the indicate type.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+void *exp_get_object (char *type, Exp *this);
+
+/// Returns TRUE if 'this' match the type.
+int exp_is_object (char *type, Exp *this);
+
+/// Returns TRUE if 'this' is an object of undefined type.
+int exp_is_some_object (Exp *this);
+
+/// Read an Exp of the indicate type. Returns a Tp<char, void>
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Tp *exp_get_object_tuple (Exp *this);
+
+// UTILITIES
+
+/// Returns TRUE if 'this' is a binary operator.
+int exp_is_binary (Exp *this);
+
+/// Returns a string representation of 'this' type.
+char *exp_type_to_str (Exp *this);
+
+/// Returns a string representation of this.
+/// Differences with exp_to_js are:
+///   - string are witout quotes ("abc" -> abc)
+///   - float can be without decimal point (3 -> 3)
+char *exp_to_str (Exp *this);
+
+/// Returns a JSON string representation of this.
+/// Differences with exp_to_str are:
+///   - string are between quotes ("abc" -> "abc")
+///   - float take ever decimal point (3 -> 3.0)
+char *exp_to_js (Exp *this);``
+
+Para facilitar el uso de expresiones de tipo objeto se dispone en los
+archivos *obj.h* y *obj.c* de diversas funciones de tipo *obj\[_]_objeto_*
+(constructor), *obj\[_]get\[_]_objeto_* (lector de valor) y
+*obj\[_]is\[_]_objeto_* (comprobador de tipo).
+
+
+## Stat
+
+(Archivos *stat.h* y *stat.c*)
+
+Representa una instrucción del programa.
+
+En bloque (conjunto de instrucciones) es considerado tambien como una
+instrucción.
+
+Una instrucción finaliza siempre con ';', salvo en el caso de que sea un
+bloque.
+
+Tabla de expresiones:
+
+``
+<table border=1>
+<tr><td>Índice</td><td>Significado</td><td>Construcción</td></tr>
+<tr><td>END</td><td>Fin de módulo</td><td>Automáticamente añadido</td></tr>
+<tr><td>INDEXED</td>
+  <td>Asignación de función más<br>enumeración de paramétros</td>
+  <td><code>stat_indexed (Arr *syms)</code><br>
+    donde <i>syms</i> es <code>Arr&lt;Exp de tipo SYM></code><br>::<br>
+    <code>fn : p1, p2, ...;</code> es convertido a<br>
+    <code>p1 = 0; p2 = 1; ...; fn = \p1, p2 ... -> [p1, p2, ...];</code>
+  </td></tr>
+<tr><td>ASSIGN</td><td>Asocia un símbolo a una expresión</td>
+  <td><code>stat_assign (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n = 3;</code>
+  </td></tr>
+<tr><td>ARR_MULTI</td>
+  <td>Asigna varios valores de un array<br>a varias variables</td>
+    <td><code>stat_arr_multi (Exp *new_sym, Arr *syms, Exp *exp)</code><br>
+    donde new_sym es una expression de tipo SYM de uso interno<br>
+    <i>syms</i> es <code>Arr&lt;Exp de tipo SYM></code><br>
+    y <i>exp</i> es Exp de tipo ARR.<br>::<br>
+    <code>,a,,b = [1, 2, 3, 4, 5];</code> que es igual a:<br>
+    <code>a = [1, 2, 3, 4, 5][1]; b = [1, 2, 3, 4, 5][3];</code>
+  </td></tr>
+<tr><td>DIC_MULTI</td>
+  <td>Asigna varios valores de un diccionario<br>a varias variables</td>
+    <td><code>stat_dic_multi (Exp *new_sym, Arr *syms, Exp *exp)</code><br>
+    donde new_sym es una expression de tipo SYM de uso interno<br>
+    <i>syms</i> es <code>Arr&lt;Exp de tipo SYM></code><br>
+    y <i>exp</i> es Exp de tipo DIC.<br>::<br>
+    <code>a,b = {x:1, b:2, y:3, a:4, c:5};</code> que es igual a:<br>
+    <code>a = {x:1, b:2, y:3, a:4, c:5}["a"];<br>
+    b = {x:1, b:2, y:3, a:4, c:5}["b"];</code>
+  </td></tr>
+<tr><td>ADDAS</td><td>Suma más asignación</td>
+  <td><code>stat_add_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n += 3;</code>
+  </td></tr>
+<tr><td>SUBAS</td><td>Resta más asignación</td>
+  <td><code>stat_sub_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n -= 3;</code>
+  </td></tr>
+<tr><td>MULAS</td><td>Multiplicación más asignación</td>
+  <td><code>stat_mul_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n *= 3;</code>
+  </td></tr>
+<tr><td>DIVAS</td><td>División más asignación</td>
+  <td><code>stat_div_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n /= 3;</code>
+  </td></tr>
+<tr><td>MODAS</td><td>Modulo más asignación</td>
+  <td><code>stat_mod_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n %= 3;</code>
+  </td></tr>
+<tr><td>ANDAS</td><td>Conjunción más asignación</td>
+  <td><code>stat_and_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n &= 3;</code>
+  </td></tr>
+<tr><td>ORAS</td><td>Disyunción más asignación</td>
+  <td><code>stat_or_as (Exp *left, Exp *right)</code><br>
+    donde <i>left</i> es una expression de tipo SYM.<br>::<br>
+    <code>n |= 3;</code>
+  </td></tr>
+<tr><td>FUNCTION</td><td>Invocación de función</td>
+  <td><code>stat_func (Exp *value)</code><br>
+    donde <i>value</i> es una expression de tipo PR.<br>::<br>
+    <code>fn(a, b);</code>
+  </td></tr>
+<tr><td>BLOCK</td><td>Secuencia de instrucciones</td>
+  <td><code>stat_block (Arr *stats)</code><br>::<br>
+    <code>{ a = "abc"; sys.println(a); }</code>
+  </td></tr>
+<tr><td>BLOCK_CLOSE</td><td>Cierre de bloque</td>
+  <td><code>stat_block_close (void)</code><br>::<br><code>}</code></td></tr>
+<tr><td>BREAK</td><td>Detener bucles</td>
+  <td><code>stat_break (void)</code><br>::<br><code>break;</code></td></tr>
+<tr><td>CONTINUE</td><td>Reiniciar bucles</td>
+  <td><code>stat_continue (void)</code><br>::<br><code>continue;</code></td></tr>
+<tr><td>TRACE</td><td>Mostrar una expresión</td>
+  <td><code>stat_trace (int is_complete, Exp *value)</code><br>::<br>
+    <code>trace : value;</code> or<br><code>trace value;</code></td></tr>
+<tr><td>RETURN</td><td>Terminar función y devolver su resultado</td>
+  <td><code>stat_return (Exp *value)</code><br>
+    donde <i>value</i> puede ser una Exp de tipo <i>&lt;empty return><br>::<br>
+    <code>return value;</code> or<br><code>return;</code></td></tr>
+<tr><td>TRY</td><td>Probar una instrucción</td>
+  <td><code>stat_try (StatCode *try,<br>int catch_var, StatCode *catch, Opt *finally)</code><br>
+    donde<br>
+    <i>try</i> es la instrucción a probar.<br>
+    <i>catch_var</i> es el índice de un símbolo.<br>
+    <i>catch</i> es una instrucción para ejecutar si la prueba falla.<br>
+    <i>finally</i> es una <code>Opt&lt;StatCode></code> que se ejecutará después<br>
+    de las instrucciones <i>try</i> or <i>catch</i> y antes de<br>
+      <code>return</code>, <code>break</code> or <code>continue</code>,
+      si existen en ellas.<br>::<br>
+    <code>try { fn(); } catch (e) { trace e; }</code> or<br>
+    <code>try { fn(); } catch (e) { trace e; } finally { trace "end"; }</code>
+  </td></tr>
+<tr><td>WHILE</td>
+  <td>Ejecutar una instrucción mientras que<br>
+   una condición sea cierta</td>
+  <td><code>stat_while (Exp *cond, StatCode *stat)</code><br>
+    donde <i>cond</i> es una Exp de tipo BOOL o <i>&lt;empty expression></i>.<br>::<br>
+    <code>while () { A[0] += 1; if (A[0] > 3) break; }</code> or<br>
+    <code>while (A[0] < 3) { A[0] += 1; }</code>
+  </td></tr>
+<tr><td>IF</td>
+  <td>Ejecutar una instrucción si<br>
+   una condición es cierta</td>
+  <td><code>stat_if(Exp *cond, StatCode *if_stat, Opt *else_stat)</code><br>
+    donde<br>
+    <i>cond</i> es una Exp de tipo BOOL.<br>
+    <i>if_stat</i> es la instrucción que se ejecutará si <i>cond</i> es cierta.<br>
+    <i>else_stat</i> es una <code>Opt&lt;StatCode></code> que se ejecutará<br>
+    so <i>cond</i> es falsa<br>::<br>
+    <code>if (a == 3) fn();</code> or<br>
+    <code>if (a == 3) fn(); else fn2();</code>
+  </td></tr>
+<tr><td>FOR</td>
+  <td>Itera sobre una colección</td>
+  <td><code>stat_for (int var, Exp *collection, StatCode *stat)</code><br>
+    donde<br>
+    <i>var</i> es el índice de un símbolo.<br>
+    <i>Exp</i> es una Exp de tipo ARR, DIC o <i>&lt;iter></i>.<br>
+    <i>stat</i> es la instrucción a ejecutar.<br>::<br>
+    <code>for (e = ["a", "b"]) trace e;</code>
+  </td></tr>
+<tr><td>FOR_IX</td>
+  <td>Itera sobre una colección</td>
+  <td><code>stat_for_ix (int var_e, int var_ix,  Exp *collection,<br>
+      StatCode *stat)</code><br>
+    donde<br>
+    <i>var_e</i> es el índice de un símbolo.<br>
+    <i>var_ix</i> es el índice del elemento (base 0) en la colección.<br>
+    <i>Exp</i> es una Exp de tipo ARR, DIC o <i>&lt;iter></i>.<br>
+    <i>stat</i> es la instrucción a ejecutar.<br>::<br>
+    <code>for (ix, e = ["a", "b"]) trace [ix, e];</code>
+  </td></tr>
+<tr><td>FOR_R</td>
+  <td>Itera sobre una rango de enteros</td>
+  <td><code>stat_for_r (int var, Exp *start, Exp *end, StatCode *stat)</code><br>
+    donde<br>
+    <i>var</i> es el índice de un símbolo.<br>
+    <i>start</i> es una Exp de tipo INT (inclusive)</i>.<br>
+    <i>end</i> es una Exp de tipo INT (exclusive)</i>.<br>
+    <i>stat</i> es la instrucción a ejecutar.<br>::<br>
+    <code>for (e = 0:12) trace e;</code>
+  </td></tr>
+<tr><td>FOR_RS</td>
+  <td>Itera sobre una rango de enteros</td>
+  <td><code>stat_for_rs (int var, Exp *start, Exp *end, Exp *step,<br>
+      StatCode *stat)</code><br>
+    donde<br>
+    <i>var</i> es el índice de un símbolo.<br>
+    <i>start</i> es una Exp de tipo INT (inclusive)</i>.<br>
+    <i>end</i> es una Exp de tipo INT (inclusive)</i>.<br>
+    <i>step</i> es una Exp de tipo INT != 0</i>.<br>
+    <i>stat</i> es la instrucción a ejecutar.<br>::<br>
+    <code>for (e = 12:-12:-1) trace e;</code>
+  </td></tr>
+<tr><td>SWITCH</td><td>Instrucción 'switch'</td>
+  <td><code>stat_switch (Exp *cond, Arr *entries)</code> ::<br>
+    <code>(Exp :: int) { opciones default}</code><br>
+    donde cada opción es: <code> valor, ...: instrucción;</code><br>
+    y <i>default</i> es:<code> default; Instrucción;</code><br>
+    <i>default</i> es opcional.
+<tr><td>IMPORT</td><td>Importación de módulos</td>
+  <td><code>stat_import (char *module_path, int id)</code><br>
+    donde<br>
+    <i>module_path</i> es el path del módulo a importar.<br>
+    <i>id</i> es el índice del símbolo usado para designar el módulo.
+    <br>::<br>
+    <code>import "ab/mod" : md;</code> o  <code>import "ab/mod";</code>
+  </td></tr>
+<tr><td>EXPORT</td>
+  <td>Marca que debe estar en la línea<br>
+    inmediatamente anterior a una<br>
+    asignación para su exportación.</td>
+  <td><i>stat</i> generada en cada comentario de tipo '<code>///</code>' <br>
+    que será eliminada antes del proceso de ejecución.
+  </td></tr>
+</table>``
+
+Para todas las instrucciones está disponible la función
+*stat__is__xxxx*.
+
+Por ejemplo:
+
+``c_cpp
+/// Returns TRUE if 'this' match the type.
+int stat_is_assign (Stat *this);``
+
+También, salvo para END, BREAK, CONTINUE, BLOCK__CLOSE y EXPORT, está
+disponible la función *stat__get__xxxx*.
+
+Por ejemplo:
+
+``c_cpp
+/// Read a Stat of the indicate type. Returns an Arr[Exp, <StatCode>]. Exp can
+/// be an empty expression.
+/// Throws EXC_ILLEGAL_AGUMENT if 'this' is not of such type.
+Arr *stat_get_while (Stat *this);``
+
+Existen las siguientes funciones especiales:
+
+``c_cpp
+///
+char *stat_type_to_str (Stat *this);
+
+///
+char *stat_to_str (Stat *this);``
+
+## StatCode
+
+(Archivos *stat.h* y *stat.c*)
+
+Registro que contiene una instrucción y su posicion en el programa.
+
+Su interfaz es la siguiente:
+
+``c_cpp
+/// Constructor.
+StatCode *stat_code_new(int file_ix, int nline, Stat *stat);
+
+/// Returns the file index value.
+int stat_code_file_ix(StatCode *this);
+
+/// Returns the file line value.
+int stat_code_line(StatCode *this);
+
+/// Returns the enveloped statement.
+Stat *stat_code_stat(StatCode *this);``
+
+## Stack
+
+(Archivos *runner/stack.h* y *runner/stack.c*)
+
+Array con las instrucciones procesadas hasta el momento y sus posiciones en
+el programa ([#StatCode](StatCode)).
+
+## Función
+
+(Archivos *function.h* y *function.c*)
+
+Guarda y ejecuta funciones definidas por el usuario.
+
+Un objeto función es un registro con los siguientes campos:
+
+* _imports_ de tipo [#Importaciones](Importaciones).
+
+* _heap0_ de tipo [#Heap0](Heap0).
+
+* _heaps_ de tipo [#Heaps](Heaps).
+
+* _params_ de tipo *Iarr*.
+
+* _stat_ de tipo [#StatCode](StatCode).
+
+Los campos _imports_, _heap0_ y _heap_ constituyen el contexto de la función.
+Son creados en *function__new* con contenedores vacíos, pero pueden ser
+modificado creando una copia superficial (_shallow copy_) con
+*function__set__context*.
+
+La función pude ser ejecutada con
+*function__run (Function \[*]this, Arr \[*]params)*. La ejecución sigue el
+siguiente proceso:
+
+* Se ejecuta '*exp = runner__run__stat*' con los parámetros _params_.
+
+* Se comprueba que _exp_ no es de tipo BREAK, ni CONTINUE.
+
+* Si _exp_ es de tipo *<empty return>*, retorna una expresion de
+  tipo *<empty expression>*. En otro caso retorna la misma _exp_.
+
+Una función puede ser convertida en expresion con
+*function__to__exp (Function \[*]this, Arr \[*]params)*.
+
+## Importaciones
+
+(Archivos *imports.h* y *imports.c*)
+
+Array con las importaciones de un módulo.
+
+Las entradas del array son registros con los campos:
+
+- symbol
+> El índice en [80-objetos.html#symix](symix) del nombre del módulo importado.
+
+- fix
+> El índice del modulo importado. Este índice es también el del archivo
+  que define el módulo.
+
+## Exportaciones
+
+(Archivos *exports.h* y *exports.c*)
+
+Array con los índices en [80-objetos.html#symix](symix) de los símbolos exportados de un módulo.
+
+## Heap0
+
+(Archivos *heap0.h* y *heap0.c*)
+
+Array con los símbolos definidos a nivel de módulo.
+
+El símbolo es almacenado en un objeto Heap0Entry, que tiene los siguientes
+campos:
+
+* *int symbol*. El simbolo identificador.
+
+* *int nline*. El número de línea en el que el símbolo aparece.
+
+* *Exp \[*]exp*. Las expresión asociada al símbolo.
+
+## Heap
+
+(Archivos *heap.h* y *heap.c*)
+
+Array con los símbolos definidos a nivel bloque.
+
+El símbolo es almacenado en un objeto HeapEntry, que tiene los siguientes
+campos:
+
+* *int symbol*. El simbolo identificador.
+
+* *Exp \[*]exp*. Las expresión asociada al símbolo.
+
+## Heaps
+
+(Archivos *heaps.h* y *heaps.c*)
+
+Lista enlazada con los heaps de los bloques anidados, donde el top de la
+lista corresponde al bloque más interno.
+
+En la raíz de la lista se almacena el heap del bloque principal del módulo,
+salvo que éste no exista, que se trate de la resolución de una expresión
+aislada o de la ejeción de una función (*function*). En este último caso en la
+raíz se almacena el bloque principal de la función.
+
+Cuando no hay un modulo almacendado en la raíz, se almacena el valor NULL.
+
+## Módulo
+
+(Archivos *module.h* y *module.c*)
+
+Es el resultado de la compilación de un archivo *.kut*. Consiste en un
+registro con los siguietes campos:
+
+* *Imports \[*]imports;*. [#Importaciones](Importaciones) del módulo.
+
+* *Exports \[*]exports;*. [#Exportaciones](Exportaciones) del módulo.
+
+* *Heap0 \[*]heap0;*. [Heap0](Heap0) del módulo.
+
+* *Heap \[*]heap;*. [Heap](Heap) del módulo.
+
+* *Arr \[*]code;*. Array<[#StatCode](StatCode)> con las instrucciones del módulo.
+
+## Iarr
+
+(Archivos *iarr.h* y *iarr.c*)
+
+Utilidad para manejar arrais de enteros de una maner cómoda y eficiente.
+
+Su interfaz es la siguiente:
+
+``c_cpp
+/// Constructor of a Iarr with n (> 0) elements ('ints').
+Iarr *iarr_new (int n, int *ints);
+
+/// Constructor of a Iarr with n (> 0) elements.
+/// Ejemplo: iarr_new_from(3, 100, 45, -15);
+Iarr *iarr_new_from (int n, ...);
+
+/// Returns the size of 'this'.
+int iarr_size (Iarr *this);
+
+/// Returns the value at index 'ix'
+int iarr_get (Iarr *this, int ix);``

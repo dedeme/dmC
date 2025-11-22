@@ -1,74 +1,74 @@
 
 {
   {
-    v = [false];
-    msg = ["msg"];
+    vV = [false];
+    msgV = ["msg"];
 
-    if (v[0]) msg[0] = "msgIf";
-    sys.test(msg[0], "msg");
+    if (vV[0]) msgV[0] = "msgIf";
+    sys.test(msgV[0], "msg");
 
-    if (v[0]) msg[0] = "msgIf";
-    else msg[0] = "msgElse";
-    sys.test(msg[0], "msgElse");
+    if (vV[0]) msgV[0] = "msgIf";
+    else msgV[0] = "msgElse";
+    sys.test(msgV[0], "msgElse");
 
-    v[0] = true;
+    vV[0] = true;
 
-    if (v[0]) { msg[0] = "msgIf"; }
-    sys.test(msg[0], "msgIf");
+    if (vV[0]) { msgV[0] = "msgIf"; }
+    sys.test(msgV[0], "msgIf");
 
-    if (v[0]) {
-      msg[0] = "msgIf2";
+    if (vV[0]) {
+      msgV[0] = "msgIf2";
     } else {
-      msg[0] = "msgElse";
+      msgV[0] = "msgElse";
     }
-    sys.test(msg[0], "msgIf2");
+    sys.test(msgV[0], "msgIf2");
   }
   {
-    rOp = [""];
+    rV = [""];
 
     switch (3) {
-      3 + 1: rOp[0] = "1";
-      3 + 0: rOp[0] = "2";
-      3 - 1: rOp[0] = "3";
+      3 + 1: rV[0] = "1";
+      3 + 0: rV[0] = "2";
+      3 - 1: rV[0] = "3";
     }
-    sys.test(rOp[0], "2");
+    sys.test(rV[0], "2");
 
     switch (4 * 2) {
-      0: rOp[0] = "01";
-      1: rOp[0] = "02";
-      2: rOp[0] = "03";
+      0: rV[0] = "01";
+      1: rV[0] = "02";
+      2: rV[0] = "03";
     }
-    sys.test(rOp[0], "2");
+    sys.test(rV[0], "2");
 
     switch (4 * 2) {
-      0: rOp[0] = "01";
-      1: rOp[0] = "02";
-      2: rOp[0] = "03";
-      default: rOp[0] = "08";
+      0: rV[0] = "01";
+      1: rV[0] = "02";
+      2: rV[0] = "03";
+      default: rV[0] = "08";
     }
-    sys.test(rOp[0], "08");
+    sys.test(rV[0], "08");
 
     // Use as multiple ifs.
 
     // This
-    rOp[0] = "";
+    rV[0] = "";
     switch (true) {
-      3 > 5 : rOp[0] = "A";
-      3 == 5 : rOp[0] = "B";
-      3 < 5 : rOp[0] = "C";
-      default: rOp[0] = "D";
+      3 > 5 : rV[0] = "A";
+      3 == 5 : rV[0] = "B";
+      3 < 5 : rV[0] = "C";
+      default: rV[0] = "D";
     }
-    sys.test(rOp[0], "C");
+    sys.test(rV[0], "C");
 
     // is equals to
-    rOp[0] = "";
+    rV[0] = "";
 
-    if (3 > 5) rOp[0] = "A";
-    else if (3 == 5) rOp[0] = "B";
-    else if (3 < 5) rOp[0] = "C";
-    else rOp[0] = "D";
+    if (3 > 5) rV[0] = "A";
+    else if (3 == 5) rV[0] = "B";
+    else if (3 < 5) rV[0] = "C";
+    else rV[0] = "D";
 
-    sys.test(rOp[0], "C");
+    sys.test(rV[0], "C");
   }
   {
     xV = [10];
@@ -123,6 +123,7 @@
     sys.test(sumV[0], 3);
     keysV = [""];
     for (k, e = D) {
+      // k = "x"; <-- Not allowed (duplicated symbol)
       keysV[0] += k;
       sumV[0] -= e;
     }
@@ -131,7 +132,7 @@
   }
   {
     sumV = [0];
-    for (i = 4 : 4) sumV[0] += i;
+    for (i = 4 : 4) { sumV[0] += i; }
     sys.test(sumV[0], 0);
     for (i = 0 : 4) sumV[0] += i;
     sys.test(sumV[0], 6);
@@ -184,7 +185,9 @@
         // V[0] += 1; // <- No allowed after throw.
       } catch (e) {
         V[0] += 2;
-        sys.test(e[-4:], "fail");
+        sys.test(e[str.lastIndex(e, ": ")+2:], "fail");
+        // or better (see Module marks in Module chapter)
+        sys.test(e[e.lastIndex(": ")+2:], "fail");
         throw("error");
         // V[0] += 2;  // <- No allowed after throw.
       }
@@ -244,6 +247,20 @@
       }
     }
     sys.test(V[0], 2);
+
+    // Loop with excetion cached and continue.
+    V[0] = 0;
+    while (V[0] < 9) {
+      try {
+        throw("fail");
+        // V[0] += 1; // <- No allowed after throw.
+      } catch (e) {
+        sys.test(e[-4:], "fail");
+        V[0] += 35;
+        continue;
+      }
+    }
+    sys.test(V[0], 35);
 
     // Try without exception and with return.
     V[0] = 0;

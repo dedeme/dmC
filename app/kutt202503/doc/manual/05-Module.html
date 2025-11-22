@@ -67,10 +67,10 @@ window.MathJax = {
 <p>Import statements.</p>
 </li>
 <li>
-<p>Constant assignations.</p>
+<p>Constant assignments.</p>
 </li>
 <li>
-<p>Function assignations.</p>
+<p>Function assignments.</p>
 </li>
 <li>
 <p>Enumerations.</p>
@@ -83,9 +83,10 @@ window.MathJax = {
 </li>
 </ul>
 <p><i>NOTE: After the main block can not have more code, but comments.</i></p>
-<p>Only can have one module with a main block and should be placed, by convention,
-in the main directory. In this case the modules are an executable program. If
-such module does not exists, the modules make up a library.</p>
+<p>Only can have one module with a main block for each program and should be placed, by convention,
+in the main directory.</p>
+<p>In this case the modules make up an executable program. If
+such main module does not exists, the modules make up a library.</p>
 <p>A module can refer another through imports statements.</p>
 <p>Top declarations (constants, enumerations, indexed and functions) can be
 used when a module is imported with the 'point' operator.</p>
@@ -100,7 +101,7 @@ max = cl.maxNumber; // Assign the value 'maxNumber' of module 'client' to 'max'.
 <script>aceConf("aceEditor-0", "kutt");</script>
 <a name="Private symbols"></a>
 <h3>Private symbols</h3>
-<p>By default, module main symbols are public (that is, importable). However
+<p>By default, module symbols are public (that is, importable). However
 is possible to mark these symbols whith the prefix operator '<code>_</code>' to make
 them private (that is, not importable).</p>
 <p>This prefix go before the corresponding symbol in constants and enumerations,
@@ -135,7 +136,7 @@ x2 = \-> return;;
 <script>aceConf("aceEditor-1", "kutt");</script>
 <a name="Module marks."></a>
 <h3>Module marks.</h3>
-<p>In assignations is posible to indicate that the assgionation symbol is going to
+<p>In assignments is posible to indicate that the assignation symbol is going to
 be used with functions of a module. For that, we annotate '<code>:module</code>'
 immediately before the symbol.</p>
 <p>Example:</p>
@@ -157,6 +158,7 @@ import "person";
 {
   :person p = person.new("Peter", 48);
   sys.test(p.isUnderAge(), false);
+  // 'p.isUnderAge()' is equivalent to 'person.isUnderAge(p)'
 }
 </div>
 <script>aceConf("aceEditor-3", "kutt");</script>
@@ -164,16 +166,16 @@ import "person";
 <p><code>module.function(sym, parameters)</code></p>
 <p>for</p>
 <p><code>sym.function(parameters)</code></p>
-<p>where <code>parameters</code> can be skipped if <code>function</code> is a function with only one
-parameter.</p>
+<p>where <code>parameters</code> is skipped if <code>function</code> is a function with the only
+parameter <code>sym</code>.</p>
 <h4>Module marks places</h4>
 <p>The '<code>:module</code>' annotation can be placed:</p>
 <ul>
 <li>
-<p>In assignations.</p>
+<p>In assignments.</p>
 </li>
 <li>
-<p>In multiassignations.</p>
+<p>In multiassignments.</p>
 </li>
 <li>
 <p>In function parameters.</p>
@@ -203,18 +205,18 @@ try {
 </div>
 <script>aceConf("aceEditor-4", "kutt");</script>
 <h4>Default module marks</h4>
-<p>If there is no module mark, the compile puts a default one in the following
-cases of assignation:</p>
+<p>If there is no module mark, the compiler puts a default one in the following
+cases:</p>
 <ol>
-<dt>When literal string is assigned.</dt>
+<dt>When a literal string is assigned.</dt>
 <dd>
 <p>The symbol is marked with '<code>:str</code>'.</p>
 </dd>
-<dt>When literal array is assigned.</dt>
+<dt>When a literal array is assigned.</dt>
 <dd>
 <p>The symbol is marked with '<code>:arr</code>'.</p>
 </dd>
-<dt>When literal dictionary is assigned.</dt>
+<dt>When a literal dictionary is assigned.</dt>
 <dd>
 <p>The symbol is marked with '<code>:dic</code>'.</p>
 </dd>
@@ -222,8 +224,11 @@ cases of assignation:</p>
 <dd>
 <p>The symbol is marked with '<code>:module</code>'.</p>
 </dd>
+<dt>When the directive <code>try-catch</code> is used.</dt>
+<dd>
+<p>The <code>catch</code> parameter is marked as '<code>:str</code>'.</p>
+</dd>
 </ol>
-<p>In case of <code>catch</code> paramter, this is marked as '<code>:str</code>'.</p>
 <p>Examples:</p>
 <div id="aceEditor-5" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
 import "person";
@@ -265,9 +270,9 @@ import "person";
 </div>
 <script>aceConf("aceEditor-6", "kutt");</script>
 <h4>Corner case</h4>
-<p>When a function returns a container with elements which are functions, we
-can call such functions writing '<code>#</code>' beteen the index symbol and the
-first parenthesis.</p>
+<p>When a function returns a tuple or array with elements which are functions, it is
+possible yet to use the shorthand for constants when calling one of such functions,
+using parenthesis.</p>
 <p>Example:</p>
 <p>File <code>person.ktt</code></p>
 <div id="aceEditor-7" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">
@@ -286,8 +291,8 @@ import "person";
 
 {
   :person p0 = person.new();
-  // sys.test(p0.name(), "Peter"); // &lt;- does not work
-  sys.test(p0.name#(), "Peter");
+  // sys.test(p0.name(), "Peter"); // &lt;- does not work.
+  sys.test((p0.name2)(), "Peter"); // &lt;- it is ok.
 }
 </div>
 <script>aceConf("aceEditor-8", "kutt");</script>

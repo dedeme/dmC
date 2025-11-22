@@ -177,11 +177,11 @@ export function pass (targetId) {
   return r;
 }
 
-// \\s, s -> s
+// \\s, s -> ([s]|[])
 export function prompt (msg, def) {
   sys.$params(arguments.length, 2);
-  if (def === "") return prompt(msg);
-  else return prompt(msg, def);
+  if (def === "") return sys.$null(window.prompt(msg));
+  else return sys.$null(window.prompt(msg, def));
 }
 
 // \* -> <domo>

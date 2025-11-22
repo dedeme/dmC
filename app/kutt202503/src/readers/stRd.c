@@ -48,14 +48,10 @@ StRd *stRd_new0 (RdCtx *ctx, ExpRd *erd) {
   return this;
 }
 
-/// Constructor.
-///   ctx: Reader context.
-///   tx : Text to read.
 StRd *stRd_new (RdCtx *ctx, char *tx) {
   return stRd_new0 (ctx, expRd_new(ctx, tx));
 }
 
-/// Returns the current statement and advances the character reader.
 Stat *stRd_next (StRd *this) {
   ExpRd *erd = this->erd;
   Stat *next2 () {
@@ -146,7 +142,8 @@ Stat *stRd_next (StRd *this) {
   Stat *st = next2();
 
   int must_have_type = st->tp == stat_indexed &&
-    ((Tp3 *)st->value)->e1 != type_bool()
+    ((Tp3 *)st->value)->e1 != type_int() &&
+    ((Tp3 *)st->value)->e1 != type_string()
   ;
   if (!must_have_type && st->tp == stat_assign) {
     Tp *t = st->value;
@@ -158,7 +155,7 @@ Stat *stRd_next (StRd *this) {
   }
 
   if (must_have_type) { // Indexed or function assignation.
-    if (!ktp) return fail(st->ln, "Type missing in assignation or indexed");
+    if (!ktp) return fail(st->ln, "Type missing in assignment or indexed");
     int ln = ktp->ln;
 
     Rs *rs = type_read(ktp->value);
@@ -322,10 +319,23 @@ static Stat *read_multiassign (StRd *this, int ln, char *first_sym) {
         Token *tk = expRd_peek_token(erd);
         if (token_is_op(tk, ";")) {
           expRd_next_token(erd);
-          return stat_new_indexed(ln, type_bool(), "", syms);
+          return stat_new_indexed(ln, type_int(), "", syms);
+        }
+        if (token_is_op(tk, ":")) {
+          expRd_next_token(erd);
+          Token *tk = expRd_next_token(erd);
+          if (!token_is_op(tk, ";"))
+            return faile(tk->ln, ";", token_to_str(tk));
+          return stat_new_indexed(ln, type_string(), "", syms);
         }
         Exp *e = expRd_next(erd);
         if (e->tp == exp_error) return fail(e->ln, e->value);
+
+        EACH(syms, char, s) {
+          if (exp_is_cyclic(e, s))
+            return fail(ln, str_f("'%s' cyclic symbol", s));
+        }_EACH
+
         return check_end(this, stat_new_multiassign(ln, syms, e));
       } // else continue below.
     }
@@ -727,6 +737,10 @@ static Stat *read_symbol (StRd *this, Exp *sym) {
     }
     else if (*tk->value == '=') {
       Exp *e = expRd_next(erd);
+
+      if (exp_is_cyclic(e, sym->value))
+        return fail(tk->ln, str_f("'%s' cyclic symbol", sym->value));
+
       switch (e->tp) {
         case exp_error: return fail(e->ln, e->value);
         case exp_string: {

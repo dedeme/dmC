@@ -298,7 +298,6 @@ Val __sys_cmd (Val command, Val args);
 Val __sys_cmd2 (Val command, Val args);
 Val __sys_compilerRoot (void);
 Val __sys_environ (void);
-Val __sys_exec (char *pos, Val command, Val args);
 void __sys_exit (Val code);
 Val __sys_getLocale (void);
 Val __sys_home (void);

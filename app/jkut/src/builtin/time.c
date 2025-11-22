@@ -1,4 +1,4 @@
-// Copyright 15-Feb-2025 ºDeme
+// Copyright 04-Nov-2025 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *time_bget (void) {return
@@ -28,7 +28,7 @@ char *time_bget (void) {return
   "  const df = Math.trunc((t1 / 86400000) - (t2 / 86400000));\n"
   "  const t1b = addDays(t2, df);\n"
   "  return day(t1b) != day(t1)\n"
-  "    ? t1b > t1 ? df + 1 : df - 1\n"
+  "    ? t1b > t1 ? df - 1 : df + 1\n"
   "    : df\n"
   "  ;\n"
   "}\n"

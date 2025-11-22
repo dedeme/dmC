@@ -2050,8 +2050,8 @@ Arr *acmd = arr_new();
 arr_push(acmd, command.s);
 Val *p = args.a->begin;
 Val *end = args.a->end;
-while (p < end) arr_push(acmd, str_to_escape((*p++).s));
-Tp *tp = sys_cmd2(arr_cjoin(acmd, ' '));
+while (p < end) arr_push(acmd, (*p++).s);
+Tp *tp = sys_cmd2(acmd);
 Val r = __arr_new();
 __arr_push(r, (Val)tp->e1);
 __arr_push(r, (Val)tp->e2);
@@ -2065,14 +2065,6 @@ return __dic_from_smap(sys_environ());
 }
 void __sys_exit (Val code) {
 exit(code.i);
-}
-Val __sys_exec (char *pos, Val command, Val args) {
-Arr *acmd = arr_new();
-arr_push(acmd, command.s);
-Val *p = args.a->begin;
-Val *end = args.a->end;
-while (p < end) arr_push(acmd, str_to_escape((*p++).s));
-return (Val)(int64_t)system(arr_cjoin(acmd, ' '));
 }
 Val __sys_getLocale (void) {
 return (Val)sys_get_locale();

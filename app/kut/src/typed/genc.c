@@ -96,12 +96,14 @@ void genc_compile (void) {
   if (strcmp(code, file_read(c_path))) {
     file_write(c_path, code);
 
-    Rs *rs1 = sys_cmd(str_f(
-      "gcc -Wno-div-by-zero -c -rdynamic -fPIC %s -o %s -lm -lgc",
-      c_path, o_path
+    Rs *rs1 = sys_cmd(arr_new_from(
+      "gcc", "-Wno-div-by-zero", "-c", "-rdynamic", "-fPIC", c_path,
+      "-o", o_path, "-lm", "-lgc", NULL
     ));
     if (!rs_get(rs1)) puts(rs_error(rs1));
-    Rs *rs2 = sys_cmd(str_f("gcc -shared %s -o %s", o_path, so_path));
+    Rs *rs2 = sys_cmd(arr_new_from(
+      "gcc", "-shared", o_path, "-o", so_path, NULL
+    ));
     if (!rs_get(rs2)) puts(rs_error(rs2));
 
     file_del(o_path);

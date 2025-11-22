@@ -119,7 +119,7 @@ sumTimes = \v1, v2, v3 -> {
   sys.used(vop);
 
   finalV = [""];
-  if (v1 == 2) finalV[0] = "2";
+  if (v1 == 2) finalV! = "2"; // equals to finalV[0] = "2";
   vv = finalV!; // equals to vv = finalV[0];
   sys.used(vv);
 

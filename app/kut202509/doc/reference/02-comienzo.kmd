@@ -1,0 +1,112 @@
+=
+title = Comienzo
+=
+
+(Archivos _main.h_ y _main.c_)
+
+## Línea de comando.
+
+Kut puede ser llamado de las siguientes formas:
+
+# <code>kut -v</code>
+
+Muestra la versión del programa.
+
+Ejemplo:
+
+``bash
+  kut -v``
+
+# <code>kut -c &lt;archivo></code>
+
+Comprueba la sintaxis de _archivo_.
+
+Ejemplo:
+
+``bash
+  kut -c myprogr``
+
+# <code>kut &lt;archivo> [argumentos]</code>
+
+Ejecuta un _archivo_ '.kut' con argumentos opcionales.
+
+_archivo_ va sin extensión.
+
+Ejemplos:
+
+``bash
+  kut myprogr
+  kut myprogr arg1 arg2``
+
+
+## Inicialización.
+
+# Recolector de basura.
+
+Se inicializa el recolector de basura.
+
+# Sistema.
+
+A través de sys__init():
+
+* Se establece el lenguaje a 'C'.
+
+* Se prepara el generador de números aleatorios.
+
+* Se prepara el sistema de _threads_.
+
+# Señales.
+
+Se interceptan las señales de error matemático (SIGFPE) y de violación de
+segmento (SIGSEGV) para poder generar un mensaje antes de finalizar el programa.
+
+# Parámetros del programa.
+
+* Se comprueba que el número de parámetros es, al menos, dos.
+
+* Se registran dichos parámetros, que podrán ser recuperados por la función
+  *main.args(void)*.
+
+# Índice de símbolos.
+
+Se inicializa el objeto [80-objetos.html#symix](symix) añadiendo al mismo las
+palabras reservadas y los nombres de las librerías básicas (_built-in_).
+
+# Índice de archivos con código.
+
+Se inicializa el objeto [80-objetos.html#fileix](fileix) y se establece el valor
+del path raíz del archivo _.kut_ que está siendo procesado.
+
+# Índice de modulos.
+
+Se inicializa la [80-objetos.html#módulos](lista de módulos) creando una lista
+vacía.
+
+## Comprobación - ejecución.
+
+Esta acción se ejecuta dentro de bloque *TRY*, que, en caso de excepción,
+imprime el mensaje de la misma.
+
+Primeramente se lee y registra el módulo correspondiente al _archivo_ indicado
+en la línea de comando ([03-lector.html](Lector)) y después, dependiendo de la
+opción *-c* de dicha línea, se pasa a la comprobación o a la ejecución.
+
+Para la lectura se crea un objeto de la clase
+[81-clases.html#Lector de caracteres](lector de caracteres).
+
+# Comprobación.
+
+1. Se leen todos los módulos del programa y se registran.
+
+2. Se comprueba cada módulo con el [04-comprobador.html](comprobador).
+
+# Ejecución.
+
+Se ejecuta el código del módulo pricipal con el [05-ejecutor.html](ejecutor).
+
+La lectura y ejecución de los demás módulos se va realizando conforme el
+programa se ejecuta.
+
+La expresión devuelta por la función de ejecución es descartada, salvo que sea
+_break_ o _continue_, en cuyo caso se lanza un excepción.
+

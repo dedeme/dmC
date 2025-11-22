@@ -31,8 +31,17 @@ WrSRs *blockWriter_run(
   WrSRsStopT stopped = wrSRs_no;
   // Arr<char>
   Arr *bf = arr_new();
+  if (kind == blockWriter_inner) {
+    dicLayers_add_layer(ctx->sym_types);
+  } else if (kind != blockWriter_top) {
+    DicLayers *symTypes = ctx->sym_types;
+    Map *last_layer = dicLayers_peek_layer(symTypes);
+    dicLayers_add_layer(symTypes);
+    EACH(last_layer, Kv, kv) {
+      dicLayers_put_element(symTypes, kv_key(kv), kv_value(kv));
+    }_EACH
+  }
 
-  if (kind != blockWriter_top) dicLayers_add_layer(ctx->sym_types);
   EACH (sts, Stat, st) {
     int ln = st->ln;
     StatT tp = st->tp;
@@ -409,9 +418,13 @@ WrSRs *blockWriter_run(
         Tp *squareTp = e1->value;
         Exp *ct = squareTp->e1;
         WrERs *rs_ct =  expWriter_run(ctx, ct);
-        Type *t_ct = rs_ct->tp;
+        Type *t_ct0 = rs_ct->tp;
+        Rs *t_ct_rs = wrCtx_expand(ctx, t_ct0);
+        Type *t_ct = rs_get(t_ct_rs);
+        if (!t_ct) return wrSRs_fail(ctx, ct->ln, rs_error(t_ct_rs));
+
         Exp *ix = squareTp->e2;
-        WrERs *rs_ix =  expWriter_run(ctx, ix);
+        WrERs *rs_ix = expWriter_run(ctx, ix);
         Type *t_ix = rs_ix->tp;
         char *pos = fns_mk_pos(ctx->md_id, ln);
 
@@ -496,12 +509,15 @@ WrSRs *blockWriter_run(
 
         if (rs->stopped != wrSRs_no && _i < arr_size(sts) - 1)
           warn(ctx, ln, "There are spare statements after block-breaker");
+
         arr_push(bf, str_f("%s%s",
           kind == blockWriter_top
             ? str_f("void %s_main() ", ctx->md_id)
             : "",
           rs->code
         ));
+
+        stopped = rs->stopped;
         break;
       }
       case stat_break:
@@ -688,7 +704,7 @@ WrSRs *blockWriter_run(
           ));
         dicLayers_put_element(sym_types, e, typedSym_new(ln, e, t, opt_none(), TRUE));
         WrSRs *st_rs = blockWriter_run(
-          rtp, generics, blockWriter_inner, TRUE, is_try, ctx, st->ln, st->value
+          rtp, generics, blockWriter_param, TRUE, is_try, ctx, st->ln, st->value
         );
         if (st_rs->is_error) return st_rs;
         dicLayers_remove_layer(sym_types);
@@ -768,7 +784,7 @@ WrSRs *blockWriter_run(
           sym_types, var, typedSym_new(ln, var, type_int(), opt_none(), TRUE)
         );
         WrSRs *st_rs = blockWriter_run(
-          rtp, generics, blockWriter_inner, TRUE, is_try, ctx, st->ln, st->value
+          rtp, generics, blockWriter_param, TRUE, is_try, ctx, st->ln, st->value
         );
         if (st_rs->is_error) return st_rs;
         dicLayers_remove_layer(sym_types);
@@ -812,9 +828,11 @@ WrSRs *blockWriter_run(
         DicLayers *sym_types = ctx->sym_types;
         dicLayers_add_layer(sym_types);
         dicLayers_put_element(
-          sym_types, var, typedSym_new(ln, var, type_string(), opt_none(), TRUE));
+          sym_types, var,
+          typedSym_new(st_catch->ln, var, type_string(), opt_none(), TRUE)
+        );
         WrSRs *st_catch_rs = blockWriter_run(
-          rtp, generics, blockWriter_inner, is_loop, is_try, ctx,
+          rtp, generics, blockWriter_param, is_loop, is_try, ctx,
           st_catch->ln, st_catch->value
         );
         dicLayers_remove_layer(sym_types);
@@ -852,7 +870,7 @@ WrSRs *blockWriter_run(
         Tp *tp = v;
         Exp *var = tp->e1;
         // Arr<Tp<Arr<Exp>, Stat>>
-        Arr *entries = tp->e2;
+        Arr *entries = arr_copy(tp->e2);
 
         WrERs *rs =  expWriter_run(ctx, var);
         if (rs->is_error) return wrSRs_fromWrERsFail(rs);
@@ -905,7 +923,6 @@ WrSRs *blockWriter_run(
             st->ln, st->value);
           if (srs->is_error) return srs;
 
-
           stopped =
             stopped == wrSRs_no || srs->stopped == wrSRs_no
             ? wrSRs_no
@@ -932,7 +949,6 @@ WrSRs *blockWriter_run(
         } else {
           stopped = wrSRs_no;
         }
-
         arr_push(bf,str_f(
           "%s\n%s", fns_fun_code(funs), arr_join(code, "else\n")
         ));
@@ -962,6 +978,7 @@ WrSRs *blockWriter_run(
         "Possible no return at end of block"
       );
     }
+
     return wrSRs_mk(stopped, arr_cjoin(bf, '\n'));
   }
 

@@ -129,7 +129,7 @@ sys.assert(D == {"one": 505, "two": 2});
 
 // D["x"] = 505; <- Runtime exception ``
 
-# Operation + assignation
+# Operation with assignation
 
 It is posible use the scheme *'symbol operation= value'*, that is replaced
 as *'symbol = symbol operation (value)'*.
