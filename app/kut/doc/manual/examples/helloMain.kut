@@ -1,3 +1,0 @@
-import "helloText";
-
-sys.println(helloText.tx);

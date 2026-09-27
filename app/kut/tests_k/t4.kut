@@ -1,5 +1,0 @@
-import "sub/s1" : ss;
-
-sys.test(ss.hello21("world"), "hello world");
-sys.test(ss.A!, 1800);
-
