@@ -1,4 +1,4 @@
-// Copyright 04-Nov-2025 ºDeme
+// Copyright 16-Aug-2026 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *js_bget (void) {return

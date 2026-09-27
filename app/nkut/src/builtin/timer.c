@@ -1,4 +1,4 @@
-// Copyright 21-Jun-2025 ºDeme
+// Copyright 16-Aug-2026 ºDeme
 // GNU General Public License - V3 <http://www.gnu.org/licenses/>
 
 char *timer_bget (void) {return
@@ -31,9 +31,10 @@ char *timer_bget (void) {return
   "  if (!t[0]) throw new Error('Timer has been stopped');\n"
   "\n"
   "  async function loop () {\n"
-  "    const r = await delay(t[1], fn);\n"
-  "    if (t[0]) return loop();\n"
-  "    else return r;\n"
+  "    while (true) {\n"
+  "      const r = await delay(t[1], fn);\n"
+  "      if (!t[0]) return r;\n"
+  "    }\n"
   "  }\n"
   "\n"
   "  return await loop();\n"

@@ -54,6 +54,30 @@ export function confirm (s) {
   return window.confirm(s);
 }
 
+/// \s -> <promise>s
+export async function downloadFile (fpath) {
+  sys.$params(arguments.length, 1);
+  const url = fpath.charAt(0) === "/"
+    ? "http://" + location.host + fpath
+    : fpath
+  ;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("Url '" + url + "' can not be read");
+  return r.text();
+}
+
+/// \s, s -> ()
+export function downloadText (fileName, text) {
+  const a = q("a")
+    .att("href", "data:text/plain;plain," + text)
+    .att("download", fileName)
+  ;
+  const body = document.body;
+  body.appendChild(a.e);
+  a.e.click();
+  body.removeChild(a.e);
+}
+
 // \s -> <domo>
 export function field (targetId) {
   sys.$params(arguments.length, 1);
@@ -167,7 +191,7 @@ export function mouseY (ev) {
 // \s -> <domo>
 export function pass (targetId) {
   sys.$params(arguments.length, 1);
-  const r = q("input").att("type", "password");
+  const r = q("input").att("type", "password").att("autocomplete", "off");
   r.e.onkeydown = function (e) {
     if (e.keyCode === 13) {
       e.preventDefault();
@@ -251,27 +275,6 @@ export function select (idPrefix, list) {
   return r;
 }
 
-/// \s -> <promise>s
-export function upload (fpath) {
-  sys.$params(arguments.length, 1);
-  const url = fpath.charAt(0) === "/"
-    ? "http://" + location.host + fpath
-    : fpath
-  ;
-  return new Promise(function (resolve, reject) {
-    const request = new XMLHttpRequest();
-    request.open("GET", url, true);
-    request.onload = () => {
-      if (request.status >= 200 && request.status < 300)
-        resolve(request.responseText);
-      else reject(new Error(request.statusText));
-    };
-    request.onerror = () => reject(new Error(request.statusText));
-    request.onabort = () => reject(new Error(request.statusText));
-
-    request.send();
-  });
-}
 
 // \s -> <domo>
 export function upTop (image) {

@@ -1,0 +1,96 @@
+=
+title = Comprobadores
+=
+
+## Comprobador de sintaxis
+
+(Archivos *checker/checker.h* y *checker/checker.c*)
+
+Se crea una capa de *Chksym* con los símbolos declarados en *heap0*.
+
+Con dicha capa se inicializa el objeto [80-objetos.html#layers](<tt>layers</tt>).
+
+Con dicha capa y los 'imports' se chequea el código del módulo con
+_check__block_.
+
+# check_block
+
+Si el bloque es interno, se añade una nueva capa de símbolos vacía.
+
+Cada instrucción de código se chequea para verificar el uso de variables.
+
+Terminado lo anterior, si el bloque es interno y hay símbolos definidos
+y no usados en la nueva capa añadida, se emite una advertencia.
+
+Las instrucciones de código se chequean añadiendo los nuevos símbolos en
+*layers* y checkeando su uso en las expresiones que ellas contienen.
+
+## Comprobador de tipos
+
+(Archivos *checker/tpchecker.h* y *checker/tpchecker.c*)
+
+Partiendo del módulo principal se va controlando que todas las definiciones
+exportadas de símbolos son antecedidas por un la línea de comentario *///*
+con una definición válida de tipo.
+
+_NOTA_; Los tipos son indicativos, a los solos efectos de documentar el simbolo
+que tipifican. Por lo tanto el control que se hace es sintáctico y no tiene
+relación con el tipo real del símbolo (que, por otra parte, puede variar en
+diferentes momentos de la ejecución del código).
+
+También se controla el tipo de aquellos símbolos no exportados precedidos por el
+comentario *//:*
+
+Cuando es conveniente expandir el comentario de definición de tipo más de una
+línea, se debe usar *//-* al comienzo de la nueva línea.
+
+# Contrucción de tipos.
+
+Son tipos simples *b* (bool), *i* (int), *f* (float), *s* (string),
+*\[*]* (indefinido) y *<_identifier_>* objeto.
+
+Son válidos tipos:
+
+``kut
+/// Se exporta.
+/// s
+a = "v";
+
+// No se exporta.
+//: i
+n = 12;
+
+/// Se exporta.
+/// <file>
+f = file.open("z");
+``
+
+Sean *T*, *T1*, *T2*, *T3* tipos válido entonces son válidos:
+
+- [T.]
+> Array de tipo *T*.
+
+- [T1, T2, T3]
+> Tupla de tres elementos de tipos *T1*, *T2* y *T3*.
+
+- {T.}
+> Diccionario de tipo *T*.
+
+- {label1: T1, label2: T2, label3: T3}
+> Diccionario con tres elementos etiquetados.
+
+- {T1, T2, T3}
+> Diccionario con tres elementos sin indicar la etiqueta.
+
+- (T1 | T2 | T2)
+> Tipo que puede ser *T1*, *T2* o *T3*
+
+- \T1, T2, T3 -> T
+> Funcion con parámetros de tipo *T1*, *T2* y *T3* y que retorna una expresión
+  de tipo *T*.
+
+- \T1, T2, T3 -> ()
+> Funcion con parámetros de tipo *T1*, *T2* y *T3* y que no retorna ninguna
+  expresión.
+
+

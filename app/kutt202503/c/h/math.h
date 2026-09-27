@@ -13,6 +13,8 @@ Val __math_asinh (Val n);
 // f->f
 Val __math_atan (Val n);
 // f->f
+Val __math_atan2 (Val y, Val x);
+// f->f
 Val __math_atanh (Val n);
 // f->f
 Val __math_ceil (Val n);

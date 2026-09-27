@@ -12,6 +12,7 @@ WrERs *mdMath_process (WrCtx *ctx, int ln, char *md, char *sym) {
   if (!strcmp(sym, "asin")) return built_mk_rs("[f|f]", md, sym);
   if (!strcmp(sym, "asinh")) return built_mk_rs("[f|f]", md, sym);
   if (!strcmp(sym, "atan")) return built_mk_rs("[f|f]", md, sym);
+  if (!strcmp(sym, "atan2")) return built_mk_rs("[ff|f]", md, sym);
   if (!strcmp(sym, "atanh")) return built_mk_rs("[f|f]", md, sym);
   if (!strcmp(sym, "ceil")) return built_mk_rs("[f|f]", md, sym);
   if (!strcmp(sym, "cos")) return built_mk_rs("[f|f]", md, sym);

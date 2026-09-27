@@ -1,0 +1,539 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Lector</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-comprobador.html'>Posterior (Comprobadores)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Lector del bloque principal'>Lector del bloque principal</a><br>
+<a href='#Lector de bloque no principal'>Lector de bloque no principal</a><br>
+<a href='#Lector de instrucción'>Lector de instrucción</a><br>
+<a href='#Lector de expresión'>Lector de expresión</a><br>
+<a href='#Lector de expresión extendida'>Lector de expresión extendida</a>
+</p>
+<hr>
+<p>(Archivos <code>reader/reader.h</code> y <code>reader/reader.c</code>)</p>
+<p>Dispone de dos funciones de lectura, una para el bloque principal (el propio
+archivo <code>.kut</code>) y otro para los demás bloques (bloques interiores).</p>
+<a name="Lector del bloque principal"></a>
+<h3>Lector del bloque principal</h3>
+<p>Lee un archivo <code>.kut</code> y retorna el <a href="81-clases.html#Módulo">módulo</a> correspondiente.</p>
+<p>Esta función necesita que se le pase un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a>.</p>
+<p>Inicializa los campos <code>imports</code>, <code>exports</code> y <code>heap0</code> del módulo.</p>
+<p>Además inicializa un array <code>tps</code> que contendrá los símbolos con los que se accede
+a los módulos de los que depende el módulo que se está leyendo. La inicialización
+se hace añadiendo los símbolos correspondientes a los módulos-base de
+<code>kut</code>.</p>
+<p>A continuación se van leyendo las sucesivas <a href="81-clases.html#StatCode">instrucciones</a>
+y añadiéndolas en un array.</p>
+<p>Por último se invoca el constructor de la clase <a href="81-clases.html#Módulo">module</a>
+y se retorna el objeto creado.</p>
+<h4>Lectura de las sucesivas instrucciones</h4>
+<p>Se realiza dentro de un bucle que se desarrolla según el siguiete esquema:</p>
+<p>Se lee la siguiente instrucción y se obtiene la
+<a href="[81-clases.html#StatCode">StatCode</a> (<code><i>st</i></code>) correspondinente.</p>
+<ol>
+<dt>Si <code>st</code> es de tipo <code>break</code>
+</dt>
+<dd>
+<p>Se finaliza el bloque.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>import</code>
+</dt>
+<dd>
+<p>- Se comprueba que el simbolo identificador del módulo importado no ha sido
+    previamente importado o incluido en el <a href="Heap0">Heap0</a> del módulo.<br>  - Acto seguido se comprueba que el archivo que se importa es accesible para su
+    lectura.<br>  - Por último se añaden los datos correspodientes de los objecto <code>imports</code>, <code>heap0</code>
+    y <code>tps</code>.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>indexed</code>
+</dt>
+<dd>
+<p>- Primero se determina si los símbolos del <code>indexed</code> se van a exportar.<br>  - A continuación se asigna una función de tipo <code>\p1, p2 ... -> return <a href="p1, p2 ...">p1, p2 ...</a></code>
+    al primer símbolo del <code>indexed</code> (donde <i>p1</i>, <i>p2</i> ... son los símbolo del
+    <code>indexed</code> que sigen al primero -- eventualmente puede no haber ninguno).<br>  - Hecho esto, se asignan los símbolos <i>p1</i>, <i>p2</i>, ... a los enteros <code>0</code>, <code>1</code>, ...<br>  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los <code>imports</code> ni en el <code>heap0</code>, se añaden a los <code>exports</code>, si
+    procede, al <code>heap0</code> y al array de instrucciones.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>arr_multi</code> o <code>dic_multi</code>
+</dt>
+<dd>
+<p>Con el fin de actualizar los <code>exports</code> y el <code>heap0</code>: <br>  <br>  - Primero se determina si los símbolos de la instrucción se van a exportar.<br>  - A continuación se extraen los valores <code>new_sym</code>, <code>syms</code> y <code>exp</code> del
+    constructor de la instrucción.<br>  - Con <code>new_sym</code> se crea una instrucción interna que le asigna: En el
+    caso de <code>arr_multi</code>, un array de enteros de 0, inclusive, al número de
+    elementos de <code>syms</code>, exclusive. En el caso de <code>dic_multi</code>, un diccionario
+    que asocia los simbolos de <code>syms</code> a expresiones de cadena con el mismo
+    símbolo (p.e. a -> "a").<br>  - Hecho esto, se crean instrucciones de tipo <code>sym = exp[new_sym[<i>i</i>]]</code>
+    en el caso de <code>arr_multi</code>, o <code>sym = exp[new_sym[<i>symbol</i>]]</code> en
+    el de <code>dic_multi</code>. Una para cada valor de <code>syms</code> que no sea una
+    <i>expresión vacía</i>.<br>  - Todas las asignaciones, después de comprobar que los símbolos no están ya
+    registrados en los <code>imports</code> ni en el <code>heap0</code>, se añaden a los <code>exports</code>, si
+    procede, y al <code>heap0</code>.<br>  <br>  <i>NOTA</i>: Estas asignaciones NO se registran el array de instrucciones. Lo que
+  añade a tal array es la propia instrucción de tipo <code>arr_multi</code> o
+  <code>dic_multi</code>.</p>
+</dd>
+<dt>Si <code>st</code> es de tipo <code>asign</code>
+</dt>
+<dd>
+<p>- Con el fin de actualizar los <code>exports</code> y el <code>heap0</code> se comprueva que el símbolo
+    de la asignación no está ya registrado en los <code>imports</code> ni en el <code>heap0</code>,
+    y se añade a los <code>exports</code>, si se determina que es una instrucción para
+    exportar, y al <code>heap0</code>.<br>  - Hecho esto se añade al array de instrucciones.</p>
+</dd>
+<dt>Cualquier otra <code>st</code>
+</dt>
+<dd>
+<p>Se añade al array de instrucciones.</p>
+</dd>
+</ol>
+<p>Una vez finalizada la inserción de instrucciones en su array:</p>
+<ol>
+<li>
+<p>Se eliminan del mismo las instrucciones de tipo <code>export</code>, que ya no son
+   necesarias.</p>
+</li>
+<li>
+<p> Se crea y retorna el módulo correspondiente con los datos de los <code>imports</code>,
+   <code>exports</code>, <code>heap0</code> y array de instrucciones.</p>
+</li>
+</ol>
+<a name="Lector de bloque no principal"></a>
+<h3>Lector de bloque no principal</h3>
+<p>Lee un bloque interno (situado entre los <i>tokens</i> <code>{</code> y <code>}</code>).</p>
+<p>Esta función necesita que se le pase un array <code>tps</code> que contendrá los símbolos
+con los que se accede a los módulos de los que depende el código que llama
+a la función y un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a>.</p>
+<p>Prepara un nuevo <code>tps</code> para añadir los símbolos de la función y lee las
+sucesivas <a href="81-clases.html#StatCode">instrucciones</a> in un array.</p>
+<p>Una vez finalizada la lectura se retorna el array,</p>
+<h4>Lectura de las sucesivas instrucciones</h4>
+<p>Se realiza dentro de un bucle que se desarrolla según el siguiete esquema:</p>
+<p>Se lee la siguiente instrucción y se obtiene la
+<a href="81-clases.html#StatCode">StatCode</a> (<code><i>st</i></code>) correspondinente.</p>
+<ul>
+<li>
+<p>Si <code><i>st</i></code> es de tipo <code>end</code> o de tipo <code>import</code>, se lanza una excepción.</p>
+</li>
+<li>
+<p>Si <code><i>st</i></code> es de tipo <code>export</code>, se descarta.</p>
+</li>
+<li>
+<p>Si <code><i>st</i></code> es de tipo 'cierre de bloque' (<code>block_close</code>), se descarta y
+  se finaliza la lectura del bloque.</p>
+</li>
+<li>
+<p>En otro caso <code><i>st</i></code> se anade la array de instrucciones.</p>
+</li>
+</ul>
+<a name="Lector de instrucción"></a>
+<h3>Lector de instrucción</h3>
+<p>(Archivos reader/st_reader.h y reader/st_reader.c)</p>
+<p>El código sólo exporta la función <i>st_reader_read</i>, que lee una instrucción.</p>
+<h4>Función <i>st_reader_read</i>.</h4>
+<p>Esta función necesita que se le pase un array <code>tps</code> que contendrá los símbolos
+con los que se accede a los módulos de los que depende el código que llama
+a la función y un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a>.</p>
+<p>Retorna una <a href="81-clases.html#StatCode">StatCode</a> (<code><i>st</i></code>) conforme el siguiente
+algoritmo:</p>
+<p>Lee el siguiente <a href="81-clases.html#Token">token</a> (<code><i>tk</i></code>) .</p>
+<p>Si no hay más tokens que leer, devuelve una <code><i>st</i></code> de tipo <code>end</code>.</p>
+<p>En otro caso:</p>
+<ol>
+<dt>Si <code>tk</code> es de tipo TOKEN_LINE_COMMENT.
+</dt>
+<dd>
+<p>Si la línea comienza con <code>///</code> retorna una <code><i>st</i></code> de tipo <code>export</code>.<br>  En otro caso retorna el resultado de llamar recursivamente la función
+  <i>st_reader_read</i>.</p>
+</dd>
+<dt>Si <code>tk</code> es de tipo TOKEN_COMMENT.
+</dt>
+<dd>
+<p>Retorna el resultado de llamar recursivamente la función <i>st_reader_read</i>.</p>
+</dd>
+<dt>Si <code>tk</code> es el operador 'dos puntos' (:).
+</dt>
+<dd>
+<p>Se leen sucesivamente dos tokens: El primero corresponde a un símbolo o a
+  a otro operador 'dos puntos'. El segundo debe ser un simbolo (en otro
+  caso se lanza un excepción).<br>  Acto seguido se actualiza el array <code>tps</code> asociando el símbolo del segundo
+  tocken con el valor del índice del símbolo del primer token, o con '-1', si
+  dicho tocken es el operador 'dos puntos'.<br>  Hecho esto se lee una instrucción <a href="81-clases.html#Stat">Stat</a>(<i>st</i>) con la
+  función <i>read</i>, pasandole el segundo token leído.<br>  - Si <i>st</i> es una asignación distinta de una asignación a símbolo (p.ej. una
+  asignación a array) se lanza un excepción.<br>  - Si <i>st</i> no es una asignación (ya sea normal o múltiple) también se lanza
+  una excepción.<br>  - En otro caso se retorna una <a href="81-clases.html#StatCode">StatCode</a> con <i>st</i>.</p>
+</dd>
+<dt>Si <code>tk</code> es el operador 'coma' (,).
+</dt>
+<dd>
+<p>Se llama a la función <i>read_multi</i> y se retorna una
+  <a href="81-clases.html#StatCode">StatCode</a> con la <a href="81-clases.html#Stat">Stat</a>
+  obtenida.</p>
+</dd>
+<dt>En otro caso.
+</dt>
+<dd>
+<p>Se llama a la función <i>read</i> pasándole <code><i>tk</i></code> y se retorna una
+  <a href="81-clases.html#StatCode">StatCode</a> con la <a href="81-clases.html#Stat">Stat</a>
+  obtenida.</p>
+</dd>
+</ol>
+<h4>Función <i>read</i></h4>
+<p>Esta función necesita que se le pase un array <code>tps</code> que contendrá los símbolos
+con los que se accede a los módulos de los que depende el código que llama
+a la función, un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a> y el último token
+leído (<code><i>tk</i></code>).</p>
+<p>Retorna una instrucción <a href="81-clases.html#Stat">Stat</a>.</p>
+<ol>
+<dt>Si <code>tk</code> es de tipo TOKEN_SYMBOL.
+</dt>
+<dd>
+<p>Llama a la función <i>read_symbol</i>, pasándole el índice del símbolo de <code><i>tk</i></code>,
+  y retorna el resultado.</p>
+</dd>
+<dt>Si <code>tk</code> es el operador 'llave abierta' ({).
+</dt>
+<dd>
+<p>Retorna una instrucción de tipo 'bloque' con el array retornado por la
+  función <a href="03-lector.html#Lector de bloque no principal">reader_read_block</a>.</p>
+</dd>
+<dt>Si <code>tk</code> es el operador 'llave cerrada' (}).
+</dt>
+<dd>
+<p>Retorna una instrucción de tipo 'bloque cerrado'.</p>
+</dd>
+<dt>En otro caso.
+</dt>
+<dd>
+<p>Lanza un excepción.</p>
+</dd>
+</ol>
+<h4>función <i>read_symbol</i></h4>
+<p>Esta función necesita que se le pase un array <code>tps</code> que contendrá los símbolos
+con los que se accede a los módulos de los que depende el código que llama
+a la función, un un objeto de la clase
+<a href="81-clases.html#Lector de caracteres">lector de caracteres</a> y el índice del
+símbolo que se acaba de leer (<code><i>sym</i></code>).</p>
+<ol>
+<dt>Si <code>sym</code> es BREAK.
+</dt>
+<dd>
+<p>Se lee el token ';' y se retorna una instrucción 'break'.</p>
+</dd>
+<dt>Si <code>sym</code> es CONTINUE.
+</dt>
+<dd>
+<p>Se lee el token ';' y se retorna una instrucción 'continue'.</p>
+</dd>
+<dt>Si <code>sym</code> es TRACE.
+</dt>
+<dd>
+<p>Se lee el siguiente token si es 'dos puntos' (en este caso 'trace' mostrará
+  la expresión forma completa) y a continuación se lee una
+  expresión y el token ';'.<br>  Se retorna una instrucción 'trace' con la expresión y el indicador de
+  'mostrar completamente'.</p>
+</dd>
+<dt>Si <code>sym</code> es RETURN.
+</dt>
+<dd>
+<p>Se lee el siguiente token.<br>  - Si es ';' se retorna una instrucción 'return' que retorna la expresión
+    vacía (<i>empty</i>).<br>  - En otro caso se lee una expresión, el token ';' y se retorna una instrucción
+    'return' con la expresión leida.</p>
+</dd>
+<dt>Si <code>sym</code> es IMPORT.
+</dt>
+<dd>
+<p>Se lee un token de tipo 'string' (<code><i>path</i></code>) y se comprueba que es correcto
+  (no se admiten <i>paths</i> que empiecen o terminen con '/', que contengan
+  puntos ('.') o que sean 'strings' vacías.<br>  A continuación se lee el siguiente token:<br>  - Si es ';' se establece como identificador la base de <code><i>path</i></code>.<br>  - Si es ':' se lee un símbolo y el token ';', stableciéndose como identificador
+    el símbolo leído.<br>  - En otro caso se lanza un excepción.</p>
+</dd>
+<dt>Si <code>sym</code> es TRY.
+</dt>
+<dd>
+<p>Lee un bloque TRY-CATCH-FINALLY con el siguiente algoritmo:<br>  - Lee una <a href="81-clases.html#StatCode">StatCode</a> con la función <i>st_in_read</i>
+    (<code><i>st1</i></code>).<br>  - Lee el token 'catch' (si no se encuentra se lanza una exceptión).<br>  - Lee el símbolo del bloque CATCH, entre paréntesis (si no se encuentra
+    se lanza una excepción).<br>  - Lee una <a href="81-clases.html#StatCode">StatCode</a> con la función <i>st_in_read</i>
+    (<code><i>st2</i></code>).<br>  - Se intenta leer el token 'finally'. Si se encuentra se lee una
+    <a href="81-clases.html#StatCode">StatCode</a> con la función <i>st_in_read</i>
+    en la opción (<code><i>st3</i></code>). En otro caso la opción (<code><i>st3</i></code>) queda vacía.<br>  - Por último se retorna una instrucción de tipo 'try' con <code><i>st1</i></code>, <code><i>st2</i></code>,
+    <code><i>st3</i></code> y la símbolo del bloque CATCH.</p>
+</dd>
+<dt>Si <code>sym</code> es CATCH.
+</dt>
+<dd>
+<p>Se lanza un excepción indicando que CATCH está fuera un bloque TRY.</p>
+</dd>
+<dt>Si <code>sym</code> es FINALLY.
+</dt>
+<dd>
+<p>Se lanza un excepción indicando que FINALLY está fuera un bloque TRY.</p>
+</dd>
+<dt>Si <code>sym</code> es WHILE.
+</dt>
+<dd>
+<p>Lee<br>  - Un par de paréntesis vacío seguido por una <a href="81-clases.html#StatCode">StatCode</a>,
+    leida con la función <i>st_in_read</i>, retornando un instrucción 'while'.<br>  o<br>  - Una expresión entre paréntesis, usanado la función
+    <a href="03-lector.html#Lector de expresión">lector de expresión</a>, seguida por
+    una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función <i>st_in_read</i>,
+    retornando un instrucción 'while'.</p>
+</dd>
+<dt>Si <code>sym</code> es IF.
+</dt>
+<dd>
+<p>Lee una expresión entre paréntesis, unsando la función
+  <a href="03-lector.html#Lector de expresión">lector de expresión</a>, seguida por una
+  <a href="81-clases.html#StatCode">StatCode</a>, leida con la función <i>st_in_read</i>
+  (<code><i>st1</i></code>).<br>  A continuación se intenta leer el token 'else'. Si se encuentra se lee una
+  <a href="81-clases.html#StatCode">StatCode</a> con la función <i>st_in_read</i> en la
+  opción <code><i>st2</i></code>. En otro caso la opción <code><i>st2</i></code> queda vacía.<br>  Por último se retorna una instrucción 'if' con la expresión leida, la
+  instrucción <code><i>st1</i></code> y la opción <code><i>st2</i></code>.</p>
+</dd>
+<dt>Si <code>sym</code> es ELSE.
+</dt>
+<dd>
+<p>Se lanza un excepción indicando que ELSE está fuera un bloque IF.</p>
+</dd>
+<dt>Si <code>sym</code> es FOR.
+</dt>
+<dd>
+<p>Se lee un token 'paréntesis ('. A continuación:<br>  <br>  - Si el siguiente token es 'dos puntos' (:)<br>  &nbsp;&nbsp;> Se leen dos símbolos (de modulo y 'variable').<br>  &nbsp;&nbsp;> Se lee el token igual (=).<br>  &nbsp;&nbsp;> Se lee una expresión con la función <a href="03-lector.html#Lector de expresión">lector de expresión</a>.<br>  &nbsp;&nbsp;> Se lee un token 'paréntesis )'.<br>  &nbsp;&nbsp;> Se lee una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función
+      <i>st_in_read</i>.<br>  &nbsp;&nbsp;> Se retorna una instrucción 'for' de tipo <code>for (:<i>md v</i> = <i>contenedor</i>)</code>.<br>  <br>  - En otro caso el siguiente token debe ser un símbolo (<code><i>v1</i></code>)<br>  <br>  Se inicializa <code><i>v2</i>=-1</code> y se lee un nuevo token (<code><i>tk</i></code>).<br>  <br>  - Si <code><i>tk</i></code> es una coma (,)<br>  &nbsp;&nbsp;> Si el siguiente token es 'dos puntos' (:)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;> Se leen dos símbolos (de modulo y 'variable').<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Se lee el token igual (=).<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Se lee una expresión con la función <a href="03-lector.html#Lector de expresión">lector de expresión</a>.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Se lee un token 'paréntesis )'.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Se lee una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función
+      <i>st_in_read</i>.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Se retorna una instrucción 'for' de tipo <code>for (i, :<i>md v</i> = <i>contenedor</i>)</code>.<br>  &nbsp;&nbsp;> En otro caso el siguiente token debe ser un símbolo distinto de <code><i>v1</i></code>,
+      que se asigna a <code><i>v2</i></code>.<br>  <br>  - Si no es una coma se sigue con <code><i>v2</i></code> igual a <code>-1</code>.<br>  <br>  Se lee el token igual (=).<br>  Se lee una expresión con la función <a href="03-lector.html#Lector de expresión">lector de expresión</a>
+  (<code><i>ex1</i></code>).<br>  <br>  - Si el siguiente token es 'dos puntos' (:) [for de tipo 'range']<br>  &nbsp;&nbsp;> Si <code><i>v2</i></code> es distinto de <code>-1</code> se lanza una excepción.<br>  &nbsp;&nbsp;> Se lee una expresión con la función <a href="03-lector.html#Lector de expresión">lector de expresión</a>
+      (<code><i>ex2</i></code>).<br>  &nbsp;&nbsp;> Se lee un nuevo token.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Si el token es 'dos puntos' (:) se lee en <code><i>ex3</i></code> una expresión con
+        la función <a href="03-lector.html#Lector de expresión">lector de expresión</a>.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> En otro caso <code><i>ex3</i>=NULL</code>.<br>  &nbsp;&nbsp;> Se lee un token 'paréntesis )'.<br>  &nbsp;&nbsp;> Se lee una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función
+      <i>st_in_read</i>.<br>  &nbsp;&nbsp;> Se retorna:<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Si <code><i>ex3</i></code> es <code>NULL</code>, una instrucción 'for' de tipo
+        <code>for (<i>i</i> = <i>start</i>:<i>end</i>)</code>.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> En otro caso, una instrucción 'for' de tipo
+        <code>for (<i>i</i> = <i>start</i>:<i>end</i>:<i>step</i>)</code>.
+  <br>  - Si no es 'dos puntos' (:) ni 'paréntesis )', se lanza una excepción.</p>
+<p>Se lee el token 'paréntesis )'.<br>  Se lee una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función
+  <i>st_in_read</i>.<br>  Se retorna:<br>  &nbsp;&nbsp;> Si <code><i>v2</i></code> es <code>-1</code>, una instrucción 'for' de tipo
+        <code>for (<i>v</i> = <i>contenedor</i>)</code>.<br>  &nbsp;&nbsp;> En otro caso, una instrucción 'for' de tipo
+        <code>for (<i>i</i>, <i>v</i> = <i>contenedor</i>)</code>.</p>
+</dd>
+<dt>Si <code>sym</code> es SWITCH.
+</dt>
+<dd>
+<p>Se lee una expresión entre paréntesis, unsando la función
+  <a href="03-lector.html#Lector de expresión">lector de expresión</a>.<br>  A continuación comprueba que sigue un token 'llave{'.<br>  Se establece la variable <code><i>with_default</i></code> a <code>FALSE</code>.<br>  Después se leen los distintos casos en un array, hasta que el siguiente
+  token sea 'llave}' siguiendo el siguiente algoritmo:<br>  - Se lee un array de condiciones de la siguiente manera:<br>  &nbsp;&nbsp;> Se lee una expresión con el <a href="03-lector.html#Lector de expresión">lector de expresión</a>
+      y se añade al array de condiciones.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> Si la expresion es el símbolo 'default' se establece <code><i>with_default</i></code>
+        a <code>TRUE</code>.<br>  &nbsp;&nbsp;&nbsp;&nbsp;> En otro caso se establece un bucle que lee el token 'coma' (,)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; seguido de una expresion (leida con el
+         <a href="03-lector.html#Lector de expresión">lector de expresión</a>),
+         hasta que la 'coma' no aparezca.<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Si la expresión es el símbolo 'default' se lanza una excepción.<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Cada expresión así leida se añade al array de condiciones.<br>  - Se lee el token 'dos puntos' (:)<br>  - Se lee una <a href="81-clases.html#StatCode">StatCode</a>, leida con la función
+    <i>st_in_read</i>.<br>  - Se añade una tupla con el array de condiciones y
+      la instrucción al array de condiciones.<br>  - Si <code><i>with_default</i></code> es <code>TRUE</code> y el siguiente token no es 'llave}',
+    se lanza una excepción.<br>  Se lee el token 'llave}' y se retorna una instrucción de tipo 'switch' con
+  el array de casos.</p>
+</dd>
+<dt>Si <code>sym</code> es un símbolo diferente de los anteriores.
+</dt>
+<dd>
+<p>Se lee una expresión <code><i>exp</i></code> con la función
+  <a href="03-lector.html#Lector de expresión extendida">lector de expresión extendida</a>,
+  pasando <code><i>sym</i></code> como argumento.<br>  A continuación se lee el siguiente token (<code><i>tk</i></code>), resultando:<br>  <br>  - Si <code><i>tk</i></code> es ';'<br>  &nbsp;&nbsp;> Si <code><i>exp</i></code> es 'pr' (función) se retorna una instrucción de tipo 'func'.<br>  &nbsp;&nbsp;> En otro caso se lanza una excepción.</p>
+<p>- Si <code><i>tk</i></code> es 'dos puntos' (:)<br>  &nbsp;&nbsp;> Si <code><i>exp</i></code> no es de tipo símbolo se lanza una excepción.<br>  &nbsp;&nbsp;> Se leen uno o más <i>tokens</i> de tipo símbolo, separados por comas (,)<br>  &nbsp;&nbsp;&nbsp;&nbsp; y terminados en ';'.<br>  &nbsp;&nbsp;> Se crea un array con <code><i>exp</i></code> mas los símbolo leídos, pasados a expresiones.<br>  &nbsp;&nbsp;> Se retorna una instrucción de tipo "indexed" creada con el array.</p>
+<p>- Si <code><i>tk</i></code> es 'coma' (,)<br>  &nbsp;&nbsp;> Si <code><i>exp</i></code> no es de tipo símbolo se lanza una excepción.<br>  &nbsp;&nbsp;> Se lee una asignación múltiple con la función <i>read_multi</i> y se
+      retorna la instrucción.</p>
+<p>- Si <code><i>tk</i></code> es de tipo asignación<br>  &nbsp;&nbsp;> Si <code><i>tk</i></code> es igual (=) y <code><i>exp</i></code> no es de tipo 'símbolo', 'punto' or
+      'subíndice', se lanza una excepción.<br>  &nbsp;&nbsp;> Si <code><i>tk</i></code> es distinta de igual (=) y <code><i>exp</i></code> no es una tipo 'punto' or
+      'subíndice', se lanza una excepción.<br>  &nbsp;&nbsp;> Se lee una nueva expresión con el
+      <a href="03-lector.html#Lector de expresión">lector de expresión</a>) (<code><i>exp2</i></code>).<br>  &nbsp;&nbsp;> Si <code><i>tk</i></code> es el símbolo "=" y
+      <code>types_in_block(tps, exp_get_sym(exp))</code>
+      es <code>FALSE</code> (ver <a href="80-objetos.html#Tipos">Tipos</a>),<br>  &nbsp;&nbsp;&nbsp;&nbsp; se añade a <code>tps</code> el simbolo de <code><i>exp</i></code> asociado a<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>str</code> si <code><i>exp2</i></code> es una cadena literal,<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>arr</code> si <code><i>exp2</i></code> es un array literal,<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>dic</code> si <code><i>exp2</i></code> es un diccionario literal.<br>  &nbsp;&nbsp;> Se lee el token ';'.<br>  &nbsp;&nbsp;> Se retorna una instrucción de asignación con el siguinte código.<br>      <code>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return token_is_equals(tk) ? stat_assign(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "+=") ? stat_add_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "-=") ? stat_sub_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "*=") ? stat_mul_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "/=") ? stat_div_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "%=") ? stat_mod_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : !strcmp(tk->value, "&amp;=") ? stat_and_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : stat_or_as(exp, exp2)<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;</code></p>
+<p>- Si <code><i>tk</i></code> es distinto de ';', de 'dos puntos' (:), de coma (,) y no es de
+    tipo asignación, se lanza una excepción.</p>
+</dd>
+</ol>
+<h4>función <i>read_multi</i></h4>
+<p>Esta función lee una asignación múltiple. Para ello construye un array de
+expresiones tipo símbolo, que puede tener elementos con expresiones vacías
+(<code>exp_empy</code>).</p>
+<p>Inicialmente se comprueba si el símbolo (índice) enviado como parámetro
+es igual a '-1', en tal caso el array de expresiones de símbolo se inicializa
+con una expresión vacía. En otro caso dicho array se inicializa vacío.</p>
+<p>A continuación se van leyendo sucesivos símbolos separados por comas y
+eventualmente precedidos por una declación de módulo (<i>:modulo</i>). En en caso
+de ser precedidos por dicha declaración, se actualiza el archivo <code>tps</code>.</p>
+<p>La lectura finaliza al encontar:</p>
+<ul>
+<li>
+<p>Un signo igual seguido de (;):<br>  Se retorna una instrucción de tipo <i>array_multi</i> que contiene una
+  enumeración numérica.</p>
+</li>
+<li>
+<p>Un signo igual seguido de una expresión y (;):<br>  Se retorna una instrucción de tipo <i>array_multi</i> que contiene una
+  asignación múltiple de 'array'.</p>
+</li>
+<li>
+<p>Un signo 'dos puntos' (:) seguido de (;):<br>  Se retorna una instrucción de tipo <i>dic_multi</i> que contiene una
+  enumeración de 'strings'.</p>
+</li>
+<li>
+<p>Un signo 'dos puntos' (:) seguido de una expresión y (;):<br>  Se retorna una instrucción de tipo <i>dic_multi</i> que contiene una
+  asignación múltiple de 'dictionary'.</p>
+</li>
+</ul>
+<p>Si después de leer un símbolo no se encuentra (,), (:) ni (=) se lanza una
+excepción.</p>
+<h4>función <i>st_in_read</i></h4>
+<p>Lee una instrucción que completa bloques 'try', 'if', 'while', 'for' y
+'switch'.</p>
+<p>Si dicha instrucción es un cierre de bloque (}), un 'import' o un final
+de archivo, se lanza una excepción.</p>
+<p>En otro caso se devuelve la instrucción leida.</p>
+<a name="Lector de expresión"></a>
+<h3>Lector de expresión</h3>
+<p>(Archivos <code>reader/ex_reader.h</code> y <code>reader/ex_reader.c</code>)</p>
+<p>Lee una expresión con las funciones:</p>
+<ol>
+<dt>ex_reader_read1</dt>
+<dd>
+<p>Que lee una expresión simple (sin operadores ni
+  <a href="03-lector.html#Lector de expresión extendida">extensión</a>.</p>
+</dd>
+<dt>ex_reader_read</dt>
+<dd>
+<p>Que lee una expresión completa.</p>
+</dd>
+</ol>
+<h4>ex_reader_read1</h4>
+<p>Lee y retorna una <a href="81-clases.html#Expresión">expresión</a>
+buscando sucesivamente:</p>
+<ul>
+<li>
+<p>Expresión 'paréntesis' (PAR).</p>
+</li>
+<li>
+<p>Expressión 'unaria' (NOT, MINUS).</p>
+</li>
+<li>
+<p>Expresión 'corchete' (ARR, RANGE).</p>
+</li>
+<li>
+<p>Expresión 'llave' (DIC).</p>
+</li>
+<li>
+<p>Expresión 'función' (FUN). Se llama a las funciones:<br>  - <code>st_reader_read</code> para leer el código. <br>  - <code>function_new</code> para crear la función.</p>
+</li>
+<li>
+<p>Comentario. Lo salta y vuelve a llamar a <i>ex_reader_read1</i>.</p>
+</li>
+<li>
+<p>Sucesivamente BOOL, INT, FLOAT, STRING, SYMBOL Y SWITCH.</p>
+</li>
+</ul>
+<p>Si se ha encontrado una expresión, se retorna. En otro caso se lanza una
+excepción.</p>
+<h4>ex_reader_read</h4>
+<p>Se utliza la función <i>add_expressions</i> para crear un array de
+'expresiones-operador' (<i>[Exp, Token, Exp, Token ..., Exp]</i>). Esta
+función recibe un array vacío y funciona como sigue:</p>
+<blockquote>
+<p>Lee una expresión simple con <i>ex_reader_read1</i> y la extiende usando la
+  función <a href="03-lector.html#Lector de expresión extendida">pt_sq_pr_reader_read</a>.</p>
+<p>La añade al array de 'expresiones-operador'.</p>
+<ul>
+<li>
+<p>Si a continuación hay un operador binario se añade también y se vuelve a
+    llamar a <i>add_expressions</i>.</p>
+</li>
+<li>
+<p>En otro caso se retorna el array.</p>
+</li>
+</ul>
+</blockquote>
+<p>El array se va reduciendo llamando sucesivamente a las funciones
+<i>solve_level1</i> (<code>* / %</code>), <i>solve_level2</i> (<code>+ -</code>), <i>solve_level3</i>
+(<code>== != > >= &lt; &lt;=</code>) y <i>solve_level4</i> (<code>&amp; |</code>), para generar una expresión
+que incluya todos los operador por su nivel de precedencia. Esta expresión
+queda en el índice 0 de dicho array.</p>
+<p>Por último, con la expresión resultante tras ordenar los operadores
+binarios, se procesa el operador ternario (?), si aparece.</p>
+<p>La expresión resultante se retorna.</p>
+<a name="Lector de expresión extendida"></a>
+<h3>Lector de expresión extendida</h3>
+<p>(Archivos <code>reader/pt_sq_pr_reader.h</code> y <code>reader/pt_sq_pr_reader.c</code>)</p>
+<p>La única función de este archivo (<i>pt_sq_pr_reader_read</i>) completa una
+expresión simple de tipo 'simbolo' con operadores de máxima precedencia.
+Se procesa sequencialente:</p>
+<ul>
+<li>
+<p>Expresión 'punto' (PT).</p>
+</li>
+<li>
+<p>Expresión 'corchete' abreviada con (!) (SQ con valor <code>[0]</code>).</p>
+</li>
+<li>
+<p>Expresión 'cochete' noraml (SQ SLICE).</p>
+</li>
+<li>
+<p>Expresión 'paréntesis' (PR).</p>
+</li>
+</ul>
+<p>Si se encuentra una de tales expresiones, se vuelve a llamar a
+<i>pt_sq_pr_reader_read</i>. En otro caso se devuelve la expresión que
+se recibe como parámetro.</p>
+<hr>
+<p style="text-indent: 0px"><a href='02-comienzo.html'>Anterior (Comienzo)</a> · <a href="index.html">Índice</a> · <a href='04-comprobador.html'>Posterior (Comprobadores)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

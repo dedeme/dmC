@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Comprobadores</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='03-lector.html'>Anterior (Lector)</a> · <a href="index.html">Índice</a> · <a href='05-ejecutor.html'>Posterior (Ejecutor)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Comprobador de sintaxis'>Comprobador de sintaxis</a><br>
+<a href='#Comprobador de tipos'>Comprobador de tipos</a>
+</p>
+<hr>
+<a name="Comprobador de sintaxis"></a>
+<h3>Comprobador de sintaxis</h3>
+<p>(Archivos <code>checker/checker.h</code> y <code>checker/checker.c</code>)</p>
+<p>Se crea una capa de <code>Chksym</code> con los símbolos declarados en <code>heap0</code>.</p>
+<p>Con dicha capa se inicializa el objeto <a href="80-objetos.html#layers"><tt>layers</tt></a>.</p>
+<p>Con dicha capa y los 'imports' se chequea el código del módulo con
+<i>check_block</i>.</p>
+<h4>check_block</h4>
+<p>Si el bloque es interno, se añade una nueva capa de símbolos vacía.</p>
+<p>Cada instrucción de código se chequea para verificar el uso de variables.</p>
+<p>Terminado lo anterior, si el bloque es interno y hay símbolos definidos
+y no usados en la nueva capa añadida, se emite una advertencia.</p>
+<p>Las instrucciones de código se chequean añadiendo los nuevos símbolos en
+<code>layers</code> y checkeando su uso en las expresiones que ellas contienen.</p>
+<a name="Comprobador de tipos"></a>
+<h3>Comprobador de tipos</h3>
+<p>(Archivos <code>checker/tpchecker.h</code> y <code>checker/tpchecker.c</code>)</p>
+<p>Partiendo del módulo principal se va controlando que todas las definiciones
+exportadas de símbolos son antecedidas por un la línea de comentario <code>///</code>
+con una definición válida de tipo.</p>
+<p><i>NOTA</i>; Los tipos son indicativos, a los solos efectos de documentar el simbolo
+que tipifican. Por lo tanto el control que se hace es sintáctico y no tiene
+relación con el tipo real del símbolo (que, por otra parte, puede variar en
+diferentes momentos de la ejecución del código).</p>
+<p>También se controla el tipo de aquellos símbolos no exportados precedidos por el
+comentario <code>//:</code></p>
+<p>Cuando es conveniente expandir el comentario de definición de tipo más de una
+línea, se debe usar <code>//-</code> al comienzo de la nueva línea.</p>
+<h4>Contrucción de tipos.</h4>
+<p>Son tipos simples <code>b</code> (bool), <code>i</code> (int), <code>f</code> (float), <code>s</code> (string),
+<code>*</code> (indefinido) y <code>&lt;<i>identifier</i>></code> objeto.</p>
+<p>Son válidos tipos:</p>
+<div id="aceEditor-0" style="width: 650px;border-radius: 4px;border: 1px solid rgb(0,0,0);">/// Se exporta.
+/// s
+a = "v";
+
+// No se exporta.
+//: i
+n = 12;
+
+/// Se exporta.
+/// &lt;file>
+f = file.open("z");
+</div>
+<script>aceConf("aceEditor-0", "kut");</script>
+<p>Sean <code>T</code>, <code>T1</code>, <code>T2</code>, <code>T3</code> tipos válido entonces son válidos:</p>
+<ol>
+<dt>[T.]</dt>
+<dd>
+<p>Array de tipo <code>T</code>.</p>
+</dd>
+<dt>[T1, T2, T3]</dt>
+<dd>
+<p>Tupla de tres elementos de tipos <code>T1</code>, <code>T2</code> y <code>T3</code>.</p>
+</dd>
+<dt>{T.}</dt>
+<dd>
+<p>Diccionario de tipo <code>T</code>.</p>
+</dd>
+<dt>{label1: T1, label2: T2, label3: T3}</dt>
+<dd>
+<p>Diccionario con tres elementos etiquetados.</p>
+</dd>
+<dt>{T1, T2, T3}</dt>
+<dd>
+<p>Diccionario con tres elementos sin indicar la etiqueta.</p>
+</dd>
+<dt>(T1 | T2 | T2)</dt>
+<dd>
+<p>Tipo que puede ser <code>T1</code>, <code>T2</code> o <code>T3</code></p>
+</dd>
+<dt>\T1, T2, T3 -> T</dt>
+<dd>
+<p>Funcion con parámetros de tipo <code>T1</code>, <code>T2</code> y <code>T3</code> y que retorna una expresión
+  de tipo <code>T</code>.</p>
+</dd>
+<dt>\T1, T2, T3 -> ()</dt>
+<dd>
+<p>Funcion con parámetros de tipo <code>T1</code>, <code>T2</code> y <code>T3</code> y que no retorna ninguna
+  expresión.</p>
+</dd>
+</ol>
+<hr>
+<p style="text-indent: 0px"><a href='03-lector.html'>Anterior (Lector)</a> · <a href="index.html">Índice</a> · <a href='05-ejecutor.html'>Posterior (Ejecutor)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

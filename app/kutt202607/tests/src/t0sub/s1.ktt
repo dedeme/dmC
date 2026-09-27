@@ -1,0 +1,4 @@
+
+import "t0"  : t;
+
+v = "value";

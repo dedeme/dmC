@@ -1,0 +1,126 @@
+=
+title = Conventions
+=
+
+## Naming
+
+* To make visible several words we use 'camelCase': *theEnd*,
+  *severalWordsJoinTogether*, ...
+
+* Every symbol start with lowercase, except in Arrays and dictionaries that
+  starts with uppecase. (*Book* instead of *book*)
+
+* Array symbols, to be used as options, end in 'Op'. (*elementOp* instead of *element*)
+
+* Array symbols, to be used as variables, end in 'V'. (*ageV* instead of *age*)
+
+* Defined types of functions end in 'Fn'. (*searchFn* instead of *search*)
+
+## ! instead [0]
+
+To get or set Arrays used as options or variables we use '*!*' instead of
+'*\[0]*'.
+
+For example:
+
+``kutt
+
+a = ["s"];
+sys.println(a!); // instead of sys.println(a[0]);
+``
+
+## \abc instead ["abc"]
+
+To get or set dictionaries when the key is of symbol type and it is known that
+it exists, we use '*d\symbol*" instead of '*d\["symbol"]*'.
+
+In both cases, if the key does not exists in dictionary, an execption is
+thrown.
+
+Expample:
+
+``kutt
+
+d\k = 1_213; // instead of d["k"] = 1_213;
+sys.println(d\k); // instead of sys.println(d["k"]);
+``
+
+## Module mark
+
+Write '*:module*' instead of '*: module*'.
+
+## Skip module symbol
+
+Skip the module symbol in expressions when it is possible.
+
+Example:
+
+``kutt
+
+a = []/i/;
+a.push(23); // instead of arr.push(a, 23);
+
+p = person.new("Ana", 32);
+sys.println(p.age); // instead of sys.println(p[person.age]);
+``
+
+## Module order
+
+1. Copyright.
+
+2. Documentation summary.
+
+3. Imports.
+
+4. Type definitions.
+
+5. Constants.
+
+6. Enumerations.
+
+7. Indexeds.
+
+8. Functions.
+
+9. Main block.
+
+In each item write first internal and then exported elements.
+
+## Block order
+
+1. Inner functions.
+
+2. Rest.
+
+## Library
+
+We call library to a number of modules inside a parent directory which only
+have imports relative to the current module (that is, there are no imports
+relative to the parent directory).
+
+A library has not _main module_.
+
+# Naming
+
+Library names, by convention, should start with 'lib' and finish with its date
+if format YYYYMM.
+
+In special cases is allowed writing the date in format YYYYMMDD.
+
+Examples:
+
+*libmk202503*, *libmyLib202506*, *libcritical20260211*.
+
+Inside the parent directory should be included an empty file with the
+library name.
+
+# Usage
+
+Inside the parent directory of the main module a library can be integred:
+
+* Through a symbolic link.
+
+* Copying its modules in an empty subdirectory.
+
+The name of the link or directory should be the same of the library, without the
+date.

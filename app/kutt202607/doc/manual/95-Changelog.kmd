@@ -1,0 +1,19 @@
+=
+title = Changelog
+=
+
+\[ Version 202607 ]
+
+## try - break - continue - return
+
+# break and continue
+
+When a *try* block is inside of a loop, *break* and *continue* can not be
+used.
+
+Nevertheless *break* and *continue* work when the loop is inside of a *try*
+block. They also work ever inside *catch* blocks.
+
+# return
+
+Fixed return inside of nested *try* blocks.

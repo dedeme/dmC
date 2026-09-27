@@ -1,0 +1,11 @@
+zero, one,, three =;
+,, two =;
+sys.assert(zero == 0);
+sys.assert(one == 1);
+sys.assert(two == 2);
+sys.assert(three == 3);
+
+a, b, c :;
+sys.assert(a == "a");
+sys.assert(b == "b");
+sys.assert(c == "c");

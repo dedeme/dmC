@@ -231,10 +231,11 @@ r = r || (((Val (*)(Val))fn.o)(v)).b;
 }
 return (Val)r;
 }
-void __arr_clear (Val a) {
+Val __arr_clear (Val a) {
 a.a->end = a.a->begin;
+return a;
 }
-void __arr_cat (Val a, Val a2) {
+Val __arr_cat (Val a, Val a2) {
 int64_t other_size = __arr_size(a2).i;
 if (other_size) {
 int64_t this_size = __arr_size(a).i;
@@ -251,6 +252,7 @@ Val *t = a.a->end;
 while (s < s_end) *t++ = *s++;
 a.a->end = t;
 }
+return a;
 }
 Val __arr_cat2 (Val a, Val a2) {
 Val r = __arr_copy(a);
@@ -342,7 +344,7 @@ if ((((Val (*)(Val))fn.o)(e)).b) __arr_push(r, e);
 }
 return (Val)r;
 }
-void __arr_filterIn (Val a, Val fn) {
+Val __arr_filterIn (Val a, Val fn) {
 Val *p = a.a->begin;
 Val *end = a.a->end;
 Val *new_end = p;
@@ -351,6 +353,7 @@ Val e = *p++;
 if ((((Val (*)(Val))fn.o)(e)).b) *new_end++ = e;
 }
 a.a->end = new_end;
+return a;
 }
 Val __arr_find (Val a, Val fn) {
 Val *p = a.a->begin;
@@ -398,7 +401,7 @@ if ((((Val (*)(Val))fn.o)(*p++)).b) return (Val)i;
 }
 return (Val)(int64_t)-1;
 }
-void __arr_insert (char *pos, Val a, Val ix, Val e) {
+Val __arr_insert (char *pos, Val a, Val ix, Val e) {
 int64_t size = __arr_size(a).i;
 if (ix.i < 0 || ix.i > size)
 ___built_throw(pos, (Val)str_f("index %d out of [0,%d]", ix.i, size));
@@ -410,11 +413,13 @@ while (p > pix) {
 --p;
 }
 *p = e;
+return a;
 }
-void __arr_insertArr (char *pos, Val a, Val ix, Val other) {
+Val __arr_insertArr (char *pos, Val a, Val ix, Val other) {
 __arr_insertRange(pos, a, ix, other, (Val)0, __arr_size(other));
+return a;
 }
-void __arr_insertRange (char *pos, Val this, Val ix, Val other, Val begin, Val end) {
+Val __arr_insertRange (char *pos, Val this, Val ix, Val other, Val begin, Val end) {
 int64_t this_len = __arr_size(this).i;
 if (ix.i < 0 || ix.i > this_len)
 ___built_throw(pos, (Val)str_f("index %d out of [0,%d]", ix.i, this_len));
@@ -426,7 +431,7 @@ ___built_throw(pos, (Val)str_f("begin(%d) < 0", begin.i));
 if (end.i > other_size)
 ___built_throw(pos, (Val)str_f("end(%d) > size(%d)", end.i, other_size));
 int64_t other_len = end.i - begin.i;
-if (!other_len) return;
+if (!other_len) return this;
 int64_t new_len = this_len + other_len;
 int64_t new_size = new_len + 15;
 Val *new_begin = GC_MALLOC(new_size * sizeof(Val));
@@ -440,6 +445,7 @@ sizeof(Val) * (__arr_size(this).i - ix.i)
 this.a->begin = new_begin;
 this.a->end = new_begin + new_len;
 this.a->end_bf = new_begin + new_size;
+return this;
 }
 Val __arr_join(Val a, Val sep) {
 Buf *bf = buf_new();
@@ -499,7 +505,7 @@ int64_t size = __arr_size(a).i;
 if (size == 0) ___built_throw(pos, (Val)"Array is empty");
 return *(a.a->end-- - 1);
 }
-void __arr_push (Val a, Val el) {
+Val __arr_push (Val a, Val el) {
 Varr *this = a.a;
 if (this->end == this->end_bf) {
 int size = this->end_bf - this->begin;
@@ -509,6 +515,7 @@ this->end = this->begin + size;
 this->end_bf = this->begin + new_size;
 }
 *this->end++ = el;
+return a;
 }
 Val __arr_reduce (Val a, Val seed, Val fn) {
 Val *p = a.a->begin;
@@ -550,7 +557,7 @@ Val r = __arr_copy(a);
 __arr_reverseIn(r);
 return r;
 }
-void __arr_reverseIn (Val a) {
+Val __arr_reverseIn (Val a) {
 int64_t sz = __arr_size(a).i;
 Val *p = a.a->begin;
 Val *end = a.a->end - 1;
@@ -560,9 +567,11 @@ tmp = *p;
 *p++ = *end;
 *end-- = tmp;
 }
+return a;
 }
-void __arr_set (Val a, Val ix, Val el) {
+Val __arr_set (Val a, Val ix, Val el) {
 a.a->begin[ix.i] = el;
+return a;
 }
 void __arr_set2 (char *pos, Val a, Val ix, Val el) {
 Varr *arr = a.a;
@@ -572,10 +581,10 @@ if (i < 0 || i >= sz)
 ___built_throw(pos, (Val)str_f("index %d out of [0,%d]", i, sz - 1));
 arr->begin[i] = el;
 }
-void __arr_setArr (char *pos, Val a, Val ix, Val other) {
-__arr_setRange(pos, a, ix, other, (Val)0, __arr_size(other));
+Val __arr_setArr (char *pos, Val a, Val ix, Val other) {
+return __arr_setRange(pos, a, ix, other, (Val)0, __arr_size(other));
 }
-void __arr_setRange (char *pos, Val this, Val ix, Val other, Val begin, Val end) {
+Val __arr_setRange (char *pos, Val this, Val ix, Val other, Val begin, Val end) {
 int64_t this_len = __arr_size(this).i;
 int64_t other_size = __arr_size(other).i;
 if (ix.i < 0 || ix.i > this_len - other_size)
@@ -589,10 +598,11 @@ ___built_throw(pos, (Val)str_f("begin(%d) < 0", begin.i));
 if (end.i > other_size)
 ___built_throw(pos, (Val)str_f("end(%d) > size(%d)", end.i, other_size));
 int64_t other_len = end.i - begin.i;
-if (!other_len) return;
+if (!other_len) return this;
 Val *target = this.a->begin + ix.i;
 Val *source = other.a->begin + begin.i;
 memcpy(target, source, sizeof(Val *) * other_len);
+return this;
 }
 Val __arr_shift (char *pos, Val a) {
 int64_t size = __arr_size(a).i;
@@ -604,7 +614,7 @@ Val *end = a.a->end--;
 while (p1 < end) *p++ = *p1++;
 return r;
 }
-void __arr_shuffle (Val a) {
+Val __arr_shuffle (Val a) {
 int64_t size = __arr_size(a).i;
 Val *begin = a.a->begin;
 Val *p = a.a->end - 1;
@@ -615,11 +625,12 @@ tmp = *p;
 *p-- = *pix;
 *pix = tmp;
 }
+return a;
 }
 Val __arr_size (Val a) {
 return (Val)(a.a->end - a.a->begin);
 }
-void __arr_sort (Val a, Val fn) {
+Val __arr_sort (Val a, Val fn) {
 Val (*less0)(Val, Val) = (Val (*)(Val, Val))fn.o;
 int less (Val e1, Val e2) {
 return less0(e1, e2).b;
@@ -667,6 +678,7 @@ else *pa++ = *pa1++;
 }
 }
 sort(a.a->begin, __arr_size(a).i);
+return a;
 }
 Val __arr_sub (Val a, Val begin, Val end) {
 if (begin.i < 0) begin = (Val)(__arr_size(a).i + begin.i);
@@ -723,7 +735,7 @@ Val *end = va->end;
 while (p < end) arr_push(r, (*p++).s);
 return r;
 }
-void __arr_unshift (Val a, Val e) {
+Val __arr_unshift (Val a, Val e) {
 __arr_push(a, e);
 Val *p = a.a->end;
 Val *pix = a.a->begin;
@@ -732,6 +744,7 @@ while (p > pix) {
 --p;
 }
 *p = e;
+return a;
 }
 Val __arr_unzip (Val a) {
 Val a1 = __arr_new();
@@ -1600,6 +1613,9 @@ return (Val)asinh(n.f);
 Val __math_atan (Val n) {
 return (Val)atan(n.f);
 }
+Val __math_atan2 (Val y, Val x) {
+return (Val)atan2(y.f, x.f);
+}
 Val __math_atanh (Val n) {
 return (Val)atanh(n.f);
 }
@@ -1753,6 +1769,29 @@ return (Val)trunc(n.f);
 
 
 // -------------------------------------
+//plugin
+// -------------------------------------
+
+void __plugin_close (Val pl) {
+dlclose(pl.o);
+}
+Val __plugin_exec (char *pos, Val rt, Val pl, Val fn, Val vs) {
+void *handle = pl.o;
+char *fns = fn.s;
+Val (*bfn)(Val) = (Val(*)(Val)) dlsym(handle, fns);
+if (!bfn)
+___built_throw(pos, (Val)(str_f("%s", dlerror())));
+return bfn(vs);
+}
+Val __plugin_open (char *pos, Val path) {
+void *handle = dlopen(path.s, RTLD_NOW);
+if (!handle)
+___built_throw(pos, (Val)(str_f("%s", dlerror())));
+return (Val)(void *)handle;
+}
+
+
+// -------------------------------------
 //regex
 // -------------------------------------
 
@@ -1820,6 +1859,17 @@ return (Val)(int64_t)strcoll(s1.s, s2.s);
 }
 Val __str_ends (Val str, Val substr) {
 return (Val)str_ends(str.s, substr.s);
+}
+void __str_erase (char *pos, Val str) {
+TRY {
+str_erase(str.s);
+} CATCH(e) {
+e = e;
+___built_throw(pos, (Val)str_f(
+"CONSTANT '%s' can not be erased.",
+str.s
+));
+}_TRY
 }
 Val __str_fmt (char *pos, Val format, Val args) {
 char *fmt = format.s;

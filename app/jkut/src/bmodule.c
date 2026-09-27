@@ -15,10 +15,10 @@ static char *bmods[] = {
 static char *md_arr[] = {
   "all", "any", "cat", "concat", "clear", "copy", "drop", "dropWhile",
   "duplicates", "each", "eachIx", "eachSync", "filter", "filterIn", "find",
-  "fromIter", "index", "insert", "insertArr", "join", "map", "mk", "peek",
-  "pop", "reduce", "remove", "removeRange", "push", "reverse", "reverseIn",
-  "shift", "shuffle", "size", "sort", "take", "takeWhile", "toIter",
-  "unshift",
+  "fromIter", "index", "insert", "insertArr", "join", "map", "mapIx", "mk",
+  "peek", "pop", "reduce", "remove", "removeRange", "push", "reverse",
+  "reverseIn", "shift", "shuffle", "size", "sort", "take", "takeWhile",
+  "toIter", "unshift", "zip",
   NULL
 };
 
@@ -105,9 +105,9 @@ static char *md_timer[] = {
 };
 
 static char *md_ui[] = {
-  "alert", "beep", "changePoint", "confirm", "field", "hrule", "ifiles",
-  "img", "led", "lightImg", "link", "mouseX", "mouseY", "pass", "prompt",
-  "q", "qOp", "qq", "select", "upload", "upTop", "url",
+  "alert", "beep", "changePoint", "confirm", "downloadFile", "downloadText",
+  "field", "hrule", "ifiles", "img", "led", "lightImg", "link", "mouseX",
+  "mouseY", "pass", "prompt", "q", "qOp", "qq", "select", "upTop", "url",
   NULL
 };
 

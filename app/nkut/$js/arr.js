@@ -178,6 +178,16 @@ export function map (a, fn) {
   return r;
 }
 
+// \a, (\*,n->*) -> a
+export function mapIx (a, fn) {
+  sys.$params(arguments.length, 2);
+  sys.$fparams(fn, 2);
+  const r = [];
+  r.length = a.length;
+  for (let i = 0; i < a.length; ++i) r[i] = fn(a[i], i);
+  return r;
+}
+
 // \n, * -> a
 export function mk (n, e) {
   sys.$params(arguments.length, 2);
@@ -318,15 +328,17 @@ export function unshift (a, e) {
 /// \[[*.].] -> [[*.].]
 export function zip (a) {
   sys.$params(arguments.length, 1);
-  if (a.length < 2) return a;
-  let nels = a[0].length;
-  for (let i = 1; i < a.length; ++i)
-    if (a[i].length < nels) nels = a[i].length;
+  if (a.length == 0) return [];
+  let size = a[0].length;
+  for (let i = 1; i < a.length; ++i) {
+    const sz = a[i].length;
+    if (sz < size) size = sz;
+  }
   const r = [];
-  for (let i = 0; i < nels; ++i) {
+  for (let  i = 0; i < size; ++i) {
     const row = [];
     for (let j = 0; j < a.length; ++j) row.push(a[j][i]);
-    r.push(row);
+    r.push(row)
   }
   return r;
 }

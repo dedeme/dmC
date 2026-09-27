@@ -1,0 +1,11 @@
+n = 4;
+sys.assert (n + 2 == 6);
+
+fn1 = \n -> return \i -> return n + i;;;
+sys.assert(fn1(3)(2) == 5);
+
+fn2 = \v, f -> return f(v);;
+sys.assert(fn2(4, \n -> return n * 2;) == 8);
+
+sys.assert(\n -> return n * n;(3) == 9);
+

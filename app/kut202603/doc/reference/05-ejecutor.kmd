@@ -1,0 +1,339 @@
+=
+title = Ejecutor
+=
+
+## Runner
+
+(Archivos *runner/runner.h* y *runner/runner.c*)
+
+Exporta dos funciones:
+
+* _runner__run_. Que ejecuta un array de instrucciones (bloque).
+
+* _runner__run__stat_. Que ejecuta un sola instrucción.
+
+# runner_run
+
+Recibe los siguientes parámetros:
+
+  - *isTop*: TRUE si el código pertenece al bloque principal del módulo.\
+  - [81-clases.html#Stack](<tt>stack__trace</tt>)\
+  - [81-clases.html#Importaciones](<tt>imports</tt>)\
+  - [81-clases.html#Heap0](<tt>hp0</tt>)\
+  - [81-clases.html#Heaps](<tt>heaps</tt>)\
+  - *code*: Array de instrucciones a ejecutar que corresponde a un 'bloque'.
+
+*code* puede estar vacío.
+
+Si *isTop* != TRUE, se añande un nuevo [81-clases.html#Heap](heap) a *heaps*.
+
+A continuación se procesa cada instrucción de *code* con _runner__run__stat_.
+
+Una vez procesadas todas se retorna una expresión vacía (_exp__empty_)
+
+Si el procesamiento de una instruccion devuelve un valor distinto de
+la expresión vacía, el bucle de ejecución de instrucciones se detiene y
+se retorna la expresión devuelta (BREAK, CONTINUE o una enviada con 'return').
+
+# runner_run_stat
+
+Recibe los siguientes parámetros:
+
+  - *stk*: [81-clases.html#Stack](Stack)\
+  - *is*: [81-clases.html#Importaciones](Imports)\
+  - *h0*: [81-clases.html#Heap0](Heap0)\
+  - *hs*: [81-clases.html#Heaps](Heaps)\
+  - *st__cd*: [81-clases.html#StatCode](Instrucción).
+
+Primero añade *st__cd* a *stk*.
+
+A continuación crea una expresión vacia (_exp__empty_) *exp*.
+
+Por último se invoca una función de procesamiento en base a la instrución
+simple [81-clases.html#Stat](<tt>st</tt>) extraida de *st__cd*.
+
+Con el resultado de la citada función se modifica *exp*, que finalmente se
+retorna. Esta función [#Solver](resuelve) expresiones cuando procede.
+
+La invocación de la función se hace en el siguiente orden, dependiendo del
+tipo de *st*.
+
+- BLOCK_CLOSE
+> Se emite una excepción.
+
+- BREAK
+> Se modifica *exp = exp__break*
+
+- CONTINUE
+> Se modifica *exp = exp__continue*
+
+- RETURN
+> Se modifica *exp = freturn*.\
+  _freturn_ extrae la expresión de *st*, la _resuelve_ y la retorna.
+
+- TRACE
+> Se utiliza la función *trace(is, h0, hs, st__cd)* para mostrar por pantalla
+  el mensaje de *st*.
+
+- FUNCTION
+> Se utiliza la función *func__call(is, h0, hs, st)* que a su vez llama
+  a *_function__run_*, si *st* contiene una
+  [81-clases.html#Función](función), o directamente a la
+  [81-clases.html#Bfunctión](bfunction) contenida
+  en *st*, si tal es el caso, descartando el retorno que pudieran tener.
+
+- BLOCK
+> Se invoca la función *runner__run* con las instrucciones de bloque.
+
+- ARRAY_MULTI y DIC_MULTI
+> Asignación múltiple que utiliza la función *assign__multi*. Esta crea y
+  resuelve una instrucción intermedia con los índices o las claves
+  correspondientes de la parte derecha de la asignación. Con dicha instrucción
+  se asignan y resuelven las diversas variables de la de la asignación
+  múltiple.\
+  \
+  Para realizar las asignaciones se utiliza la función *assign*.
+
+- ASSIGN
+> Utiliza la función *assign* que aborda tres casos:\
+  \
+  _Asignación a símbolo_: Se resuelve el valor a asignar y se vincula al
+  símbolo en *hs*. Previamente se comprueba que el símbolo no haya sido ya
+  utilizado, salvo en el bloque principal, donde ya se comprobó al añadirlo
+  al *h0* en el [03-lector.html#Lector del bloque principal](proceso de lectura).\
+  \
+  _Asignación a contenedor (ct\[[]] = ...)_: Se resuelve la parte de la
+  izquierda de la asignación obteniendo el contenedor el índice o clave. Con
+  esos datos se modifica el valor del contendor con el resultado de resolver la
+  la parte derecha de la asignación.\
+  \
+  _Asignación a diccionario (dc.clave = ...)_: Se resuelve el símbolo del
+  dicionario y con la clave indicda se modifica el valor correspondiente con
+  el valor de resolver la parte derecha de la asignación.
+
+- ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS y ORAS.
+> Se procesan con la función *assign__xxx* que funciona de manera similar
+  a la recien vista función *assign* para los casos de contenedor y
+  diccionario.
+
+- TRY
+> Se procesa con la función *try* que utiliza *runner__run__stat* para
+  ejecutar las instrucciones _try_, _catch_ y _finally_.
+
+- WHILE
+> Distinge el caso en que no hay expresión de control, que funciona como
+  un bucle infinito, y aquel en el que existe. Se utilizan las funciones
+  *solve__solver* y *runner__run__stat* para resolver la expresión de
+  control y ejecutar las instrucciones del bloque respectivamente.
+
+- IF
+> Utiliza las funciones *solve__solver* y *runner__run__stat* para resolver
+  la condición de control y ejecutar las instrucciones del bloque
+  respectivamente.
+
+- FOR, FOR_IX
+> Utiliza la función *solver__solver* para resolver el objeto container del
+  bucle. A continuación, dependiendo del tipo del container ('array',
+  diccionario, 'string' o iterador) va ejecutando el bloque de código con el valor
+  correspondiente (elemento del 'array', diccionario o iterador, o
+  caracter-byte) y el índice en su caso. El índice es número, empezando con
+  '0', en 'array', 'string' e 'iterator' y es 'string' (key) en diccionario.\
+  \
+  El código del bucle se interrumpe si el retorno de su ejeción no es vacío o
+  es 'break'. En caso de que el retorno sea vacío o 'continue', se vuelve a
+  ejecutar el código, hasta que los elementos del container se agotan.\
+  \
+  _NOTA_; Los símbolos intermedios (para el índice y el elemento del container)
+  se añaden a un heap intermedio entre el bloque principal y el del bucle.
+
+- FOR_R, FOR_RS
+> Utiliza la función *solver__solver* var obtener el valor inicial, final y el salto que
+  determinan el comportamento del índice (un entero).\
+  \
+  En el caso FOR__R el salto es igual a '1' y el indice va desde el valor
+  inicial (inclusive) hasta el final (exclusive).\
+  \
+  En el caso FOR__RS el salto no puede ser '0', y el índice va desde del valor
+  inicial (inclusive) hasta el final (inclusive).\
+  \
+  El código del bucle se interrumpe si el retorno de su ejeción no es vacío o
+  es 'break'. En caso de que el retorno sea vacío o 'continue', se vuelve a
+  ejecutar el código, hasta que el recorrido del índice se agota.\
+  \
+  _NOTA_; El símbolo intermedio para el índice se añade a un heap intermedio
+  entre el bloque principal y el del bucle.
+
+- SWITCH
+> Utiliza la función *solver__solver* para resolver el símbolo principal, así
+  como los sucesivos símbolos que se comparan con 'exp__eq'. Sin embargo la
+  propia expresión 'exp__eq' se resuelve con *solver__solve__isolate* pues al
+  haber sido resueltos previamente sus dos elementos, ya no es necesario
+  utilizar los símbolos de importaciones y heaps.\
+  \
+  Cuando la condición de una entrada del 'switch' retorna el valor 'true',
+  su instrucción asociada se ejecuta y el bloque 'switch' termina.\
+  \
+  Puede haber una condición 'default' opcional, cuya instrucción asociada se
+  ejecutará si el flujo del 'switch' la alcanza.
+
+
+## Solver
+
+(Archivos *runner/solver.h* y *runner/solver.c*)
+
+# solve_isolate
+
+Resuleve una expresión sin utilizar los símbolos registrados en 'imports' y
+'heaps'.
+
+# solve
+
+Recibe lo siguientes parámetros:
+
+Imports *\[*]is*, Heap0 *\[*]h0 *, Heaps *\[*]hs* y Exp *\[*]exp*.
+
+Resuelve una expresión realizando los cálculos necesarios, de manera que
+retorna una nueva expresión 'simple'.
+
+Una expresión simple es una de las siguientes:
+
+* BOOL, INT, FLOAT, STRING, OBJECT, FUNC.
+
+* ARR cuyos elementos son expresiones simples.
+
+* DIC cuyos elementos son expresiones simples.
+
+Las expresiones son resueltas como sigue:
+
+- BOOL, INT, FLOAT, STRING, OBJECT
+> Se retorna misma expresión de entrada.
+
+- ARR, DIC
+> Se resuleve cada elemento y se devuelve un array con las expresiones
+  resueltas.
+
+- FUNC
+> Se devuelve la misma función de entrada, pero añadiéndola previamente
+  el actual contexto ('imports' y 'heaps').
+
+- SYM
+> - Si el símbolo está en *hs*, se retorna su valor.\
+  \
+  - Si el símbolo está en *h0*, se comprueba que no sea una referencia
+    cíclica, se resuelve y se añade a *hs* apuntando a su resulución.\
+  \
+  - Si el símbolo está en imports:\
+  ··> Si el módulo correspodiente ha sido leido, se retorna este (como objeto).\
+  ··> En otro caso se lee y ejecuta el módulo correspondiente, devolviéndose
+      el módulo leido como objeto.\
+  \
+  - Si el módulo es un 'built-in' módulo, se devuelve como objeto.\
+  \
+  - En otro caso se lanza un excepción indicando que el símbolo no se encuentra.
+
+- RANGE
+> Se resuelven los valores 'start', 'end' and 'step' y se devuelve un objeto
+  iterator cuya función de iteración se ajusta según el valor de 'step'.
+
+- PT
+> Se resuelve la primera expresión.\
+  \
+  - Si la expresión es un módulo 'de usuario'.\
+  ··> Si la segunda expresión es un símbolo exportado, se retorna su valor
+      resuelto en el entorno de módulo al que pertence.\
+  ··> En otro caso se lanza un excepción.\
+  \
+  - Si la expresión es un módulo 'built-in', se retorna la correspondiente
+    'bfunction' *_modulo.función_* como objeto. Si la 'bfunction' no existe,
+    se lanza una excepción.\
+  \
+  - Si la expresión es un diccionario, se retorna el valor correspondiente
+    a *dic.key*. Si la clave no existe, se lanza una excepción. El valor
+    devuelto no se resuelve, porque ya lo fué cuando se resolvió el diccionario.
+
+- SQ
+> Se resuelve la primera expresión.\
+  \
+  - Si la expresión es una 'string' o un 'array', se resuelve la segunda
+    expresión como un entrero y se devuelve ct\[[]ix].\
+  \
+  - Si la expresión es un diccionario, se resuelve la segunda expresión como
+    una 'string' y se devuelve ct\[[]ix].\
+  \
+  _NOTA_ El valor devuelto no se resuelve, porque ya lo fué cuando se
+  resolvió su contenedor.
+
+- SLICE
+> Se resuelven el contenedor ('string' o 'array') y los índices
+  correspondientes, Retornándose una 'substring' o un 'subarray', eventualmente
+  vacíos.
+
+- PR
+> Se resuleve la función y los parámetros. Si la función es una 'bfunction',
+  se ejecuta directamente con los parámetros. Si es un función 'de usuario',
+  se ejecuta con [81-clases.html#Función](function_run).
+
+- SWITCH
+> Se resuelve el símbolo principal así como los sucesivos símbolos de las
+  entradas, que se comparan con 'exp__eq'. Sin embargo la propia expresión
+  'exp__eq' se resuelve con *solver__solve__isolate* pues al haber sido
+  resueltos previamente sus dos elementos, ya no es necesario utilizar los
+  símbolos de importaciones y heaps.\
+  \
+  Cuando la condición de una entrada del 'switch' retorna el valor 'true',
+  su expresion asociada se resuelve y retorna.\
+  \
+  Tiene que haber una condición 'default' al final de todas las demas. Su
+  expresión asociada se retornará cuando ninguna condición previa se haya
+  cumplido.
+
+- NOT, MINUS
+> Se aplican las funciones sobre la resolución de la expresión currespondiente.
+  Devuelven una expresión del mismo tipo que la expresión procesada.
+
+- ADD
+> Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser del mismo tipo que, además, será el tipo de retorno. ADD es aplicable
+  a enteros, 'floats', 'strings' y 'arrays'. En este caso retornar un nuevo
+  'array' con una copia superficial (punteros) de los arrays concatenados.
+
+- SUB, MUL, DIV.
+> Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser del mismo tipo que, además, será el tipo de retorno. Estas
+  funciones se aplican a enteros y 'floats'.
+
+- MOD
+> Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser de tipo entero, igual que lo será el tipo de retorno.
+
+- AND
+> Sus dos parámetros deben ser booleanos. Se resuleve el primer parámetro.
+  Si su valor es *false* se retorna *false*. En otro caso se resuleve y retorna
+  el segundo parámetro.
+
+- OR
+> Sus dos parámetros deben ser booleanos. Se resuleve el primer parámetro.
+  Si su valor es *true* se retorna *true*. En otro caso se resuleve y retorna
+  el segundo parámetro.
+
+- EQ, NEQ
+> Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  habrán de ser del mismo tipo, y su resultado es de tipo booleano. Estas
+  funciones se aplican a boolean, enteros, 'floats', 'strings', 'arrays' y
+  diccionarios.\
+  \
+  Para la igualdad, en 'arrays' se requiere que todos los elementos sean
+  iguales y estén en el mismo orden.\
+  \
+  En diccionarios, solo se requiere que todas las claves y sus elementos
+  asociados sean iguales; pero no que tengan el mismo orden.
+
+- GREATER, GREATER_EQ, LESS, LESS_EQ
+> Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  habrán de ser del mismo tipo, y su resultado es de tipo booleano. Estas
+  funciones se aplican a boolean (true > false), enteros, 'floats' y 'strings'.
+
+- TERNARY
+> Se resuelve la condición. Si resulta *true* se resuelve la primera
+  expresión y se retorna. En otro caso se resuelve la segunda y se retorna.
+

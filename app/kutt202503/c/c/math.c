@@ -32,6 +32,11 @@ Val __math_atan (Val n) {
 }
 
 // f->f
+Val __math_atan2 (Val y, Val x) {
+  return (Val)atan2(y.f, x.f);
+}
+
+// f->f
 Val __math_atanh (Val n) {
   return (Val)atanh(n.f);
 }

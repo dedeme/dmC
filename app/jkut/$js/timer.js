@@ -27,9 +27,10 @@ export async function run (t, fn) {
   if (!t[0]) throw new Error('Timer has been stopped');
 
   async function loop () {
-    const r = await delay(t[1], fn);
-    if (t[0]) return loop();
-    else return r;
+    while (true) {
+      const r = await delay(t[1], fn);
+      if (!t[0]) return r;
+    }
   }
 
   return await loop();

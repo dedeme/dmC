@@ -1,0 +1,179 @@
+V = [0];
+
+// Without exception.
+try {
+  V[0] += 1;
+} catch (e) {
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 5);
+
+// With cached exception.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+} finally {
+  V[0] += 4;
+}
+sys.assert(V[0] == 6);
+
+// With cached exception and without finally.
+V[0] = 0;
+try {
+  sys.throw("fail");
+  V[0] += 1;
+} catch (e) {
+  sys.assert(e[:4] == "fail");
+  V[0] += 2;
+}
+sys.assert(V[0] == 2);
+
+// Rethrowing a cached exception.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    sys.throw("error");
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 12);
+
+// Throwing a exception in the finally block.
+V[0] = 0;
+try {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+  } finally {
+    sys.throw("error");
+    V[0] += 4;
+  }
+} catch (e) {
+  sys.assert(e[:5] == "error");
+  V[0] += 8;
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 10);
+
+// Loop without exception and break in the try block.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    V[0] += 1;
+    break;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 5);
+
+// Loop without exception and continue in the try block.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    continue;
+    V[0] += 1;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 12);
+
+// Loop with excetion cached and break.
+V[0] = 0;
+while (V[0] < 9) {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    break;
+  } finally {
+    V[0] += 4;
+  }
+}
+sys.assert(V[0] == 6);
+
+// Try without exception and with return.
+V[0] = 0;
+fn0 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn0();
+sys.assert(V[0] == 5);
+
+// Try with cached exception and with return in the catch block.
+V[0] = 0;
+fn1 = \ -> {
+  try {
+    sys.throw("fail");
+    V[0] += 1;
+  } catch (e) {
+    sys.assert(e[:4] == "fail");
+    V[0] += 2;
+    return;
+  } finally {
+    V[0] += 4;
+  }
+};
+fn1();
+sys.assert(V[0] == 6);
+
+// Try with returns in the try and finally blocks.
+V[0] = 0;
+fn2 = \ -> {
+  try {
+    V[0] += 1;
+    return;
+  } catch (e) {
+    V[0] += 2;
+  } finally {
+    return;
+    V[0] += 4;
+  }
+};
+fn2();
+sys.assert(V[0] == 1);
+

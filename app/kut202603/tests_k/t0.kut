@@ -1,0 +1,29 @@
+f5 = \-> {
+  tx = "accdfsfegsfe";
+  code = cryp.key(tx, 250);
+  len = str.len(code[:31]);
+  R = [215];
+  {
+    R! = len / 3;
+  }
+  return R!;
+};
+f4 = \-> return f5();;
+f3 = \-> return f4();;
+f2 = \-> return f3();;
+f1 = \-> return f2();;
+f0 = \-> return f1();;
+
+tm = time.now();
+
+Sum = [0];
+for (i = 0 : 5_000) {{{{
+  Sum! += f0() + (i / (i + 1));
+}}}}
+
+sys.assert(time.now() - tm < 300);
+sys.test(Sum!, 50000);
+
+v = sys.checkVersion("", {});
+sys.test(mFILE, "/home/deme/dm/dmC/app/kut" + v + "/tests_k/t0.kut");
+sys.checkVersion(v, {});

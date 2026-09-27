@@ -1,0 +1,11 @@
+import "rPet";
+
+(person) [. isss ];
+
+//: (person)
+new : age, sound, name, idc;
+
+//: [(rPet)|(person)]
+fromRPet = \:rPet p -> return new(p.age, p.sound, p.name, sys.toStr(p.id));;
+
+enum0, enum1,,enum3 =;

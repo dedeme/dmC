@@ -1,0 +1,32 @@
+A1 = [];
+sys.assert(arr.size(A1) == 0);
+
+A2 = [100, 101, "tx", 103, 104, true, 106];
+A2b = [100, 101, "tx", 103, 104, true, 106];
+sys.assert(A2 == A2b);
+sys.assert(arr.size(A2) == 7);
+
+sys.assert(A2[1:4] == [101, "tx", 103]);
+sys.assert(A2[4] == 104);
+sys.assert (A2[:] == [100, 101, "tx", 103, 104, true, 106]);
+sys.assert (A2[:2] == [100, 101]);
+sys.assert (A2[:-1] == [100, 101, "tx", 103, 104, true]);
+sys.assert (A2[2:] == ["tx", 103, 104, true, 106]);
+sys.assert (A2[-1:] == [106]);
+
+A3a = A2[:]; // Copy
+A3b = A2; // Asignation
+A2[0] = "Changed";
+sys.assert(A2 == ["Changed", 101, "tx", 103, 104, true, 106]);
+sys.assert(A3a == [100, 101, "tx", 103, 104, true, 106]); // Copy
+sys.assert(A3b == ["Changed", 101, "tx", 103, 104, true, 106]); // Asignation
+
+B = [1, 2.0];
+C = ["a", B, "c"];
+C2 = C[:]; // Shallow copy
+sys.assert(C == ["a", [1, 2.0], "c"]);
+B[1] = "New";
+C[2] = 0;
+sys.assert(C == ["a", [1, "New"], 0]);
+sys.assert(C2 == ["a", [1, "New"], "c"]);
+

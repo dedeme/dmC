@@ -1,0 +1,360 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta name="lang" content="es" />
+<meta name="author" content="ºDeme." />
+<link rel="icon" type="image/png" href="img/favicon.png" />
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<title>DOC</title>
+
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      DS: "\\displaystyle",
+      EX: "{\\times 10}"
+    }
+  }
+};
+</script>
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function aceConf (ed, mode) {
+    const editor = ace.edit(ed);
+    editor.setTheme("ace/theme/deme");
+    editor.session.setMode("ace/mode/" + mode);
+    editor.getSession().setTabSize(2);
+    editor.getSession().setUseSoftTabs(true);
+    editor.setOptions({
+      readOnly: true,
+      maxLines: 100000
+    });
+  }
+</script>
+</head>
+
+<body>
+<div id='hp:START_PAGE'></div>
+<table class="kmd-main"><tr><td style="text-align:left">
+  <span class="kmd-title">Ejecutor</span>
+  </td><td style="text-align:right">
+  <span class="kmd-title">Kut. Referencia del programa.</span>
+</td></tr></table>
+<hr>
+<p style="text-indent: 0px"><a href='04-comprobador.html'>Anterior (Comprobadores)</a> · <a href="index.html">Índice</a> · <a href='80-objetos.html'>Posterior (Objetos)</a></p>
+<hr>
+<p style='text-indent:0px'>
+<a href='#Runner'>Runner</a><br>
+<a href='#Solver'>Solver</a>
+</p>
+<hr>
+<a name="Runner"></a>
+<h3>Runner</h3>
+<p>(Archivos <code>runner/runner.h</code> y <code>runner/runner.c</code>)</p>
+<p>Exporta dos funciones:</p>
+<ul>
+<li>
+<p><i>runner_run</i>. Que ejecuta un array de instrucciones (bloque).</p>
+</li>
+<li>
+<p><i>runner_run_stat</i>. Que ejecuta un sola instrucción.</p>
+</li>
+</ul>
+<h4>runner_run</h4>
+<p>Recibe los siguientes parámetros:</p>
+<blockquote>
+<p>- <code>isTop</code>: TRUE si el código pertenece al bloque principal del módulo.<br>  - <a href="81-clases.html#Stack"><tt>stack__trace</tt></a><br>  - <a href="81-clases.html#Importaciones"><tt>imports</tt></a><br>  - <a href="81-clases.html#Heap0"><tt>hp0</tt></a><br>  - <a href="81-clases.html#Heaps"><tt>heaps</tt></a><br>  - <code>code</code>: Array de instrucciones a ejecutar que corresponde a un 'bloque'.</p>
+</blockquote>
+<p><code>code</code> puede estar vacío.</p>
+<p>Si <code>isTop</code> != TRUE, se añande un nuevo <a href="81-clases.html#Heap">heap</a> a <code>heaps</code>.</p>
+<p>A continuación se procesa cada instrucción de <code>code</code> con <i>runner_run_stat</i>.</p>
+<p>Una vez procesadas todas se retorna una expresión vacía (<i>exp_empty</i>)</p>
+<p>Si el procesamiento de una instruccion devuelve un valor distinto de
+la expresión vacía, el bucle de ejecución de instrucciones se detiene y
+se retorna la expresión devuelta (BREAK, CONTINUE o una enviada con 'return').</p>
+<h4>runner_run_stat</h4>
+<p>Recibe los siguientes parámetros:</p>
+<blockquote>
+<p>- <code>stk</code>: <a href="81-clases.html#Stack">Stack</a><br>  - <code>is</code>: <a href="81-clases.html#Importaciones">Imports</a><br>  - <code>h0</code>: <a href="81-clases.html#Heap0">Heap0</a><br>  - <code>hs</code>: <a href="81-clases.html#Heaps">Heaps</a><br>  - <code>st_cd</code>: <a href="81-clases.html#StatCode">Instrucción</a>.</p>
+</blockquote>
+<p>Primero añade <code>st_cd</code> a <code>stk</code>.</p>
+<p>A continuación crea una expresión vacia (<i>exp_empty</i>) <code>exp</code>.</p>
+<p>Por último se invoca una función de procesamiento en base a la instrución
+simple <a href="81-clases.html#Stat"><tt>st</tt></a> extraida de <code>st_cd</code>.</p>
+<p>Con el resultado de la citada función se modifica <code>exp</code>, que finalmente se
+retorna. Esta función <a href="#Solver">resuelve</a> expresiones cuando procede.</p>
+<p>La invocación de la función se hace en el siguiente orden, dependiendo del
+tipo de <code>st</code>.</p>
+<ol>
+<dt>BLOCK_CLOSE</dt>
+<dd>
+<p>Se emite una excepción.</p>
+</dd>
+<dt>BREAK</dt>
+<dd>
+<p>Se modifica <code>exp = exp_break</code></p>
+</dd>
+<dt>CONTINUE</dt>
+<dd>
+<p>Se modifica <code>exp = exp_continue</code></p>
+</dd>
+<dt>RETURN</dt>
+<dd>
+<p>Se modifica <code>exp = freturn</code>.<br>  <i>freturn</i> extrae la expresión de <code>st</code>, la <i>resuelve</i> y la retorna.</p>
+</dd>
+<dt>TRACE</dt>
+<dd>
+<p>Se utiliza la función <code>trace(is, h0, hs, st_cd)</code> para mostrar por pantalla
+  el mensaje de <code>st</code>.</p>
+</dd>
+<dt>FUNCTION</dt>
+<dd>
+<p>Se utiliza la función <code>func_call(is, h0, hs, st)</code> que a su vez llama
+  a <code><i>function_run</i></code>, si <code>st</code> contiene una
+  <a href="81-clases.html#Función">función</a>, o directamente a la
+  <a href="81-clases.html#Bfunctión">bfunction</a> contenida
+  en <code>st</code>, si tal es el caso, descartando el retorno que pudieran tener.</p>
+</dd>
+<dt>BLOCK</dt>
+<dd>
+<p>Se invoca la función <code>runner_run</code> con las instrucciones de bloque.</p>
+</dd>
+<dt>ARRAY_MULTI y DIC_MULTI</dt>
+<dd>
+<p>Asignación múltiple que utiliza la función <code>assign_multi</code>. Esta crea y
+  resuelve una instrucción intermedia con los índices o las claves
+  correspondientes de la parte derecha de la asignación. Con dicha instrucción
+  se asignan y resuelven las diversas variables de la de la asignación
+  múltiple.<br>  <br>  Para realizar las asignaciones se utiliza la función <code>assign</code>.</p>
+</dd>
+<dt>ASSIGN</dt>
+<dd>
+<p>Utiliza la función <code>assign</code> que aborda tres casos:<br>  <br>  <i>Asignación a símbolo</i>: Se resuelve el valor a asignar y se vincula al
+  símbolo en <code>hs</code>. Previamente se comprueba que el símbolo no haya sido ya
+  utilizado, salvo en el bloque principal, donde ya se comprobó al añadirlo
+  al <code>h0</code> en el <a href="03-lector.html#Lector del bloque principal">proceso de lectura</a>.<br>  <br>  <i>Asignación a contenedor (ct[] = ...)</i>: Se resuelve la parte de la
+  izquierda de la asignación obteniendo el contenedor el índice o clave. Con
+  esos datos se modifica el valor del contendor con el resultado de resolver la
+  la parte derecha de la asignación.<br>  <br>  <i>Asignación a diccionario (dc.clave = ...)</i>: Se resuelve el símbolo del
+  dicionario y con la clave indicda se modifica el valor correspondiente con
+  el valor de resolver la parte derecha de la asignación.</p>
+</dd>
+<dt>ADDAS, SUBAS, MULAS, DIVAS, MODAS, ANDAS y ORAS.</dt>
+<dd>
+<p>Se procesan con la función <code>assign_xxx</code> que funciona de manera similar
+  a la recien vista función <code>assign</code> para los casos de contenedor y
+  diccionario.</p>
+</dd>
+<dt>TRY</dt>
+<dd>
+<p>Se procesa con la función <code>try</code> que utiliza <code>runner_run_stat</code> para
+  ejecutar las instrucciones <i>try</i>, <i>catch</i> y <i>finally</i>.</p>
+</dd>
+<dt>WHILE</dt>
+<dd>
+<p>Distinge el caso en que no hay expresión de control, que funciona como
+  un bucle infinito, y aquel en el que existe. Se utilizan las funciones
+  <code>solve_solver</code> y <code>runner_run_stat</code> para resolver la expresión de
+  control y ejecutar las instrucciones del bloque respectivamente.</p>
+</dd>
+<dt>IF</dt>
+<dd>
+<p>Utiliza las funciones <code>solve_solver</code> y <code>runner_run_stat</code> para resolver
+  la condición de control y ejecutar las instrucciones del bloque
+  respectivamente.</p>
+</dd>
+<dt>FOR, FOR_IX</dt>
+<dd>
+<p>Utiliza la función <code>solver_solver</code> para resolver el objeto container del
+  bucle. A continuación, dependiendo del tipo del container ('array',
+  diccionario, 'string' o iterador) va ejecutando el bloque de código con el valor
+  correspondiente (elemento del 'array', diccionario o iterador, o
+  caracter-byte) y el índice en su caso. El índice es número, empezando con
+  '0', en 'array', 'string' e 'iterator' y es 'string' (key) en diccionario.<br>  <br>  El código del bucle se interrumpe si el retorno de su ejeción no es vacío o
+  es 'break'. En caso de que el retorno sea vacío o 'continue', se vuelve a
+  ejecutar el código, hasta que los elementos del container se agotan.<br>  <br>  <i>NOTA</i>; Los símbolos intermedios (para el índice y el elemento del container)
+  se añaden a un heap intermedio entre el bloque principal y el del bucle.</p>
+</dd>
+<dt>FOR_R, FOR_RS</dt>
+<dd>
+<p>Utiliza la función <code>solver_solver</code> var obtener el valor inicial, final y el salto que
+  determinan el comportamento del índice (un entero).<br>  <br>  En el caso FOR_R el salto es igual a '1' y el indice va desde el valor
+  inicial (inclusive) hasta el final (exclusive).<br>  <br>  En el caso FOR_RS el salto no puede ser '0', y el índice va desde del valor
+  inicial (inclusive) hasta el final (inclusive).<br>  <br>  El código del bucle se interrumpe si el retorno de su ejeción no es vacío o
+  es 'break'. En caso de que el retorno sea vacío o 'continue', se vuelve a
+  ejecutar el código, hasta que el recorrido del índice se agota.<br>  <br>  <i>NOTA</i>; El símbolo intermedio para el índice se añade a un heap intermedio
+  entre el bloque principal y el del bucle.</p>
+</dd>
+<dt>SWITCH</dt>
+<dd>
+<p>Utiliza la función <code>solver_solver</code> para resolver el símbolo principal, así
+  como los sucesivos símbolos que se comparan con 'exp_eq'. Sin embargo la
+  propia expresión 'exp_eq' se resuelve con <code>solver_solve_isolate</code> pues al
+  haber sido resueltos previamente sus dos elementos, ya no es necesario
+  utilizar los símbolos de importaciones y heaps.<br>  <br>  Cuando la condición de una entrada del 'switch' retorna el valor 'true',
+  su instrucción asociada se ejecuta y el bloque 'switch' termina.<br>  <br>  Puede haber una condición 'default' opcional, cuya instrucción asociada se
+  ejecutará si el flujo del 'switch' la alcanza.</p>
+</dd>
+</ol>
+<a name="Solver"></a>
+<h3>Solver</h3>
+<p>(Archivos <code>runner/solver.h</code> y <code>runner/solver.c</code>)</p>
+<h4>solve_isolate</h4>
+<p>Resuleve una expresión sin utilizar los símbolos registrados en 'imports' y
+'heaps'.</p>
+<h4>solve</h4>
+<p>Recibe lo siguientes parámetros:</p>
+<p>Imports <code>*is</code>, Heap0 <code>*h0 </code>, Heaps <code>*hs</code> y Exp <code>*exp</code>.</p>
+<p>Resuelve una expresión realizando los cálculos necesarios, de manera que
+retorna una nueva expresión 'simple'.</p>
+<p>Una expresión simple es una de las siguientes:</p>
+<ul>
+<li>
+<p>BOOL, INT, FLOAT, STRING, OBJECT, FUNC.</p>
+</li>
+<li>
+<p>ARR cuyos elementos son expresiones simples.</p>
+</li>
+<li>
+<p>DIC cuyos elementos son expresiones simples.</p>
+</li>
+</ul>
+<p>Las expresiones son resueltas como sigue:</p>
+<ol>
+<dt>BOOL, INT, FLOAT, STRING, OBJECT</dt>
+<dd>
+<p>Se retorna misma expresión de entrada.</p>
+</dd>
+<dt>ARR, DIC</dt>
+<dd>
+<p>Se resuleve cada elemento y se devuelve un array con las expresiones
+  resueltas.</p>
+</dd>
+<dt>FUNC</dt>
+<dd>
+<p>Se devuelve la misma función de entrada, pero añadiéndola previamente
+  el actual contexto ('imports' y 'heaps').</p>
+</dd>
+<dt>SYM</dt>
+<dd>
+<p>- Si el símbolo está en <code>hs</code>, se retorna su valor.<br>  <br>  - Si el símbolo está en <code>h0</code>, se comprueba que no sea una referencia
+    cíclica, se resuelve y se añade a <code>hs</code> apuntando a su resulución.<br>  <br>  - Si el símbolo está en imports:<br>  &nbsp;&nbsp;> Si el módulo correspodiente ha sido leido, se retorna este (como objeto).<br>  &nbsp;&nbsp;> En otro caso se lee y ejecuta el módulo correspondiente, devolviéndose
+      el módulo leido como objeto.<br>  <br>  - Si el módulo es un 'built-in' módulo, se devuelve como objeto.<br>  <br>  - En otro caso se lanza un excepción indicando que el símbolo no se encuentra.</p>
+</dd>
+<dt>RANGE</dt>
+<dd>
+<p>Se resuelven los valores 'start', 'end' and 'step' y se devuelve un objeto
+  iterator cuya función de iteración se ajusta según el valor de 'step'.</p>
+</dd>
+<dt>PT</dt>
+<dd>
+<p>Se resuelve la primera expresión.<br>  <br>  - Si la expresión es un módulo 'de usuario'.<br>  &nbsp;&nbsp;> Si la segunda expresión es un símbolo exportado, se retorna su valor
+      resuelto en el entorno de módulo al que pertence.<br>  &nbsp;&nbsp;> En otro caso se lanza un excepción.<br>  <br>  - Si la expresión es un módulo 'built-in', se retorna la correspondiente
+    'bfunction' <code><i>modulo.función</i></code> como objeto. Si la 'bfunction' no existe,
+    se lanza una excepción.<br>  <br>  - Si la expresión es un diccionario, se retorna el valor correspondiente
+    a <code>dic.key</code>. Si la clave no existe, se lanza una excepción. El valor
+    devuelto no se resuelve, porque ya lo fué cuando se resolvió el diccionario.</p>
+</dd>
+<dt>SQ</dt>
+<dd>
+<p>Se resuelve la primera expresión.<br>  <br>  - Si la expresión es una 'string' o un 'array', se resuelve la segunda
+    expresión como un entrero y se devuelve ct[ix].<br>  <br>  - Si la expresión es un diccionario, se resuelve la segunda expresión como
+    una 'string' y se devuelve ct[ix].<br>  <br>  <i>NOTA</i> El valor devuelto no se resuelve, porque ya lo fué cuando se
+  resolvió su contenedor.</p>
+</dd>
+<dt>SLICE</dt>
+<dd>
+<p>Se resuelven el contenedor ('string' o 'array') y los índices
+  correspondientes, Retornándose una 'substring' o un 'subarray', eventualmente
+  vacíos.</p>
+</dd>
+<dt>PR</dt>
+<dd>
+<p>Se resuleve la función y los parámetros. Si la función es una 'bfunction',
+  se ejecuta directamente con los parámetros. Si es un función 'de usuario',
+  se ejecuta con <a href="81-clases.html#Función">function_run</a>.</p>
+</dd>
+<dt>SWITCH</dt>
+<dd>
+<p>Se resuelve el símbolo principal así como los sucesivos símbolos de las
+  entradas, que se comparan con 'exp_eq'. Sin embargo la propia expresión
+  'exp_eq' se resuelve con <code>solver_solve_isolate</code> pues al haber sido
+  resueltos previamente sus dos elementos, ya no es necesario utilizar los
+  símbolos de importaciones y heaps.<br>  <br>  Cuando la condición de una entrada del 'switch' retorna el valor 'true',
+  su expresion asociada se resuelve y retorna.<br>  <br>  Tiene que haber una condición 'default' al final de todas las demas. Su
+  expresión asociada se retornará cuando ninguna condición previa se haya
+  cumplido.</p>
+</dd>
+<dt>NOT, MINUS</dt>
+<dd>
+<p>Se aplican las funciones sobre la resolución de la expresión currespondiente.
+  Devuelven una expresión del mismo tipo que la expresión procesada.</p>
+</dd>
+<dt>ADD</dt>
+<dd>
+<p>Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser del mismo tipo que, además, será el tipo de retorno. ADD es aplicable
+  a enteros, 'floats', 'strings' y 'arrays'. En este caso retornar un nuevo
+  'array' con una copia superficial (punteros) de los arrays concatenados.</p>
+</dd>
+<dt>SUB, MUL, DIV.</dt>
+<dd>
+<p>Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser del mismo tipo que, además, será el tipo de retorno. Estas
+  funciones se aplican a enteros y 'floats'.</p>
+</dd>
+<dt>MOD</dt>
+<dd>
+<p>Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  deben ser de tipo entero, igual que lo será el tipo de retorno.</p>
+</dd>
+<dt>AND</dt>
+<dd>
+<p>Sus dos parámetros deben ser booleanos. Se resuleve el primer parámetro.
+  Si su valor es <code>false</code> se retorna <code>false</code>. En otro caso se resuleve y retorna
+  el segundo parámetro.</p>
+</dd>
+<dt>OR</dt>
+<dd>
+<p>Sus dos parámetros deben ser booleanos. Se resuleve el primer parámetro.
+  Si su valor es <code>true</code> se retorna <code>true</code>. En otro caso se resuleve y retorna
+  el segundo parámetro.</p>
+</dd>
+<dt>EQ, NEQ</dt>
+<dd>
+<p>Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  habrán de ser del mismo tipo, y su resultado es de tipo booleano. Estas
+  funciones se aplican a boolean, enteros, 'floats', 'strings', 'arrays' y
+  diccionarios.<br>  <br>  Para la igualdad, en 'arrays' se requiere que todos los elementos sean
+  iguales y estén en el mismo orden.<br>  <br>  En diccionarios, solo se requiere que todas las claves y sus elementos
+  asociados sean iguales; pero no que tengan el mismo orden.</p>
+</dd>
+<dt>GREATER, GREATER_EQ, LESS, LESS_EQ</dt>
+<dd>
+<p>Se aplica la función después de resolver sus parámetros. Los dos parámetros
+  habrán de ser del mismo tipo, y su resultado es de tipo booleano. Estas
+  funciones se aplican a boolean (true > false), enteros, 'floats' y 'strings'.</p>
+</dd>
+<dt>TERNARY</dt>
+<dd>
+<p>Se resuelve la condición. Si resulta <code>true</code> se resuelve la primera
+  expresión y se retorna. En otro caso se resuelve la segunda y se retorna.</p>
+</dd>
+</ol>
+<hr>
+<p style="text-indent: 0px"><a href='04-comprobador.html'>Anterior (Comprobadores)</a> · <a href="index.html">Índice</a> · <a href='80-objetos.html'>Posterior (Objetos)</a></p>
+<div style="position: fixed;bottom: 0px;right: 10px;cursor: pointer;">
+  <span onclick="location.assign('#hp:START_PAGE');">
+    <img border="0" src="img/up.png" alt="" />
+  </span>
+</div>
+<div id='hp:END_PAGE'></div>
+
+</body>
+</html>

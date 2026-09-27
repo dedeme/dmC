@@ -1,0 +1,25 @@
+=
+book = Kut. Conventions and Programing Schemes.
+title = Naming
+=
+
+## First symbols character.
+
+- Upercase
+> Lists type \[*.] and dictionaries type {*.}.
+
+- Lowercase
+> The rest.
+
+## Variables and options.
+
+* Variables are lists (type \[*]) with one and only one element.
+
+* Options are lists  (type \[*]) with one or none element.
+
+They are written with its first symbol in _lowercase_.
+
+## Indexeds
+
+The same system explained in the *First symbols character* paragraph is
+applicable to variables in _indexeds_.

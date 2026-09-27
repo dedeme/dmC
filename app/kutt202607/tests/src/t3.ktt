@@ -1,0 +1,206 @@
+(p) [. si];
+(biArr | A B ) [. [A] [B] ];
+(it | A)  [.  [. [A]ii]
+              [[.[A]ii]|[A]]
+              [A]
+          ];
+
+//: (p)
+newPerson : name, age;
+
+//: [. (p)]
+newTp : tp;
+
+//: [. (p)]
+newV : v;
+
+//: (biArr | AB)
+biArrNew : barr1, barr2;
+
+//: (biArr |Ai)
+bi1 : bie1, bie2;
+
+//: [. [A][B]]
+bi2 : b1, b2;
+
+//: [[. [A]ii] | [A]]
+arrNext = \obj -> {
+  empty = []/A/;
+  //: [|[A]]
+  next = \-> {
+    r = obj[0][obj[1]];
+    obj[1] += 1;
+    return [r];
+  };
+  return (obj[1] >= obj[2]) ? empty : next();
+};
+
+//: [[A]i | (it|A)]
+newIt = \a, sz -> {
+  obj = [. a, 0, sz];
+  return [. obj, arrNext, arrNext(obj)];
+};
+
+//: [(it|A) | A]
+next = \i -> {
+  r = i[2]!;
+  i[2] = i[1](i[0]);
+  return r;
+};
+
+//: [(it|A) | b]
+has = \it -> return !!it[2];;
+
+(token) [. is[(token)] ];
+
+
+{
+  person = newPerson("Peter", 32);
+  sys.test(person[name], "Peter");
+  v = newV(person);
+  sys.test(v[0][age], 32);
+
+  //: [[E]i|E]
+  get = \A, ix -> return A[ix];;
+  Arr1 = ["a", "b"];
+  sys.test(get(Arr1, 0), "a");
+  Arr2 = [1, 2];
+  sys.test(get(Arr2, 0), 1);
+
+  Arr2[0] = Arr2[1];
+  sys.test(get(Arr2, 0), 2);
+
+  ba0 = bi2(Arr1, Arr2);
+  ba = biArrNew(Arr1, Arr2);
+  sys.test(ba, ba0);
+  sys.test(ba[barr1][1], "b");
+  sys.test(ba[barr1][1] + "xx", "bxx");
+
+  bi1a = bi1(Arr1 , Arr2);
+  sys.test(bi1a, ba0);
+
+  it0 = newIt(["a", "b", "c"], 3);
+  sys.test(has(it0), true);
+  sys.test(next(it0), "a");
+  sys.test(has(it0), true);
+  sys.test(next(it0), "b");
+  sys.test(has(it0), true);
+  sys.test(next(it0), "c");
+  sys.test(has(it0), false);
+
+  sumV = [0];
+  iV = [0];
+  while () {
+    if (iV! >= 5) break;
+    sumV! += iV!;
+    iV! += 1;
+  }
+  sys.test(sumV!, 10);
+
+  sumV! = 0;
+  iV! = 0;
+  while (iV! < 5) {
+    sumV! += iV!;
+    iV! += 1;
+  }
+  sys.test(sumV!, 10);
+
+  n3 = 3;
+  sw0 = switch (1) { 1: "one"; 3: "three"; default: "two";};
+  sys.test(sw0, "one");
+  sw1 = switch (3) { 1: "one"; 3: "three"; default: "two"; };
+  sys.test(sw1, "three");
+  sw2 = switch (n3) { 1: "one"; 5: "three"; default: "two"; };
+  sys.test(sw2, "two");
+
+  sw3 = switch (n3) { 1, n3 + 4 - 2 -2, 4: "one"; 3: "three"; default: "two"; };
+  sys.test(sw3, "one");
+  sw4 = switch (3) { 1, 0, n3, 4: "one"; 8, 12: "three"; default: "two"; };
+  sys.test(sw4, "one");
+  // change '5' to 'n3' produce an exception.
+  sw5 = switch (5) { 1: "one"; 3:
+    throw([]/s/,  "error"); default: "two";};
+  sys.test(sw5, "two");
+
+  V = [""];
+  switch (1) { 1: V! = "one"; 3: V[0] = "three";}
+  sys.test(V!, "one");
+  switch (3) { 1: V! = "one"; 3: V! = "three"; default: V! = "two";}
+  sys.test(V!, "three");
+  switch (n3) { 1: V! = "one"; 5: V! = "three"; default: V! = "two";}
+  sys.test(V!, "two");
+  switch (n3) { 1, n3 + 4 - 2 -2, 4: V! = "one"; 3: V! = "three"; default: V! = "two";}
+  sys.test(V!, "one");
+  switch (3) { 1, n3, 4: V! = "one"; 8, 12: V! = "three";}
+  sys.test(V!, "one");
+  while () {
+    switch (2) {2: V! = "two";default: break;}
+    sys.test(V!, "two");
+    break;
+  }
+
+  //: [i|(token)]
+  tokenI = \n -> return [. 0, sys.toStr(n), []/(token)/ ];;
+  //: [s|(token)]
+  tokenS = \v -> return [. 1, v, []/(token)/ ];;
+  //: [[(token)]|(token)]
+  tokenA = \a -> return [. 2, "", a ];;
+
+  //: [(token)|s]
+  tokenToStr = \tk -> return switch(tk[0]) {
+    0, 1: tk[1];
+    default: "[" + tokenToStr(tk[2][0]) + "," + tokenToStr(tk[2][1]) + "]";
+  };;
+
+  tk1 = tokenI(3);
+  tk2 = tokenS("e");
+  tk3 = tokenA([tk1, tk2]);
+
+  //:[s|s]
+  swf1 = \e -> return switch(e) {
+    "a": "is a";
+    "b": "is b";
+    default: "is c";
+  };;
+  sys.test(swf1("x"), "is c");
+
+  //:[s|s]
+  swf2 = \e -> {
+    switch(e) {
+    "a": return "is a";
+    "b": {
+      b = e;
+      return b  + " is b";
+    }
+    default: return "is c";
+    }
+  };
+  sys.test(swf2("x"), "is c");
+/* Throw execption
+  //:[s|s]
+  swf3 = \e -> {
+    switch(e) {
+    "a": return "is a";
+    "b": {
+      b = e;
+      return b  + " is b";
+    }
+    default: return throw([]/s/, "error");
+    }
+  };
+  sys.test(swf3("x"), "is c");
+*/
+
+/* Throw exception.
+  //:[s|s]
+  swf4 = \e -> return switch(e) {
+    "a": "is a";
+    "b": " is b";
+    default: throw([]/s/, "error");
+  };;
+  sys.test(swf4("x"), "is c");
+*/
+
+  sys.test(tokenToStr(tk3), "[3,e]");
+
+}

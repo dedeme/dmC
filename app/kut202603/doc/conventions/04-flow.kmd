@@ -1,0 +1,18 @@
+=
+title = Program Flow
+=
+
+## Start
+
+1. Parameter reading.
+
+2. System initialization.
+
+3. Data base initialization.
+
+## Browser comunications.
+
+Request should be sent to a file in root named *pgs.kut* where it is
+resent to the correponding file in the directory *pgs*.
+
+

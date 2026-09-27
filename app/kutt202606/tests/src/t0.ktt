@@ -1,0 +1,6 @@
+
+import "t0sub/s1";
+
+{
+  sys.test(s1.v, "value");
+}

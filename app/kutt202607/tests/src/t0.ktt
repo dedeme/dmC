@@ -1,0 +1,7 @@
+
+import "t0sub/s1";
+
+{
+  sys.readPass("abc:");
+  sys.test(s1.v, "value");
+}

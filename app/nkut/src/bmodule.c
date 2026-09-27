@@ -15,10 +15,10 @@ static char *bmods[] = {
 static char *md_arr[] = {
   "all", "any", "cat", "concat", "clear", "copy", "drop", "dropWhile",
   "duplicates", "each", "eachIx", "eachSync", "filter", "filterIn", "find",
-  "fromIter", "index", "insert", "insertArr", "join", "map", "mk", "peek",
-  "pop", "reduce", "remove", "removeRange", "push", "reverse", "reverseIn",
-  "shift", "shuffle", "size", "sort", "take", "takeWhile", "toIter",
-  "unshift", "zip", "unzip",
+  "fromIter", "index", "insert", "insertArr", "join", "map", "mapIx", "mk",
+  "peek", "pop", "reduce", "remove", "removeRange", "push", "reverse",
+  "reverseIn", "shift", "shuffle", "size", "sort", "take", "takeWhile",
+  "toIter", "unshift", "zip",
   NULL
 };
 

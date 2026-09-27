@@ -1,0 +1,32 @@
+xV = [10];
+sumV = [0];
+while (xV[0] < 20) {
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 145);
+
+xV[0] = 10;
+sumV[0] = 0;
+while () {
+  if (xV[0] >= 20) break;
+  if (xV[0] % 2 == 0) {
+    xV[0] += 1;
+    continue;
+  }
+  sumV[0] += xV[0];
+  xV[0] += 1;
+}
+sys.assert(sumV[0] == 75);
+
+while () break;
+// while () continue; <- Infinite loop.

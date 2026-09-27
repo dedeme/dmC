@@ -1,0 +1,7 @@
+trace 3 + 2;
+trace "abc" + "d";
+v = "012012012012012012012ññññññññññññññññññññññcccccccccccccccc";
+trace [v];
+v4 = v + v;
+trace [v4];
+trace : [v4];

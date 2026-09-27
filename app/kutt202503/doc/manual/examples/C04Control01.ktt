@@ -168,7 +168,7 @@
     V[0] = 0;
     try {
       V[0] += 1;
-      throw("fail");
+      throw "fail";
       // V[0] += 1; // <- No allowed after throw.
     } catch (e) {
       sys.test(e[-4:], "fail");
@@ -181,14 +181,14 @@
     try {
       try {
         V[0] += 1;
-        throw("fail");
+        throw "fail";
         // V[0] += 1; // <- No allowed after throw.
       } catch (e) {
         V[0] += 2;
         sys.test(e[str.lastIndex(e, ": ")+2:], "fail");
         // or better (see Module marks in Module chapter)
         sys.test(e[e.lastIndex(": ")+2:], "fail");
-        throw("error");
+        throw "error";
         // V[0] += 2;  // <- No allowed after throw.
       }
     } catch (e) {
@@ -208,37 +208,11 @@
     }
     sys.test(V[0], 9);
 
-    // Loop without exception and break in the try block.
-    V[0] = 0;
-    while (V[0] < 9) {
-      try {
-        V[0] += 1;
-        break;
-        // V[0] += 1; // Not allowed after continue
-      } catch (e) {
-        V[0] += 2;
-      }
-    }
-    sys.test(V[0], 1);
-
-    // Loop without exception and continue in the try block.
-    V[0] = 0;
-    while (V[0] < 9) {
-      try {
-        V[0] += 1;
-        continue;
-        // V[0] += 1; // Not allowed after continue
-      } catch (e) {
-        V[0] += 2;
-      }
-    }
-    sys.test(V[0], 9);
-
     // Loop with excetion cached and break.
     V[0] = 0;
     while (V[0] < 9) {
       try {
-        throw("fail");
+        throw "fail";
         // V[0] += 1; // <- No allowed after throw.
       } catch (e) {
         sys.test(e[-4:], "fail");
@@ -252,7 +226,7 @@
     V[0] = 0;
     while (V[0] < 9) {
       try {
-        throw("fail");
+        throw "fail";
         // V[0] += 1; // <- No allowed after throw.
       } catch (e) {
         sys.test(e[-4:], "fail");
@@ -281,7 +255,7 @@
     //: [|]
     fn1 = \ -> {
       try {
-        throw("fail");
+        throw "fail";
         // V[0] += 1; // <- No allowed after throw.
       } catch (e) {
         sys.test(e[-4:], "fail");

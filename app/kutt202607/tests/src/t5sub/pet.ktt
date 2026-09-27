@@ -1,0 +1,4 @@
+(pet) [. iss ];
+
+//: (pet)
+new : age, sound, name;
