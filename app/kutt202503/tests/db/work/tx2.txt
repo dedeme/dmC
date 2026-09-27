@@ -1,4 +1,0 @@
-A text
-with
-four
-lines.

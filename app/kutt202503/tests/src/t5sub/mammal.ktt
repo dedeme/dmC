@@ -1,4 +1,0 @@
-(mammal) [. is ];
-
-//: (mammal)
-new : age, sound;
